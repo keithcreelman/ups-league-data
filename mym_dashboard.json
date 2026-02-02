@@ -1,64 +1,161 @@
 #!/usr/bin/env python3
+"""
+Export MYM dashboard JSON for GitHub Pages.
+
+Workflow:
+1) Run view builder to ensure views exist:
+   python3 view_mym.py --db-path "/path/to/mfl_database.db"
+
+2) Run this exporter:
+   python3 export_mym_to_pages.py --db-path "/path/to/mfl_database.db" --out "/path/to/repo/mym_dashboard.json"
+
+GitHub Pages URL (after commit/push):
+https://keithcreelman.github.io/ups-league-data/mym_dashboard.json
+"""
+
+from __future__ import annotations
+
+import argparse
 import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-DB_PATH = Path("mfl_database.db")  # adjust if needed
-OUT_PATH = Path("site/mym_dashboard.json")  # output folder for hosting
 
-MIN_SEASON = 2019
+MIN_SEASON_DEFAULT = 2019
 
-def dict_rows(cur):
+
+def dict_rows(cur: sqlite3.Cursor):
     cols = [c[0] for c in cur.description]
     for row in cur.fetchall():
         yield dict(zip(cols, row))
 
-def main():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+
+def ensure_views_exist(conn: sqlite3.Connection):
     cur = conn.cursor()
+    missing = []
+    for v in ("View_MYM_Eligibility", "View_MYM_Usage"):
+        exists = cur.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='view' AND name=? LIMIT 1;",
+            (v,),
+        ).fetchone()
+        if not exists:
+            missing.append(v)
 
-    # Eligibility rows (history)
-    cur.execute(
-        """
-        SELECT
-          season, week, franchise_id, franchise_name, franchise_logo,
-          player_id, player_name, position, positional_grouping,
-          salary, contract_year, contract_status,
-          acquired_date, mym_acq_type, mym_deadline, eligible_flag, rule_explanation
-        FROM View_MYM_Eligibility
-        WHERE CAST(season AS INTEGER) >= ?
-        ORDER BY CAST(season AS INTEGER) DESC, franchise_name, player_name;
-        """,
-        (MIN_SEASON,),
-    )
-    eligibility = list(dict_rows(cur))
+    if missing:
+        raise RuntimeError(
+            "Missing required view(s): "
+            + ", ".join(missing)
+            + "\nRun view_mym.py against THIS SAME DB file first."
+        )
 
-    # Usage rows (history)
-    cur.execute(
-        """
-        SELECT
-          season, franchise_id, team_name, mym_used, mym_remaining
-        FROM View_MYM_Usage
-        WHERE CAST(season AS INTEGER) >= ?
-        ORDER BY CAST(season AS INTEGER) DESC, team_name;
-        """,
-        (MIN_SEASON,),
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--db-path",
+        required=True,
+        help="Path to SQLite DB that contains View_MYM_Eligibility/View_MYM_Usage",
     )
-    usage = list(dict_rows(cur))
+    parser.add_argument(
+        "--out",
+        required=True,
+        help="Output JSON path inside your GitHub Pages repo (e.g. /.../ups-league-data/mym_dashboard.json)",
+    )
+    parser.add_argument(
+        "--min-season",
+        type=int,
+        default=MIN_SEASON_DEFAULT,
+        help=f"Minimum season to include (default {MIN_SEASON_DEFAULT})",
+    )
+    args = parser.parse_args()
+
+    db_path = Path(args.db_path).expanduser()
+    out_path = Path(args.out).expanduser()
+    min_season = int(args.min_season)
+
+    if not db_path.exists():
+        raise FileNotFoundError(f"DB not found: {db_path}")
+
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    try:
+        ensure_views_exist(conn)
+        cur = conn.cursor()
+
+        # Eligibility rows
+        cur.execute(
+            """
+            SELECT
+              season,
+              week,
+              franchise_id,
+              franchise_name,
+              franchise_logo,
+              player_id,
+              player_name,
+              position,
+              positional_grouping,
+              salary,
+              contract_year,
+              contract_status,
+              acquired_date,
+              mym_acq_type,
+              mym_deadline,
+              eligible_flag,
+              rule_explanation
+            FROM View_MYM_Eligibility
+            WHERE CAST(season AS INTEGER) >= ?
+            ORDER BY
+              CAST(season AS INTEGER) DESC,
+              franchise_name,
+              player_name;
+            """,
+            (min_season,),
+        )
+        eligibility = list(dict_rows(cur))
+
+        # Usage rows
+        cur.execute(
+            """
+            SELECT
+              season,
+              franchise_id,
+              team_name,
+              mym_used,
+              mym_remaining
+            FROM View_MYM_Usage
+            WHERE CAST(season AS INTEGER) >= ?
+            ORDER BY
+              CAST(season AS INTEGER) DESC,
+              team_name;
+            """,
+            (min_season,),
+        )
+        usage = list(dict_rows(cur))
+
+    finally:
+        conn.close()
 
     payload = {
-        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "min_season": MIN_SEASON,
+        "meta": {
+            "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "min_season": min_season,
+            "source_db": str(db_path),
+            "views": ["View_MYM_Eligibility", "View_MYM_Usage"],
+        },
         "eligibility": eligibility,
         "usage": usage,
     }
 
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
-    print(f"✅ Wrote {OUT_PATH} ({len(eligibility)} eligibility rows, {len(usage)} usage rows)")
+    print(f"✅ Wrote: {out_path}")
+    print(f"   Eligibility rows: {len(eligibility)}")
+    print(f"   Usage rows:       {len(usage)}")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

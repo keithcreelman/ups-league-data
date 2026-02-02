@@ -6,7 +6,7 @@
     "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
 
   // Commissioner franchise IDs (ONLY reliable client-side signal)
-  const COMMISH_FRANCHISE_IDS = ["0007","0004"];
+  const COMMISH_FRANCHISE_IDS = ["0008"];
 
   // ======================================================
   // 2) HELPERS

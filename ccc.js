@@ -69,6 +69,14 @@ function htmlEsc(s){
     const m = window.location.pathname.match(/\/(\d{4})\//);
     return m ? m[1] : "2025";
   }
+  function isCommishByMFL(){
+  return (
+    window?.mfl?.isCommish === true ||
+    window?.mfl?.isCommissioner === true ||
+    window?.isCommish === true ||
+    window?.isCommissioner === true
+  );
+}
 
   function detectFranchiseId(){
     try{
@@ -398,10 +406,16 @@ function htmlEsc(s){
       state.payload = normalizePayload(raw);
 
       state.detectedFranchiseId = detectFranchiseId();
-      const quickAdmin = COMMISH_FRANCHISE_IDS.includes(state.detectedFranchiseId);
-      const exportAdmin = await detectAdminViaLeagueExport();
+     const fid = state.detectedFranchiseId;
 
-      state.isAdmin = quickAdmin || exportAdmin.isAdmin;
+// Manual fallback (your known commish franchise IDs)
+const hardcodedCommish = COMMISH_FRANCHISE_IDS.includes(fid);
+
+// MFL-native detection (THIS is the key)
+const mflCommish = isCommishByMFL();
+
+// Final admin decision
+state.isAdmin = mflCommish || hardcodedCommish;
 
       $("#adminBadge").style.display = state.isAdmin ? "" : "none";
       $("#adminControls").style.display = state.isAdmin ? "flex" : "none";

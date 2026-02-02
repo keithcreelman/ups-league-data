@@ -23,13 +23,14 @@
     if(!d) return "";
     return d.padStart(4,"0").slice(-4);
   }
-  function htmlEsc(s){
-    return safeStr(s)
-      .replace(/&/g,"&")
-      .replace(/</g,"<")
-      .replace(/>/g,">")
-      .replace(/"/g,""")
-      .replace(/'/g,"'");
+function htmlEsc(s){
+  return safeStr(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+
   }
 
   function parseDate(x){

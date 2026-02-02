@@ -1,141 +1,64 @@
 #!/usr/bin/env python3
-"""
-Export MYM data to a static JSON file for GitHub Pages hosting.
-
-Output URL:
-https://keithcreelman.github.io/ups-league-data/mym_dashboard.json
-"""
-
 import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-# =========================
-# CONFIG – ADJUST PATHS ONCE
-# =========================
-
-# Path to your SQLite DB that contains View_MYM_Eligibility / View_MYM_Usage
-DB_PATH = Path(
-    "/Users/keithcreelman/Desktop/MFL_Scripts/Code/mflworkspace/mfl_etl_full/mfl.sqlite"
-)
-
-# Path to your LOCAL clone of the GitHub Pages repo
-OUT_PATH = Path(
-    "/Users/keithcreelman/Desktop/ups-league-data/mym_dashboard.json"
-)
+DB_PATH = Path("mfl_database.db")  # adjust if needed
+OUT_PATH = Path("site/mym_dashboard.json")  # output folder for hosting
 
 MIN_SEASON = 2019
-
-
-# =========================
-# HELPERS
-# =========================
 
 def dict_rows(cur):
     cols = [c[0] for c in cur.description]
     for row in cur.fetchall():
         yield dict(zip(cols, row))
 
-
-# =========================
-# MAIN
-# =========================
-
 def main():
-    if not DB_PATH.exists():
-        raise FileNotFoundError(f"DB not found: {DB_PATH}")
-
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    # -------------------------
-    # MYM Eligibility (history)
-    # -------------------------
+    # Eligibility rows (history)
     cur.execute(
         """
         SELECT
-          season,
-          week,
-          franchise_id,
-          franchise_name,
-          franchise_logo,
-          player_id,
-          player_name,
-          position,
-          positional_grouping,
-          salary,
-          contract_year,
-          contract_status,
-          acquired_date,
-          mym_acq_type,
-          mym_deadline,
-          eligible_flag,
-          rule_explanation
+          season, week, franchise_id, franchise_name, franchise_logo,
+          player_id, player_name, position, positional_grouping,
+          salary, contract_year, contract_status,
+          acquired_date, mym_acq_type, mym_deadline, eligible_flag, rule_explanation
         FROM View_MYM_Eligibility
         WHERE CAST(season AS INTEGER) >= ?
-        ORDER BY
-          CAST(season AS INTEGER) DESC,
-          franchise_name,
-          player_name;
+        ORDER BY CAST(season AS INTEGER) DESC, franchise_name, player_name;
         """,
         (MIN_SEASON,),
     )
     eligibility = list(dict_rows(cur))
 
-    # -------------------------
-    # MYM Usage (history)
-    # -------------------------
+    # Usage rows (history)
     cur.execute(
         """
         SELECT
-          season,
-          franchise_id,
-          team_name,
-          mym_used,
-          mym_remaining
+          season, franchise_id, team_name, mym_used, mym_remaining
         FROM View_MYM_Usage
         WHERE CAST(season AS INTEGER) >= ?
-        ORDER BY
-          CAST(season AS INTEGER) DESC,
-          team_name;
+        ORDER BY CAST(season AS INTEGER) DESC, team_name;
         """,
         (MIN_SEASON,),
     )
     usage = list(dict_rows(cur))
 
-    conn.close()
-
-    # -------------------------
-    # FINAL PAYLOAD
-    # -------------------------
     payload = {
-        "meta": {
-            "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "min_season": MIN_SEASON,
-            "source": "UPS Salary Cap Dynasty League",
-            "views": [
-                "View_MYM_Eligibility",
-                "View_MYM_Usage"
-            ]
-        },
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "min_season": MIN_SEASON,
         "eligibility": eligibility,
-        "usage": usage
+        "usage": usage,
     }
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(
-        json.dumps(payload, indent=2),
-        encoding="utf-8"
-    )
+    OUT_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
-    print(
-        f"✅ Wrote {OUT_PATH}\n"
-        f"   Eligibility rows: {len(eligibility)}\n"
-        f"   Usage rows: {len(usage)}"
-    )
-
+    print(f"✅ Wrote {OUT_PATH} ({len(eligibility)} eligibility rows, {len(usage)} usage rows)")
 
 if __name__ == "__main__":
     main()

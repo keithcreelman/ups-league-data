@@ -32,6 +32,15 @@ function htmlEsc(s){
     .replace(/'/g,"&#39;");
 
   }
+  function isCommishByMFL(){
+  // MFL sets this when logged in as commissioner
+  return (
+    window?.mfl?.isCommish === true ||
+    window?.mfl?.isCommissioner === true ||
+    window?.isCommish === true ||
+    window?.isCommissioner === true
+  );
+}
 
   function parseDate(x){
     const s = safeStr(x).trim();

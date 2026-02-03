@@ -4,14 +4,15 @@
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
 
-  // Cloudflare Worker that returns: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
-  // NOTE: This does NOT rely on browser cookies. The Worker uses its own commish cookie server-side.
+  // Cloudflare Worker: returns { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
+  // Worker authenticates to MFL server-side using its own commish cookie.
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
 
-  // If the current page doesn't have ?L= in the URL (common for some custom/home modules),
-  // we fall back to these.
+  // If the current page doesn't have ?L= (common for GH Pages / home modules),
+  // we fallback to these.
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
+
   // ======================================================
   // 2) DOM + SAFE HELPERS
   // ======================================================
@@ -62,28 +63,52 @@
   // ======================================================
   // 3) URL HELPERS
   // ======================================================
-  function getLeagueId() {
+  function getParamFromUrl(urlString, key) {
     try {
-      const u = new URL(window.location.href);
-      return u.searchParams.get("L") || "";
-    } catch (e) { return ""; }
+      const u = new URL(urlString);
+      return u.searchParams.get(key) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function getLeagueId() {
+    // 1) Current URL
+    const direct = getParamFromUrl(window.location.href, "L");
+    if (direct) return direct;
+
+    // 2) Referrer (if opened from MFL / embedded module)
+    if (document.referrer) {
+      const fromRef = getParamFromUrl(document.referrer, "L");
+      if (fromRef) return fromRef;
+    }
+
+    // 3) Fallback constant
+    return DEFAULT_LEAGUE_ID;
   }
 
   function getYear() {
-    // Prefer explicit YEAR= in querystring (your Worker supports it)
-    try {
-      const u = new URL(window.location.href);
-      const qYear = u.searchParams.get("YEAR");
-      if (qYear) return qYear;
-    } catch (e) { /* ignore */ }
+    // 1) Current URL query YEAR=
+    const direct = getParamFromUrl(window.location.href, "YEAR");
+    if (direct) return direct;
 
-    // Otherwise attempt /2025/ style
+    // 2) Referrer query YEAR=
+    if (document.referrer) {
+      const fromRef = getParamFromUrl(document.referrer, "YEAR");
+      if (fromRef) return fromRef;
+    }
+
+    // 3) If path has /2025/ style
     const m = window.location.pathname.match(/\/(\d{4})\//);
-    return m ? m[1] : "2025";
+    if (m && m[1]) return m[1];
+
+    // 4) Fallback constant
+    return DEFAULT_YEAR;
   }
 
-  // Only used to choose a default team in the dropdown (not for admin)
+  // Only used to choose a default team in dropdown (not for admin)
   function detectFranchiseId() {
+    // 1) Current URL
     try {
       const u = new URL(window.location.href);
       const qs = u.searchParams;
@@ -95,10 +120,29 @@
         qs.get("F") ||
         qs.get("FR") ||
         "";
-      return pad4(cand);
-    } catch (e) {
-      return "";
-    }
+      const fid = pad4(cand);
+      if (fid) return fid;
+    } catch (e) {}
+
+    // 2) Referrer URL (sometimes only MFL page has it)
+    try {
+      if (document.referrer) {
+        const r = new URL(document.referrer);
+        const qs = r.searchParams;
+        const cand =
+          qs.get("FRANCHISE_ID") ||
+          qs.get("FRANCHISEID") ||
+          qs.get("franchise_id") ||
+          qs.get("FRANCHISE") ||
+          qs.get("F") ||
+          qs.get("FR") ||
+          "";
+        const fid = pad4(cand);
+        if (fid) return fid;
+      }
+    } catch (e) {}
+
+    return "";
   }
 
   // ======================================================
@@ -130,14 +174,18 @@
     const L = getLeagueId();
     const YEAR = getYear();
 
-    if (!L) return { ok: false, isAdmin: false, reason: "No league id (L) in URL" };
+    // With fallback, this should basically never be empty, but guard anyway
+    if (!L) return { ok: false, isAdmin: false, reason: "No league id (L) available" };
 
     const url =
       `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
 
     try {
-      // Important: no credentials needed; Worker authenticates to MFL server-side.
       const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) {
+        return { ok: false, isAdmin: false, reason: `Worker HTTP ${res.status}` };
+      }
+
       const j = await res.json();
 
       return {
@@ -147,7 +195,11 @@
         emailCount: safeInt(j.emailCount || 0)
       };
     } catch (e) {
-      return { ok: false, isAdmin: false, reason: `Worker check failed: ${e && e.message ? e.message : e}` };
+      return {
+        ok: false,
+        isAdmin: false,
+        reason: `Worker check failed: ${e && e.message ? e.message : e}`
+      };
     }
   }
 
@@ -182,8 +234,8 @@
 
     const salaryScore = Math.max(0, 20000 - salary) / 20000;
     const urgencyScore = Math.max(0, Math.min(1, (14 - urgDays) / 14));
-
     const score = (salaryScore * 60) + (posW * 20) + (urgencyScore * 20);
+
     return Math.round(score);
   }
 
@@ -362,6 +414,7 @@
       const aa = parseDate(a.acquired_date) || new Date("1900-01-01");
       const bb = parseDate(b.acquired_date) || new Date("1900-01-01");
       if (bb - aa !== 0) return bb - aa;
+
       const da = parseDate(a.mym_deadline) || new Date("2999-01-01");
       const db = parseDate(b.mym_deadline) || new Date("2999-01-01");
       return da - db;
@@ -403,7 +456,8 @@
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
         (state.isAdmin ? ` | admin: yes` : "") +
-        (state.adminReason ? ` | ${state.adminReason}` : "");
+        (state.adminReason ? ` | ${state.adminReason}` : "") +
+        ` | L=${getLeagueId()} YEAR=${getYear()}`;
     }
 
     const eligibleRows = sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) === 1));
@@ -455,7 +509,7 @@
       const raw = await res.json();
       state.payload = normalizePayload(raw);
 
-      // 2) Determine admin via Worker (cookie-based server-side)
+      // 2) Determine admin via Worker (server-side commish cookie)
       state.detectedFranchiseId = detectFranchiseId();
 
       const admin = await getAdminFlagFromWorker();
@@ -581,7 +635,6 @@
   // ======================================================
   // START
   // ======================================================
-  // Make sure DOM is ready before wiring up + load (prevents "null is not an object" junk)
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       wireEvents();

@@ -1,9 +1,15 @@
 (function () {
+  "use strict";
+
   // ======================================================
   // 1) CONFIG
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
+
+  // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
+
+  // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
 
@@ -70,6 +76,7 @@
       const qYear = u.searchParams.get("YEAR");
       if (qYear) return qYear;
     } catch (e) {}
+
     const m = window.location.pathname.match(/\/(\d{4})\//);
     return m ? m[1] : DEFAULT_YEAR;
   }
@@ -157,7 +164,7 @@
   }
 
   // ======================================================
-  // 7) TABLE RENDER
+  // 7) SORT + TABLE RENDER
   // ======================================================
   function pillForType(acqType) {
     const t = safeStr(acqType).toUpperCase();
@@ -166,46 +173,71 @@
     return "waiver";
   }
 
-  // sorting helpers
-  function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
-
-  function sortRows(rows) {
-    const { col, dir } = state.sort;
-    const mult = (dir === "asc") ? 1 : -1;
-
-    return rows.sort((ra, rb) => {
-      if (col === "salary") return mult * (safeInt(ra.salary) - safeInt(rb.salary));
-      if (col === "acquired_date") return mult * ((parseDate(ra.acquired_date)?.getTime() || 0) - (parseDate(rb.acquired_date)?.getTime() || 0));
-      if (col === "mym_deadline") return mult * ((parseDate(ra.mym_deadline)?.getTime() || 0) - (parseDate(rb.mym_deadline)?.getTime() || 0));
-      if (col === "pos") return mult * cmp(safeStr(ra.positional_grouping || ra.position).toUpperCase(), safeStr(rb.positional_grouping || rb.position).toUpperCase());
-
-      return mult * cmp(safeStr(ra[col]).toLowerCase(), safeStr(rb[col]).toLowerCase());
-    });
+  function posKeyFromRow(r) {
+    const p = safeStr(r.positional_grouping || r.position).toUpperCase().trim();
+    // keep common buckets; otherwise pass through
+    if (["QB","RB","WR","TE","K","DL","LB","DB"].includes(p)) return p;
+    return p || "NA";
   }
 
-  function renderTable(rows, mode) {
+  const sortState = {
+    tab: "eligible",
+    key: "acquired",
+    dir: "desc" // asc | desc
+  };
+
+  function compareVals(a, b, dir) {
+    if (a === b) return 0;
+    const d = (dir === "asc") ? 1 : -1;
+    return (a > b) ? d : -d;
+  }
+
+  function getSortValue(r, key) {
+    switch (key) {
+      case "player": return safeStr(r.player_name).toLowerCase();
+      case "pos": return safeStr(r.positional_grouping || r.position).toLowerCase();
+      case "salary": return safeInt(r.salary);
+      case "acqType": return safeStr(r.mym_acq_type).toLowerCase();
+      case "acquired": return (parseDate(r.acquired_date) || new Date("1900-01-01")).getTime();
+      case "deadline": return (parseDate(r.mym_deadline) || new Date("2999-01-01")).getTime();
+      default: return safeStr(r.player_name).toLowerCase();
+    }
+  }
+
+  function sortRows(rows, key, dir) {
+    const copy = rows.slice();
+    copy.sort((ra, rb) => {
+      const a = getSortValue(ra, key);
+      const b = getSortValue(rb, key);
+      return compareVals(a, b, dir);
+    });
+    return copy;
+  }
+
+  function sortIcon(tab, key) {
+    if (sortState.tab !== tab) return "";
+    if (sortState.key !== key) return "";
+    return sortState.dir === "asc" ? "▲" : "▼";
+  }
+
+  function renderTable(rows, tabMode) {
     if (!rows.length) {
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     }
 
-    const isEligibleTab = (mode === "eligible");
-
-    const sortMark = (col) => {
-      if (state.sort.col !== col) return `<span class="sort-ind">↕</span>`;
-      return state.sort.dir === "asc" ? `<span class="sort-ind">↑</span>` : `<span class="sort-ind">↓</span>`;
-    };
+    const isEligibleTab = (tabMode === "eligible");
 
     const head = `
-      <div class="ccc-tableWrap">
+      <div class="ccc-tableWrap" data-table="${tabMode}">
         <table class="ccc-table">
           <thead>
             <tr>
-              <th class="sortable" data-sort="player_name" style="min-width:180px;">Player ${sortMark("player_name")}</th>
-              <th class="sortable" data-sort="pos">Pos ${sortMark("pos")}</th>
-              <th class="sortable" data-sort="salary">Salary ${sortMark("salary")}</th>
-              <th class="sortable" data-sort="mym_acq_type">Acq Type ${sortMark("mym_acq_type")}</th>
-              <th class="sortable" data-sort="acquired_date">Acquired ${sortMark("acquired_date")}</th>
-              <th class="sortable" data-sort="mym_deadline">Deadline ${sortMark("mym_deadline")}</th>
+              <th data-sort="player">Player <span class="sort">${sortIcon(tabMode,"player")}</span></th>
+              <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode,"pos")}</span></th>
+              <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode,"salary")}</span></th>
+              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode,"acqType")}</span></th>
+              <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode,"acquired")}</span></th>
+              <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode,"deadline")}</span></th>
               ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
               <th style="min-width:320px;">Explanation</th>
             </tr>
@@ -215,18 +247,8 @@
 
     const body = rows.map(r => {
       const player = htmlEsc(r.player_name);
-      const posRaw = safeStr(r.positional_grouping || r.position).toUpperCase();
-      const pos = htmlEsc(posRaw);
-
-      const posClass =
-        posRaw === "QB" ? "pos-qb" :
-        posRaw === "RB" ? "pos-rb" :
-        posRaw === "WR" ? "pos-wr" :
-        posRaw === "TE" ? "pos-te" :
-        posRaw === "K"  ? "pos-k"  :
-        (posRaw === "DEF" || posRaw === "DST") ? "pos-def" :
-        "pos-def";
-
+      const posDisp = htmlEsc(r.positional_grouping || r.position);
+      const posKey = htmlEsc(posKeyFromRow(r));
       const salaryNum = safeInt(r.salary);
       const salary = salaryNum.toLocaleString();
       const acqType = safeStr(r.mym_acq_type);
@@ -253,9 +275,9 @@
         : ``;
 
       return `
-        <tr>
+        <tr class="pos-${posKey}">
           <td class="playerCell">${player}</td>
-          <td class="muted"><span class="pospill ${posClass}">${pos}</span></td>
+          <td class="muted">${posDisp}</td>
           <td>${salary}</td>
           <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
           <td class="muted">${acquired}</td>
@@ -328,7 +350,7 @@
     detectedFranchiseId: "",
     asOfDate: null,
     search: "",
-    sort: { col: "acquired_date", dir: "desc" }
+    activeTab: "eligible"
   };
 
   function buildTeamList(rows) {
@@ -376,17 +398,6 @@
     });
   }
 
-  function sortRowsNewestAcquired(rows) {
-    return rows.sort((a, b) => {
-      const aa = parseDate(a.acquired_date) || new Date("1900-01-01");
-      const bb = parseDate(b.acquired_date) || new Date("1900-01-01");
-      if (bb - aa !== 0) return bb - aa;
-      const da = parseDate(a.mym_deadline) || new Date("2999-01-01");
-      const db = parseDate(b.mym_deadline) || new Date("2999-01-01");
-      return da - db;
-    });
-  }
-
   function render() {
     const { eligibility, usage, meta } = state.payload;
 
@@ -403,7 +414,7 @@
 
     const searchLower = safeStr(state.search).trim().toLowerCase();
 
-    let scoped = eligibility;
+    let scoped = eligibility.slice();
     if (state.selectedTeam !== "__ALL__") {
       const fid = pad4(state.selectedTeam);
       scoped = scoped.filter(r => pad4(r.franchise_id) === fid);
@@ -425,8 +436,11 @@
         (state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
-    const eligibleRows = sortRows(sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) === 1)));
-    const ineligibleRows = sortRows(sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) !== 1)));
+    const eligibleRowsRaw = scoped.filter(r => safeInt(r._eligibleEffective) === 1);
+    const ineligibleRowsRaw = scoped.filter(r => safeInt(r._eligibleEffective) !== 1);
+
+    const eligibleRows = sortRows(eligibleRowsRaw, sortState.tab === "eligible" ? sortState.key : "acquired", sortState.tab === "eligible" ? sortState.dir : "desc");
+    const ineligibleRows = sortRows(ineligibleRowsRaw, sortState.tab === "ineligible" ? sortState.key : "acquired", sortState.tab === "ineligible" ? sortState.dir : "desc");
 
     const teamName =
       (state.selectedTeam === "__ALL__") ? "All Teams" :
@@ -460,6 +474,10 @@
     const s = safeInt(salary);
     const y = safeInt(years);
     const tcv = s * y;
+
+    // Rule:
+    // if TCV > 4K => 75% TCV
+    // else => (years-1)*salary
     if (tcv > 4000) return Math.round(tcv * 0.75);
     return Math.max(0, (y - 1) * s);
   }
@@ -520,6 +538,7 @@
 
   function setModalOption(years) {
     mymModalState.years = years;
+
     const btn2 = $("#btnMYM2");
     const btn3 = $("#btnMYM3");
     if (btn2 && btn3) {
@@ -545,23 +564,19 @@
 
     setModalOption(2);
 
-    $("#mymModal").style.display = "";
+    const modal = $("#mymModal");
+    modal.classList.add("is-open");
     document.body.classList.add("ccc-modalOpen");
-
-    // Lock scroll reliably (MFL sometimes scrolls html)
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
+    modal.setAttribute("aria-hidden", "false");
   }
 
   function closeMYMModal() {
     const modal = $("#mymModal");
     if (!modal) return;
 
-    $("#mymModal").style.display = "none";
+    modal.classList.remove("is-open");
     document.body.classList.remove("ccc-modalOpen");
-
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
+    modal.setAttribute("aria-hidden", "true");
 
     mymModalState.open = false;
     mymModalState.row = null;
@@ -590,8 +605,12 @@
 
     console.log("[MYM submit payload]", payload);
 
-    // TODO: POST to your worker
-    // await fetch("https://your-worker/offer-mym", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+    // TODO: POST to your worker that performs the MFL import
+    // await fetch("https://your-worker/offer-mym", {
+    //   method:"POST",
+    //   headers:{ "Content-Type":"application/json" },
+    //   body: JSON.stringify(payload)
+    // });
 
     closeMYMModal();
   }
@@ -612,6 +631,8 @@
       must("#asOfResetBtn");
       must("#refreshBtn");
       must("#clearBtn");
+
+      // Modal required elements
       must("#mymModal");
       must("#btnMYM2");
       must("#btnMYM3");
@@ -653,6 +674,11 @@
       populateTeamSelect(teams, state.selectedTeam);
 
       setTab("eligible");
+      // default sort per tab
+      sortState.tab = "eligible";
+      sortState.key = "acquired";
+      sortState.dir = "desc";
+
       render();
     } catch (e) {
       const msg = (e && e.message) ? e.message : String(e);
@@ -668,6 +694,8 @@
   // 10) TABS + EVENTS
   // ======================================================
   function setTab(tab) {
+    state.activeTab = tab;
+
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
 
@@ -677,19 +705,52 @@
     $$(".ccc-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
   }
 
+  function handleHeaderSortClick(th, tableMode) {
+    const key = th.getAttribute("data-sort");
+    if (!key) return;
+
+    if (sortState.tab !== tableMode) {
+      sortState.tab = tableMode;
+      sortState.key = key;
+      sortState.dir = "asc";
+    } else {
+      if (sortState.key === key) {
+        sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
+      } else {
+        sortState.key = key;
+        sortState.dir = "asc";
+      }
+    }
+
+    render();
+  }
+
   function wireEvents() {
     // Tabs
-    $$(".ccc-tab").forEach(btn => btn.addEventListener("click", () => setTab(btn.dataset.tab)));
+    $$(".ccc-tab").forEach(btn => btn.addEventListener("click", () => {
+      setTab(btn.dataset.tab);
+      render();
+    }));
 
     // Filters
     const teamSelect = $("#teamSelect");
-    if (teamSelect) teamSelect.addEventListener("change", (e) => { state.selectedTeam = e.target.value; render(); });
+    if (teamSelect) teamSelect.addEventListener("change", (e) => {
+      state.selectedTeam = e.target.value;
+      render();
+    });
 
     const searchBox = $("#searchBox");
-    if (searchBox) searchBox.addEventListener("input", (e) => { state.search = e.target.value; render(); });
+    if (searchBox) searchBox.addEventListener("input", (e) => {
+      state.search = e.target.value;
+      render();
+    });
 
     const clearBtn = $("#clearBtn");
-    if (clearBtn) clearBtn.addEventListener("click", () => { $("#searchBox").value = ""; state.search = ""; render(); });
+    if (clearBtn) clearBtn.addEventListener("click", () => {
+      $("#searchBox").value = "";
+      state.search = "";
+      render();
+    });
 
     const refreshBtn = $("#refreshBtn");
     if (refreshBtn) refreshBtn.addEventListener("click", () => load());
@@ -715,31 +776,26 @@
       render();
     });
 
-    // Sorting (click header)
+    // TABLE SORT (event delegation)
     document.addEventListener("click", (e) => {
-      const th = e.target && e.target.closest ? e.target.closest("th.sortable[data-sort]") : null;
+      const th = e.target && e.target.closest ? e.target.closest("th[data-sort]") : null;
       if (!th) return;
 
-      const col = th.getAttribute("data-sort");
-      if (!col) return;
+      const wrap = th.closest ? th.closest(".ccc-tableWrap") : null;
+      if (!wrap) return;
 
-      if (state.sort.col === col) {
-        state.sort.dir = (state.sort.dir === "asc") ? "desc" : "asc";
-      } else {
-        state.sort.col = col;
-        state.sort.dir = (col === "player_name" || col === "pos" || col === "mym_acq_type") ? "asc" : "desc";
-      }
-
-      render();
+      const tableMode = wrap.getAttribute("data-table") || "eligible";
+      handleHeaderSortClick(th, tableMode);
     }, true);
 
-    // Open modal (event delegation for dynamic Offer buttons)
+    // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
     document.addEventListener("click", (e) => {
       const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
       if (!btn) return;
 
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
 
       const row = {
         player_id: btn.getAttribute("data-player-id"),
@@ -765,9 +821,10 @@
 
     // Escape closes modal
     document.addEventListener("keydown", (e) => {
-      const modal = $("#mymModal");
-      if (!modal) return;
-      if (e.key === "Escape" && modal.style.display !== "none") closeMYMModal();
+      if (e.key === "Escape") {
+        const modalEl = $("#mymModal");
+        if (modalEl && modalEl.classList.contains("is-open")) closeMYMModal();
+      }
     });
 
     // Modal option buttons

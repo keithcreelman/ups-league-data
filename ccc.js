@@ -3,11 +3,7 @@
   // 1) CONFIG
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
-
-  // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
-
-  // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
 
@@ -74,7 +70,6 @@
       const qYear = u.searchParams.get("YEAR");
       if (qYear) return qYear;
     } catch (e) {}
-
     const m = window.location.pathname.match(/\/(\d{4})\//);
     return m ? m[1] : DEFAULT_YEAR;
   }
@@ -162,13 +157,30 @@
   }
 
   // ======================================================
-  // 7) TABLE RENDER (Offer Contract button only on Eligible tab)
+  // 7) TABLE RENDER
   // ======================================================
   function pillForType(acqType) {
     const t = safeStr(acqType).toUpperCase();
     if (t.includes("AUCTION")) return "auction";
     if (t.includes("ROOKIE")) return "rookie";
     return "waiver";
+  }
+
+  // sorting helpers
+  function cmp(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
+
+  function sortRows(rows) {
+    const { col, dir } = state.sort;
+    const mult = (dir === "asc") ? 1 : -1;
+
+    return rows.sort((ra, rb) => {
+      if (col === "salary") return mult * (safeInt(ra.salary) - safeInt(rb.salary));
+      if (col === "acquired_date") return mult * ((parseDate(ra.acquired_date)?.getTime() || 0) - (parseDate(rb.acquired_date)?.getTime() || 0));
+      if (col === "mym_deadline") return mult * ((parseDate(ra.mym_deadline)?.getTime() || 0) - (parseDate(rb.mym_deadline)?.getTime() || 0));
+      if (col === "pos") return mult * cmp(safeStr(ra.positional_grouping || ra.position).toUpperCase(), safeStr(rb.positional_grouping || rb.position).toUpperCase());
+
+      return mult * cmp(safeStr(ra[col]).toLowerCase(), safeStr(rb[col]).toLowerCase());
+    });
   }
 
   function renderTable(rows, mode) {
@@ -178,17 +190,22 @@
 
     const isEligibleTab = (mode === "eligible");
 
+    const sortMark = (col) => {
+      if (state.sort.col !== col) return `<span class="sort-ind">↕</span>`;
+      return state.sort.dir === "asc" ? `<span class="sort-ind">↑</span>` : `<span class="sort-ind">↓</span>`;
+    };
+
     const head = `
       <div class="ccc-tableWrap">
         <table class="ccc-table">
           <thead>
             <tr>
-              <th style="min-width:180px;">Player</th>
-              <th>Pos</th>
-              <th>Salary</th>
-              <th>Acq Type</th>
-              <th>Acquired</th>
-              <th>Deadline</th>
+              <th class="sortable" data-sort="player_name" style="min-width:180px;">Player ${sortMark("player_name")}</th>
+              <th class="sortable" data-sort="pos">Pos ${sortMark("pos")}</th>
+              <th class="sortable" data-sort="salary">Salary ${sortMark("salary")}</th>
+              <th class="sortable" data-sort="mym_acq_type">Acq Type ${sortMark("mym_acq_type")}</th>
+              <th class="sortable" data-sort="acquired_date">Acquired ${sortMark("acquired_date")}</th>
+              <th class="sortable" data-sort="mym_deadline">Deadline ${sortMark("mym_deadline")}</th>
               ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
               <th style="min-width:320px;">Explanation</th>
             </tr>
@@ -198,7 +215,18 @@
 
     const body = rows.map(r => {
       const player = htmlEsc(r.player_name);
-      const pos = htmlEsc(r.positional_grouping || r.position);
+      const posRaw = safeStr(r.positional_grouping || r.position).toUpperCase();
+      const pos = htmlEsc(posRaw);
+
+      const posClass =
+        posRaw === "QB" ? "pos-qb" :
+        posRaw === "RB" ? "pos-rb" :
+        posRaw === "WR" ? "pos-wr" :
+        posRaw === "TE" ? "pos-te" :
+        posRaw === "K"  ? "pos-k"  :
+        (posRaw === "DEF" || posRaw === "DST") ? "pos-def" :
+        "pos-def";
+
       const salaryNum = safeInt(r.salary);
       const salary = salaryNum.toLocaleString();
       const acqType = safeStr(r.mym_acq_type);
@@ -227,7 +255,7 @@
       return `
         <tr>
           <td class="playerCell">${player}</td>
-          <td class="muted">${pos}</td>
+          <td class="muted"><span class="pospill ${posClass}">${pos}</span></td>
           <td>${salary}</td>
           <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
           <td class="muted">${acquired}</td>
@@ -299,7 +327,8 @@
     selectedTeam: "__ALL__",
     detectedFranchiseId: "",
     asOfDate: null,
-    search: ""
+    search: "",
+    sort: { col: "acquired_date", dir: "desc" }
   };
 
   function buildTeamList(rows) {
@@ -396,8 +425,8 @@
         (state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
-    const eligibleRows = sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) === 1));
-    const ineligibleRows = sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) !== 1));
+    const eligibleRows = sortRows(sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) === 1)));
+    const ineligibleRows = sortRows(sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) !== 1)));
 
     const teamName =
       (state.selectedTeam === "__ALL__") ? "All Teams" :
@@ -431,10 +460,6 @@
     const s = safeInt(salary);
     const y = safeInt(years);
     const tcv = s * y;
-
-    // Rule:
-    // if TCV > 4K => 75% TCV
-    // else => (years-1)*salary
     if (tcv > 4000) return Math.round(tcv * 0.75);
     return Math.max(0, (y - 1) * s);
   }
@@ -495,7 +520,6 @@
 
   function setModalOption(years) {
     mymModalState.years = years;
-
     const btn2 = $("#btnMYM2");
     const btn3 = $("#btnMYM3");
     if (btn2 && btn3) {
@@ -521,18 +545,24 @@
 
     setModalOption(2);
 
-      $("#mymModal").style.display = "";
-  document.body.classList.add("ccc-modalOpen");
-  document.body.style.overflow = "hidden";
+    $("#mymModal").style.display = "";
+    document.body.classList.add("ccc-modalOpen");
+
+    // Lock scroll reliably (MFL sometimes scrolls html)
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
   }
 
   function closeMYMModal() {
     const modal = $("#mymModal");
     if (!modal) return;
 
-      $("#mymModal").style.display = "none";
-  document.body.classList.remove("ccc-modalOpen");
-  document.body.style.overflow = "";
+    $("#mymModal").style.display = "none";
+    document.body.classList.remove("ccc-modalOpen");
+
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+
     mymModalState.open = false;
     mymModalState.row = null;
   }
@@ -560,7 +590,7 @@
 
     console.log("[MYM submit payload]", payload);
 
-    // TODO: POST to your worker that performs the MFL import
+    // TODO: POST to your worker
     // await fetch("https://your-worker/offer-mym", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
 
     closeMYMModal();
@@ -582,8 +612,6 @@
       must("#asOfResetBtn");
       must("#refreshBtn");
       must("#clearBtn");
-
-      // Modal required elements (since we now use it)
       must("#mymModal");
       must("#btnMYM2");
       must("#btnMYM3");
@@ -687,61 +715,71 @@
       render();
     });
 
- // ===== Modal wiring =====
+    // Sorting (click header)
+    document.addEventListener("click", (e) => {
+      const th = e.target && e.target.closest ? e.target.closest("th.sortable[data-sort]") : null;
+      if (!th) return;
 
-// Open modal (event delegation for dynamic Offer buttons)
-document.addEventListener("click", (e) => {
-  const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
-  if (!btn) return;
+      const col = th.getAttribute("data-sort");
+      if (!col) return;
 
-  // Stop any MFL / page handlers from interfering
-  e.preventDefault();
-  e.stopPropagation();
+      if (state.sort.col === col) {
+        state.sort.dir = (state.sort.dir === "asc") ? "desc" : "asc";
+      } else {
+        state.sort.col = col;
+        state.sort.dir = (col === "player_name" || col === "pos" || col === "mym_acq_type") ? "asc" : "desc";
+      }
 
-  const row = {
-    player_id: btn.getAttribute("data-player-id"),
-    player_name: btn.getAttribute("data-player-name"),
-    salary: safeInt(btn.getAttribute("data-salary")),
-    franchise_id: btn.getAttribute("data-franchise-id"),
-    franchise_name: btn.getAttribute("data-franchise-name"),
-    mym_acq_type: btn.getAttribute("data-acq-type"),
-    mym_deadline: btn.getAttribute("data-deadline")
-  };
+      render();
+    }, true);
 
-  console.log("[CCC] Offer Contract clicked", row);
-  openMYMModal(row);
-}, true);
+    // Open modal (event delegation for dynamic Offer buttons)
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
+      if (!btn) return;
 
-// Close modal: clicking backdrop OR any element marked data-close="1"
-const modal = $("#mymModal");
-if (modal) {
-  modal.addEventListener("click", (e) => {
-    // Click backdrop area (outside the card)
-    if (e.target === modal || (e.target.classList && e.target.classList.contains("ccc-modal-backdrop"))) {
-      closeMYMModal();
-      return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const row = {
+        player_id: btn.getAttribute("data-player-id"),
+        player_name: btn.getAttribute("data-player-name"),
+        salary: safeInt(btn.getAttribute("data-salary")),
+        franchise_id: btn.getAttribute("data-franchise-id"),
+        franchise_name: btn.getAttribute("data-franchise-name"),
+        mym_acq_type: btn.getAttribute("data-acq-type"),
+        mym_deadline: btn.getAttribute("data-deadline")
+      };
+
+      openMYMModal(row);
+    }, true);
+
+    // Close modal (backdrop/X/cancel)
+    const modal = $("#mymModal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeMYMModal();
+      });
     }
-    // Click any explicit close control
-    const closer = e.target && e.target.closest ? e.target.closest("[data-close='1']") : null;
-    if (closer) closeMYMModal();
-  });
-}
 
-// Escape closes modal
-document.addEventListener("keydown", (e) => {
-  const mm = $("#mymModal");
-  if (e.key === "Escape" && mm && mm.style.display !== "none") closeMYMModal();
-});
+    // Escape closes modal
+    document.addEventListener("keydown", (e) => {
+      const modal = $("#mymModal");
+      if (!modal) return;
+      if (e.key === "Escape" && modal.style.display !== "none") closeMYMModal();
+    });
 
-// Modal option buttons
-const btn2 = $("#btnMYM2");
-const btn3 = $("#btnMYM3");
-if (btn2) btn2.addEventListener("click", () => setModalOption(2));
-if (btn3) btn3.addEventListener("click", () => setModalOption(3));
+    // Modal option buttons
+    const btn2 = $("#btnMYM2");
+    const btn3 = $("#btnMYM3");
+    if (btn2) btn2.addEventListener("click", () => setModalOption(2));
+    if (btn3) btn3.addEventListener("click", () => setModalOption(3));
 
-// Submit
-const submitBtn = $("#mymSubmitBtn");
-if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
+    // Submit
+    const submitBtn = $("#mymSubmitBtn");
+    if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
+  }
 
   // ======================================================
   // START

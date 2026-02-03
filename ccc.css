@@ -306,24 +306,56 @@ table.ccc-table tbody tr:hover td{
   color: #ffb4b4;
 }
 
-/* ===== Position grouping accents (row + player name) ===== */
-tr.pos-QB td.playerCell{ color: #dbeafe; }
-tr.pos-RB td.playerCell{ color: #dcfce7; }
-tr.pos-WR td.playerCell{ color: #fae8ff; }
-tr.pos-TE td.playerCell{ color: #ffedd5; }
-tr.pos-K  td.playerCell{ color: #fef9c3; }
-tr.pos-DL td.playerCell{ color: #fee2e2; }
-tr.pos-LB td.playerCell{ color: #e0f2fe; }
-tr.pos-DB td.playerCell{ color: #ede9fe; }
+/* ===== Table shading boost ===== */
 
-tr.pos-QB td:first-child{ border-left: 4px solid rgba(59,130,246,.55); }
-tr.pos-RB td:first-child{ border-left: 4px solid rgba(34,197,94,.55); }
-tr.pos-WR td:first-child{ border-left: 4px solid rgba(168,85,247,.55); }
-tr.pos-TE td:first-child{ border-left: 4px solid rgba(249,115,22,.55); }
-tr.pos-K  td:first-child{ border-left: 4px solid rgba(234,179,8,.55); }
-tr.pos-DL td:first-child{ border-left: 4px solid rgba(239,68,68,.55); }
-tr.pos-LB td:first-child{ border-left: 4px solid rgba(6,182,212,.55); }
-tr.pos-DB td:first-child{ border-left: 4px solid rgba(99,102,241,.55); }
+/* Stronger zebra stripes */
+table.ccc-table tbody tr:nth-child(odd) td{
+  background: rgba(255,255,255,.02);
+}
+table.ccc-table tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.045);
+}
+
+/* Stronger hover with a soft glow */
+table.ccc-table tbody tr:hover td{
+  background: rgba(78,161,255,.14) !important;
+}
+
+/* Optional: subtle vertical dividers to improve readability */
+table.ccc-table th,
+table.ccc-table td{
+  border-right: 1px solid rgba(255,255,255,.05);
+}
+table.ccc-table th:last-child,
+table.ccc-table td:last-child{
+  border-right: none;
+}
+
+/* Make the header feel “heavier” */
+table.ccc-table thead th{
+  background: rgba(10,16,30,.98);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+/* Position-based row tints (light but noticeable) */
+tr.pos-QB td{ background-image: linear-gradient(90deg, rgba(59,130,246,.10), rgba(0,0,0,0)); }
+tr.pos-RB td{ background-image: linear-gradient(90deg, rgba(34,197,94,.10), rgba(0,0,0,0)); }
+tr.pos-WR td{ background-image: linear-gradient(90deg, rgba(168,85,247,.10), rgba(0,0,0,0)); }
+tr.pos-TE td{ background-image: linear-gradient(90deg, rgba(249,115,22,.10), rgba(0,0,0,0)); }
+tr.pos-K  td{ background-image: linear-gradient(90deg, rgba(234,179,8,.10), rgba(0,0,0,0)); }
+tr.pos-DL td{ background-image: linear-gradient(90deg, rgba(239,68,68,.10), rgba(0,0,0,0)); }
+tr.pos-LB td{ background-image: linear-gradient(90deg, rgba(6,182,212,.10), rgba(0,0,0,0)); }
+tr.pos-DB td{ background-image: linear-gradient(90deg, rgba(99,102,241,.12), rgba(0,0,0,0)); }
+
+/* Keep your left border accent (make it a touch thicker) */
+tr.pos-QB td:first-child{ border-left: 5px solid rgba(59,130,246,.65); }
+tr.pos-RB td:first-child{ border-left: 5px solid rgba(34,197,94,.65); }
+tr.pos-WR td:first-child{ border-left: 5px solid rgba(168,85,247,.65); }
+tr.pos-TE td:first-child{ border-left: 5px solid rgba(249,115,22,.65); }
+tr.pos-K  td:first-child{ border-left: 5px solid rgba(234,179,8,.65); }
+tr.pos-DL td:first-child{ border-left: 5px solid rgba(239,68,68,.65); }
+tr.pos-LB td:first-child{ border-left: 5px solid rgba(6,182,212,.65); }
+tr.pos-DB td:first-child{ border-left: 5px solid rgba(99,102,241,.70); }
 
 /* ===== Modal (fixed readability + no lockups) ===== */
 .ccc-modal{
@@ -429,6 +461,8 @@ body.ccc-modalOpen #mymModal *{
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+
 
 /* Responsive */
 @media (max-width: 820px){

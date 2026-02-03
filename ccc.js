@@ -686,23 +686,28 @@
     });
 
     // ===== Modal wiring =====
-    // Open modal (event delegation for dynamic Offer buttons)
-    document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
-      if (!btn) return;
+// Open modal (event delegation for dynamic Offer buttons)
+document.addEventListener("click", (e) => {
+  const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
+  if (!btn) return;
 
-      const row = {
-        player_id: btn.getAttribute("data-player-id"),
-        player_name: btn.getAttribute("data-player-name"),
-        salary: safeInt(btn.getAttribute("data-salary")),
-        franchise_id: btn.getAttribute("data-franchise-id"),
-        franchise_name: btn.getAttribute("data-franchise-name"),
-        mym_acq_type: btn.getAttribute("data-acq-type"),
-        mym_deadline: btn.getAttribute("data-deadline")
-      };
+  // Stop any MFL / page handlers from interfering
+  e.preventDefault();
+  e.stopPropagation();
 
-      openMYMModal(row);
-    });
+  const row = {
+    player_id: btn.getAttribute("data-player-id"),
+    player_name: btn.getAttribute("data-player-name"),
+    salary: safeInt(btn.getAttribute("data-salary")),
+    franchise_id: btn.getAttribute("data-franchise-id"),
+    franchise_name: btn.getAttribute("data-franchise-name"),
+    mym_acq_type: btn.getAttribute("data-acq-type"),
+    mym_deadline: btn.getAttribute("data-deadline")
+  };
+
+  console.log("[CCC] Offer Contract clicked", row); // quick sanity check
+  openMYMModal(row);
+}, true);
 
     // Close modal (backdrop/X/cancel)
     const modal = $("#mymModal");

@@ -687,7 +687,8 @@
       render();
     });
 
-    // ===== Modal wiring =====
+ // ===== Modal wiring =====
+
 // Open modal (event delegation for dynamic Offer buttons)
 document.addEventListener("click", (e) => {
   const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
@@ -707,36 +708,40 @@ document.addEventListener("click", (e) => {
     mym_deadline: btn.getAttribute("data-deadline")
   };
 
-  console.log("[CCC] Offer Contract clicked", row); // quick sanity check
+  console.log("[CCC] Offer Contract clicked", row);
   openMYMModal(row);
 }, true);
 
-    // Close modal (backdrop/X/cancel)
-    const modal = $("#mymModal");
-    if (modal) {
-      modal.addEventListener("click", (e) => {
-        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
-        if (close === "1") closeMYMModal();
-      });
+// Close modal: clicking backdrop OR any element marked data-close="1"
+const modal = $("#mymModal");
+if (modal) {
+  modal.addEventListener("click", (e) => {
+    // Click backdrop area (outside the card)
+    if (e.target === modal || (e.target.classList && e.target.classList.contains("ccc-modal-backdrop"))) {
+      closeMYMModal();
+      return;
     }
+    // Click any explicit close control
+    const closer = e.target && e.target.closest ? e.target.closest("[data-close='1']") : null;
+    if (closer) closeMYMModal();
+  });
+}
 
-    // Escape closes modal
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && $("#mymModal") && $("#mymModal").style.display !== "none") {
-        closeMYMModal();
-      }
-    });
+// Escape closes modal
+document.addEventListener("keydown", (e) => {
+  const mm = $("#mymModal");
+  if (e.key === "Escape" && mm && mm.style.display !== "none") closeMYMModal();
+});
 
-    // Modal option buttons
-    const btn2 = $("#btnMYM2");
-    const btn3 = $("#btnMYM3");
-    if (btn2) btn2.addEventListener("click", () => setModalOption(2));
-    if (btn3) btn3.addEventListener("click", () => setModalOption(3));
+// Modal option buttons
+const btn2 = $("#btnMYM2");
+const btn3 = $("#btnMYM3");
+if (btn2) btn2.addEventListener("click", () => setModalOption(2));
+if (btn3) btn3.addEventListener("click", () => setModalOption(3));
 
-    // Submit
-    const submitBtn = $("#mymSubmitBtn");
-    if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
-  }
+// Submit
+const submitBtn = $("#mymSubmitBtn");
+if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
 
   // ======================================================
   // START

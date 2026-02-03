@@ -583,14 +583,6 @@
     mymModalState.row = null;
   }
 
-  async function submitMYMContract() {
-    const row = mymModalState.row;
-    if (!row) return;
-
-    const salary = safeInt(row.salary);
-    const years = mymModalState.years;
-    const calc = buildContractInfo(salary, years);
-
     async function submitMYMContract() {
   const row = mymModalState.row;
   if (!row) return;

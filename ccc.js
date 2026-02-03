@@ -12,7 +12,8 @@
   // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
-
+//MYM
+  const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
   // ======================================================
   // 2) DOM + SAFE HELPERS
   // ======================================================
@@ -605,12 +606,37 @@
 
     console.log("[MYM submit payload]", payload);
 
-    // TODO: POST to your worker that performs the MFL import
-    // await fetch("https://your-worker/offer-mym", {
-    //   method:"POST",
-    //   headers:{ "Content-Type":"application/json" },
-    //   body: JSON.stringify(payload)
-    // });
+    try {
+      const res = await fetch(OFFER_MYM_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const out = await res.json().catch(() => ({}));
+
+      if (!res.ok || !out || out.ok !== true) {
+        const msg = out && out.error ? out.error : `Submit failed (HTTP ${res.status})`;
+        const err = $("#mymModalErr");
+        if (err) {
+          err.style.display = "";
+          err.textContent = msg;
+        }
+        return; // do NOT close modal on failure
+      }
+
+      // success
+      closeMYMModal();
+      // Optional: refresh dashboard to reflect new MYM used/remaining
+      load();
+
+    } catch (e) {
+      const err = $("#mymModalErr");
+      if (err) {
+        err.style.display = "";
+        err.textContent = `Submit failed: ${e && e.message ? e.message : String(e)}`;
+      }
+    }
 
     closeMYMModal();
   }

@@ -257,7 +257,15 @@
 
 /* ===== Modal ===== */
 .ccc-modal{ position:fixed; inset:0; z-index:9999; }
-.ccc-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+.ccc-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.78); /* darker = easier to read */
+}
+/* When modal is open, soften what's behind it */
+body.ccc-modalOpen #cccApp{
+  filter: blur(2px) saturate(.85) brightness(.65);
+}
 
 .ccc-modal-card{
   position:relative;

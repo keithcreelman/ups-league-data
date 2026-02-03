@@ -592,17 +592,24 @@
     const calc = buildContractInfo(salary, years);
 
     const payload = {
-      type: "MYM",
-      leagueId: getLeagueId() || DEFAULT_LEAGUE_ID,
-      year: getYear() || DEFAULT_YEAR,
-      player_id: safeStr(row.player_id),
-      salary: salary,
-      contract_year: years,
-      contract_info: calc.contractInfo,
-      tcv: calc.tcv,
-      aav: calc.aav,
-      guaranteed: calc.gtd
-    };
+  type: "MYM",
+
+  // 🔑 REQUIRED by Worker
+  L: leagueId,
+  YEAR: year,
+
+  // keep these for your logic
+  leagueId,
+  year,
+
+  player_id,
+  salary,
+  contract_year,
+  contract_info,
+  tcv,
+  aav,
+  guaranteed
+};
 
     console.log("[MYM submit payload]", payload);
 

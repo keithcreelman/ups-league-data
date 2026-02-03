@@ -587,7 +587,7 @@
   const row = mymModalState.row;
   if (!row) return;
 
-  // ✅ DEFINE VARIABLES LOCALLY
+  // ✅ DEFINE VARIABLES LOCALLY (no globals)
   const L = getLeagueId() || DEFAULT_LEAGUE_ID;
   const YEAR = getYear() || DEFAULT_YEAR;
 
@@ -617,21 +617,51 @@
 
   console.log("[MYM submit payload]", payload);
 
-  const res = await fetch(OFFER_MYM_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  // UI: disable button while submitting
+  const btn = $("#mymSubmitBtn");
+  const err = $("#mymModalErr");
+  if (err) { err.style.display = "none"; err.textContent = ""; }
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`MYM submit failed (${res.status}): ${txt}`);
+  try {
+    const res = await fetch(OFFER_MYM_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    // Worker might return JSON OR text on error
+    const text = await res.text();
+    let out = {};
+    try { out = text ? JSON.parse(text) : {}; } catch (_) {}
+
+    if (!res.ok || out.ok !== true) {
+      const msg =
+        (out && (out.error || out.reason)) ||
+        (text && text.slice(0, 200)) ||
+        `Submit failed (HTTP ${res.status})`;
+
+      if (err) {
+        err.style.display = "";
+        err.textContent = msg;
+      }
+      return; // do NOT close modal on failure
+    }
+
+    // success
+    closeMYMModal();
+    load(); // refresh dashboard so eligibility/usage updates
+
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    if (err) {
+      err.style.display = "";
+      err.textContent = msg;
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Submit Contract"; }
   }
-
-  closeMYMModal();
 }
-
-    console.log("[MYM submit payload]", payload);
 
     try {
       const res = await fetch(OFFER_MYM_URL, {

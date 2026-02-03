@@ -578,7 +578,57 @@
       });
     }
   }
-
+/* ===== Modal ===== */
+.ccc-modal{ position:fixed; inset:0; z-index:9999; }
+.ccc-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+.ccc-modal-card{
+  position:relative;
+  max-width: 720px;
+  margin: 6vh auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: radial-gradient(900px 500px at 25% 10%, rgba(78,161,255,.18), transparent 60%),
+              radial-gradient(900px 500px at 85% 10%, rgba(139,92,255,.16), transparent 60%),
+              linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.25));
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.ccc-modal-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.ccc-modal-title{ font-size:16px; font-weight:1000; }
+.ccc-modal-sub{ margin-top:4px; font-size:12px; }
+.ccc-modal-x{
+  background: rgba(255,255,255,.08);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor:pointer;
+  font-weight:1000;
+}
+.ccc-modal-body{ padding: 12px 14px; }
+.ccc-modal-row{ padding: 6px 0; }
+.ccc-modal-label{ font-size:12px; color: var(--muted); font-weight:900; margin-bottom:8px; }
+.ccc-modal-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.ccc-modal-foot{
+  display:flex; justify-content:flex-end; gap:10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+}
+.ccc-code{
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,.22);
+  border-radius: 12px;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  color: rgba(233,238,249,.92);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
   // ======================================================
   // START
   // ======================================================

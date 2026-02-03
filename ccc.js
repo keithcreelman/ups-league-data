@@ -623,12 +623,7 @@
   if (err) { err.style.display = "none"; err.textContent = ""; }
   if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
 
-  try {
-    const res = await fetch(OFFER_MYM_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+
 
     // Worker might return JSON OR text on error
     const text = await res.text();

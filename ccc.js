@@ -1,15 +1,16 @@
 (function () {
-  // =========================
+  // ======================================================
   // 1) CONFIG
-  // =========================
+  // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
 
-  // Your Worker endpoint that checks commish cookie server-side
+  // Cloudflare Worker that returns: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
+  // NOTE: This does NOT rely on browser cookies. The Worker uses its own commish cookie server-side.
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
 
-  // =========================
-  // 2) UTIL
-  // =========================
+  // ======================================================
+  // 2) DOM + SAFE HELPERS
+  // ======================================================
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
@@ -20,8 +21,7 @@
   }
   function pad4(fid) {
     const d = safeStr(fid).replace(/\D/g, "");
-    if (!d) return "";
-    return d.padStart(4, "0").slice(-4);
+    return d ? d.padStart(4, "0").slice(-4) : "";
   }
   function htmlEsc(s) {
     return safeStr(s)
@@ -36,8 +36,8 @@
     const s = safeStr(x).trim();
     if (!s) return null;
     const t = s.replace(" ", "T");
-    const t2 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? (t + ":00") : t;
-    const d = new Date(t2);
+    const iso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? (t + ":00") : t;
+    const d = new Date(iso);
     return isNaN(d.getTime()) ? null : d;
   }
   function fmtYMD(x) {
@@ -49,41 +49,69 @@
     return `${y}-${m}-${da}`;
   }
 
+  function must(sel) {
+    const el = $(sel);
+    if (!el) throw new Error(`Missing required element: ${sel}`);
+    return el;
+  }
+
+  // ======================================================
+  // 3) URL HELPERS
+  // ======================================================
   function getLeagueId() {
     try {
       const u = new URL(window.location.href);
       return u.searchParams.get("L") || "";
     } catch (e) { return ""; }
   }
-  function getYearFromPath() {
+
+  function getYear() {
+    // Prefer explicit YEAR= in querystring (your Worker supports it)
+    try {
+      const u = new URL(window.location.href);
+      const qYear = u.searchParams.get("YEAR");
+      if (qYear) return qYear;
+    } catch (e) { /* ignore */ }
+
+    // Otherwise attempt /2025/ style
     const m = window.location.pathname.match(/\/(\d{4})\//);
     return m ? m[1] : "2025";
   }
 
-  // Pull franchise id if present (nice-to-have; not required for admin now)
+  // Only used to choose a default team in the dropdown (not for admin)
   function detectFranchiseId() {
     try {
-      const url = new URL(window.location.href);
-      const qs = url.searchParams;
-      const cand = [
-        qs.get("FRANCHISE_ID"),
-        qs.get("FRANCHISEID"),
-        qs.get("franchise_id"),
-        qs.get("FRANCHISE"),
-        qs.get("F"),
-        qs.get("FR")
-      ].filter(Boolean);
-      if (cand.length) return pad4(cand[0]);
-    } catch (e) { }
-    return "";
+      const u = new URL(window.location.href);
+      const qs = u.searchParams;
+      const cand =
+        qs.get("FRANCHISE_ID") ||
+        qs.get("FRANCHISEID") ||
+        qs.get("franchise_id") ||
+        qs.get("FRANCHISE") ||
+        qs.get("F") ||
+        qs.get("FR") ||
+        "";
+      return pad4(cand);
+    } catch (e) {
+      return "";
+    }
   }
 
+  // ======================================================
+  // 4) PAYLOAD NORMALIZATION
+  // ======================================================
   function normalizePayload(raw) {
     if (Array.isArray(raw)) return { eligibility: raw, usage: [], meta: {} };
+
     const all = raw.View_MYM_All || raw.view_mym_all || raw.mym_all || null;
     if (Array.isArray(all)) {
-      return { eligibility: all, usage: raw.View_MYM_Usage || raw.usage || [], meta: raw.meta || {} };
+      return {
+        eligibility: all,
+        usage: raw.View_MYM_Usage || raw.usage || [],
+        meta: raw.meta || {}
+      };
     }
+
     return {
       eligibility: raw.eligibility || raw.View_MYM_Eligibility || [],
       usage: raw.usage || raw.View_MYM_Usage || [],
@@ -91,33 +119,44 @@
     };
   }
 
-  // =========================
-  // 3) ADMIN CHECK (via Worker)
-  // =========================
+  // ======================================================
+  // 5) ADMIN CHECK (WORKER)
+  // ======================================================
   async function getAdminFlagFromWorker() {
     const L = getLeagueId();
-    const YEAR = getYearFromPath();
-    if (!L) return { isAdmin: false, reason: "No league id (L) in URL" };
+    const YEAR = getYear();
 
-    const u = `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
+    if (!L) return { ok: false, isAdmin: false, reason: "No league id (L) in URL" };
+
+    const url =
+      `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
+
     try {
-      const r = await fetch(u, { cache: "no-store" });
-      const j = await r.json();
-      return { isAdmin: !!j.isAdmin, reason: safeStr(j.reason || "") };
+      // Important: no credentials needed; Worker authenticates to MFL server-side.
+      const res = await fetch(url, { cache: "no-store" });
+      const j = await res.json();
+
+      return {
+        ok: !!j.ok,
+        isAdmin: !!j.isAdmin,
+        reason: safeStr(j.reason || ""),
+        emailCount: safeInt(j.emailCount || 0)
+      };
     } catch (e) {
-      return { isAdmin: false, reason: `Worker check failed: ${e?.message || e}` };
+      return { ok: false, isAdmin: false, reason: `Worker check failed: ${e && e.message ? e.message : e}` };
     }
   }
 
-  // =========================
-  // 4) ELIGIBILITY OVERRIDE + SCORING
-  // =========================
+  // ======================================================
+  // 6) ELIGIBILITY OVERRIDE + SCORING
+  // ======================================================
   function computeEligible(row, asOfDate) {
     const acqType = safeStr(row.mym_acq_type || "").toUpperCase();
     if (acqType === "ROOKIE_DRAFT") return 0;
 
     const deadline = parseDate(row.mym_deadline);
     if (!deadline || !asOfDate) return 0;
+
     return (asOfDate.getTime() <= deadline.getTime()) ? 1 : 0;
   }
 
@@ -133,19 +172,20 @@
       : 14;
 
     const posW = ({
-      "QB": 1.0, "RB": 1.4, "WR": 1.2, "TE": 1.25,
-      "DL": 1.05, "LB": 1.05, "DB": 1.05, "S": 1.05, "CB": 1.05
+      QB: 1.0, RB: 1.4, WR: 1.2, TE: 1.25,
+      DL: 1.05, LB: 1.05, DB: 1.05, S: 1.05, CB: 1.05
     })[pos] || 1.0;
 
     const salaryScore = Math.max(0, 20000 - salary) / 20000;
     const urgencyScore = Math.max(0, Math.min(1, (14 - urgDays) / 14));
+
     const score = (salaryScore * 60) + (posW * 20) + (urgencyScore * 20);
     return Math.round(score);
   }
 
-  // =========================
-  // 5) UI RENDER
-  // =========================
+  // ======================================================
+  // 7) UI RENDER
+  // ======================================================
   function pillForType(acqType) {
     const t = safeStr(acqType).toUpperCase();
     if (t.includes("AUCTION")) return "auction";
@@ -255,10 +295,10 @@
     `;
   }
 
-  // =========================
-  // 6) STATE
-  // =========================
-  let state = {
+  // ======================================================
+  // 8) STATE + TEAM LIST
+  // ======================================================
+  const state = {
     payload: { eligibility: [], usage: [], meta: {} },
     isAdmin: false,
     adminReason: "",
@@ -285,6 +325,8 @@
 
   function populateTeamSelect(teams, selectedId) {
     const sel = $("#teamSelect");
+    if (!sel) return;
+
     sel.innerHTML = "";
     teams.forEach(t => {
       const opt = document.createElement("option");
@@ -324,7 +366,14 @@
 
   function render() {
     const { eligibility, usage, meta } = state.payload;
-    $("#cccError").textContent = "";
+
+    const cccError = $("#cccError");
+    const cccMeta = $("#cccMeta");
+    const summary = $("#summary");
+    const tabEligible = $("#tabEligible");
+    const tabIneligible = $("#tabIneligible");
+
+    if (cccError) cccError.textContent = "";
 
     const asOfDate = state.isAdmin ? state.asOfDate : null;
     applyEffectiveEligibility(eligibility, asOfDate);
@@ -344,19 +393,21 @@
     const built = (meta && meta.generated_at) ? safeStr(meta.generated_at) : "";
     const minSeason = (meta && meta.min_season) ? safeStr(meta.min_season) : "";
 
-    $("#cccMeta").textContent =
-      `Season: ${season || "?"}` +
-      (built ? ` | built: ${built}` : "") +
-      (minSeason ? ` | min season: ${minSeason}` : "") +
-      (state.isAdmin ? ` | admin: yes` : "") +
-      (state.adminReason ? ` | ${state.adminReason}` : "");
+    if (cccMeta) {
+      cccMeta.textContent =
+        `Season: ${season || "?"}` +
+        (built ? ` | built: ${built}` : "") +
+        (minSeason ? ` | min season: ${minSeason}` : "") +
+        (state.isAdmin ? ` | admin: yes` : "") +
+        (state.adminReason ? ` | ${state.adminReason}` : "");
+    }
 
     const eligibleRows = sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) === 1));
     const ineligibleRows = sortRowsNewestAcquired(scoped.filter(r => safeInt(r._eligibleEffective) !== 1));
 
     const teamName =
       (state.selectedTeam === "__ALL__") ? "All Teams" :
-        (scoped[0] ? safeStr(scoped[0].franchise_name) : "Team");
+      (scoped[0] ? safeStr(scoped[0].franchise_name) : "Team");
 
     let usageRow = null;
     if (state.selectedTeam !== "__ALL__") {
@@ -367,15 +418,32 @@
       usageRow = { mym_used: used, mym_remaining: remaining };
     }
 
-    $("#summary").innerHTML = renderSummary(teamName, scoped, eligibleRows, usageRow, asOfDate, state.isAdmin);
-    $("#tabEligible").innerHTML = renderTable(eligibleRows, "eligible", asOfDate || new Date());
-    $("#tabIneligible").innerHTML = renderTable(ineligibleRows, "ineligible", asOfDate || new Date());
+    if (summary) summary.innerHTML = renderSummary(teamName, scoped, eligibleRows, usageRow, asOfDate, state.isAdmin);
+    if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible", asOfDate || new Date());
+    if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible", asOfDate || new Date());
   }
 
+  // ======================================================
+  // 9) LOAD
+  // ======================================================
   async function load() {
     try {
+      // Ensure required elements exist (fail loud)
+      must("#cccMeta");
+      must("#tabEligible");
+      must("#tabIneligible");
+      must("#teamSelect");
+      must("#searchBox");
+      must("#adminBadge");
+      must("#adminControls");
+      must("#asOfInput");
+      must("#asOfResetBtn");
+      must("#refreshBtn");
+      must("#clearBtn");
+
       $("#cccMeta").textContent = "Loading MYM data…";
 
+      // 1) Load MYM dashboard JSON
       const bust = (MYM_JSON_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
       const res = await fetch(MYM_JSON_URL + bust, { cache: "no-store" });
       if (!res.ok) throw new Error("MYM JSON HTTP " + res.status);
@@ -383,92 +451,140 @@
       const raw = await res.json();
       state.payload = normalizePayload(raw);
 
-      // Detect franchise id (not required for admin, but nice for default team)
+      // 2) Determine admin via Worker (cookie-based server-side)
       state.detectedFranchiseId = detectFranchiseId();
 
-      // ✅ Admin is determined by Worker (cookie-based, reliable)
       const admin = await getAdminFlagFromWorker();
-      console.log("[CCC] Worker admin check:", admin);
-alert("Worker says admin = " + admin.isAdmin + " | " + admin.reason);
-      state.isAdmin = admin.isAdmin;
-      state.adminReason = admin.reason;
+      state.isAdmin = !!admin.isAdmin;
+      state.adminReason = safeStr(admin.reason || "");
 
+      console.log("[CCC] admin via Worker:", admin);
+
+      // 3) Toggle admin UI
       $("#adminBadge").style.display = state.isAdmin ? "" : "none";
       $("#adminControls").style.display = state.isAdmin ? "flex" : "none";
 
+      // 4) As-of defaults (admin only)
       if (state.isAdmin) {
         const now = new Date();
         state.asOfDate = now;
+
         const pad = (n) => String(n).padStart(2, "0");
         $("#asOfInput").value =
           `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       } else {
         state.asOfDate = null;
+        $("#asOfInput").value = "";
       }
 
+      // 5) Build team list / default selection
       const teams = buildTeamList(state.payload.eligibility);
-
-      // Default team: detected franchise if present, else All Teams
       const detected = teams.some(t => t.id === state.detectedFranchiseId) ? state.detectedFranchiseId : "__ALL__";
       state.selectedTeam = detected;
 
       populateTeamSelect(teams, state.selectedTeam);
+
+      // 6) Render + default tab
+      setTab("eligible");
       render();
+
     } catch (e) {
-      $("#cccMeta").textContent = "";
-      $("#cccError").textContent = "Could not load MYM JSON. " + (e && e.message ? e.message : e);
+      const msg = (e && e.message) ? e.message : String(e);
+      const cccError = $("#cccError");
+      const cccMeta = $("#cccMeta");
+      if (cccMeta) cccMeta.textContent = "";
+      if (cccError) cccError.textContent = "Could not load MYM dashboard: " + msg;
       console.error(e);
     }
   }
 
+  // ======================================================
+  // 10) TABS + EVENTS
+  // ======================================================
   function setTab(tab) {
-    $("#tabEligible").style.display = (tab === "eligible") ? "" : "none";
-    $("#tabIneligible").style.display = (tab === "ineligible") ? "" : "none";
-    $$(".ccc-tab").forEach(b => {
-      b.classList.toggle("active", b.dataset.tab === tab);
-    });
+    const tabEligible = $("#tabEligible");
+    const tabIneligible = $("#tabIneligible");
+
+    if (tabEligible) tabEligible.style.display = (tab === "eligible") ? "" : "none";
+    if (tabIneligible) tabIneligible.style.display = (tab === "ineligible") ? "" : "none";
+
+    $$(".ccc-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
   }
 
-  // Events
-  $$(".ccc-tab").forEach(btn => btn.addEventListener("click", () => setTab(btn.dataset.tab)));
+  function wireEvents() {
+    $$(".ccc-tab").forEach(btn => {
+      btn.addEventListener("click", () => setTab(btn.dataset.tab));
+    });
 
-  $("#teamSelect").addEventListener("change", (e) => {
-    state.selectedTeam = e.target.value;
-    render();
-  });
+    const teamSelect = $("#teamSelect");
+    if (teamSelect) {
+      teamSelect.addEventListener("change", (e) => {
+        state.selectedTeam = e.target.value;
+        render();
+      });
+    }
 
-  $("#searchBox").addEventListener("input", (e) => {
-    state.search = e.target.value;
-    render();
-  });
+    const searchBox = $("#searchBox");
+    if (searchBox) {
+      searchBox.addEventListener("input", (e) => {
+        state.search = e.target.value;
+        render();
+      });
+    }
 
-  $("#clearBtn").addEventListener("click", () => {
-    $("#searchBox").value = "";
-    state.search = "";
-    render();
-  });
+    const clearBtn = $("#clearBtn");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        const sb = $("#searchBox");
+        if (sb) sb.value = "";
+        state.search = "";
+        render();
+      });
+    }
 
-  $("#refreshBtn").addEventListener("click", () => load());
+    const refreshBtn = $("#refreshBtn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => load());
+    }
 
-  $("#asOfInput").addEventListener("change", () => {
-    if (!state.isAdmin) return;
-    const v = $("#asOfInput").value;
-    const d = v ? new Date(v) : new Date();
-    state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
-    render();
-  });
+    const asOfInput = $("#asOfInput");
+    if (asOfInput) {
+      asOfInput.addEventListener("change", () => {
+        if (!state.isAdmin) return;
+        const v = asOfInput.value;
+        const d = v ? new Date(v) : new Date();
+        state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
+        render();
+      });
+    }
 
-  $("#asOfResetBtn").addEventListener("click", () => {
-    if (!state.isAdmin) return;
-    const now = new Date();
-    state.asOfDate = now;
-    const pad = (n) => String(n).padStart(2, "0");
-    $("#asOfInput").value =
-      `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    render();
-  });
+    const asOfResetBtn = $("#asOfResetBtn");
+    if (asOfResetBtn) {
+      asOfResetBtn.addEventListener("click", () => {
+        if (!state.isAdmin) return;
+        const now = new Date();
+        state.asOfDate = now;
 
-  // Start
-  setTab("eligible");
-  load();
+        const pad = (n) => String(n).padStart(2, "0");
+        $("#asOfInput").value =
+          `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        render();
+      });
+    }
+  }
+
+  // ======================================================
+  // START
+  // ======================================================
+  // Make sure DOM is ready before wiring up + load (prevents "null is not an object" junk)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      wireEvents();
+      load();
+    });
+  } else {
+    wireEvents();
+    load();
+  }
 })();

@@ -4,12 +4,10 @@
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
 
-  // Cloudflare Worker that returns: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
-  // NOTE: This does NOT rely on browser cookies. The Worker uses its own commish cookie server-side.
+  // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
 
-  // If the current page doesn't have ?L= in the URL (common for some custom/home modules),
-  // we fall back to these.
+  // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
 
@@ -71,19 +69,16 @@
   }
 
   function getYear() {
-    // Prefer explicit YEAR= in querystring (your Worker supports it)
     try {
       const u = new URL(window.location.href);
       const qYear = u.searchParams.get("YEAR");
       if (qYear) return qYear;
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
 
-    // Otherwise attempt /2025/ style
     const m = window.location.pathname.match(/\/(\d{4})\//);
-    return m ? m[1] : "2025";
+    return m ? m[1] : DEFAULT_YEAR;
   }
 
-  // Only used to choose a default team in the dropdown (not for admin)
   function detectFranchiseId() {
     try {
       const u = new URL(window.location.href);
@@ -131,15 +126,12 @@
     let L = getLeagueId();
     let YEAR = getYear();
 
-    // If we're on a module page without ?L=, fall back
     if (!L) L = DEFAULT_LEAGUE_ID;
     if (!YEAR) YEAR = DEFAULT_YEAR;
 
-    const url =
-      `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
+    const url = `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
 
     try {
-      // Important: no credentials needed; Worker authenticates to MFL server-side.
       const res = await fetch(url, { cache: "no-store" });
       const j = await res.json();
 
@@ -169,32 +161,8 @@
     return (asOfDate.getTime() <= deadline.getTime()) ? 1 : 0;
   }
 
-  // (Score logic intentionally kept but not used in UI right now)
-  function scoreCandidate(row, asOfDate) {
-    const salary = safeInt(row.salary);
-    const pos = safeStr(row.positional_grouping || row.position).toUpperCase();
-    const eligible = safeInt(row._eligibleEffective) === 1;
-    if (!eligible) return 0;
-
-    const deadline = parseDate(row.mym_deadline);
-    const urgDays = (deadline && asOfDate)
-      ? Math.ceil((deadline.getTime() - asOfDate.getTime()) / (1000 * 60 * 60 * 24))
-      : 14;
-
-    const posW = ({
-      QB: 1.0, RB: 1.4, WR: 1.2, TE: 1.25,
-      DL: 1.05, LB: 1.05, DB: 1.05, S: 1.05, CB: 1.05
-    })[pos] || 1.0;
-
-    const salaryScore = Math.max(0, 20000 - salary) / 20000;
-    const urgencyScore = Math.max(0, Math.min(1, (14 - urgDays) / 14));
-
-    const score = (salaryScore * 60) + (posW * 20) + (urgencyScore * 20);
-    return Math.round(score);
-  }
-
   // ======================================================
-  // 7) UI RENDER
+  // 7) TABLE RENDER (Offer Contract button only on Eligible tab)
   // ======================================================
   function pillForType(acqType) {
     const t = safeStr(acqType).toUpperCase();
@@ -203,76 +171,75 @@
     return "waiver";
   }
 
-  function renderTable(rows, mode, asOfDate) {
-  if (!rows.length) {
-    return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
-  }
+  function renderTable(rows, mode) {
+    if (!rows.length) {
+      return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
+    }
 
-  const isEligibleTab = (mode === "eligible");
+    const isEligibleTab = (mode === "eligible");
 
-  const head = `
-    <div class="ccc-tableWrap">
-      <table class="ccc-table">
-        <thead>
-          <tr>
-            <th style="min-width:180px;">Player</th>
-            <th>Pos</th>
-            <th>Salary</th>
-            <th>Acq Type</th>
-            <th>Acquired</th>
-            <th>Deadline</th>
-            ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
-            <th style="min-width:320px;">Explanation</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
-
-  const body = rows.map(r => {
-    const player = htmlEsc(r.player_name);
-    const pos = htmlEsc(r.positional_grouping || r.position);
-    const salaryNum = safeInt(r.salary);
-    const salary = salaryNum.toLocaleString();
-    const acqType = safeStr(r.mym_acq_type);
-
-    const acquired = htmlEsc(fmtYMD(r.acquired_date));
-    const deadline = htmlEsc(fmtYMD(r.mym_deadline));
-    const expl = htmlEsc(r.rule_explanation || "");
-
-    // Only show Offer Contract in Eligible tab
-    const actions = isEligibleTab
-      ? `
-        <button
-          type="button"
-          class="ccc-btn"
-          data-offer="1"
-          data-player-id="${htmlEsc(r.player_id)}"
-          data-player-name="${htmlEsc(r.player_name)}"
-          data-salary="${salaryNum}"
-          data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
-          data-franchise-name="${htmlEsc(r.franchise_name || "")}"
-          data-acq-type="${htmlEsc(acqType)}"
-          data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
-        >Offer Contract</button>
-      `
-      : ``;
-
-    return `
-      <tr>
-        <td class="playerCell">${player}</td>
-        <td class="muted">${pos}</td>
-        <td>${salary}</td>
-        <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
-        <td class="muted">${acquired}</td>
-        <td class="muted">${deadline}</td>
-        ${isEligibleTab ? `<td>${actions}</td>` : ``}
-        <td class="explain">${expl}</td>
-      </tr>
+    const head = `
+      <div class="ccc-tableWrap">
+        <table class="ccc-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px;">Player</th>
+              <th>Pos</th>
+              <th>Salary</th>
+              <th>Acq Type</th>
+              <th>Acquired</th>
+              <th>Deadline</th>
+              ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
+              <th style="min-width:320px;">Explanation</th>
+            </tr>
+          </thead>
+          <tbody>
     `;
-  }).join("");
 
-  return head + body + `</tbody></table></div>`;
-}
+    const body = rows.map(r => {
+      const player = htmlEsc(r.player_name);
+      const pos = htmlEsc(r.positional_grouping || r.position);
+      const salaryNum = safeInt(r.salary);
+      const salary = salaryNum.toLocaleString();
+      const acqType = safeStr(r.mym_acq_type);
+
+      const acquired = htmlEsc(fmtYMD(r.acquired_date));
+      const deadline = htmlEsc(fmtYMD(r.mym_deadline));
+      const expl = htmlEsc(r.rule_explanation || "");
+
+      const actions = isEligibleTab
+        ? `
+          <button
+            type="button"
+            class="ccc-btn"
+            data-offer="1"
+            data-player-id="${htmlEsc(r.player_id)}"
+            data-player-name="${htmlEsc(r.player_name)}"
+            data-salary="${salaryNum}"
+            data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
+            data-franchise-name="${htmlEsc(r.franchise_name || "")}"
+            data-acq-type="${htmlEsc(acqType)}"
+            data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
+          >Offer Contract</button>
+        `
+        : ``;
+
+      return `
+        <tr>
+          <td class="playerCell">${player}</td>
+          <td class="muted">${pos}</td>
+          <td>${salary}</td>
+          <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
+          <td class="muted">${acquired}</td>
+          <td class="muted">${deadline}</td>
+          ${isEligibleTab ? `<td>${actions}</td>` : ``}
+          <td class="explain">${expl}</td>
+        </tr>
+      `;
+    }).join("");
+
+    return head + body + `</tbody></table></div>`;
+  }
 
   function renderSummary(teamName, rowsAll, rowsElig, usageRow, asOfDate, isAdmin) {
     const used = usageRow ? safeInt(usageRow.mym_used) : 0;
@@ -446,8 +413,155 @@
     }
 
     if (summary) summary.innerHTML = renderSummary(teamName, scoped, eligibleRows, usageRow, asOfDate, state.isAdmin);
-    if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible", asOfDate || new Date());
-    if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible", asOfDate || new Date());
+    if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
+    if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible");
+  }
+
+  // ======================================================
+  // 9B) MODAL STATE + HELPERS
+  // ======================================================
+  const mymModalState = { open: false, row: null, years: 2 };
+
+  function formatK(n) {
+    const v = safeInt(n);
+    return (v % 1000 === 0) ? `${v / 1000}K` : `${v}`;
+  }
+
+  function computeGuarantee(salary, years) {
+    const s = safeInt(salary);
+    const y = safeInt(years);
+    const tcv = s * y;
+
+    // Rule:
+    // if TCV > 4K => 75% TCV
+    // else => (years-1)*salary
+    if (tcv > 4000) return Math.round(tcv * 0.75);
+    return Math.max(0, (y - 1) * s);
+  }
+
+  function buildContractInfo(salary, years) {
+    const s = safeInt(salary);
+    const y = safeInt(years);
+    const tcv = s * y;
+    const aav = s;
+    const gtd = computeGuarantee(s, y);
+
+    const parts = [];
+    parts.push(`CL ${y}`);
+    parts.push(`TCV ${formatK(tcv)}`);
+    parts.push(`AAV ${formatK(aav)}`);
+
+    const yearParts = [];
+    yearParts.push(`Y1-${formatK(s)}`);
+    yearParts.push(`Y2-${formatK(s)}`);
+    if (y === 3) yearParts.push(`Y3-${formatK(s)}`);
+
+    parts.push(yearParts.join(", "));
+    parts.push(`GTD: ${formatK(gtd)}`);
+
+    return { years: y, tcv, aav, gtd, contractInfo: parts.join("| ") };
+  }
+
+  function ensureModalExists() {
+    const modal = $("#mymModal");
+    if (!modal) throw new Error("Missing #mymModal in HTML.");
+    return modal;
+  }
+
+  function renderModalSummary() {
+    const row = mymModalState.row;
+    if (!row) return;
+
+    const salary = safeInt(row.salary);
+    const years = mymModalState.years;
+    const calc = buildContractInfo(salary, years);
+
+    $("#mymYears").textContent = String(calc.years);
+    $("#mymTCV").textContent = safeInt(calc.tcv).toLocaleString();
+    $("#mymAAV").textContent = safeInt(calc.aav).toLocaleString();
+    $("#mymGTD").textContent = safeInt(calc.gtd).toLocaleString();
+    $("#mymContractInfo").textContent = calc.contractInfo;
+
+    const pill = $("#mymAsOfPill");
+    if (pill) {
+      if (state.isAdmin && state.asOfDate) {
+        pill.style.display = "";
+        pill.textContent = `As-Of: ${state.asOfDate.toISOString().slice(0, 16).replace("T", " ")}`;
+      } else {
+        pill.style.display = "none";
+      }
+    }
+  }
+
+  function setModalOption(years) {
+    mymModalState.years = years;
+
+    const btn2 = $("#btnMYM2");
+    const btn3 = $("#btnMYM3");
+    if (btn2 && btn3) {
+      btn2.classList.toggle("primary", years === 2);
+      btn3.classList.toggle("primary", years === 3);
+    }
+    renderModalSummary();
+  }
+
+  function openMYMModal(row) {
+    ensureModalExists();
+    mymModalState.row = row;
+    mymModalState.open = true;
+    mymModalState.years = 2;
+
+    const sub = $("#mymModalSub");
+    if (sub) {
+      sub.textContent = `${row.player_name} | Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${row.franchise_name || row.franchise_id}`;
+    }
+
+    const err = $("#mymModalErr");
+    if (err) { err.style.display = "none"; err.textContent = ""; }
+
+    setModalOption(2);
+
+    $("#mymModal").style.display = "";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMYMModal() {
+    const modal = $("#mymModal");
+    if (!modal) return;
+
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+    mymModalState.open = false;
+    mymModalState.row = null;
+  }
+
+  async function submitMYMContract() {
+    const row = mymModalState.row;
+    if (!row) return;
+
+    const salary = safeInt(row.salary);
+    const years = mymModalState.years;
+    const calc = buildContractInfo(salary, years);
+
+    const payload = {
+      type: "MYM",
+      leagueId: getLeagueId() || DEFAULT_LEAGUE_ID,
+      year: getYear() || DEFAULT_YEAR,
+      player_id: safeStr(row.player_id),
+      salary: salary,
+      contract_year: years,
+      contract_info: calc.contractInfo,
+      tcv: calc.tcv,
+      aav: calc.aav,
+      guaranteed: calc.gtd
+    };
+
+    console.log("[MYM submit payload]", payload);
+
+    // TODO: POST to your worker that performs the MFL import
+    // await fetch("https://your-worker/offer-mym", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
+
+    closeMYMModal();
   }
 
   // ======================================================
@@ -455,7 +569,6 @@
   // ======================================================
   async function load() {
     try {
-      // Ensure required elements exist (fail loud)
       must("#cccMeta");
       must("#tabEligible");
       must("#tabIneligible");
@@ -468,9 +581,14 @@
       must("#refreshBtn");
       must("#clearBtn");
 
+      // Modal required elements (since we now use it)
+      must("#mymModal");
+      must("#btnMYM2");
+      must("#btnMYM3");
+      must("#mymSubmitBtn");
+
       $("#cccMeta").textContent = "Loading MYM data…";
 
-      // 1) Load MYM dashboard JSON
       const bust = (MYM_JSON_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
       const res = await fetch(MYM_JSON_URL + bust, { cache: "no-store" });
       if (!res.ok) throw new Error("MYM JSON HTTP " + res.status);
@@ -478,24 +596,18 @@
       const raw = await res.json();
       state.payload = normalizePayload(raw);
 
-      // 2) Determine admin via Worker (server-side cookie)
       state.detectedFranchiseId = detectFranchiseId();
 
       const admin = await getAdminFlagFromWorker();
       state.isAdmin = !!admin.isAdmin;
       state.adminReason = safeStr(admin.reason || "");
 
-      console.log("[CCC] admin via Worker:", admin);
-
-      // 3) Toggle admin UI
       $("#adminBadge").style.display = state.isAdmin ? "" : "none";
       $("#adminControls").style.display = state.isAdmin ? "flex" : "none";
 
-      // 4) As-of defaults (admin only)
       if (state.isAdmin) {
         const now = new Date();
         state.asOfDate = now;
-
         const pad = (n) => String(n).padStart(2, "0");
         $("#asOfInput").value =
           `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -504,17 +616,14 @@
         $("#asOfInput").value = "";
       }
 
-      // 5) Build team list / default selection
       const teams = buildTeamList(state.payload.eligibility);
       const detected = teams.some(t => t.id === state.detectedFranchiseId) ? state.detectedFranchiseId : "__ALL__";
       state.selectedTeam = detected;
 
       populateTeamSelect(teams, state.selectedTeam);
 
-      // 6) Render + default tab
       setTab("eligible");
       render();
-
     } catch (e) {
       const msg = (e && e.message) ? e.message : String(e);
       const cccError = $("#cccError");
@@ -524,175 +633,7 @@
       console.error(e);
     }
   }
-// =========================
-// 9B - MYM Modal State + Wiring
-// =========================
-const mymModalState = {
-  open: false,
-  row: null,      // selected player row info
-  years: 2        // default MYM-2
-};
 
-function formatK(n) {
-  // assumes integer dollars
-  const v = safeInt(n);
-  return (v % 1000 === 0) ? `${v/1000}K` : `${v}`;
-}
-
-function computeGuarantee(salary, years) {
-  const s = safeInt(salary);
-  const y = safeInt(years);
-  const tcv = s * y;
-
-  // Rule:
-  // if TCV > 4K => 75% TCV
-  // else => (years-1)*salary
-  if (tcv > 4000) return Math.round(tcv * 0.75);
-  return Math.max(0, (y - 1) * s);
-}
-
-function buildContractInfo(salary, years) {
-  const s = safeInt(salary);
-  const y = safeInt(years);
-  const tcv = s * y;
-  const aav = s;
-  const gtd = computeGuarantee(s, y);
-
-  const parts = [];
-  parts.push(`CL ${y}`);
-  parts.push(`TCV ${formatK(tcv)}`);
-  parts.push(`AAV ${formatK(aav)}`);
-
-  const yearParts = [];
-  yearParts.push(`Y1-${formatK(s)}`);
-  yearParts.push(`Y2-${formatK(s)}`);
-  if (y === 3) yearParts.push(`Y3-${formatK(s)}`);
-
-  parts.push(yearParts.join(", "));
-  parts.push(`GTD: ${formatK(gtd)}`);
-
-  return {
-    years: y,
-    tcv,
-    aav,
-    gtd,
-    contractInfo: parts.join("| ")
-  };
-}
-
-function ensureModalExists() {
-  const modal = $("#mymModal");
-  if (!modal) throw new Error("Missing #mymModal in HTML. Add the modal markup.");
-  return modal;
-}
-
-function setModalOption(years) {
-  mymModalState.years = years;
-
-  const btn2 = $("#btnMYM2");
-  const btn3 = $("#btnMYM3");
-  if (btn2 && btn3) {
-    btn2.classList.toggle("primary", years === 2);
-    btn3.classList.toggle("primary", years === 3);
-  }
-
-  renderModalSummary();
-}
-
-function renderModalSummary() {
-  const row = mymModalState.row;
-  if (!row) return;
-
-  const salary = safeInt(row.salary);
-  const years = mymModalState.years;
-
-  const calc = buildContractInfo(salary, years);
-
-  $("#mymYears").textContent = String(calc.years);
-  $("#mymTCV").textContent   = safeInt(calc.tcv).toLocaleString();
-  $("#mymAAV").textContent   = safeInt(calc.aav).toLocaleString();
-  $("#mymGTD").textContent   = safeInt(calc.gtd).toLocaleString();
-  $("#mymContractInfo").textContent = calc.contractInfo;
-
-  // As-of pill only for admin
-  const pill = $("#mymAsOfPill");
-  if (pill) {
-    if (state.isAdmin && state.asOfDate) {
-      pill.style.display = "";
-      pill.textContent = `As-Of: ${state.asOfDate.toISOString().slice(0,16).replace("T"," ")}`;
-    } else {
-      pill.style.display = "none";
-    }
-  }
-}
-
-function openMYMModal(row) {
-  ensureModalExists();
-  mymModalState.row = row;
-  mymModalState.open = true;
-  mymModalState.years = 2; // default MYM-2
-
-  const sub = $("#mymModalSub");
-  if (sub) {
-    sub.textContent = `${row.player_name} | Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${row.franchise_name || row.franchise_id}`;
-  }
-
-  $("#mymModalErr").style.display = "none";
-  $("#mymModalErr").textContent = "";
-
-  setModalOption(2);
-
-  $("#mymModal").style.display = "";
-  document.body.style.overflow = "hidden";
-}
-
-function closeMYMModal() {
-  const modal = $("#mymModal");
-  if (!modal) return;
-
-  modal.style.display = "none";
-  document.body.style.overflow = "";
-  mymModalState.open = false;
-  mymModalState.row = null;
-}
-
-// You will point this at YOUR server-side endpoint that does the MFL import.
-// For now it just logs what WOULD be sent.
-async function submitMYMContract() {
-  const row = mymModalState.row;
-  if (!row) return;
-
-  const salary = safeInt(row.salary);
-  const years = mymModalState.years;
-  const calc = buildContractInfo(salary, years);
-
-  // This is the payload you will POST to your Worker/Python service
-  const payload = {
-    type: "MYM",
-    leagueId: getLeagueId() || DEFAULT_LEAGUE_ID,
-    year: getYear() || DEFAULT_YEAR,
-    player_id: safeStr(row.player_id),
-    salary: salary,
-    contract_year: years,
-    contract_info: calc.contractInfo,
-    tcv: calc.tcv,
-    aav: calc.aav,
-    guaranteed: calc.gtd
-  };
-
-  console.log("[MYM submit payload]", payload);
-
-  // TODO: replace with real POST call when your Worker endpoint is ready:
-  // const res = await fetch("https://YOUR-WORKER-ENDPOINT/offer-mym", {
-  //   method:"POST",
-  //   headers:{ "Content-Type":"application/json" },
-  //   body: JSON.stringify(payload)
-  // });
-  // const j = await res.json();
-  // if(!res.ok || !j.ok) throw new Error(j.error || "MFL import failed");
-
-  closeMYMModal();
-}
   // ======================================================
   // 10) TABS + EVENTS
   // ======================================================
@@ -707,122 +648,92 @@ async function submitMYMContract() {
   }
 
   function wireEvents() {
-    $$(".ccc-tab").forEach(btn => {
-      btn.addEventListener("click", () => setTab(btn.dataset.tab));
-    });
+    // Tabs
+    $$(".ccc-tab").forEach(btn => btn.addEventListener("click", () => setTab(btn.dataset.tab)));
 
+    // Filters
     const teamSelect = $("#teamSelect");
-    if (teamSelect) {
-      teamSelect.addEventListener("change", (e) => {
-        state.selectedTeam = e.target.value;
-        render();
-      });
-    }
+    if (teamSelect) teamSelect.addEventListener("change", (e) => { state.selectedTeam = e.target.value; render(); });
 
     const searchBox = $("#searchBox");
-    if (searchBox) {
-      searchBox.addEventListener("input", (e) => {
-        state.search = e.target.value;
-        render();
-      });
-    }
+    if (searchBox) searchBox.addEventListener("input", (e) => { state.search = e.target.value; render(); });
 
     const clearBtn = $("#clearBtn");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        const sb = $("#searchBox");
-        if (sb) sb.value = "";
-        state.search = "";
-        render();
-      });
-    }
+    if (clearBtn) clearBtn.addEventListener("click", () => { $("#searchBox").value = ""; state.search = ""; render(); });
 
     const refreshBtn = $("#refreshBtn");
-    if (refreshBtn) {
-      refreshBtn.addEventListener("click", () => load());
-    }
+    if (refreshBtn) refreshBtn.addEventListener("click", () => load());
 
+    // Admin as-of
     const asOfInput = $("#asOfInput");
-    if (asOfInput) {
-      asOfInput.addEventListener("change", () => {
-        if (!state.isAdmin) return;
-        const v = asOfInput.value;
-        const d = v ? new Date(v) : new Date();
-        state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
-        render();
-      });
-    }
+    if (asOfInput) asOfInput.addEventListener("change", () => {
+      if (!state.isAdmin) return;
+      const v = asOfInput.value;
+      const d = v ? new Date(v) : new Date();
+      state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
+      render();
+    });
 
     const asOfResetBtn = $("#asOfResetBtn");
-    if (asOfResetBtn) {
-      asOfResetBtn.addEventListener("click", () => {
-        if (!state.isAdmin) return;
-        const now = new Date();
-        state.asOfDate = now;
+    if (asOfResetBtn) asOfResetBtn.addEventListener("click", () => {
+      if (!state.isAdmin) return;
+      const now = new Date();
+      state.asOfDate = now;
+      const pad = (n) => String(n).padStart(2, "0");
+      $("#asOfInput").value =
+        `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      render();
+    });
 
-        const pad = (n) => String(n).padStart(2, "0");
-        $("#asOfInput").value =
-          `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    // ===== Modal wiring =====
+    // Open modal (event delegation for dynamic Offer buttons)
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
+      if (!btn) return;
 
-        render();
+      const row = {
+        player_id: btn.getAttribute("data-player-id"),
+        player_name: btn.getAttribute("data-player-name"),
+        salary: safeInt(btn.getAttribute("data-salary")),
+        franchise_id: btn.getAttribute("data-franchise-id"),
+        franchise_name: btn.getAttribute("data-franchise-name"),
+        mym_acq_type: btn.getAttribute("data-acq-type"),
+        mym_deadline: btn.getAttribute("data-deadline")
+      };
+
+      openMYMModal(row);
+    });
+
+    // Close modal (backdrop/X/cancel)
+    const modal = $("#mymModal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeMYMModal();
       });
     }
+
+    // Escape closes modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && $("#mymModal") && $("#mymModal").style.display !== "none") {
+        closeMYMModal();
+      }
+    });
+
+    // Modal option buttons
+    const btn2 = $("#btnMYM2");
+    const btn3 = $("#btnMYM3");
+    if (btn2) btn2.addEventListener("click", () => setModalOption(2));
+    if (btn3) btn3.addEventListener("click", () => setModalOption(3));
+
+    // Submit
+    const submitBtn = $("#mymSubmitBtn");
+    if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
   }
-/* ===== Modal ===== */
-.ccc-modal{ position:fixed; inset:0; z-index:9999; }
-.ccc-modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-.ccc-modal-card{
-  position:relative;
-  max-width: 720px;
-  margin: 6vh auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: radial-gradient(900px 500px at 25% 10%, rgba(78,161,255,.18), transparent 60%),
-              radial-gradient(900px 500px at 85% 10%, rgba(139,92,255,.16), transparent 60%),
-              linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.25));
-  box-shadow: var(--shadow);
-  overflow:hidden;
-}
-.ccc-modal-head{
-  display:flex; justify-content:space-between; align-items:flex-start;
-  padding: 14px 14px 10px;
-  border-bottom: 1px solid var(--line);
-}
-.ccc-modal-title{ font-size:16px; font-weight:1000; }
-.ccc-modal-sub{ margin-top:4px; font-size:12px; }
-.ccc-modal-x{
-  background: rgba(255,255,255,.08);
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 6px 10px;
-  cursor:pointer;
-  font-weight:1000;
-}
-.ccc-modal-body{ padding: 12px 14px; }
-.ccc-modal-row{ padding: 6px 0; }
-.ccc-modal-label{ font-size:12px; color: var(--muted); font-weight:900; margin-bottom:8px; }
-.ccc-modal-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-.ccc-modal-foot{
-  display:flex; justify-content:flex-end; gap:10px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-}
-.ccc-code{
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,.22);
-  border-radius: 12px;
-  padding: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 12px;
-  color: rgba(233,238,249,.92);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+
   // ======================================================
   // START
   // ======================================================
-  // Make sure DOM is ready before wiring up + load
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       wireEvents();

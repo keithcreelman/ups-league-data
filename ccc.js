@@ -8,6 +8,10 @@
   // NOTE: This does NOT rely on browser cookies. The Worker uses its own commish cookie server-side.
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
 
+  // If the current page doesn't have ?L= in the URL (common for some custom/home modules),
+  // we fall back to these.
+  const DEFAULT_LEAGUE_ID = "74598";
+  const DEFAULT_YEAR = "2025";
   // ======================================================
   // 2) DOM + SAFE HELPERS
   // ======================================================

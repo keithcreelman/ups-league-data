@@ -524,7 +524,175 @@
       console.error(e);
     }
   }
+// =========================
+// 9B - MYM Modal State + Wiring
+// =========================
+const mymModalState = {
+  open: false,
+  row: null,      // selected player row info
+  years: 2        // default MYM-2
+};
 
+function formatK(n) {
+  // assumes integer dollars
+  const v = safeInt(n);
+  return (v % 1000 === 0) ? `${v/1000}K` : `${v}`;
+}
+
+function computeGuarantee(salary, years) {
+  const s = safeInt(salary);
+  const y = safeInt(years);
+  const tcv = s * y;
+
+  // Rule:
+  // if TCV > 4K => 75% TCV
+  // else => (years-1)*salary
+  if (tcv > 4000) return Math.round(tcv * 0.75);
+  return Math.max(0, (y - 1) * s);
+}
+
+function buildContractInfo(salary, years) {
+  const s = safeInt(salary);
+  const y = safeInt(years);
+  const tcv = s * y;
+  const aav = s;
+  const gtd = computeGuarantee(s, y);
+
+  const parts = [];
+  parts.push(`CL ${y}`);
+  parts.push(`TCV ${formatK(tcv)}`);
+  parts.push(`AAV ${formatK(aav)}`);
+
+  const yearParts = [];
+  yearParts.push(`Y1-${formatK(s)}`);
+  yearParts.push(`Y2-${formatK(s)}`);
+  if (y === 3) yearParts.push(`Y3-${formatK(s)}`);
+
+  parts.push(yearParts.join(", "));
+  parts.push(`GTD: ${formatK(gtd)}`);
+
+  return {
+    years: y,
+    tcv,
+    aav,
+    gtd,
+    contractInfo: parts.join("| ")
+  };
+}
+
+function ensureModalExists() {
+  const modal = $("#mymModal");
+  if (!modal) throw new Error("Missing #mymModal in HTML. Add the modal markup.");
+  return modal;
+}
+
+function setModalOption(years) {
+  mymModalState.years = years;
+
+  const btn2 = $("#btnMYM2");
+  const btn3 = $("#btnMYM3");
+  if (btn2 && btn3) {
+    btn2.classList.toggle("primary", years === 2);
+    btn3.classList.toggle("primary", years === 3);
+  }
+
+  renderModalSummary();
+}
+
+function renderModalSummary() {
+  const row = mymModalState.row;
+  if (!row) return;
+
+  const salary = safeInt(row.salary);
+  const years = mymModalState.years;
+
+  const calc = buildContractInfo(salary, years);
+
+  $("#mymYears").textContent = String(calc.years);
+  $("#mymTCV").textContent   = safeInt(calc.tcv).toLocaleString();
+  $("#mymAAV").textContent   = safeInt(calc.aav).toLocaleString();
+  $("#mymGTD").textContent   = safeInt(calc.gtd).toLocaleString();
+  $("#mymContractInfo").textContent = calc.contractInfo;
+
+  // As-of pill only for admin
+  const pill = $("#mymAsOfPill");
+  if (pill) {
+    if (state.isAdmin && state.asOfDate) {
+      pill.style.display = "";
+      pill.textContent = `As-Of: ${state.asOfDate.toISOString().slice(0,16).replace("T"," ")}`;
+    } else {
+      pill.style.display = "none";
+    }
+  }
+}
+
+function openMYMModal(row) {
+  ensureModalExists();
+  mymModalState.row = row;
+  mymModalState.open = true;
+  mymModalState.years = 2; // default MYM-2
+
+  const sub = $("#mymModalSub");
+  if (sub) {
+    sub.textContent = `${row.player_name} | Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${row.franchise_name || row.franchise_id}`;
+  }
+
+  $("#mymModalErr").style.display = "none";
+  $("#mymModalErr").textContent = "";
+
+  setModalOption(2);
+
+  $("#mymModal").style.display = "";
+  document.body.style.overflow = "hidden";
+}
+
+function closeMYMModal() {
+  const modal = $("#mymModal");
+  if (!modal) return;
+
+  modal.style.display = "none";
+  document.body.style.overflow = "";
+  mymModalState.open = false;
+  mymModalState.row = null;
+}
+
+// You will point this at YOUR server-side endpoint that does the MFL import.
+// For now it just logs what WOULD be sent.
+async function submitMYMContract() {
+  const row = mymModalState.row;
+  if (!row) return;
+
+  const salary = safeInt(row.salary);
+  const years = mymModalState.years;
+  const calc = buildContractInfo(salary, years);
+
+  // This is the payload you will POST to your Worker/Python service
+  const payload = {
+    type: "MYM",
+    leagueId: getLeagueId() || DEFAULT_LEAGUE_ID,
+    year: getYear() || DEFAULT_YEAR,
+    player_id: safeStr(row.player_id),
+    salary: salary,
+    contract_year: years,
+    contract_info: calc.contractInfo,
+    tcv: calc.tcv,
+    aav: calc.aav,
+    guaranteed: calc.gtd
+  };
+
+  console.log("[MYM submit payload]", payload);
+
+  // TODO: replace with real POST call when your Worker endpoint is ready:
+  // const res = await fetch("https://YOUR-WORKER-ENDPOINT/offer-mym", {
+  //   method:"POST",
+  //   headers:{ "Content-Type":"application/json" },
+  //   body: JSON.stringify(payload)
+  // });
+  // const j = await res.json();
+  // if(!res.ok || !j.ok) throw new Error(j.error || "MFL import failed");
+
+  closeMYMModal();
+}
   // ======================================================
   // 10) TABS + EVENTS
   // ======================================================

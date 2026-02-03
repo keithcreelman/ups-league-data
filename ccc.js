@@ -388,6 +388,8 @@
 
       // ✅ Admin is determined by Worker (cookie-based, reliable)
       const admin = await getAdminFlagFromWorker();
+      console.log("[CCC] Worker admin check:", admin);
+alert("Worker says admin = " + admin.isAdmin + " | " + admin.reason);
       state.isAdmin = admin.isAdmin;
       state.adminReason = admin.reason;
 

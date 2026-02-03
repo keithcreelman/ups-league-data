@@ -203,54 +203,76 @@
     return "waiver";
   }
 
-  function renderTable(rows, mode /*, asOfDate */) {
-    if (!rows.length) {
-      return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
-    }
-
-    // ✅ Score removed (header + cells)
-    const head = `
-      <div class="ccc-tableWrap">
-        <table class="ccc-table">
-          <thead>
-            <tr>
-              <th style="min-width:180px;">Player</th>
-              <th>Pos</th>
-              <th>Salary</th>
-              <th>Acq Type</th>
-              <th>Acquired</th>
-              <th>Deadline</th>
-              <th style="min-width:320px;">Explanation</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    const body = rows.map(r => {
-      const player = htmlEsc(r.player_name);
-      const pos = htmlEsc(r.positional_grouping || r.position);
-      const salary = safeInt(r.salary).toLocaleString();
-      const acqType = safeStr(r.mym_acq_type);
-
-      const acquired = htmlEsc(fmtYMD(r.acquired_date));
-      const deadline = htmlEsc(fmtYMD(r.mym_deadline));
-      const expl = htmlEsc(r.rule_explanation || "");
-
-      return `
-        <tr>
-          <td class="playerCell">${player}</td>
-          <td class="muted">${pos}</td>
-          <td>${salary}</td>
-          <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
-          <td class="muted">${acquired}</td>
-          <td class="muted">${deadline}</td>
-          <td class="explain">${expl}</td>
-        </tr>
-      `;
-    }).join("");
-
-    return head + body + `</tbody></table></div>`;
+  function renderTable(rows, mode, asOfDate) {
+  if (!rows.length) {
+    return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
   }
+
+  const isEligibleTab = (mode === "eligible");
+
+  const head = `
+    <div class="ccc-tableWrap">
+      <table class="ccc-table">
+        <thead>
+          <tr>
+            <th style="min-width:180px;">Player</th>
+            <th>Pos</th>
+            <th>Salary</th>
+            <th>Acq Type</th>
+            <th>Acquired</th>
+            <th>Deadline</th>
+            ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
+            <th style="min-width:320px;">Explanation</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  const body = rows.map(r => {
+    const player = htmlEsc(r.player_name);
+    const pos = htmlEsc(r.positional_grouping || r.position);
+    const salaryNum = safeInt(r.salary);
+    const salary = salaryNum.toLocaleString();
+    const acqType = safeStr(r.mym_acq_type);
+
+    const acquired = htmlEsc(fmtYMD(r.acquired_date));
+    const deadline = htmlEsc(fmtYMD(r.mym_deadline));
+    const expl = htmlEsc(r.rule_explanation || "");
+
+    // Only show Offer Contract in Eligible tab
+    const actions = isEligibleTab
+      ? `
+        <button
+          type="button"
+          class="ccc-btn"
+          data-offer="1"
+          data-player-id="${htmlEsc(r.player_id)}"
+          data-player-name="${htmlEsc(r.player_name)}"
+          data-salary="${salaryNum}"
+          data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
+          data-franchise-name="${htmlEsc(r.franchise_name || "")}"
+          data-acq-type="${htmlEsc(acqType)}"
+          data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
+        >Offer Contract</button>
+      `
+      : ``;
+
+    return `
+      <tr>
+        <td class="playerCell">${player}</td>
+        <td class="muted">${pos}</td>
+        <td>${salary}</td>
+        <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
+        <td class="muted">${acquired}</td>
+        <td class="muted">${deadline}</td>
+        ${isEligibleTab ? `<td>${actions}</td>` : ``}
+        <td class="explain">${expl}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return head + body + `</tbody></table></div>`;
+}
 
   function renderSummary(teamName, rowsAll, rowsElig, usageRow, asOfDate, isAdmin) {
     const used = usageRow ? safeInt(usageRow.mym_used) : 0;

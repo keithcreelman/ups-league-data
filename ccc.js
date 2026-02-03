@@ -521,16 +521,18 @@
 
     setModalOption(2);
 
-    $("#mymModal").style.display = "";
-    document.body.style.overflow = "hidden";
+      $("#mymModal").style.display = "";
+  document.body.classList.add("ccc-modalOpen");
+  document.body.style.overflow = "hidden";
   }
 
   function closeMYMModal() {
     const modal = $("#mymModal");
     if (!modal) return;
 
-    modal.style.display = "none";
-    document.body.style.overflow = "";
+      $("#mymModal").style.display = "none";
+  document.body.classList.remove("ccc-modalOpen");
+  document.body.style.overflow = "";
     mymModalState.open = false;
     mymModalState.row = null;
   }

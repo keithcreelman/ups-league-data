@@ -623,7 +623,12 @@
   if (err) { err.style.display = "none"; err.textContent = ""; }
   if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
 
-
+  try {
+    const res = await fetch(OFFER_MYM_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
     // Worker might return JSON OR text on error
     const text = await res.text();
@@ -633,7 +638,7 @@
     if (!res.ok || out.ok !== true) {
       const msg =
         (out && (out.error || out.reason)) ||
-        (text && text.slice(0, 200)) ||
+        (text && text.slice(0, 300)) ||
         `Submit failed (HTTP ${res.status})`;
 
       if (err) {
@@ -645,7 +650,7 @@
 
     // success
     closeMYMModal();
-    load(); // refresh dashboard so eligibility/usage updates
+    await load(); // refresh dashboard so eligibility/usage updates
 
   } catch (e) {
     const msg = e && e.message ? e.message : String(e);
@@ -657,7 +662,6 @@
     if (btn) { btn.disabled = false; btn.textContent = "Submit Contract"; }
   }
 }
-
     try {
       const res = await fetch(OFFER_MYM_URL, {
         method: "POST",

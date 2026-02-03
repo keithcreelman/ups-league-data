@@ -591,25 +591,53 @@
     const years = mymModalState.years;
     const calc = buildContractInfo(salary, years);
 
-    const payload = {
-  type: "MYM",
+    async function submitMYMContract() {
+  const row = mymModalState.row;
+  if (!row) return;
 
-  // 🔑 REQUIRED by Worker
-  L: leagueId,
-  YEAR: year,
+  // ✅ DEFINE VARIABLES LOCALLY
+  const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+  const YEAR = getYear() || DEFAULT_YEAR;
 
-  // keep these for your logic
-  leagueId,
-  year,
+  const salary = safeInt(row.salary);
+  const years = mymModalState.years;
+  const calc = buildContractInfo(salary, years);
 
-  player_id,
-  salary,
-  contract_year,
-  contract_info,
-  tcv,
-  aav,
-  guaranteed
-};
+  const payload = {
+    type: "MYM",
+
+    // 🔑 REQUIRED BY WORKER
+    L,
+    YEAR,
+
+    // Optional redundancy (harmless)
+    leagueId: L,
+    year: YEAR,
+
+    player_id: String(row.player_id),
+    salary,
+    contract_year: years,
+    contract_info: calc.contractInfo,
+    tcv: calc.tcv,
+    aav: calc.aav,
+    guaranteed: calc.gtd
+  };
+
+  console.log("[MYM submit payload]", payload);
+
+  const res = await fetch(OFFER_MYM_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`MYM submit failed (${res.status}): ${txt}`);
+  }
+
+  closeMYMModal();
+}
 
     console.log("[MYM submit payload]", payload);
 
@@ -634,18 +662,7 @@
 
       // success
       closeMYMModal();
-      // Optional: refresh dashboard to reflect new MYM used/remaining
-      load();
 
-    } catch (e) {
-      const err = $("#mymModalErr");
-      if (err) {
-        err.style.display = "";
-        err.textContent = `Submit failed: ${e && e.message ? e.message : String(e)}`;
-      }
-    }
-
-    closeMYMModal();
   }
 
   // ======================================================

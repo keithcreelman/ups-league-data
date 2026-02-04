@@ -27,6 +27,8 @@
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
   const OFFER_RESTRUCTURE_URL =
     "https://ups-league-data.keith-creelman.workers.dev/offer-restructure";
+  const COMMISH_CONTRACT_UPDATE_URL =
+    "https://ups-league-data.keith-creelman.workers.dev/commish-contract-update";
   const ROSTER_REFRESH_URL = "https://ups-league-data.keith-creelman.workers.dev/refresh-mym-json";
 
   // ======================================================
@@ -98,6 +100,7 @@
   }
 
   const LOCAL_OVERRIDE_KEY = "ccc_mym_submit_overrides_v1";
+  const LOCAL_ASOF_OVERRIDE_KEY = "ccc_asof_override_v1";
 
   function loadLocalOverrides() {
     try {
@@ -113,6 +116,51 @@
   function saveLocalOverrides(overrides) {
     try {
       localStorage.setItem(LOCAL_OVERRIDE_KEY, JSON.stringify(overrides || {}));
+    } catch (e) {}
+  }
+
+  function fmtForDatetimeLocal(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${da}T${h}:${mi}`;
+  }
+
+  function loadAsOfOverrideState() {
+    try {
+      const raw = localStorage.getItem(LOCAL_ASOF_OVERRIDE_KEY);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || typeof obj !== "object") return null;
+      const asOfDate = obj.asOfDate ? new Date(obj.asOfDate) : null;
+      if (asOfDate && isNaN(asOfDate.getTime())) return null;
+      return {
+        asOfDate,
+        active: !!obj.active,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveAsOfOverrideState(asOfDate, active) {
+    try {
+      localStorage.setItem(
+        LOCAL_ASOF_OVERRIDE_KEY,
+        JSON.stringify({
+          asOfDate: asOfDate && !isNaN(asOfDate.getTime()) ? asOfDate.toISOString() : "",
+          active: !!active,
+        })
+      );
+    } catch (e) {}
+  }
+
+  function clearAsOfOverrideState() {
+    try {
+      localStorage.removeItem(LOCAL_ASOF_OVERRIDE_KEY);
     } catch (e) {}
   }
 
@@ -891,6 +939,9 @@
     detectedFranchiseId: "",
     asOfDate: null,
     asOfOverrideActive: false,
+    commishPlayerRows: [],
+    commishSelectedPlayerId: "",
+    commishFormDirty: false,
     search: "",
     activeTab: "eligible",
     localOverrides: loadLocalOverrides(),
@@ -1287,6 +1338,209 @@
     }
   }
 
+  function buildCommishPlayerRows(seasonRows) {
+    const out = (seasonRows || [])
+      .filter((r) => safeInt(r.contract_year) > 0)
+      .slice()
+      .sort((a, b) => {
+        const ta = safeStr(a.franchise_name || a.franchise_id).toLowerCase();
+        const tb = safeStr(b.franchise_name || b.franchise_id).toLowerCase();
+        if (ta !== tb) return ta.localeCompare(tb);
+        return safeStr(a.player_name).toLowerCase().localeCompare(safeStr(b.player_name).toLowerCase());
+      });
+    return out;
+  }
+
+  function getCommishSelectedRow() {
+    const pid = safeStr(state.commishSelectedPlayerId);
+    return state.commishPlayerRows.find((r) => safeStr(r.player_id) === pid) || null;
+  }
+
+  function setCommishMessage(msg, isErr) {
+    const el = $("#commishConsoleMsg");
+    if (!el) return;
+    if (!msg) {
+      el.style.display = "none";
+      el.textContent = "";
+      el.classList.remove("ok");
+      return;
+    }
+    el.style.display = "";
+    el.textContent = msg;
+    el.classList.toggle("ok", !isErr);
+  }
+
+  function loadCommishFormFromRow(row, force) {
+    if (!row) return;
+    if (state.commishFormDirty && !force) return;
+    const salaryInput = $("#commishSalaryInput");
+    const yearsInput = $("#commishYearsInput");
+    const statusInput = $("#commishStatusInput");
+    const infoInput = $("#commishInfoInput");
+    if (salaryInput) salaryInput.value = String(safeInt(row.salary));
+    if (yearsInput) yearsInput.value = String(Math.max(1, safeInt(row.contract_year)));
+    if (statusInput) statusInput.value = safeStr(row.contract_status);
+    if (infoInput) infoInput.value = safeStr(row.contract_info);
+    state.commishFormDirty = false;
+    setCommishMessage("", false);
+  }
+
+  function syncCommishConsole(seasonRows) {
+    const consoleEl = $("#commishConsole");
+    const playerSelect = $("#commishPlayerSelect");
+    if (!consoleEl || !playerSelect) return;
+
+    const isVisible = !!state.canCommishMode && !!state.commishMode;
+    consoleEl.style.display = isVisible ? "" : "none";
+    if (!isVisible) return;
+
+    const rows = buildCommishPlayerRows(seasonRows);
+    state.commishPlayerRows = rows;
+
+    const currentPid = safeStr(state.commishSelectedPlayerId);
+    let selectedPid = currentPid && rows.some((r) => safeStr(r.player_id) === currentPid)
+      ? currentPid
+      : rows[0]
+      ? safeStr(rows[0].player_id)
+      : "";
+    state.commishSelectedPlayerId = selectedPid;
+
+    playerSelect.innerHTML = "";
+    rows.forEach((r) => {
+      const opt = document.createElement("option");
+      const team = safeStr(r.franchise_name || r.franchise_id);
+      const pos = safeStr(r.positional_grouping || r.position || "");
+      opt.value = safeStr(r.player_id);
+      opt.textContent = `${team} | ${safeStr(r.player_name)} (${pos})`;
+      opt.selected = opt.value === selectedPid;
+      playerSelect.appendChild(opt);
+    });
+    playerSelect.disabled = rows.length === 0;
+
+    const selectedRow = getCommishSelectedRow();
+    if (selectedRow) {
+      const forceLoad = safeStr(currentPid) !== safeStr(selectedPid);
+      loadCommishFormFromRow(selectedRow, forceLoad);
+    } else {
+      loadCommishFormFromRow(
+        {
+          salary: 0,
+          contract_year: 1,
+          contract_status: "",
+          contract_info: "",
+        },
+        true
+      );
+    }
+  }
+
+  async function submitCommishContractUpdate() {
+    if (!state.canCommishMode || !state.commishMode) return;
+    const row = getCommishSelectedRow();
+    if (!row) {
+      setCommishMessage("Select a player first.", true);
+      return;
+    }
+
+    const salary = safeInt($("#commishSalaryInput") ? $("#commishSalaryInput").value : 0);
+    const contractYear = safeInt($("#commishYearsInput") ? $("#commishYearsInput").value : 0);
+    const contractStatus = safeStr($("#commishStatusInput") ? $("#commishStatusInput").value : "");
+    const contractInfo = safeStr($("#commishInfoInput") ? $("#commishInfoInput").value : "");
+    if (salary < 0 || contractYear <= 0 || !contractStatus || !contractInfo) {
+      setCommishMessage("Fill salary, years remaining, contract status, and contract info.", true);
+      return;
+    }
+
+    const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+    const YEAR = getYear() || DEFAULT_YEAR;
+    const payload = {
+      L: String(L),
+      YEAR: String(YEAR),
+      type: "MANUAL_CONTRACT_UPDATE",
+      leagueId: String(L),
+      year: String(YEAR),
+      player_id: safeStr(row.player_id),
+      player_name: safeStr(row.player_name),
+      franchise_id: safeStr(row.franchise_id),
+      franchise_name: safeStr(row.franchise_name),
+      position: safeStr(row.positional_grouping || row.position),
+      salary: salary,
+      contract_year: contractYear,
+      contract_status: contractStatus,
+      contract_info: contractInfo,
+      submitted_at_utc: new Date().toISOString(),
+      commish_override_flag: state.asOfOverrideActive ? 1 : 0,
+      override_as_of_date: state.asOfOverrideActive && state.asOfDate ? fmtLocalYMDHM(state.asOfDate) : "",
+    };
+
+    const btn = $("#commishApplyBtn");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Applying...";
+    }
+    setCommishMessage("", false);
+
+    try {
+      const url =
+        `${COMMISH_CONTRACT_UPDATE_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}`;
+      let res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const form = new URLSearchParams();
+        Object.entries(payload).forEach(([k, v]) => form.set(k, String(v)));
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: form.toString(),
+        });
+      }
+
+      const text = await res.text();
+      let out = {};
+      try {
+        out = text ? JSON.parse(text) : {};
+      } catch (_) {}
+
+      if (!res.ok || out.ok !== true) {
+        const msg =
+          safeStr(out.reason) ||
+          safeStr(out.error) ||
+          safeStr(out.upstreamPreview).slice(0, 220) ||
+          `Update failed (HTTP ${res.status})`;
+        setCommishMessage(msg, true);
+        return;
+      }
+
+      const post = (out && out.postCheck) || {};
+      const salaryFinal = safeInt(post.salary || payload.salary);
+      const yearFinal = safeInt(post.contractYear || payload.contract_year);
+      const statusFinal = safeStr(post.contractStatus || payload.contract_status);
+      const infoFinal = safeStr(post.contractInfo || payload.contract_info);
+
+      state.payload.eligibility.forEach((r) => {
+        if (safeStr(r.player_id) !== safeStr(row.player_id)) return;
+        r.salary = salaryFinal;
+        r.contract_year = yearFinal;
+        r.contract_status = statusFinal;
+        r.contract_info = infoFinal;
+      });
+
+      state.commishFormDirty = false;
+      setCommishMessage(`Saved ${safeStr(row.player_name)} successfully.`, false);
+      render();
+    } catch (e) {
+      setCommishMessage(safeStr(e && e.message ? e.message : e), true);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Apply Manual Update";
+      }
+    }
+  }
+
   function render() {
     const { eligibility, submissions, meta } = state.payload;
 
@@ -1419,6 +1673,7 @@
 
     syncTabLabels();
     syncModuleChipSelection();
+    syncCommishConsole(seasonEligibility);
     if (summary) {
       summary.innerHTML = renderSummary(
         teamName,
@@ -2037,6 +2292,15 @@
       must("#showAllTeamsChk");
       must("#pageSizeSelect");
       must("#densitySelect");
+      must("#commishConsole");
+      must("#commishPlayerSelect");
+      must("#commishSalaryInput");
+      must("#commishYearsInput");
+      must("#commishStatusInput");
+      must("#commishInfoInput");
+      must("#commishReloadBtn");
+      must("#commishApplyBtn");
+      must("#commishConsoleMsg");
       must("#commishModeWrap");
       must("#commishModeChk");
       must("#searchBox");
@@ -2100,7 +2364,7 @@
       const admin = await getAdminFlagFromWorker();
       state.isAdmin = !!admin.isAdmin;
       state.canCommishMode = !!admin.isAdmin;
-      state.commishMode = state.canCommishMode ? !!state.commishMode : false;
+      state.commishMode = state.canCommishMode ? true : false;
       state.adminReason = safeStr(admin.reason || "");
 
       const commishWrap = $("#commishModeWrap");
@@ -2112,16 +2376,20 @@
       $("#adminControls").style.display = state.commishMode ? "flex" : "none";
 
       if (state.canCommishMode) {
-        const now = new Date();
-        state.asOfDate = now;
-        state.asOfOverrideActive = false;
-        const pad = (n) => String(n).padStart(2, "0");
-        $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-          now.getDate()
-        )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        const savedAsOf = loadAsOfOverrideState();
+        if (savedAsOf && savedAsOf.asOfDate) {
+          state.asOfDate = savedAsOf.asOfDate;
+          state.asOfOverrideActive = !!savedAsOf.active;
+        } else {
+          const now = new Date();
+          state.asOfDate = now;
+          state.asOfOverrideActive = false;
+        }
+        $("#asOfInput").value = fmtForDatetimeLocal(state.asOfDate);
       } else {
         state.asOfDate = null;
         state.asOfOverrideActive = false;
+        clearAsOfOverrideState();
         $("#asOfInput").value = "";
       }
 
@@ -2445,6 +2713,39 @@
         render();
       });
 
+    const commishPlayerSelect = $("#commishPlayerSelect");
+    if (commishPlayerSelect)
+      commishPlayerSelect.addEventListener("change", (e) => {
+        state.commishSelectedPlayerId = safeStr(e.target.value || "");
+        state.commishFormDirty = false;
+        const row = getCommishSelectedRow();
+        if (row) loadCommishFormFromRow(row, true);
+      });
+
+    ["#commishSalaryInput", "#commishYearsInput", "#commishStatusInput", "#commishInfoInput"].forEach(
+      (sel) => {
+        const el = $(sel);
+        if (!el) return;
+        el.addEventListener("input", () => {
+          state.commishFormDirty = true;
+          setCommishMessage("", false);
+        });
+      }
+    );
+
+    const commishReloadBtn = $("#commishReloadBtn");
+    if (commishReloadBtn)
+      commishReloadBtn.addEventListener("click", () => {
+        const row = getCommishSelectedRow();
+        if (row) loadCommishFormFromRow(row, true);
+      });
+
+    const commishApplyBtn = $("#commishApplyBtn");
+    if (commishApplyBtn)
+      commishApplyBtn.addEventListener("click", () => {
+        submitCommishContractUpdate();
+      });
+
     const commishModeChk = $("#commishModeChk");
     if (commishModeChk)
       commishModeChk.addEventListener("change", (e) => {
@@ -2454,9 +2755,6 @@
         const adminControls = $("#adminControls");
         if (adminBadge) adminBadge.style.display = state.commishMode ? "" : "none";
         if (adminControls) adminControls.style.display = state.commishMode ? "flex" : "none";
-        if (!state.commishMode) {
-          state.asOfOverrideActive = false;
-        }
         render();
       });
 
@@ -2511,6 +2809,7 @@
         const d = v ? new Date(v) : new Date();
         state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
         state.asOfOverrideActive = true;
+        saveAsOfOverrideState(state.asOfDate, state.asOfOverrideActive);
         render();
       });
 
@@ -2521,10 +2820,8 @@
         const now = new Date();
         state.asOfDate = now;
         state.asOfOverrideActive = false;
-        const pad = (n) => String(n).padStart(2, "0");
-        $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-          now.getDate()
-        )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        $("#asOfInput").value = fmtForDatetimeLocal(now);
+        saveAsOfOverrideState(state.asOfDate, state.asOfOverrideActive);
         render();
       });
 

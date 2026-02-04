@@ -308,6 +308,25 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   padding: 12px 12px;
 }
 
+.ccc-commishConsole{
+  border-color: rgba(255,210,120,.35);
+  background:
+    radial-gradient(600px 180px at 0% 0%, rgba(255,210,120,.15), transparent 70%),
+    rgba(8,15,29,.72);
+}
+
+.ccc-commishConsole .ccc-adminControls{
+  margin-left: 0;
+  justify-content: flex-start;
+}
+
+.ccc-textarea{
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 .ccc-summaryTop{
   display:flex;
   align-items:center;
@@ -656,6 +675,10 @@ table.ccc-table .muted{
   margin-top: 10px;
   font-size: 12px;
   color: #ffb4b4;
+}
+
+.ccc-error.ok{
+  color: #9cf0b7;
 }
 
 /* ===== Modal (fixed readability + no lockups) ===== */

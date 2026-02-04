@@ -17,7 +17,12 @@ export default {
       const L = url.searchParams.get("L") || "";
       const YEAR = url.searchParams.get("YEAR") || "2025";
 
-      if (!L && path !== "/offer-mym" && path !== "/offer-restructure") {
+      if (
+        !L &&
+        path !== "/offer-mym" &&
+        path !== "/offer-restructure" &&
+        path !== "/commish-contract-update"
+      ) {
         return new Response(
           JSON.stringify({ ok: false, isAdmin: false, reason: "Missing L param" }),
           { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
@@ -200,7 +205,11 @@ export default {
       }
 
       // ---------- MYM contract submit ----------
-      if (path === "/offer-mym" || path === "/offer-restructure") {
+      if (
+        path === "/offer-mym" ||
+        path === "/offer-restructure" ||
+        path === "/commish-contract-update"
+      ) {
         if (request.method !== "POST") {
           return new Response(
             JSON.stringify({ ok: false, reason: "Method not allowed" }),
@@ -230,8 +239,11 @@ export default {
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
         const requestedContractStatus = String(body.contract_status || body.contractStatus || "").trim();
         const contractTypeRaw = String(body.type || "").trim().toLowerCase();
+        const isManualContractUpdate =
+          path === "/commish-contract-update" || contractTypeRaw.includes("manual_contract_update");
         const isRestructure =
-          path === "/offer-restructure" || contractTypeRaw.includes("restructure");
+          !isManualContractUpdate &&
+          (path === "/offer-restructure" || contractTypeRaw.includes("restructure"));
         const eventType = isRestructure ? "log-restructure-submission" : "log-mym-submission";
         const sourceTag = isRestructure ? "worker-offer-restructure" : "worker-offer-mym";
         const payloadPlayerStatus = String(body.player_status || body.playerStatus || "").trim();
@@ -258,6 +270,19 @@ export default {
             }),
             { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
           );
+        }
+
+        if (isManualContractUpdate) {
+          const adminState = await getLeagueAdminState(leagueId, year);
+          if (!adminState.ok || !adminState.isAdmin) {
+            return new Response(
+              JSON.stringify({
+                ok: false,
+                reason: "Only league admin can perform manual contract updates",
+              }),
+              { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
+            );
+          }
         }
 
         const esc = (s) =>
@@ -299,7 +324,7 @@ export default {
           rookie: null,
         };
 
-        if (!isRestructure) {
+        if (!isRestructure && !isManualContractUpdate) {
           if (payloadPlayerStatus) {
             playerStatusLookup = {
               source: "payload",
@@ -352,7 +377,14 @@ export default {
         }
 
         let contractStatus = "";
-        if (isRestructure) {
+        if (isManualContractUpdate) {
+          contractStatus = requestedContractStatus || "";
+          playerStatusLookup = {
+            source: "manual-contract-update",
+            value: requestedContractStatus,
+            rookie: null,
+          };
+        } else if (isRestructure) {
           contractStatus = requestedContractStatus || "Veteran";
           playerStatusLookup = {
             source: "restructure-skip-rookie-check",
@@ -480,8 +512,13 @@ export default {
           if (changed) break;
         }
 
-        let logDispatch = { ok: false, queued: false, skipped: true, reason: "No applied change detected" };
-        if (looksOk && anyChanged) {
+        let logDispatch = {
+          ok: false,
+          queued: false,
+          skipped: true,
+          reason: isManualContractUpdate ? "Manual update does not dispatch submission log" : "No applied change detected",
+        };
+        if (looksOk && anyChanged && !isManualContractUpdate) {
           try {
             logDispatch = await dispatchRepoEvent(eventType, {
               league_id: leagueId,
@@ -514,7 +551,11 @@ export default {
         return new Response(
           JSON.stringify({
             ok: looksOk,
-            reason: looksOk ? "Submitted to MFL" : "MFL import rejected request",
+            reason: looksOk
+              ? isManualContractUpdate
+                ? "Manual contract update submitted to MFL"
+                : "Submitted to MFL"
+              : "MFL import rejected request",
             upstreamStatus: mflRes ? mflRes.status : 0,
             upstreamPreview: text.slice(0, 800),
             preCheck,
@@ -527,6 +568,7 @@ export default {
               playerStatusLookup,
               dataXml: dataXmlUsed,
               importAttempts,
+              isManualContractUpdate,
               logDispatch,
             },
           }),

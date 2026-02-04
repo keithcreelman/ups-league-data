@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204al">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204am">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -77,13 +77,50 @@
       <span class="ccc-navTitle">Coming Up</span>
       <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Restructures</button>
       <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Auction Contracts</button>
-
-      <span id="adminControls" class="ccc-adminControls" style="display:none;">
-        <span class="ccc-field ccc-adminLabel">As-Of Override</span>
-        <input id="asOfInput" type="datetime-local" class="ccc-input" />
-        <button id="asOfResetBtn" class="ccc-btn" type="button">Today</button>
-      </span>
     </div>
+  </div>
+
+  <div id="commishConsole" class="ccc-summary ccc-commishConsole" style="display:none;">
+    <div class="ccc-summaryTop">
+      <div class="ccc-summaryTitle">Commish Console</div>
+      <span class="pill">Manual contract update tool</span>
+    </div>
+
+    <div id="adminControls" class="ccc-adminControls" style="display:flex; margin-top:10px;">
+      <span class="ccc-field ccc-adminLabel">Override As-Of</span>
+      <input id="asOfInput" type="datetime-local" class="ccc-input" />
+      <button id="asOfResetBtn" class="ccc-btn" type="button">Reset Override</button>
+    </div>
+
+    <div class="ccc-inputGrid" style="margin-top:12px;">
+      <label class="ccc-field ccc-field-col">
+        Player
+        <select id="commishPlayerSelect" class="ccc-select"></select>
+      </label>
+      <label class="ccc-field ccc-field-col">
+        Salary
+        <input id="commishSalaryInput" class="ccc-input" type="number" min="0" step="1000" />
+      </label>
+      <label class="ccc-field ccc-field-col">
+        Years Remaining
+        <input id="commishYearsInput" class="ccc-input" type="number" min="1" step="1" />
+      </label>
+      <label class="ccc-field ccc-field-col">
+        Contract Status
+        <input id="commishStatusInput" class="ccc-input" type="text" placeholder="Veteran / Rookie / Tag / etc." />
+      </label>
+    </div>
+
+    <div class="ccc-field ccc-field-col" style="margin-top:10px;">
+      Contract Info
+      <textarea id="commishInfoInput" class="ccc-input ccc-textarea" rows="3"></textarea>
+    </div>
+
+    <div class="ccc-modal-actions" style="margin-top:10px;">
+      <button id="commishReloadBtn" class="ccc-btn" type="button">Reload Player Fields</button>
+      <button id="commishApplyBtn" class="ccc-btn" type="button">Apply Manual Update</button>
+    </div>
+    <div id="commishConsoleMsg" class="ccc-error" style="display:none;"></div>
   </div>
 
   <div id="summary" class="ccc-summary"></div>
@@ -221,4 +258,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204al"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204am"></script>

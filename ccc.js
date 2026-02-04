@@ -267,14 +267,14 @@
         <table class="ccc-table">
           <thead>
             <tr>
+              ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
               <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
               <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
               <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
-              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode, "acqType")}</span></th>
               <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
               <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
-              ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
-              <th style="min-width:320px;">Explanation</th>
+              ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
+              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode, "acqType")}</span></th>
             </tr>
           </thead>
           <tbody>
@@ -297,7 +297,7 @@
           ? `
           <button
             type="button"
-            class="ccc-btn"
+            class="ccc-btn ccc-btn-offer"
             data-offer="1"
             data-player-id="${htmlEsc(r.player_id)}"
             data-player-name="${htmlEsc(r.player_name)}"
@@ -312,14 +312,14 @@
 
         return `
         <tr class="pos-${posKey}">
+          ${isEligibleTab ? `<td>${actions}</td>` : ``}
           <td class="playerCell">${player}</td>
           <td class="muted">${posDisp}</td>
           <td>${salary}</td>
-          <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
           <td class="muted">${acquired}</td>
           <td class="muted">${deadline}</td>
-          ${isEligibleTab ? `<td>${actions}</td>` : ``}
-          <td class="explain">${expl}</td>
+          ${isEligibleTab ? `` : `<td class="explain">${expl}</td>`}
+          <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
         </tr>
       `;
       })
@@ -654,6 +654,7 @@
   const salary = safeInt(row.salary);
   const years = mymModalState.years;
   const calc = buildContractInfo(salary, years);
+  const isRookie = safeStr(row.mym_acq_type).toLowerCase().includes("rookie") || /\(R\)/i.test(safeStr(row.player_name));
 
   // Keep payload keys aligned with the Worker/MFL contract expectations.
   const payload = {
@@ -661,7 +662,7 @@
     YEAR: String(YEAR),
     aav: safeInt(calc.aav),
     contract_info: String(calc.contractInfo),
-    contract_status: "MYM",
+    contract_status: isRookie ? "Rookie-MYM" : "MYM",
     contract_year: safeInt(years),
     guaranteed: safeInt(calc.gtd),
     leagueId: String(L),

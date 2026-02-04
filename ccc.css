@@ -162,6 +162,16 @@
   border-color: rgba(255,255,255,.24);
 }
 
+.ccc-btn-offer{
+  background: rgba(191,109,255,.24);
+  border-color: rgba(191,109,255,.75);
+  color: rgba(250,242,255,.98);
+}
+.ccc-btn-offer:hover{
+  background: rgba(191,109,255,.32);
+  border-color: rgba(191,109,255,.9);
+}
+
 /* Summary */
 .ccc-summary{
   margin-top: 12px;

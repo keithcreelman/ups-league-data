@@ -574,6 +574,7 @@
     selectedTeam: "__ALL__",
     detectedFranchiseId: "",
     asOfDate: null,
+    asOfOverrideActive: false,
     search: "",
     activeTab: "eligible",
     localOverrides: loadLocalOverrides(),
@@ -972,9 +973,11 @@
     position: safeStr(row.positional_grouping || row.position),
     salary: safeInt(salary),
     submitted_at_utc: new Date().toISOString(),
-    commish_override_flag: state.isAdmin && state.asOfDate ? 1 : 0,
+    commish_override_flag: state.isAdmin && state.asOfOverrideActive && state.asOfDate ? 1 : 0,
     override_as_of_date:
-      state.isAdmin && state.asOfDate ? fmtLocalYMDHM(state.asOfDate) : "",
+      state.isAdmin && state.asOfOverrideActive && state.asOfDate
+        ? fmtLocalYMDHM(state.asOfDate)
+        : "",
     tcv: safeInt(calc.tcv),
     type: "MYM",
     year: String(YEAR)
@@ -1117,12 +1120,14 @@
       if (state.isAdmin) {
         const now = new Date();
         state.asOfDate = now;
+        state.asOfOverrideActive = false;
         const pad = (n) => String(n).padStart(2, "0");
         $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
           now.getDate()
         )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       } else {
         state.asOfDate = null;
+        state.asOfOverrideActive = false;
         $("#asOfInput").value = "";
       }
 
@@ -1350,6 +1355,7 @@
         const v = asOfInput.value;
         const d = v ? new Date(v) : new Date();
         state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
+        state.asOfOverrideActive = true;
         render();
       });
 
@@ -1359,6 +1365,7 @@
         if (!state.isAdmin) return;
         const now = new Date();
         state.asOfDate = now;
+        state.asOfOverrideActive = false;
         const pad = (n) => String(n).padStart(2, "0");
         $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
           now.getDate()

@@ -84,26 +84,40 @@ export default {
           `</leagueUnit></salaries>`;
 
         const form = new URLSearchParams();
-        form.set("TYPE", "salaries");
-        form.set("L", leagueId);
-        form.set("APPEND", "1");
         form.set("DATA", dataXml);
 
-        const mflImportUrl = `https://api.myfantasyleague.com/${encodeURIComponent(year)}/import`;
-        const mflRes = await fetch(mflImportUrl, {
-          method: "POST",
-          headers: {
-            Cookie: cookie,
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent": "ups-league-data-worker",
-          },
-          body: form.toString(),
-          cf: { cacheTtl: 0, cacheEverything: false },
-        });
+        const importQuery =
+          `TYPE=salaries&L=${encodeURIComponent(leagueId)}&APPEND=1`;
+        const importUrls = [
+          `https://api.myfantasyleague.com/${encodeURIComponent(year)}/import?${importQuery}`,
+          `https://www.myfantasyleague.com/${encodeURIComponent(year)}/import?${importQuery}`,
+        ];
 
-        const text = await mflRes.text();
+        let mflRes = null;
+        let text = "";
+        for (const mflImportUrl of importUrls) {
+          const res = await fetch(mflImportUrl, {
+            method: "POST",
+            headers: {
+              Cookie: cookie,
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+              "User-Agent": "ups-league-data-worker",
+            },
+            body: form.toString(),
+            redirect: "follow",
+            cf: { cacheTtl: 0, cacheEverything: false },
+          });
+          const bodyText = await res.text();
+          mflRes = res;
+          text = bodyText;
+
+          // Stop on first response that isn't the generic developer/docs page.
+          if (!bodyText.includes("Fantasy Football:  MFL Developers Program")) break;
+        }
+
         const lowered = text.toLowerCase();
         const looksOk =
+          !!mflRes &&
           mflRes.ok &&
           !lowered.includes("error") &&
           !lowered.includes("invalid") &&
@@ -113,8 +127,8 @@ export default {
           JSON.stringify({
             ok: looksOk,
             reason: looksOk ? "Submitted to MFL" : "MFL import rejected request",
-            upstreamStatus: mflRes.status,
-            upstreamPreview: text.slice(0, 400),
+            upstreamStatus: mflRes ? mflRes.status : 0,
+            upstreamPreview: text.slice(0, 800),
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );

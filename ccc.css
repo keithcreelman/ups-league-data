@@ -430,8 +430,8 @@ body.ccc-modalOpen #mymModal *{
   border-bottom: 1px solid var(--line);
 }
 
-.ccc-modal-title{ font-size:16px; font-weight:1000; }
-.ccc-modal-sub{ margin-top:4px; font-size:12px; color: var(--muted); }
+.ccc-modal-title{ font-size:18px; font-weight:1000; color: rgba(245,250,255,.98); line-height: 1.2; }
+.ccc-modal-sub{ margin-top:4px; font-size:12px; color: rgba(233,238,249,.88); font-weight: 700; }
 
 .ccc-modal-x{
   background: rgba(255,255,255,.08);

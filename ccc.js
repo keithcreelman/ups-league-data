@@ -607,9 +607,14 @@
     mymModalState.open = true;
     mymModalState.years = 2;
 
+    const title = $("#mymModalTitle");
+    if (title) {
+      title.textContent = `Offer MYM Contract - ${row.player_name}`;
+    }
+
     const sub = $("#mymModalSub");
     if (sub) {
-      sub.textContent = `${row.player_name} | Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${row.franchise_name || row.franchise_id}`;
+      sub.textContent = `Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${row.franchise_name || row.franchise_id}`;
     }
 
     const err = $("#mymModalErr");
@@ -702,7 +707,13 @@
 
     if (!res.ok || out.ok !== true) {
       const msg =
-        (out && (out.error || out.reason)) ||
+        (out &&
+          (out.error ||
+            (out.reason
+              ? out.upstreamPreview
+                ? `${out.reason}: ${String(out.upstreamPreview).slice(0, 280)}`
+                : out.reason
+              : ""))) ||
         (text && text.slice(0, 300)) ||
         `Submit failed (HTTP ${res.status})`;
 

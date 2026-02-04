@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.keith.mfl.rostersweekly.inseason.daily</string>
+  <string>com.keith.mfl.rostersweekly.inseason.tuesday</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -17,6 +17,8 @@
 
   <key>StartCalendarInterval</key>
   <dict>
+    <key>Weekday</key>
+    <integer>2</integer>
     <key>Hour</key>
     <integer>0</integer>
     <key>Minute</key>
@@ -24,8 +26,8 @@
   </dict>
 
   <key>StandardOutPath</key>
-  <string>/Users/keithcreelman/Documents/New project/etl/logs/rostersweekly.inseason.daily.out.log</string>
+  <string>/Users/keithcreelman/Documents/New project/etl/logs/rostersweekly.inseason.tuesday.out.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/keithcreelman/Documents/New project/etl/logs/rostersweekly.inseason.daily.err.log</string>
+  <string>/Users/keithcreelman/Documents/New project/etl/logs/rostersweekly.inseason.tuesday.err.log</string>
 </dict>
 </plist>

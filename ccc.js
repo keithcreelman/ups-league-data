@@ -652,7 +652,14 @@
   const salary = safeInt(row.salary);
   const years = mymModalState.years;
   const calc = buildContractInfo(salary, years);
-  const isRookie = safeStr(row.mym_acq_type).toLowerCase().includes("rookie") || /\(R\)/i.test(safeStr(row.player_name));
+  const playerStatus = safeStr(row.player_status || row.status).toLowerCase();
+  const rookieFromStatus =
+    playerStatus === "r" ||
+    playerStatus.startsWith("r-") ||
+    playerStatus.includes("rookie");
+  const rookieFromAcqType = safeStr(row.mym_acq_type).toLowerCase().includes("rookie");
+  const rookieFromNameTag = /\(R\)/i.test(safeStr(row.player_name));
+  const isRookie = rookieFromStatus || rookieFromAcqType || rookieFromNameTag;
 
   // Keep payload keys aligned with the Worker/MFL contract expectations.
   const payload = {
@@ -660,7 +667,7 @@
     YEAR: String(YEAR),
     aav: safeInt(calc.aav),
     contract_info: String(calc.contractInfo),
-    contract_status: isRookie ? "Rookie-MYM" : "MYM",
+    contract_status: isRookie ? "MYM - Rookie" : "MYM - Vet",
     contract_year: safeInt(years),
     guaranteed: safeInt(calc.gtd),
     leagueId: String(L),

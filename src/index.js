@@ -144,9 +144,9 @@ export default {
         const preCheck = await readPlayer(Date.now() - 1);
 
         const importAttempts = [];
-        const statusAttempts = Array.from(
-          new Set([contractStatus, "A", "", preCheck?.contractStatus || ""]).values()
-        );
+        const statusAttempts = contractStatus
+          ? [contractStatus]
+          : Array.from(new Set([preCheck?.contractStatus || "", "A", ""]).values());
 
         let mflRes = null;
         let text = "";

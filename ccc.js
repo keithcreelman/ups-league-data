@@ -640,22 +640,20 @@
   const years = mymModalState.years;
   const calc = buildContractInfo(salary, years);
 
+  // Keep payload keys aligned with the Worker/MFL contract expectations.
   const payload = {
-    type: "MYM",
-
-    // keep in body (fine)
-    L,
-    YEAR,
-    leagueId: L,
-    year: YEAR,
-
+    L: String(L),
+    YEAR: String(YEAR),
+    aav: safeInt(calc.aav),
+    contract_info: String(calc.contractInfo),
+    contract_year: safeInt(years),
+    guaranteed: safeInt(calc.gtd),
+    leagueId: String(L),
     player_id: String(row.player_id),
-    salary,
-    contract_year: years,
-    contract_info: calc.contractInfo,
-    tcv: calc.tcv,
-    aav: calc.aav,
-    guaranteed: calc.gtd
+    salary: safeInt(salary),
+    tcv: safeInt(calc.tcv),
+    type: "MYM",
+    year: String(YEAR)
   };
 
   console.log("[MYM submit payload]", payload);
@@ -670,11 +668,22 @@
     const url =
       `${OFFER_MYM_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}`;
 
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
+    // Fallback for endpoints that parse form bodies instead of JSON.
+    if (!res.ok) {
+      const form = new URLSearchParams();
+      Object.entries(payload).forEach(([k, v]) => form.set(k, String(v)));
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: form.toString()
+      });
+    }
 
     // Worker might return JSON OR text on error
     const text = await res.text();

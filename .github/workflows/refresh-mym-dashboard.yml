@@ -1,0 +1,43 @@
+name: Refresh MYM Dashboard JSON
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [refresh-mym-json]
+  schedule:
+    - cron: "20 * * * *"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refresh JSON from MFL
+        env:
+          MFL_COOKIE: ${{ secrets.MFL_COOKIE }}
+          MFL_LEAGUE_ID: ${{ secrets.MFL_LEAGUE_ID }}
+          MFL_YEAR: ${{ secrets.MFL_YEAR }}
+        run: |
+          python etl/mfl_etl_full/refresh_mym_dashboard_from_mfl.py \
+            --json-path mym_dashboard.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- mym_dashboard.json; then
+            echo "No JSON changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mym_dashboard.json
+          git commit -m "Auto-refresh MYM dashboard JSON from MFL"
+          git push

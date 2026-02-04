@@ -8,4 +8,15 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
   <iframe src="https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html" style="width:100%; height:1400px; border:0;" loading="lazy"></iframe>
   ```
 - If the iframe is blocked by MFL, copy the raw HTML from `mfl_hpm16_contractcommandcenter.html` in this repo and paste it directly into the message editor.
-- Cache-busting: both CSS/JS links use `?v=20260204n`; bump that token whenever you update `ccc.css` or `ccc.js` so browsers pick up the latest build. GitHub Pages updates a few minutes after each push to `main`.
+- Cache-busting: both CSS/JS links use `?v=20260204s`; bump that token whenever you update `ccc.css` or `ccc.js` so browsers pick up the latest build. GitHub Pages updates a few minutes after each push to `main`.
+
+## GitHub-based MYM JSON refresh
+- Workflow: `.github/workflows/refresh-mym-dashboard.yml`
+- Trigger options:
+  - manual (`workflow_dispatch`)
+  - repository dispatch (`refresh-mym-json`)
+  - hourly schedule at minute 20
+- Required repository secrets:
+  - `MFL_COOKIE` (commissioner cookie value or full `MFL_USER_ID=...`)
+  - `MFL_LEAGUE_ID` (e.g., `74598`)
+  - `MFL_YEAR` (e.g., `2025`)

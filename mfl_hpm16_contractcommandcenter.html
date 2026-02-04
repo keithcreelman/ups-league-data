@@ -1,70 +1,138 @@
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204ae">
+
 <div id="cccApp">
-  <!-- Header & Filters -->
-  <header class="ccc-hero">
-    <div class="ccc-topRow" style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <h1 class="ccc-title" style="margin:0; font-size:22px;">Contract Command Center <span id="adminBadge" class="badge" style="display:none;">ADMIN</span></h1>
-        <div id="cccMeta" class="ccc-sub">League Roster Analysis</div>
+  <div class="ccc-hero">
+    <div class="ccc-topRow">
+      <div style="display:none;">
+        <div class="ccc-title">
+          Contract Command Center
+          <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
+        </div>
+        <div id="cccMeta" class="ccc-sub">Loading…</div>
       </div>
-      <div class="ccc-nav">
-        <button id="moduleMymChip" class="ccc-btn" data-tool="mym">MYM Assistant</button>
-        <button id="refreshBtn" class="ccc-btn">Refresh</button>
+
+      <div class="ccc-controls">
+        <label id="commishModeWrap" class="ccc-check" style="display:none;">
+          <input id="commishModeChk" type="checkbox" />
+          Commish Mode
+        </label>
+
+        <div class="ccc-field">
+          League Yr
+          <select id="seasonSelect" class="ccc-select"></select>
+        </div>
+
+        <div class="ccc-field">
+          Team
+          <select id="teamSelect" class="ccc-select"></select>
+        </div>
+        <div class="ccc-field">
+          Position
+          <select id="positionSelect" class="ccc-select"></select>
+        </div>
+        <label class="ccc-check">
+          <input id="positionFilterChk" type="checkbox" />
+          Filter by position
+        </label>
+        <label class="ccc-check">
+          <input id="showAllTeamsChk" type="checkbox" />
+          Show all teams
+        </label>
+
+        <div class="ccc-field">
+          Search
+          <input id="searchBox" class="ccc-input" placeholder="player name…" />
+        </div>
+
+        <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
+        <button id="refreshBtn" class="ccc-btn" type="button">Roster Refresh</button>
       </div>
     </div>
 
-    <div class="ccc-controls-grid">
-      <div class="ccc-field">
-        League Year
-        <select id="seasonSelect" class="ccc-select"></select>
-      </div>
-      <div class="ccc-field">
-        Team
-        <select id="teamSelect" class="ccc-select"></select>
-      </div>
-      <div class="ccc-field">
-        Position
-        <select id="positionSelect" class="ccc-select"></select>
-      </div>
-      <div class="ccc-field">
-        Search Player
-        <input id="searchBox" class="ccc-input" placeholder="Enter name..." />
-      </div>
-      <div class="ccc-field" style="flex-direction:row; align-items:center; gap:10px;">
-        <label class="ccc-check"><input id="showAllTeamsChk" type="checkbox" /> All Teams</label>
-        <button id="clearBtn" class="ccc-btn" style="padding: 5px 10px; font-size: 11px;">Clear Filters</button>
-      </div>
-    </div>
-  </header>
+    <div class="ccc-nav">
+      <span class="ccc-navTitle">Active Now</span>
+      <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-tool="mym">MYM Assistant</button>
+      <button id="moduleExtensionsChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Extensions</button>
 
-  <!-- Summary Cards -->
-  <div id="summary" class="ccc-stats-bar" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-top:20px;">
-    <!-- Injected by JS: .stat-card elements -->
+      <span class="ccc-navTitle">Coming Up</span>
+      <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Restructures</button>
+      <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Auction Contracts</button>
+
+      <span id="adminControls" class="ccc-adminControls" style="display:none;">
+        <span class="ccc-field ccc-adminLabel">As-Of Override</span>
+        <input id="asOfInput" type="datetime-local" class="ccc-input" />
+        <button id="asOfResetBtn" class="ccc-btn" type="button">Today</button>
+      </span>
+    </div>
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="ccc-tabs" style="display:flex; gap:10px; margin-top:20px; border-bottom: 1px solid var(--line);">
-    <button class="ccc-tab active" data-tab="eligible" style="padding: 10px 20px; background:none; border:none; color:var(--text-muted); cursor:pointer;">Eligible</button>
-    <button class="ccc-tab" data-tab="submitted" style="padding: 10px 20px; background:none; border:none; color:var(--text-muted); cursor:pointer;">Submitted</button>
+  <div id="summary" class="ccc-summary"></div>
+
+  <div class="ccc-tabs">
+    <button class="ccc-tab" type="button" data-tab="summary">Summary</button>
+    <button class="ccc-tab active" type="button" data-tab="eligible">Eligible</button>
+    <button class="ccc-tab" type="button" data-tab="submitted">MYM - Submitted</button>
   </div>
 
-  <!-- Table Viewport -->
-  <div class="ccc-table-scroll">
-    <div id="tabEligible">
-      <table class="ccc-table">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Pos</th>
-            <th>Contract</th>
-            <th>AAV</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="playerDataBody">
-          <!-- Dynamically filled by ccc.js -->
-        </tbody>
-      </table>
+  <div id="tabSummary" style="display:none;"></div>
+  <div id="tabEligible"></div>
+  <div id="tabSubmitted" style="display:none;"></div>
+
+  <div id="cccError" class="ccc-error"></div>
+
+  <!-- MYM MODAL -->
+  <div id="mymModal" class="ccc-modal" aria-hidden="true">
+    <div class="ccc-modal-backdrop" data-close="1"></div>
+
+    <div class="ccc-modal-card" role="dialog" aria-modal="true" aria-labelledby="mymModalTitle">
+      <div class="ccc-modal-head">
+        <div>
+          <div id="mymModalTitle" class="ccc-modal-title">Offer MYM Contract</div>
+          <div id="mymModalSub" class="ccc-modal-sub muted"></div>
+        </div>
+        <button class="ccc-modal-x" type="button" data-close="1">✕</button>
+      </div>
+
+      <div class="ccc-modal-body">
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Choose option</div>
+          <div class="ccc-modal-actions">
+            <button type="button" class="ccc-chipBtn primary" id="btnMYM2">MYM - 2</button>
+            <button type="button" class="ccc-chipBtn" id="btnMYM3">MYM - 3</button>
+          </div>
+          <div class="muted" style="font-size:12px; margin-top:6px;">
+            MYM-2 adds 1 year (2 total). MYM-3 adds 2 years (3 total).
+          </div>
+        </div>
+
+        <div class="ccc-summary" style="margin-top:12px;">
+          <div class="ccc-summaryTop">
+            <div class="ccc-summaryTitle">Contract Summary</div>
+            <div class="pill" id="mymAsOfPill" style="display:none;"></div>
+          </div>
+
+          <div class="ccc-kpis">
+            <div class="kpi"><div class="label">Contract Length</div><div class="value" id="mymYears">—</div></div>
+            <div class="kpi"><div class="label">TCV</div><div class="value" id="mymTCV">—</div></div>
+            <div class="kpi"><div class="label">AAV</div><div class="value" id="mymAAV">—</div></div>
+            <div class="kpi"><div class="label">Guaranteed</div><div class="value" id="mymGTD">—</div></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="muted" style="font-size:12px; font-weight:800; margin-bottom:6px;">Contract Info (what gets sent to MFL)</div>
+            <div class="ccc-code" id="mymContractInfo">—</div>
+          </div>
+        </div>
+
+        <div class="ccc-error" id="mymModalErr" style="display:none;"></div>
+      </div>
+
+      <div class="ccc-modal-foot">
+        <button class="ccc-btn" type="button" data-close="1">Cancel</button>
+        <button class="ccc-btn" type="button" id="mymSubmitBtn" style="font-weight:1000;">Submit Contract</button>
+      </div>
     </div>
-    <div id="tabSubmitted" style="display:none;"></div>
   </div>
 </div>
+
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204ae"></script>

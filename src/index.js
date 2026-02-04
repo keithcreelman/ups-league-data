@@ -17,7 +17,7 @@ export default {
       const L = url.searchParams.get("L") || "";
       const YEAR = url.searchParams.get("YEAR") || "2025";
 
-      if (!L && path !== "/offer-mym") {
+      if (!L && path !== "/offer-mym" && path !== "/offer-restructure") {
         return new Response(
           JSON.stringify({ ok: false, isAdmin: false, reason: "Missing L param" }),
           { status: 400, headers: { "content-type": "application/json", ...corsHeaders } }
@@ -200,7 +200,7 @@ export default {
       }
 
       // ---------- MYM contract submit ----------
-      if (path === "/offer-mym") {
+      if (path === "/offer-mym" || path === "/offer-restructure") {
         if (request.method !== "POST") {
           return new Response(
             JSON.stringify({ ok: false, reason: "Method not allowed" }),
@@ -229,6 +229,11 @@ export default {
         const contractYear = String(body.contract_year ?? body.contractYear ?? "").trim();
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
         const requestedContractStatus = String(body.contract_status || body.contractStatus || "").trim();
+        const contractTypeRaw = String(body.type || "").trim().toLowerCase();
+        const isRestructure =
+          path === "/offer-restructure" || contractTypeRaw.includes("restructure");
+        const eventType = isRestructure ? "log-restructure-submission" : "log-mym-submission";
+        const sourceTag = isRestructure ? "worker-offer-restructure" : "worker-offer-mym";
         const payloadPlayerStatus = String(body.player_status || body.playerStatus || "").trim();
         const overrideAsOfDate = String(
           body.override_as_of_date || body.override_as_of || body.overrideAsOf || ""
@@ -294,61 +299,73 @@ export default {
           rookie: null,
         };
 
-        if (payloadPlayerStatus) {
-          playerStatusLookup = {
-            source: "payload",
-            value: payloadPlayerStatus,
-            rookie: rookieLike(payloadPlayerStatus),
-          };
-        } else {
-          try {
-            const playersQs = new URLSearchParams({
-              TYPE: "players",
-              L: leagueId,
-              P: playerId,
-              DETAILS: "1",
-              JSON: "1",
-              _: String(Date.now()),
-            });
-            if (env.MFL_APIKEY) {
-              playersQs.set("APIKEY", String(env.MFL_APIKEY));
-            }
-            const playerStatusUrl =
-              `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
-              `/export?${playersQs.toString()}`;
-            const playerRes = await fetch(playerStatusUrl, {
-              headers: {
-                Cookie: cookieHeader,
-                "User-Agent": "ups-league-data-worker",
-              },
-              cf: { cacheTtl: 0, cacheEverything: false },
-            });
-            if (playerRes.ok) {
-              const pdata = await playerRes.json();
-              const playersRaw = pdata?.players?.player || [];
-              const players = Array.isArray(playersRaw)
-                ? playersRaw
-                : [playersRaw].filter(Boolean);
-              const p = players.find((x) => String(x?.id || "") === String(playerId));
-              const pStatus = String(p?.status || "").trim();
-              if (pStatus) {
-                playerStatusLookup = {
-                  source: "mfl_players_export",
-                  value: pStatus,
-                  rookie: rookieLike(pStatus),
-                };
+        if (!isRestructure) {
+          if (payloadPlayerStatus) {
+            playerStatusLookup = {
+              source: "payload",
+              value: payloadPlayerStatus,
+              rookie: rookieLike(payloadPlayerStatus),
+            };
+          } else {
+            try {
+              const playersQs = new URLSearchParams({
+                TYPE: "players",
+                L: leagueId,
+                P: playerId,
+                DETAILS: "1",
+                JSON: "1",
+                _: String(Date.now()),
+              });
+              if (env.MFL_APIKEY) {
+                playersQs.set("APIKEY", String(env.MFL_APIKEY));
               }
+              const playerStatusUrl =
+                `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
+                `/export?${playersQs.toString()}`;
+              const playerRes = await fetch(playerStatusUrl, {
+                headers: {
+                  Cookie: cookieHeader,
+                  "User-Agent": "ups-league-data-worker",
+                },
+                cf: { cacheTtl: 0, cacheEverything: false },
+              });
+              if (playerRes.ok) {
+                const pdata = await playerRes.json();
+                const playersRaw = pdata?.players?.player || [];
+                const players = Array.isArray(playersRaw)
+                  ? playersRaw
+                  : [playersRaw].filter(Boolean);
+                const p = players.find((x) => String(x?.id || "") === String(playerId));
+                const pStatus = String(p?.status || "").trim();
+                if (pStatus) {
+                  playerStatusLookup = {
+                    source: "mfl_players_export",
+                    value: pStatus,
+                    rookie: rookieLike(pStatus),
+                  };
+                }
+              }
+            } catch (_) {
+              // Fall through to requested status if lookup fails.
             }
-          } catch (_) {
-            // Fall through to requested status if lookup fails.
           }
         }
 
-        const isRookie =
-          playerStatusLookup.rookie !== null
-            ? playerStatusLookup.rookie
-            : rookieLike(requestedContractStatus);
-        const contractStatus = isRookie ? "MYM - Rookie" : "MYM - Vet";
+        let contractStatus = "";
+        if (isRestructure) {
+          contractStatus = requestedContractStatus || "Veteran";
+          playerStatusLookup = {
+            source: "restructure-skip-rookie-check",
+            value: "",
+            rookie: null,
+          };
+        } else {
+          const isRookie =
+            playerStatusLookup.rookie !== null
+              ? playerStatusLookup.rookie
+              : rookieLike(requestedContractStatus);
+          contractStatus = isRookie ? "MYM - Rookie" : "MYM - Vet";
+        }
 
         const importQuery =
           `TYPE=salaries&L=${encodeURIComponent(leagueId)}&APPEND=1`;
@@ -466,7 +483,7 @@ export default {
         let logDispatch = { ok: false, queued: false, skipped: true, reason: "No applied change detected" };
         if (looksOk && anyChanged) {
           try {
-            logDispatch = await dispatchRepoEvent("log-mym-submission", {
+            logDispatch = await dispatchRepoEvent(eventType, {
               league_id: leagueId,
               year: year,
               season: year,
@@ -482,7 +499,7 @@ export default {
               submitted_at_utc: submittedAtUtc || new Date().toISOString(),
               commish_override_flag: commishOverrideFlag,
               override_as_of_date: overrideAsOfDate,
-              source: "worker-offer-mym",
+              source: sourceTag,
             });
           } catch (e) {
             logDispatch = {

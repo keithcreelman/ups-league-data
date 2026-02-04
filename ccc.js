@@ -6,7 +6,10 @@
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
   const MYM_SUBMISSIONS_URL = "https://keithcreelman.github.io/ups-league-data/mym_submissions.json";
+  const RESTRUCTURE_SUBMISSIONS_URL =
+    "https://keithcreelman.github.io/ups-league-data/restructure_submissions.json";
   const SEASON_CAP_PER_TEAM = 5;
+  const RESTRUCTURE_CAP_PER_TEAM = 3;
   const MYM_EVENTS_BY_SEASON = {
     "2024": { contract_deadline: "2024-09-01", season_complete: "2024-12-30" },
     "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
@@ -22,6 +25,8 @@
 
   // MYM submit endpoint
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
+  const OFFER_RESTRUCTURE_URL =
+    "https://ups-league-data.keith-creelman.workers.dev/offer-restructure";
   const ROSTER_REFRESH_URL = "https://ups-league-data.keith-creelman.workers.dev/refresh-mym-json";
 
   // ======================================================
@@ -326,6 +331,38 @@
     return asOfDate.getTime() <= deadline.getTime() ? 1 : 0;
   }
 
+  function rookieLike(raw) {
+    const s = safeStr(raw).toLowerCase();
+    return s === "r" || s.startsWith("r-") || s.includes("rookie");
+  }
+
+  function canRestructureRow(row) {
+    const years = safeInt(row.contract_year);
+    if (years <= 1 || years > 3) return false;
+    if (rookieLike(row.contract_status)) return false;
+    return true;
+  }
+
+  function extractExtSuffix(contractInfo) {
+    const s = safeStr(contractInfo);
+    if (!s) return "";
+    const m = s.match(/(?:^|\|)\s*(Ext:.*)$/i);
+    return m ? safeStr(m[1]) : "";
+  }
+
+  function splitContractInfoBaseAndExt(contractInfo) {
+    const s = safeStr(contractInfo);
+    if (!s) return { base: "", ext: "" };
+    const m = s.match(/^(.*?)(?:\|\s*)?(Ext:.*)$/i);
+    if (!m) return { base: s, ext: "" };
+    return { base: safeStr(m[1]).replace(/\|\s*$/, ""), ext: safeStr(m[2]) };
+  }
+
+  function isStep1000(v) {
+    const n = safeInt(v);
+    return n > 0 && n % 1000 === 0;
+  }
+
   // ======================================================
   // 7) SORT + TABLE RENDER
   // ======================================================
@@ -370,6 +407,8 @@
         return safeInt(r.contract_year);
       case "status":
         return safeStr(r.contract_status).toLowerCase();
+      case "contractInfo":
+        return safeStr(r.contract_info).toLowerCase();
       case "acqType":
         return safeStr(r.mym_acq_type).toLowerCase();
       case "acquired":
@@ -397,6 +436,33 @@
     return sortState.dir === "asc" ? "▲" : "▼";
   }
 
+  function clampInt(v, min, max) {
+    const n = safeInt(v);
+    if (n < min) return min;
+    if (n > max) return max;
+    return n;
+  }
+
+  function updateTabPage(tabMode, page) {
+    state.pageByTab[tabMode] = Math.max(1, safeInt(page) || 1);
+  }
+
+  function resetAllTablePages() {
+    state.pageByTab.eligible = 1;
+    state.pageByTab.submitted = 1;
+  }
+
+  function formatSubmittedValue(v) {
+    const d = parseDate(v);
+    if (!d) return { date: "N/A", time: "" };
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return { date: `${y}-${m}-${day}`, time: `${hh}:${mm}` };
+  }
+
   function renderTable(rows, tabMode) {
     if (!rows.length) {
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
@@ -404,30 +470,62 @@
 
     const isEligibleTab = tabMode === "eligible";
     const isSubmittedTab = tabMode === "submitted";
+    const isRestructureMode = state.activeModule === "restructure";
     const showOverrideCols = !!state.commishMode;
-    const sortTh = (key, label, minWidthStyle) => {
+    const pageSize = clampInt(state.pageSize || 50, 10, 500);
+    const totalRows = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+    const pageRaw = state.pageByTab[tabMode] || 1;
+    const pageNow = clampInt(pageRaw, 1, totalPages);
+    if (pageNow !== pageRaw) updateTabPage(tabMode, pageNow);
+    const start = (pageNow - 1) * pageSize;
+    const pageRows = rows.slice(start, start + pageSize);
+    const startLabel = totalRows ? start + 1 : 0;
+    const endLabel = totalRows ? Math.min(start + pageSize, totalRows) : 0;
+
+    const sortTh = (key, label, minWidthStyle, extraClass) => {
       const isSorted = sortState.tab === tabMode && sortState.key === key;
       const widthAttr = minWidthStyle ? ` style="${minWidthStyle}"` : "";
-      return `<th data-sort="${key}" class="is-sortable${isSorted ? " is-sorted" : ""}"${widthAttr}>${label} <span class="sort">${sortIcon(
+      const className = ["is-sortable", isSorted ? "is-sorted" : "", extraClass || ""]
+        .join(" ")
+        .trim();
+      const ariaSort = isSorted ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
+      return `<th data-sort="${key}" aria-sort="${ariaSort}" class="${className}"${widthAttr}>${label} <span class="sort">${sortIcon(
         tabMode,
         key
       )}</span></th>`;
     };
 
+    const pager = `
+      <div class="ccc-tableMeta">
+        <div class="ccc-tableMetaInfo">Showing ${startLabel}-${endLabel} of ${totalRows}</div>
+        <div class="ccc-tableMetaActions">
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="prev" ${
+      pageNow <= 1 ? "disabled" : ""
+    }>Prev</button>
+          <span class="ccc-pageLabel">Page ${pageNow} / ${totalPages}</span>
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="next" ${
+      pageNow >= totalPages ? "disabled" : ""
+    }>Next</button>
+        </div>
+      </div>
+    `;
+
     const head = `
-      <div class="ccc-tableWrap" data-table="${tabMode}">
+      ${pager}
+      <div class="ccc-tableWrap ccc-density-${htmlEsc(state.tableDensity || "regular")}" data-table="${tabMode}">
         <table class="ccc-table">
           <thead>
             <tr>
               ${
                 isSubmittedTab
                   ? `
-                ${sortTh("submitted", "Submitted")}
+                ${sortTh("submitted", "Submitted", "min-width:130px;")}
                 ${sortTh("team", "Team")}
                 ${sortTh("player", "Player")}
                 ${sortTh("pos", "Pos")}
-                ${sortTh("salary", "Salary")}
-                ${sortTh("contractYear", "CL")}
+                ${sortTh("salary", "Salary", "", "is-num")}
+                ${sortTh("contractYear", "CL", "", "is-num")}
                 ${sortTh("status", "Status")}
                 ${showOverrideCols ? `<th>Commish Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
@@ -436,10 +534,20 @@
                 ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
                 ${sortTh("player", "Player")}
                 ${sortTh("pos", "Pos")}
-                ${sortTh("salary", "Salary")}
+                ${sortTh("salary", "Salary", "", "is-num")}
+                ${
+                  isRestructureMode
+                    ? `
+                ${sortTh("contractYear", "CL", "", "is-num")}
+                ${sortTh("status", "Status")}
+                ${sortTh("contractInfo", "Contract Info", "min-width:260px;")}
+                `
+                    : `
                 ${sortTh("acquired", "Acquired")}
                 ${sortTh("deadline", "Deadline")}
                 ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
+                `
+                }
               `
               }
             </tr>
@@ -448,9 +556,12 @@
     `;
 
     if (isSubmittedTab) {
-      const bodySubmitted = rows
+      const bodySubmitted = pageRows
         .map((r) => {
-          const submitted = htmlEsc(fmtLocalFromValue(r.submitted_at_utc) || "N/A");
+          const submittedFmt = formatSubmittedValue(r.submitted_at_utc);
+          const submitted = `${htmlEsc(submittedFmt.date)}${
+            submittedFmt.time ? `<div class="cell-sub">${htmlEsc(submittedFmt.time)}</div>` : ""
+          }`;
           const team = htmlEsc(r.franchise_name || r.franchise_id || "");
           const player = htmlEsc(r.player_name || r.player_id);
           const posDisp = htmlEsc(r.position || "");
@@ -469,8 +580,8 @@
           <td>${team}</td>
           <td class="playerCell">${player}</td>
           <td class="muted">${posDisp}</td>
-          <td>${salary}</td>
-          <td>${cl}</td>
+          <td class="cell-num">${salary}</td>
+          <td class="cell-num">${cl}</td>
           <td>${status}</td>
           ${showOverrideCols ? `<td>${override}</td><td class="muted">${overrideAsOf}</td>` : ``}
           <td class="explain">${info}</td>
@@ -479,10 +590,10 @@
         })
         .join("");
 
-      return head + bodySubmitted + `</tbody></table></div>`;
+      return head + bodySubmitted + `</tbody></table></div>${pager}`;
     }
 
-    const body = rows
+    const body = pageRows
       .map((r) => {
         const player = htmlEsc(r.player_name);
         const posDisp = htmlEsc(r.positional_grouping || r.position);
@@ -490,25 +601,34 @@
         const salaryNum = safeInt(r.salary);
         const salary = salaryNum.toLocaleString();
         const acqType = safeStr(r.mym_acq_type);
+        const contractYear = safeInt(r.contract_year) || "";
+        const contractStatus = htmlEsc(r.contract_status || "");
+        const contractInfo = htmlEsc(r.contract_info || "");
 
         const acquired = htmlEsc(fmtYMD(r.acquired_date));
         const deadline = htmlEsc(fmtYMD(r.mym_deadline));
         const expl = htmlEsc(r.rule_explanation || "");
+        const extSuffix = extractExtSuffix(r.contract_info);
 
         const actions = isEligibleTab
           ? `
           <button
             type="button"
             class="ccc-btn ccc-btn-offer"
-            data-offer="1"
+            ${isRestructureMode ? `data-restructure="1"` : `data-offer="1"`}
             data-player-id="${htmlEsc(r.player_id)}"
             data-player-name="${htmlEsc(r.player_name)}"
+            data-pos="${htmlEsc(r.positional_grouping || r.position || "")}"
             data-salary="${salaryNum}"
+            data-contract-year="${contractYear}"
+            data-contract-status="${contractStatus}"
+            data-contract-info="${contractInfo}"
+            data-ext-suffix="${htmlEsc(extSuffix)}"
             data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
             data-franchise-name="${htmlEsc(r.franchise_name || "")}"
             data-acq-type="${htmlEsc(acqType)}"
             data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
-          >Offer Contract</button>
+          >${isRestructureMode ? "Restructure" : "Offer Contract"}</button>
         `
           : ``;
 
@@ -517,31 +637,57 @@
           ${isEligibleTab ? `<td>${actions}</td>` : ``}
           <td class="playerCell">${player}</td>
           <td class="muted">${posDisp}</td>
-          <td>${salary}</td>
+          <td class="cell-num">${salary}</td>
+          ${
+            isRestructureMode
+              ? `
+          <td class="cell-num">${contractYear}</td>
+          <td>${contractStatus}</td>
+          <td class="explain">${contractInfo}</td>
+          `
+              : `
           <td class="muted">${acquired}</td>
           <td class="muted">${deadline}</td>
           ${isEligibleTab ? `` : `<td class="explain">${expl}</td>`}
+          `
+          }
         </tr>
       `;
       })
       .join("");
 
-    return head + body + `</tbody></table></div>`;
+    return head + body + `</tbody></table></div>${pager}`;
   }
 
   function renderSummary(teamName, rowsAll, rowsElig, used, remaining, asOfDate, showAsOfPill) {
+    const isRestructureMode = state.activeModule === "restructure";
 
-    const soonest = rowsElig
-      .map((r) => ({ r, d: parseDate(r.mym_deadline) }))
-      .filter((x) => x.d)
-      .sort((a, b) => a.d - b.d)[0];
+    const soonest = isRestructureMode
+      ? null
+      : rowsElig
+          .map((r) => ({ r, d: parseDate(r.mym_deadline) }))
+          .filter((x) => x.d)
+          .sort((a, b) => a.d - b.d)[0];
 
-    const soonestTxt = soonest ? fmtYMD(soonest.r.mym_deadline) : "N/A";
+    const seasonWindow = getRestructureSeasonWindow(state.selectedSeason);
+    const soonestTxt = isRestructureMode
+      ? seasonWindow
+        ? seasonWindow.endYmd
+        : "N/A"
+      : soonest
+      ? fmtYMD(soonest.r.mym_deadline)
+      : "N/A";
     const asOfTxt = asOfDate ? fmtLocalYMDHM(asOfDate) : "";
+    const snapshotLabel = isRestructureMode ? "Restructure Snapshot" : "MYM Snapshot";
+    const usedLabel = isRestructureMode ? "Restructures Used" : "MYM Used";
+    const remainingLabel = isRestructureMode ? "Restructures Remaining" : "MYM Remaining";
+    const capHint = isRestructureMode ? "cap: 3 per offseason" : "cap: 5 per season";
+    const soonestHint = isRestructureMode ? "offseason window closes" : "earliest eligible deadline";
+    const deadlineLabel = isRestructureMode ? "Window Ends" : "Soonest Deadline";
 
     return `
       <div class="ccc-summaryTop">
-        <div class="ccc-summaryTitle">${htmlEsc(teamName)} MYM Snapshot</div>
+        <div class="ccc-summaryTitle">${htmlEsc(teamName)} ${snapshotLabel}</div>
         <div class="muted" style="font-size:12px;">
           ${showAsOfPill ? `<span class="pill">As-Of: ${htmlEsc(asOfTxt)}</span>` : ``}
         </div>
@@ -555,21 +701,21 @@
         </div>
 
         <div class="kpi">
-          <div class="label">Soonest Deadline</div>
+          <div class="label">${deadlineLabel}</div>
           <div class="value">${htmlEsc(soonestTxt)}</div>
-          <div class="hint">earliest eligible deadline</div>
+          <div class="hint">${soonestHint}</div>
         </div>
 
         <div class="kpi">
-          <div class="label">MYM Used</div>
+          <div class="label">${usedLabel}</div>
           <div class="value">${used}</div>
           <div class="hint">successful submissions</div>
         </div>
 
         <div class="kpi">
-          <div class="label">MYM Remaining</div>
+          <div class="label">${remainingLabel}</div>
           <div class="value">${remaining}</div>
-          <div class="hint">cap: 5 per season</div>
+          <div class="hint">${capHint}</div>
         </div>
       </div>
     `;
@@ -690,15 +836,20 @@
   // ======================================================
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
+    restructureSubmissions: [],
     isAdmin: false,
     canCommishMode: false,
     commishMode: false,
     adminReason: "",
+    activeModule: "mym",
     selectedSeason: "",
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
     positionFilterEnabled: false,
     showAllTeams: false,
+    pageSize: 50,
+    tableDensity: "regular",
+    pageByTab: { eligible: 1, submitted: 1 },
     detectedFranchiseId: "",
     asOfDate: null,
     asOfOverrideActive: false,
@@ -713,13 +864,17 @@
     return m ? m[0] : s;
   }
 
-  function buildSeasonList(eligibilityRows, submissionRows) {
+  function buildSeasonList(eligibilityRows, submissionRows, restructureRows) {
     const set = new Set();
     (eligibilityRows || []).forEach((r) => {
       const s = normalizeSeasonValue(r.season);
       if (s) set.add(s);
     });
     (submissionRows || []).forEach((r) => {
+      const s = normalizeSeasonValue(r.season);
+      if (s) set.add(s);
+    });
+    (restructureRows || []).forEach((r) => {
       const s = normalizeSeasonValue(r.season);
       if (s) set.add(s);
     });
@@ -848,27 +1003,54 @@
     const evt = MYM_EVENTS_BY_SEASON[s] || {};
     const deadlineYmd = safeStr(evt.contract_deadline) || `${s}-09-01`;
     const start = parseYMDDate(deadlineYmd);
-    const end = parseYMDDate(`${safeInt(s) + 1}-01-31`);
-    if (!start || !end) return null;
-    return { season: s, start, end, deadlineYmd };
+    // League year rolls on March 1, so keep the current season active through end of February.
+    const endExclusive = parseYMDDate(`${safeInt(s) + 1}-03-01`);
+    if (!start || !endExclusive) return null;
+    return { season: s, start, endExclusive, deadlineYmd };
   }
 
   function isMymActiveForSeason(season, nowDate) {
     const win = getMymSeasonWindow(season);
     if (!win) return false;
     const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
-    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
+    return now.getTime() >= win.start.getTime() && now.getTime() < win.endExclusive.getTime();
+  }
+
+  function getRestructureSeasonWindow(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return null;
+    const evt = MYM_EVENTS_BY_SEASON[s] || {};
+    const start = parseYMDDate(`${s}-02-01`);
+    const endYmd = safeStr(evt.contract_deadline) || `${s}-09-01`;
+    const end = parseYMDDate(endYmd);
+    if (!start || !end) return null;
+    // Include contract deadline day.
+    const dayAfterEnd = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+    return { season: s, start, endExclusive: dayAfterEnd, endYmd };
+  }
+
+  function isRestructureActiveForSeason(season, nowDate) {
+    const win = getRestructureSeasonWindow(season);
+    if (!win) return false;
+    const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
+    return now.getTime() >= win.start.getTime() && now.getTime() < win.endExclusive.getTime();
   }
 
   function updateModuleStatusChips() {
     const season = normalizeSeasonValue(state.selectedSeason);
     const nowRef = new Date();
     const mymActive = isMymActiveForSeason(season, nowRef);
+    const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
     const mymChip = $("#moduleMymChip");
+    const restructureChip = $("#moduleRestructuresChip");
 
     if (mymChip) {
       mymChip.classList.toggle("disabled", !mymActive);
       mymChip.classList.toggle("primary", mymActive);
+    }
+    if (restructureChip) {
+      restructureChip.classList.toggle("disabled", !restructureActive);
+      restructureChip.classList.toggle("primary", restructureActive);
     }
 
     const setModuleState = (id, active) => {
@@ -880,13 +1062,20 @@
 
     // Placeholder scheduling statuses for upcoming modules.
     setModuleState("#moduleExtensionsChip", true);
-    const m = safeInt(season ? new Date().getMonth() + 1 : 0);
-    const inFebToDeadline = m >= 2 && m <= 8;
-    setModuleState("#moduleRestructuresChip", inFebToDeadline);
-    setModuleState("#moduleAuctionChip", inFebToDeadline);
+    setModuleState("#moduleAuctionChip", restructureActive);
   }
 
   function renderEligibleAvailabilityNotice(season) {
+    if (state.activeModule === "restructure") {
+      if (state.commishMode) return "";
+      if (isRestructureActiveForSeason(season, new Date())) return "";
+      const win = getRestructureSeasonWindow(season);
+      const endTxt = win ? win.endYmd : "contract deadline";
+      return `<div class="ccc-eligWarn">Restructures Available Feb 1 Through ${htmlEsc(
+        endTxt
+      )}</div>`;
+    }
+
     const s = normalizeSeasonValue(season);
     if (!s) return "";
     if (isMymActiveForSeason(s, new Date())) return "";
@@ -987,6 +1176,79 @@
     state.payload.submissions = [localSubmission, ...existingSubs];
   }
 
+  function applyPostRestructureLocalUpdate(row, payload, out) {
+    const pid = safeStr(row && row.player_id);
+    if (!pid) return;
+
+    const post = (out && out.postCheck) || {};
+    const salaryFinal = safeInt(post.salary || payload.salary || row.salary);
+    const statusFinal = safeStr(post.contractStatus || payload.contract_status || row.contract_status);
+    const yearFinal = safeInt(post.contractYear || payload.contract_year || row.contract_year);
+    const infoFinal = safeStr(post.contractInfo || payload.contract_info || row.contract_info);
+
+    state.payload.eligibility.forEach((r) => {
+      if (safeStr(r.player_id) !== pid) return;
+      r.salary = salaryFinal;
+      if (yearFinal > 0) r.contract_year = yearFinal;
+      if (statusFinal) r.contract_status = statusFinal;
+      if (infoFinal) r.contract_info = infoFinal;
+    });
+
+    const existing = Array.isArray(state.restructureSubmissions)
+      ? state.restructureSubmissions
+      : [];
+    const localSubmission = normalizeSubmissionRow({
+      submission_id: `rs-${safeStr(row.player_id)}-${Date.now()}`,
+      league_id: payload.L || payload.leagueId || "",
+      season: payload.YEAR || payload.year || row.season || "",
+      franchise_id: row.franchise_id,
+      franchise_name: row.franchise_name,
+      player_id: row.player_id,
+      player_name: row.player_name,
+      position: row.positional_grouping || row.position,
+      salary: salaryFinal,
+      contract_year: yearFinal,
+      contract_status: statusFinal,
+      contract_info: infoFinal,
+      submitted_at_utc: payload.submitted_at_utc || new Date().toISOString(),
+      commish_override_flag: safeInt(payload.commish_override_flag) ? 1 : 0,
+      override_as_of_date: safeStr(payload.override_as_of_date || ""),
+      source: "local-restructure-submit",
+    });
+    state.restructureSubmissions = [localSubmission, ...existing];
+  }
+
+  function computeSubmissionUsageByTeam(rows) {
+    const map = new Map();
+    (rows || []).forEach((r) => {
+      const fid = pad4(r.franchise_id);
+      if (!fid) return;
+      map.set(fid, (map.get(fid) || 0) + 1);
+    });
+    return map;
+  }
+
+  function syncTabLabels() {
+    const summaryTab = $(`.ccc-tab[data-tab="summary"]`);
+    const eligibleTab = $(`.ccc-tab[data-tab="eligible"]`);
+    const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
+    if (summaryTab) summaryTab.textContent = "Summary";
+    if (eligibleTab) eligibleTab.textContent = "Eligible";
+    if (submittedTab) {
+      submittedTab.textContent =
+        state.activeModule === "restructure" ? "Restructure - Submitted" : "MYM - Submitted";
+    }
+  }
+
+  function syncModuleChipSelection() {
+    const mymChip = $("#moduleMymChip");
+    const restructureChip = $("#moduleRestructuresChip");
+    if (mymChip) mymChip.classList.toggle("is-selected", state.activeModule === "mym");
+    if (restructureChip) {
+      restructureChip.classList.toggle("is-selected", state.activeModule === "restructure");
+    }
+  }
+
   function render() {
     const { eligibility, submissions, meta } = state.payload;
 
@@ -1014,66 +1276,86 @@
     const seasonEligibility = eligibility.filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
     );
-    const seasonSubmissions = buildSubmittedRows(eligibility, submissions, meta).filter(
+    const seasonMymSubmissions = buildSubmittedRows(eligibility, submissions, meta).filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
     );
+    const seasonRestructureSubmissions = (state.restructureSubmissions || [])
+      .map((r) => normalizeSubmissionRow(r))
+      .filter((r) => !season || normalizeSeasonValue(r.season) === season);
 
     const teamFilteredEligibility = showAllTeams
       ? seasonEligibility
       : seasonEligibility.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
-    const teamFilteredSubmissions = showAllTeams
-      ? seasonSubmissions
-      : seasonSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    const teamFilteredMymSubmissions = showAllTeams
+      ? seasonMymSubmissions
+      : seasonMymSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    const teamFilteredRestructureSubmissions = showAllTeams
+      ? seasonRestructureSubmissions
+      : seasonRestructureSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
     const positionFilteredEligibility =
       !positionFilterEnabled || selectedPosition === "__ALL_POS__"
         ? teamFilteredEligibility
         : teamFilteredEligibility.filter((r) => posKeyFromRow(r) === selectedPosition);
-    const positionFilteredSubmissions =
+    const positionFilteredMymSubmissions =
       !positionFilterEnabled || selectedPosition === "__ALL_POS__"
-        ? teamFilteredSubmissions
-        : teamFilteredSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
+        ? teamFilteredMymSubmissions
+        : teamFilteredMymSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
+    const positionFilteredRestructureSubmissions =
+      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
+        ? teamFilteredRestructureSubmissions
+        : teamFilteredRestructureSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
 
-    const scoped = searchLower
+    const scopedEligibility = searchLower
       ? positionFilteredEligibility.filter((r) =>
           safeStr(r.player_name).toLowerCase().includes(searchLower)
         )
       : positionFilteredEligibility.slice();
+    const moduleSubmittedBase =
+      state.activeModule === "restructure"
+        ? positionFilteredRestructureSubmissions
+        : positionFilteredMymSubmissions;
 
     const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
 
     if (cccMeta) {
       cccMeta.textContent =
-        `Season: ${season || "?"}` +
+        `Season: ${season || "?"} | module: ${
+          state.activeModule === "restructure" ? "Restructure" : "MYM"
+        }` +
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
         (state.commishMode && state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
-    const eligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) === 1);
-    const ineligibleRowsRaw = scoped.filter(
-      (r) => safeInt(r._eligibleEffective) !== 1 && !hasSubmittedMYM(r)
-    );
+    const restructureActiveNow =
+      state.commishMode || isRestructureActiveForSeason(season, new Date());
+    const restructureUsageByTeam = computeSubmissionUsageByTeam(seasonRestructureSubmissions);
+    const eligibleRowsRaw =
+      state.activeModule === "restructure"
+        ? scopedEligibility.filter((r) => {
+            if (!canRestructureRow(r)) return false;
+            if (!restructureActiveNow) return false;
+            const fid = pad4(r.franchise_id);
+            return (restructureUsageByTeam.get(fid) || 0) < RESTRUCTURE_CAP_PER_TEAM;
+          })
+        : scopedEligibility.filter((r) => safeInt(r._eligibleEffective) === 1);
 
     const eligibleRows = sortRows(
       eligibleRowsRaw,
-      sortState.tab === "eligible" ? sortState.key : "acquired",
+      sortState.tab === "eligible"
+        ? sortState.key
+        : state.activeModule === "restructure"
+        ? "salary"
+        : "acquired",
       sortState.tab === "eligible" ? sortState.dir : "desc"
     );
 
-    const ineligibleRows = sortRows(
-      ineligibleRowsRaw,
-      sortState.tab === "ineligible" ? sortState.key : "acquired",
-      sortState.tab === "ineligible" ? sortState.dir : "desc"
-    );
-
     const submittedRowsRaw = searchLower
-      ? positionFilteredSubmissions.filter((r) =>
-          safeStr(r.player_name).toLowerCase().includes(searchLower)
-        )
-      : positionFilteredSubmissions.slice();
+      ? moduleSubmittedBase.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower))
+      : moduleSubmittedBase.slice();
 
     const submittedRows = sortRows(
       submittedRowsRaw,
@@ -1083,26 +1365,30 @@
 
     const teamNameSource =
       (positionFilteredEligibility[0] && positionFilteredEligibility[0].franchise_name) ||
-      (positionFilteredSubmissions[0] && positionFilteredSubmissions[0].franchise_name) ||
+      (moduleSubmittedBase[0] && moduleSubmittedBase[0].franchise_name) ||
       "";
     const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
 
-    const mymUsed = positionFilteredSubmissions.length;
+    const usedCount = moduleSubmittedBase.length;
     const uniqueTeamsInSeason = new Set(
       seasonEligibility.map((r) => pad4(r.franchise_id)).filter(Boolean)
     ).size;
+    const capPerTeam =
+      state.activeModule === "restructure" ? RESTRUCTURE_CAP_PER_TEAM : SEASON_CAP_PER_TEAM;
     const capTotal = showAllTeams
-      ? Math.max(0, uniqueTeamsInSeason * SEASON_CAP_PER_TEAM)
-      : SEASON_CAP_PER_TEAM;
-    const mymRemaining = Math.max(0, capTotal - mymUsed);
+      ? Math.max(0, uniqueTeamsInSeason * capPerTeam)
+      : capPerTeam;
+    const remainingCount = Math.max(0, capTotal - usedCount);
 
+    syncTabLabels();
+    syncModuleChipSelection();
     if (summary) {
       summary.innerHTML = renderSummary(
         teamName,
         positionFilteredEligibility,
         eligibleRows,
-        mymUsed,
-        mymRemaining,
+        usedCount,
+        remainingCount,
         asOfDate,
         !!asOfDate
       );
@@ -1378,6 +1664,324 @@
   }
 }
 
+  const restructureModalState = {
+    open: false,
+    row: null,
+    years: 2,
+    extSuffix: "",
+    calc: null,
+  };
+
+  function ensureRestructureModalExists() {
+    const modal = $("#restructureModal");
+    if (!modal) throw new Error("Missing #restructureModal in HTML.");
+    return modal;
+  }
+
+  function calcRestructureOffer(years, tcvRaw, y1Raw, y2Raw, extSuffix) {
+    const yearsInt = safeInt(years) >= 3 ? 3 : 2;
+    const tcv = safeInt(tcvRaw);
+    const y1 = safeInt(y1Raw);
+    const y2Input = safeInt(y2Raw);
+    const errors = [];
+
+    const minTcv = yearsInt === 2 ? 2000 : 3000;
+    if (tcv < minTcv || !isStep1000(tcv)) {
+      errors.push(`TCV must be in 1,000 increments and at least ${minTcv.toLocaleString()}.`);
+    }
+    if (!isStep1000(y1)) {
+      errors.push("Year 1 must be in 1,000 increments.");
+    }
+    const minY1 = Math.ceil((tcv * 0.2) / 1000) * 1000;
+    if (y1 < minY1) {
+      errors.push(`Year 1 must be at least 20% of TCV (${minY1.toLocaleString()}).`);
+    }
+
+    let y2 = 0;
+    let y3 = 0;
+    if (yearsInt === 2) {
+      y2 = tcv - y1;
+      if (!isStep1000(y2) || y2 < 1000) {
+        errors.push("Year 2 must be at least 1,000 after applying Year 1.");
+      }
+    } else {
+      y2 = y2Input;
+      if (!isStep1000(y2) || y2 < 1000) {
+        errors.push("Year 2 must be at least 1,000 and in 1,000 increments.");
+      }
+      y3 = tcv - y1 - y2;
+      if (!isStep1000(y3) || y3 < 1000) {
+        errors.push("Year 3 must be at least 1,000 after Year 1 + Year 2.");
+      }
+    }
+
+    if (errors.length) {
+      return { ok: false, error: errors[0], years: yearsInt, tcv, y1, y2, y3 };
+    }
+
+    const aav = Math.round(tcv / yearsInt);
+    const gtd = tcv > 4000 ? Math.round(tcv * 0.75) : Math.max(0, tcv - y1);
+    const yearParts = [`Y1-${formatK(y1)}`, `Y2-${formatK(y2)}`];
+    if (yearsInt === 3) yearParts.push(`Y3-${formatK(y3)}`);
+
+    const parts = [
+      `CL ${yearsInt}`,
+      `TCV ${formatK(tcv)}`,
+      `AAV ${formatK(aav)}`,
+      yearParts.join(", "),
+      `GTD: ${formatK(gtd)}`,
+    ];
+    if (safeStr(extSuffix)) parts.push(safeStr(extSuffix));
+
+    return {
+      ok: true,
+      years: yearsInt,
+      tcv,
+      y1,
+      y2,
+      y3,
+      aav,
+      gtd,
+      contractInfo: parts.join("| "),
+    };
+  }
+
+  function renderRestructureModalSummary() {
+    const row = restructureModalState.row;
+    if (!row) return null;
+
+    const tcvInput = $("#rsTcvInput");
+    const y1Input = $("#rsYear1Input");
+    const y2Input = $("#rsYear2Input");
+    const y3Input = $("#rsYear3Input");
+    const err = $("#rsModalErr");
+    const submitBtn = $("#rsSubmitBtn");
+    const years = restructureModalState.years;
+
+    if (y2Input) y2Input.disabled = years === 2;
+
+    const calc = calcRestructureOffer(
+      years,
+      tcvInput ? tcvInput.value : 0,
+      y1Input ? y1Input.value : 0,
+      y2Input ? y2Input.value : 0,
+      restructureModalState.extSuffix
+    );
+    restructureModalState.calc = calc.ok ? calc : null;
+
+    if (calc.ok) {
+      if (y2Input && years === 2) y2Input.value = String(calc.y2);
+      if (y3Input) y3Input.value = years === 3 ? String(calc.y3) : "";
+      $("#rsYears").textContent = String(calc.years);
+      $("#rsTCV").textContent = safeInt(calc.tcv).toLocaleString();
+      $("#rsAAV").textContent = safeInt(calc.aav).toLocaleString();
+      $("#rsGTD").textContent = safeInt(calc.gtd).toLocaleString();
+      $("#rsContractInfo").textContent = calc.contractInfo;
+      if (err) {
+        err.style.display = "none";
+        err.textContent = "";
+      }
+      if (submitBtn) submitBtn.disabled = false;
+      return calc;
+    }
+
+    $("#rsYears").textContent = String(years);
+    $("#rsTCV").textContent = "—";
+    $("#rsAAV").textContent = "—";
+    $("#rsGTD").textContent = "—";
+    $("#rsContractInfo").textContent = "—";
+    if (y3Input) y3Input.value = "";
+    if (err) {
+      err.style.display = "";
+      err.textContent = calc.error || "Invalid restructure values.";
+    }
+    if (submitBtn) submitBtn.disabled = true;
+    return null;
+  }
+
+  function openRestructureModal(row) {
+    ensureRestructureModalExists();
+    const years = safeInt(row.contract_year) >= 3 ? 3 : 2;
+    const baseTcv = Math.max((safeInt(row.salary) || 1000) * years, years * 1000);
+    const tcv = Math.ceil(baseTcv / 1000) * 1000;
+    const y1 = Math.max(Math.ceil((tcv * 0.2) / 1000) * 1000, 1000);
+    const y2Default = years === 3 ? 1000 : Math.max(1000, tcv - y1);
+
+    restructureModalState.open = true;
+    restructureModalState.row = row;
+    restructureModalState.years = years;
+    restructureModalState.extSuffix = extractExtSuffix(row.contract_info);
+    restructureModalState.calc = null;
+
+    const title = $("#rsModalTitle");
+    if (title) title.textContent = `Restructure Contract - ${safeStr(row.player_name)}`;
+    const sub = $("#rsModalSub");
+    if (sub) {
+      sub.textContent =
+        `Current CL: ${safeInt(row.contract_year)} | Current Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${safeStr(
+          row.franchise_name || row.franchise_id
+        )}`;
+    }
+    const extBadge = $("#rsExtBadge");
+    if (extBadge) {
+      if (restructureModalState.extSuffix) {
+        extBadge.style.display = "";
+        extBadge.textContent = `Preserved: ${restructureModalState.extSuffix}`;
+      } else {
+        extBadge.style.display = "none";
+        extBadge.textContent = "";
+      }
+    }
+
+    $("#rsTcvInput").value = String(tcv);
+    $("#rsYear1Input").value = String(y1);
+    $("#rsYear2Input").value = String(y2Default);
+    $("#rsYear3Input").value = "";
+
+    renderRestructureModalSummary();
+
+    const modal = $("#restructureModal");
+    modal.classList.add("is-open");
+    document.body.classList.add("ccc-modalOpen");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeRestructureModal() {
+    const modal = $("#restructureModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    document.body.classList.remove("ccc-modalOpen");
+    modal.setAttribute("aria-hidden", "true");
+    restructureModalState.open = false;
+    restructureModalState.row = null;
+    restructureModalState.calc = null;
+  }
+
+  async function submitRestructureContract() {
+    const row = restructureModalState.row;
+    const calc = renderRestructureModalSummary();
+    if (!row || !calc) return;
+
+    const season = normalizeSeasonValue(state.selectedSeason || getYear() || DEFAULT_YEAR);
+    const fid = pad4(row.franchise_id);
+    const usedCount = (state.restructureSubmissions || [])
+      .map((r) => normalizeSubmissionRow(r))
+      .filter(
+        (r) => normalizeSeasonValue(r.season) === season && pad4(r.franchise_id) === fid
+      ).length;
+    if (usedCount >= RESTRUCTURE_CAP_PER_TEAM && !state.commishMode) {
+      const capErr = $("#rsModalErr");
+      if (capErr) {
+        capErr.style.display = "";
+        capErr.textContent = "Restructure cap reached (3 per offseason for this franchise).";
+      }
+      return;
+    }
+
+    const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+    const YEAR = getYear() || DEFAULT_YEAR;
+    const btn = $("#rsSubmitBtn");
+    const err = $("#rsModalErr");
+    if (err) {
+      err.style.display = "none";
+      err.textContent = "";
+    }
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+    }
+
+    const payload = {
+      L: String(L),
+      YEAR: String(YEAR),
+      leagueId: String(L),
+      year: String(YEAR),
+      type: "RESTRUCTURE",
+      player_id: safeStr(row.player_id),
+      player_name: safeStr(row.player_name),
+      franchise_id: safeStr(row.franchise_id),
+      franchise_name: safeStr(row.franchise_name),
+      position: safeStr(row.positional_grouping || row.position),
+      salary: safeInt(calc.y1),
+      contract_year: safeInt(calc.years),
+      contract_status: safeStr(row.contract_status || "Veteran"),
+      contract_info: safeStr(calc.contractInfo),
+      tcv: safeInt(calc.tcv),
+      aav: safeInt(calc.aav),
+      guaranteed: safeInt(calc.gtd),
+      submitted_at_utc: new Date().toISOString(),
+      commish_override_flag: state.commishMode && state.asOfOverrideActive && state.asOfDate ? 1 : 0,
+      override_as_of_date:
+        state.commishMode && state.asOfOverrideActive && state.asOfDate
+          ? fmtLocalYMDHM(state.asOfDate)
+          : "",
+    };
+
+    console.log("[Restructure submit payload]", payload);
+
+    try {
+      const url =
+        `${OFFER_RESTRUCTURE_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}`;
+      let res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const form = new URLSearchParams();
+        Object.entries(payload).forEach(([k, v]) => form.set(k, String(v)));
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body: form.toString(),
+        });
+      }
+
+      const text = await res.text();
+      let out = {};
+      try {
+        out = text ? JSON.parse(text) : {};
+      } catch (_) {}
+
+      if (!res.ok || out.ok !== true) {
+        const msg =
+          (out &&
+            (out.error ||
+              (out.reason
+                ? out.upstreamPreview
+                  ? `${out.reason}: ${String(out.upstreamPreview).slice(0, 280)}`
+                  : out.reason
+                : ""))) ||
+          (text && text.slice(0, 300)) ||
+          `Submit failed (HTTP ${res.status})`;
+        if (err) {
+          err.style.display = "";
+          err.textContent = msg;
+        }
+        return;
+      }
+
+      if (out && out.preCheck) console.log("[Restructure preCheck]", out.preCheck);
+      if (out && out.postCheck) console.log("[Restructure postCheck]", out.postCheck);
+      if (out && out.submitDebug) console.log("[Restructure submitDebug]", out.submitDebug);
+
+      applyPostRestructureLocalUpdate(row, payload, out);
+      closeRestructureModal();
+      render();
+    } catch (e) {
+      if (err) {
+        err.style.display = "";
+        err.textContent = e && e.message ? e.message : String(e);
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Submit Restructure";
+      }
+    }
+  }
+
   // ======================================================
   // 9) LOAD
   // ======================================================
@@ -1392,6 +1996,8 @@
       must("#positionSelect");
       must("#positionFilterChk");
       must("#showAllTeamsChk");
+      must("#pageSizeSelect");
+      must("#densitySelect");
       must("#commishModeWrap");
       must("#commishModeChk");
       must("#searchBox");
@@ -1407,16 +2013,26 @@
       must("#btnMYM2");
       must("#btnMYM3");
       must("#mymSubmitBtn");
+      must("#restructureModal");
+      must("#rsTcvInput");
+      must("#rsYear1Input");
+      must("#rsYear2Input");
+      must("#rsSubmitBtn");
 
       $("#cccMeta").textContent = "Loading MYM data…";
 
       const bust = (MYM_JSON_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
       const subBust =
         (MYM_SUBMISSIONS_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+      const restructureBust =
+        (RESTRUCTURE_SUBMISSIONS_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-      const [res, subRes] = await Promise.all([
+      const [res, subRes, restructureSubRes] = await Promise.all([
         fetch(MYM_JSON_URL + bust, { cache: "no-store" }),
         fetch(MYM_SUBMISSIONS_URL + subBust, { cache: "no-store" }).catch(() => null),
+        fetch(RESTRUCTURE_SUBMISSIONS_URL + restructureBust, { cache: "no-store" }).catch(
+          () => null
+        ),
       ]);
       if (!res.ok) throw new Error("MYM JSON HTTP " + res.status);
 
@@ -1430,6 +2046,14 @@
         } catch (e) {}
       }
       state.payload.submissions = subRows;
+      let restructureRows = [];
+      if (restructureSubRes && restructureSubRes.ok) {
+        try {
+          const restructureRaw = await restructureSubRes.json();
+          restructureRows = normalizeSubmissions(restructureRaw);
+        } catch (e) {}
+      }
+      state.restructureSubmissions = restructureRows;
       applyLocalOverrides(state.payload.eligibility);
 
       state.detectedFranchiseId = detectFranchiseId();
@@ -1462,7 +2086,11 @@
         $("#asOfInput").value = "";
       }
 
-      const seasons = buildSeasonList(state.payload.eligibility, state.payload.submissions);
+      const seasons = buildSeasonList(
+        state.payload.eligibility,
+        state.payload.submissions,
+        state.restructureSubmissions
+      );
       const requestedSeason = normalizeSeasonValue(getYear() || DEFAULT_YEAR);
       const seasonSelected = seasons.includes(requestedSeason)
         ? requestedSeason
@@ -1476,7 +2104,11 @@
       const seasonSubmissionRows = state.payload.submissions.filter(
         (r) => normalizeSeasonValue(r.season) === state.selectedSeason
       );
-      const teams = buildTeamList(seasonRows, seasonSubmissionRows, state.detectedFranchiseId);
+      const seasonRestructureRows = (state.restructureSubmissions || []).filter(
+        (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+      );
+      const mergedSubmissionRows = seasonSubmissionRows.concat(seasonRestructureRows);
+      const teams = buildTeamList(seasonRows, mergedSubmissionRows, state.detectedFranchiseId);
       const detected = teams.some((t) => t.id === state.detectedFranchiseId)
         ? state.detectedFranchiseId
         : teams[0]
@@ -1490,7 +2122,7 @@
       if (teamSelect) teamSelect.disabled = !!state.showAllTeams;
 
       populateTeamSelect(teams, state.selectedTeam);
-      const positions = buildPositionList(seasonRows, seasonSubmissionRows);
+      const positions = buildPositionList(seasonRows, mergedSubmissionRows);
       state.selectedPosition = "__ALL_POS__";
       state.positionFilterEnabled = false;
       populatePositionSelect(positions, state.selectedPosition);
@@ -1499,6 +2131,20 @@
       const positionSelect = $("#positionSelect");
       if (positionSelect) positionSelect.disabled = !state.positionFilterEnabled;
 
+      const pageSizeSelect = $("#pageSizeSelect");
+      if (pageSizeSelect) {
+        state.pageSize = clampInt(pageSizeSelect.value || state.pageSize, 10, 500);
+        pageSizeSelect.value = String(state.pageSize);
+      }
+      const densitySelect = $("#densitySelect");
+      if (densitySelect) {
+        const densityVal = safeStr(densitySelect.value || "regular");
+        state.tableDensity =
+          densityVal === "compact" || densityVal === "relaxed" ? densityVal : "regular";
+        densitySelect.value = state.tableDensity;
+      }
+
+      resetAllTablePages();
       setTab("eligible");
 
       // default sort per tab
@@ -1672,6 +2318,28 @@
   }
 
   function wireEvents() {
+    const moduleMymChip = $("#moduleMymChip");
+    if (moduleMymChip)
+      moduleMymChip.addEventListener("click", () => {
+        state.activeModule = "mym";
+        sortState.tab = "eligible";
+        sortState.key = "acquired";
+        sortState.dir = "desc";
+        resetAllTablePages();
+        render();
+      });
+
+    const moduleRestructuresChip = $("#moduleRestructuresChip");
+    if (moduleRestructuresChip)
+      moduleRestructuresChip.addEventListener("click", () => {
+        state.activeModule = "restructure";
+        sortState.tab = "eligible";
+        sortState.key = "salary";
+        sortState.dir = "desc";
+        resetAllTablePages();
+        render();
+      });
+
     // Tabs
     $$(".ccc-tab").forEach((btn) =>
       btn.addEventListener("click", () => {
@@ -1685,21 +2353,26 @@
     if (seasonSelect)
       seasonSelect.addEventListener("change", (e) => {
         state.selectedSeason = normalizeSeasonValue(e.target.value);
+        resetAllTablePages();
         const seasonRows = state.payload.eligibility.filter(
           (r) => normalizeSeasonValue(r.season) === state.selectedSeason
         );
         const seasonSubmissionRows = (state.payload.submissions || []).filter(
           (r) => normalizeSeasonValue(r.season) === state.selectedSeason
         );
+        const seasonRestructureRows = (state.restructureSubmissions || []).filter(
+          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+        );
+        const mergedSubmissionRows = seasonSubmissionRows.concat(seasonRestructureRows);
         const teams = buildTeamList(
           seasonRows,
-          seasonSubmissionRows,
+          mergedSubmissionRows,
           state.detectedFranchiseId
         );
         const stillValid = teams.some((t) => t.id === state.selectedTeam);
         if (!stillValid) state.selectedTeam = teams[0] ? teams[0].id : "";
         populateTeamSelect(teams, state.selectedTeam);
-        const positions = buildPositionList(seasonRows, seasonSubmissionRows);
+        const positions = buildPositionList(seasonRows, mergedSubmissionRows);
         if (state.selectedPosition !== "__ALL_POS__" && !positions.includes(state.selectedPosition)) {
           state.selectedPosition = "__ALL_POS__";
         }
@@ -1711,6 +2384,7 @@
     if (showAllTeamsChk)
       showAllTeamsChk.addEventListener("change", (e) => {
         state.showAllTeams = !!e.target.checked;
+        resetAllTablePages();
         const sel = $("#teamSelect");
         if (sel) sel.disabled = state.showAllTeams;
         render();
@@ -1721,6 +2395,7 @@
       teamSelect.addEventListener("change", (e) => {
         state.selectedTeam = e.target.value;
         state.showAllTeams = false;
+        resetAllTablePages();
         const showAll = $("#showAllTeamsChk");
         if (showAll) showAll.checked = false;
         render();
@@ -1730,6 +2405,7 @@
     if (positionSelect)
       positionSelect.addEventListener("change", (e) => {
         state.selectedPosition = safeStr(e.target.value || "__ALL_POS__");
+        resetAllTablePages();
         render();
       });
 
@@ -1743,6 +2419,7 @@
           state.selectedPosition = "__ALL_POS__";
           if (sel) sel.value = "__ALL_POS__";
         }
+        resetAllTablePages();
         render();
       });
 
@@ -1765,6 +2442,7 @@
     if (searchBox)
       searchBox.addEventListener("input", (e) => {
         state.search = e.target.value;
+        resetAllTablePages();
         render();
       });
 
@@ -1773,6 +2451,26 @@
       clearBtn.addEventListener("click", () => {
         $("#searchBox").value = "";
         state.search = "";
+        resetAllTablePages();
+        render();
+      });
+
+    const pageSizeSelect = $("#pageSizeSelect");
+    if (pageSizeSelect)
+      pageSizeSelect.addEventListener("change", (e) => {
+        state.pageSize = clampInt(e.target.value || state.pageSize, 10, 500);
+        e.target.value = String(state.pageSize);
+        resetAllTablePages();
+        render();
+      });
+
+    const densitySelect = $("#densitySelect");
+    if (densitySelect)
+      densitySelect.addEventListener("change", (e) => {
+        const density = safeStr(e.target.value || "regular");
+        state.tableDensity =
+          density === "compact" || density === "relaxed" ? density : "regular";
+        e.target.value = state.tableDensity;
         render();
       });
 
@@ -1824,6 +2522,24 @@
       true
     );
 
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest(".ccc-pageBtn") : null;
+        if (!btn) return;
+        const tab = safeStr(btn.getAttribute("data-page-tab"));
+        const action = safeStr(btn.getAttribute("data-page-action"));
+        if (!tab || !action) return;
+        if (action === "prev") {
+          updateTabPage(tab, (state.pageByTab[tab] || 1) - 1);
+        } else if (action === "next") {
+          updateTabPage(tab, (state.pageByTab[tab] || 1) + 1);
+        }
+        render();
+      },
+      true
+    );
+
     // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
     document.addEventListener(
       "click",
@@ -1850,6 +2566,34 @@
       true
     );
 
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-restructure='1']") : null;
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const row = {
+          player_id: btn.getAttribute("data-player-id"),
+          player_name: btn.getAttribute("data-player-name"),
+          salary: safeInt(btn.getAttribute("data-salary")),
+          contract_year: safeInt(btn.getAttribute("data-contract-year")),
+          contract_status: safeStr(btn.getAttribute("data-contract-status")),
+          contract_info: safeStr(btn.getAttribute("data-contract-info")),
+          franchise_id: btn.getAttribute("data-franchise-id"),
+          franchise_name: btn.getAttribute("data-franchise-name"),
+          position: safeStr(btn.getAttribute("data-pos")),
+        };
+
+        openRestructureModal(row);
+      },
+      true
+    );
+
     // Close modal (backdrop/X/cancel)
     const modal = $("#mymModal");
     if (modal) {
@@ -1859,11 +2603,21 @@
       });
     }
 
+    const restructureModal = $("#restructureModal");
+    if (restructureModal) {
+      restructureModal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeRestructureModal();
+      });
+    }
+
     // Escape closes modal
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        const modalEl = $("#mymModal");
-        if (modalEl && modalEl.classList.contains("is-open")) closeMYMModal();
+        const modalElMym = $("#mymModal");
+        const modalElRes = $("#restructureModal");
+        if (modalElMym && modalElMym.classList.contains("is-open")) closeMYMModal();
+        if (modalElRes && modalElRes.classList.contains("is-open")) closeRestructureModal();
       }
     });
 
@@ -1876,6 +2630,14 @@
     // Submit
     const submitBtn = $("#mymSubmitBtn");
     if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
+
+    ["#rsTcvInput", "#rsYear1Input", "#rsYear2Input"].forEach((sel) => {
+      const el = $(sel);
+      if (el) el.addEventListener("input", () => renderRestructureModalSummary());
+    });
+
+    const rsSubmitBtn = $("#rsSubmitBtn");
+    if (rsSubmitBtn) rsSubmitBtn.addEventListener("click", () => submitRestructureContract());
   }
 
   // ======================================================

@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204af">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204aj">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -42,6 +42,22 @@
         <div class="ccc-field">
           Search
           <input id="searchBox" class="ccc-input" placeholder="player name…" />
+        </div>
+        <div class="ccc-field">
+          Rows
+          <select id="pageSizeSelect" class="ccc-select">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="ccc-field">
+          Density
+          <select id="densitySelect" class="ccc-select">
+            <option value="compact">Compact</option>
+            <option value="regular" selected>Regular</option>
+            <option value="relaxed">Relaxed</option>
+          </select>
         </div>
 
         <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
@@ -133,6 +149,72 @@
       </div>
     </div>
   </div>
+
+  <!-- RESTRUCTURE MODAL -->
+  <div id="restructureModal" class="ccc-modal" aria-hidden="true">
+    <div class="ccc-modal-backdrop" data-close="1"></div>
+
+    <div class="ccc-modal-card" role="dialog" aria-modal="true" aria-labelledby="rsModalTitle">
+      <div class="ccc-modal-head">
+        <div>
+          <div id="rsModalTitle" class="ccc-modal-title">Restructure Contract</div>
+          <div id="rsModalSub" class="ccc-modal-sub muted"></div>
+        </div>
+        <button class="ccc-modal-x" type="button" data-close="1">✕</button>
+      </div>
+
+      <div class="ccc-modal-body">
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Inputs (1,000 increments)</div>
+          <div class="ccc-inputGrid">
+            <label class="ccc-field ccc-field-col">
+              New TCV
+              <input id="rsTcvInput" class="ccc-input" type="number" min="2000" step="1000" />
+            </label>
+            <label class="ccc-field ccc-field-col">
+              Year 1
+              <input id="rsYear1Input" class="ccc-input" type="number" min="1000" step="1000" />
+            </label>
+            <label class="ccc-field ccc-field-col">
+              Year 2
+              <input id="rsYear2Input" class="ccc-input" type="number" min="1000" step="1000" />
+            </label>
+            <label class="ccc-field ccc-field-col">
+              Year 3 (auto)
+              <input id="rsYear3Input" class="ccc-input" type="number" readonly />
+            </label>
+          </div>
+          <div class="muted" style="font-size:12px; margin-top:6px;">
+            Year 1 must be at least 20% of TCV. If 2-year deal, Year 2 auto-fills.
+          </div>
+          <div class="pill" id="rsExtBadge" style="display:none; margin-top:8px;"></div>
+        </div>
+
+        <div class="ccc-summary" style="margin-top:12px;">
+          <div class="ccc-summaryTop">
+            <div class="ccc-summaryTitle">Restructure Summary</div>
+          </div>
+          <div class="ccc-kpis">
+            <div class="kpi"><div class="label">Contract Length</div><div class="value" id="rsYears">—</div></div>
+            <div class="kpi"><div class="label">TCV</div><div class="value" id="rsTCV">—</div></div>
+            <div class="kpi"><div class="label">AAV</div><div class="value" id="rsAAV">—</div></div>
+            <div class="kpi"><div class="label">Guaranteed</div><div class="value" id="rsGTD">—</div></div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="muted" style="font-size:12px; font-weight:800; margin-bottom:6px;">Contract Info (sent to MFL)</div>
+            <div class="ccc-code" id="rsContractInfo">—</div>
+          </div>
+        </div>
+
+        <div class="ccc-error" id="rsModalErr" style="display:none;"></div>
+      </div>
+
+      <div class="ccc-modal-foot">
+        <button class="ccc-btn" type="button" data-close="1">Cancel</button>
+        <button class="ccc-btn" type="button" id="rsSubmitBtn" style="font-weight:1000;">Submit Restructure</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204af"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204aj"></script>

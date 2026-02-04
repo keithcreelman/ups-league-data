@@ -39,3 +39,8 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
   - if a submission exists in salaries but not yet in logs, app shows an `Inferred` row until log arrives
 - Backfill helper:
   - `python etl/mfl_etl_full/backfill_mym_submissions_from_dashboard.py --dashboard-path mym_dashboard.json --submissions-path mym_submissions.json --league-id 74598 --commish-override-flag 1 --override-as-of-date "YYYY-MM-DD HH:MM"`
+
+## Restructure submission log
+- Submission log file: `restructure_submissions.json`
+- Workflow: `.github/workflows/log-restructure-submission.yml`
+- Trigger: `repository_dispatch` event type `log-restructure-submission` (sent by Worker after successful restructure import)

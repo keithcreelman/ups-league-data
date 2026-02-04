@@ -630,92 +630,82 @@
 
   // ✅ FIXED: single, clean submit function (no duplicate try blocks)
   async function submitMYMContract() {
-    const row = mymModalState.row;
-    if (!row) return;
+  const row = mymModalState.row;
+  if (!row) return;
 
-    const L = getLeagueId() || DEFAULT_LEAGUE_ID;
-    const YEAR = getYear() || DEFAULT_YEAR;
+  const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+  const YEAR = getYear() || DEFAULT_YEAR;
 
-    const salary = safeInt(row.salary);
-    const years = mymModalState.years;
-    const calc = buildContractInfo(salary, years);
+  const salary = safeInt(row.salary);
+  const years = mymModalState.years;
+  const calc = buildContractInfo(salary, years);
 
-    const payload = {
-      type: "MYM",
+  const payload = {
+    type: "MYM",
 
-      // REQUIRED BY WORKER
-      L,
-      YEAR,
+    // keep in body (fine)
+    L,
+    YEAR,
+    leagueId: L,
+    year: YEAR,
 
-      // Optional redundancy (harmless)
-      leagueId: L,
-      year: YEAR,
+    player_id: String(row.player_id),
+    salary,
+    contract_year: years,
+    contract_info: calc.contractInfo,
+    tcv: calc.tcv,
+    aav: calc.aav,
+    guaranteed: calc.gtd
+  };
 
-      player_id: String(row.player_id),
-      salary,
-      contract_year: years,
-      contract_info: calc.contractInfo,
-      tcv: calc.tcv,
-      aav: calc.aav,
-      guaranteed: calc.gtd,
-    };
+  console.log("[MYM submit payload]", payload);
 
-    console.log("[MYM submit payload]", payload);
+  const btn = $("#mymSubmitBtn");
+  const err = $("#mymModalErr");
+  if (err) { err.style.display = "none"; err.textContent = ""; }
+  if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
 
-    const btn = $("#mymSubmitBtn");
-    const err = $("#mymModalErr");
-    if (err) {
-      err.style.display = "none";
-      err.textContent = "";
-    }
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "Submitting...";
-    }
+  try {
+    // ✅ ALSO put required params in querystring (what your Worker is likely checking)
+    const url =
+      `${OFFER_MYM_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}`;
 
-    try {
-      const res = await fetch(OFFER_MYM_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-      // Worker might return JSON OR text on error
-      const text = await res.text();
-      let out = {};
-      try {
-        out = text ? JSON.parse(text) : {};
-      } catch (_) {}
+    // Worker might return JSON OR text on error
+    const text = await res.text();
+    let out = {};
+    try { out = text ? JSON.parse(text) : {}; } catch (_) {}
 
-      if (!res.ok || out.ok !== true) {
-        const msg =
-          (out && (out.error || out.reason)) ||
-          (text && text.slice(0, 300)) ||
-          `Submit failed (HTTP ${res.status})`;
+    if (!res.ok || out.ok !== true) {
+      const msg =
+        (out && (out.error || out.reason)) ||
+        (text && text.slice(0, 300)) ||
+        `Submit failed (HTTP ${res.status})`;
 
-        if (err) {
-          err.style.display = "";
-          err.textContent = msg;
-        }
-        return; // do NOT close modal on failure
-      }
-
-      // success
-      closeMYMModal();
-      await load(); // refresh dashboard so eligibility/usage updates
-    } catch (e) {
-      const msg = e && e.message ? e.message : String(e);
       if (err) {
         err.style.display = "";
         err.textContent = msg;
       }
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Submit Contract";
-      }
+      return; // do NOT close modal on failure
     }
+
+    closeMYMModal();
+    await load(); // refresh dashboard
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    if (err) {
+      err.style.display = "";
+      err.textContent = msg;
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Submit Contract"; }
   }
+}
 
   // ======================================================
   // 9) LOAD

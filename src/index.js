@@ -84,36 +84,43 @@ export default {
           `</leagueUnit></salaries>`;
 
         const form = new URLSearchParams();
+        form.set("TYPE", "salaries");
+        form.set("L", leagueId);
+        form.set("APPEND", "1");
         form.set("DATA", dataXml);
 
         const importQuery =
           `TYPE=salaries&L=${encodeURIComponent(leagueId)}&APPEND=1`;
-        const importUrls = [
-          `https://api.myfantasyleague.com/${encodeURIComponent(year)}/import?${importQuery}`,
-          `https://www.myfantasyleague.com/${encodeURIComponent(year)}/import?${importQuery}`,
-        ];
+        const importUrl = `https://api.myfantasyleague.com/${encodeURIComponent(
+          year
+        )}/import?${importQuery}`;
 
-        let mflRes = null;
-        let text = "";
-        for (const mflImportUrl of importUrls) {
-          const res = await fetch(mflImportUrl, {
-            method: "POST",
-            headers: {
-              Cookie: cookie,
-              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-              "User-Agent": "ups-league-data-worker",
-            },
-            body: form.toString(),
-            redirect: "follow",
-            cf: { cacheTtl: 0, cacheEverything: false },
-          });
-          const bodyText = await res.text();
-          mflRes = res;
-          text = bodyText;
-
-          // Stop on first response that isn't the generic developer/docs page.
-          if (!bodyText.includes("Fantasy Football:  MFL Developers Program")) break;
+        // api.myfantasyleague.com issues 302 to a specific shard (wwwNN). If we auto-follow
+        // a POST through 302, body data can be dropped. Resolve target first, then POST once.
+        let targetImportUrl = importUrl;
+        const probe = await fetch(importUrl, {
+          method: "GET",
+          redirect: "manual",
+          headers: { Cookie: cookie, "User-Agent": "ups-league-data-worker" },
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+        const loc = probe.headers.get("Location") || probe.headers.get("location");
+        if (probe.status >= 300 && probe.status < 400 && loc) {
+          targetImportUrl = loc;
         }
+
+        const mflRes = await fetch(targetImportUrl, {
+          method: "POST",
+          headers: {
+            Cookie: cookie,
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "User-Agent": "ups-league-data-worker",
+          },
+          body: form.toString(),
+          redirect: "manual",
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+        const text = await mflRes.text();
 
         const lowered = text.toLowerCase();
         const looksOk =

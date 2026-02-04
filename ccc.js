@@ -359,6 +359,78 @@
     }
   }
 
+  function parseLeagueAdminFromData(data) {
+    const league = data && (data.league || data);
+    const frBlock =
+      (league && league.franchises) ||
+      (league && league.league && league.league.franchises) ||
+      null;
+    const frArr = (frBlock && (frBlock.franchise || frBlock)) || [];
+    const franchises = Array.isArray(frArr) ? frArr : [frArr].filter(Boolean);
+    const emailCount = franchises.reduce((acc, f) => {
+      const hasEmail = !!(f && (f.email || (f.owner && f.owner.email)));
+      return acc + (hasEmail ? 1 : 0);
+    }, 0);
+
+    return {
+      ok: true,
+      isAdmin: emailCount > 1,
+      reason: emailCount > 1
+        ? "Private owner data visible (commish)"
+        : "No private owner data visible (owner mode)",
+      emailCount,
+    };
+  }
+
+  async function getAdminFlagFromBrowser(leagueId, year) {
+    const L = safeStr(leagueId || getLeagueId() || DEFAULT_LEAGUE_ID);
+    const YEAR = safeStr(year || getYear() || DEFAULT_YEAR);
+    const candidates = [];
+
+    if (window && window.location && window.location.origin) {
+      candidates.push(
+        `${window.location.origin}/${encodeURIComponent(
+          YEAR
+        )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`
+      );
+    }
+    candidates.push(
+      `https://api.myfantasyleague.com/${encodeURIComponent(
+        YEAR
+      )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`
+    );
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, {
+          cache: "no-store",
+          credentials: "include",
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const parsed = parseLeagueAdminFromData(data);
+        return {
+          ...parsed,
+          L,
+          YEAR,
+          source: "browser",
+        };
+      } catch (e) {
+        // Try next endpoint.
+      }
+    }
+
+    return {
+      ok: false,
+      isAdmin: false,
+      reason: "Could not verify commish mode from current login",
+      emailCount: 0,
+      L,
+      YEAR,
+      source: "browser",
+    };
+  }
+
   // ======================================================
   // 6) ELIGIBILITY OVERRIDE
   // ======================================================
@@ -2361,11 +2433,17 @@
 
       state.detectedFranchiseId = detectFranchiseId();
 
-      const admin = await getAdminFlagFromWorker();
-      state.isAdmin = !!admin.isAdmin;
-      state.canCommishMode = !!admin.isAdmin;
+      const workerAdmin = await getAdminFlagFromWorker();
+      const browserAdmin = await getAdminFlagFromBrowser(workerAdmin.L, workerAdmin.YEAR);
+      const admin = browserAdmin.ok ? browserAdmin : workerAdmin;
+
+      // Safety: only grant commish tools when current browser login proves commish access.
+      state.isAdmin = !!(browserAdmin.ok && browserAdmin.isAdmin);
+      state.canCommishMode = !!(browserAdmin.ok && browserAdmin.isAdmin);
       state.commishMode = state.canCommishMode ? true : false;
-      state.adminReason = safeStr(admin.reason || "");
+      state.adminReason = state.canCommishMode
+        ? safeStr(admin.reason || "")
+        : safeStr(browserAdmin.reason || "No private owner data visible (owner mode)");
 
       const commishWrap = $("#commishModeWrap");
       const commishChk = $("#commishModeChk");

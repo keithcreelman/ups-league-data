@@ -228,7 +228,7 @@
 .ccc-tableWrap{
   margin-top: 10px;
   border: 1px solid var(--line);
-  background: rgba(0,0,0,.22);
+  background: rgba(0,0,0,.26);
   border-radius: var(--radius);
   overflow:auto;
 }
@@ -237,6 +237,7 @@ table.ccc-table{
   width:100%;
   border-collapse: collapse;
   min-width: 980px;
+  color: rgba(233,238,249,.92);
 }
 
 table.ccc-table thead th{
@@ -311,16 +312,16 @@ table.ccc-table tbody tr:hover td{
 
 /* Stronger zebra stripes */
 table.ccc-table tbody tr:nth-child(odd) td{
-  background: rgba(255,255,255,.055);
+  background: rgba(255,255,255,.095);
 }
 table.ccc-table tbody tr:nth-child(even) td{
-  background: rgba(255,255,255,.085);
+  background: rgba(255,255,255,.14);
 }
 
 /* Stronger hover with a soft glow */
 table.ccc-table tbody tr:hover td{
-  background: rgba(78,161,255,.18) !important;
-  box-shadow: inset 0 0 0 1px rgba(78,161,255,.25);
+  background: rgba(78,161,255,.24) !important;
+  box-shadow: inset 0 0 0 1px rgba(78,161,255,.30);
 }
 
 /* Optional: subtle vertical dividers to improve readability */
@@ -340,24 +341,24 @@ table.ccc-table thead th{
 }
 
 /* Position-based row tints (light but noticeable) */
-tr.pos-QB td{ background-image: linear-gradient(90deg, rgba(59,130,246,.17), rgba(0,0,0,0)); }
-tr.pos-RB td{ background-image: linear-gradient(90deg, rgba(34,197,94,.17), rgba(0,0,0,0)); }
-tr.pos-WR td{ background-image: linear-gradient(90deg, rgba(168,85,247,.17), rgba(0,0,0,0)); }
-tr.pos-TE td{ background-image: linear-gradient(90deg, rgba(249,115,22,.17), rgba(0,0,0,0)); }
-tr.pos-K  td{ background-image: linear-gradient(90deg, rgba(234,179,8,.17), rgba(0,0,0,0)); }
-tr.pos-DL td{ background-image: linear-gradient(90deg, rgba(239,68,68,.17), rgba(0,0,0,0)); }
-tr.pos-LB td{ background-image: linear-gradient(90deg, rgba(6,182,212,.17), rgba(0,0,0,0)); }
-tr.pos-DB td{ background-image: linear-gradient(90deg, rgba(99,102,241,.20), rgba(0,0,0,0)); }
+tr.pos-QB td{ background-image: linear-gradient(90deg, rgba(59,130,246,.32), rgba(0,0,0,0)); }
+tr.pos-RB td{ background-image: linear-gradient(90deg, rgba(34,197,94,.32), rgba(0,0,0,0)); }
+tr.pos-WR td{ background-image: linear-gradient(90deg, rgba(168,85,247,.32), rgba(0,0,0,0)); }
+tr.pos-TE td{ background-image: linear-gradient(90deg, rgba(249,115,22,.32), rgba(0,0,0,0)); }
+tr.pos-K  td{ background-image: linear-gradient(90deg, rgba(234,179,8,.32), rgba(0,0,0,0)); }
+tr.pos-DL td{ background-image: linear-gradient(90deg, rgba(239,68,68,.32), rgba(0,0,0,0)); }
+tr.pos-LB td{ background-image: linear-gradient(90deg, rgba(6,182,212,.32), rgba(0,0,0,0)); }
+tr.pos-DB td{ background-image: linear-gradient(90deg, rgba(99,102,241,.36), rgba(0,0,0,0)); }
 
 /* Keep your left border accent (make it a touch thicker) */
-tr.pos-QB td:first-child{ border-left: 5px solid rgba(59,130,246,.65); }
-tr.pos-RB td:first-child{ border-left: 5px solid rgba(34,197,94,.65); }
-tr.pos-WR td:first-child{ border-left: 5px solid rgba(168,85,247,.65); }
-tr.pos-TE td:first-child{ border-left: 5px solid rgba(249,115,22,.65); }
-tr.pos-K  td:first-child{ border-left: 5px solid rgba(234,179,8,.65); }
-tr.pos-DL td:first-child{ border-left: 5px solid rgba(239,68,68,.65); }
-tr.pos-LB td:first-child{ border-left: 5px solid rgba(6,182,212,.65); }
-tr.pos-DB td:first-child{ border-left: 5px solid rgba(99,102,241,.70); }
+tr.pos-QB td:first-child{ border-left: 5px solid rgba(59,130,246,.85); }
+tr.pos-RB td:first-child{ border-left: 5px solid rgba(34,197,94,.85); }
+tr.pos-WR td:first-child{ border-left: 5px solid rgba(168,85,247,.85); }
+tr.pos-TE td:first-child{ border-left: 5px solid rgba(249,115,22,.85); }
+tr.pos-K  td:first-child{ border-left: 5px solid rgba(234,179,8,.85); }
+tr.pos-DL td:first-child{ border-left: 5px solid rgba(239,68,68,.85); }
+tr.pos-LB td:first-child{ border-left: 5px solid rgba(6,182,212,.85); }
+tr.pos-DB td:first-child{ border-left: 5px solid rgba(99,102,241,.90); }
 
 /* ===== Modal (fixed readability + no lockups) ===== */
 .ccc-modal{
@@ -479,6 +480,7 @@ body.ccc-modalOpen #mymModal *{
   table.ccc-table{ min-width: 760px; }
   table.ccc-table th,
   table.ccc-table td{ padding: 10px 8px; }
+  table.ccc-table thead th{ position: sticky; }
 }
 @media (max-width: 520px){
   .kpi{ min-width: 100%; }

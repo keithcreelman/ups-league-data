@@ -29,6 +29,14 @@ jobs:
           MFL_COOKIE: ${{ secrets.MFL_COOKIE }}
           MFL_LEAGUE_ID: ${{ secrets.MFL_LEAGUE_ID }}
         run: |
+          if [ -z "${MFL_COOKIE}" ]; then
+            echo "Missing required secret: MFL_COOKIE"
+            exit 1
+          fi
+          if [ -z "${MFL_LEAGUE_ID}" ]; then
+            echo "Missing required secret: MFL_LEAGUE_ID"
+            exit 1
+          fi
           python etl/mfl_etl_full/refresh_mym_dashboard_from_mfl.py \
             --json-path mym_dashboard.json
 

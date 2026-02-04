@@ -18,6 +18,7 @@ import os
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -57,9 +58,27 @@ def fetch_json(url: str, cookie_header: str) -> Dict[str, Any]:
             "User-Agent": "ups-league-data-refresh-bot",
         },
     )
-    with urlopen(req, timeout=60) as resp:
-        raw = resp.read().decode("utf-8")
-    return json.loads(raw)
+    try:
+        with urlopen(req, timeout=60) as resp:
+            raw = resp.read().decode("utf-8")
+    except HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"MFL HTTP {e.code} when fetching salaries export. "
+            f"Check MFL_COOKIE and league access. Response starts: {body[:220]}"
+        ) from e
+    except URLError as e:
+        raise RuntimeError(f"MFL network error while fetching salaries export: {e}") from e
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        snippet = raw[:220].replace("\n", " ").strip()
+        raise RuntimeError(
+            "MFL salaries export was not JSON. "
+            "Most likely an expired/invalid MFL_COOKIE. "
+            f"Response starts: {snippet}"
+        ) from e
 
 
 def extract_salaries_map(payload: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:

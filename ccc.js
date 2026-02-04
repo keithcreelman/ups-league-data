@@ -564,7 +564,7 @@
                 ${sortTh("player", "Player")}
                 ${sortTh("pos", "Pos")}
                 ${sortTh("salary", "Salary", "", "is-num")}
-                ${sortTh("contractYear", "CL", "", "is-num")}
+                ${sortTh("contractYear", "Years Remaining", "min-width:145px;", "is-num")}
                 ${sortTh("status", "Status")}
                 ${showOverrideCols ? `<th>Commish Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
@@ -577,7 +577,7 @@
                 ${
                   isRestructureMode
                     ? `
-                ${sortTh("contractYear", "CL", "", "is-num")}
+                ${sortTh("contractYear", "Years Remaining", "min-width:145px;", "is-num")}
                 ${sortTh("status", "Status")}
                 ${sortTh("contractInfo", "Contract Info", "min-width:260px;")}
                 `

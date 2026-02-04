@@ -1,0 +1,21 @@
+{
+  "db": {
+    "path": "/Users/keithcreelman/Desktop/MFL_Scripts/Datastorage/mfl_database.db"
+  },
+  "defaults": {
+    "start_week": 1,
+    "end_week": 17,
+    "last_regular_season_week": 14
+  },
+  "schedule": {
+    "timezone": "America/New_York",
+    "weekly_refresh": {
+      "hour": 23,
+      "minute": 30
+    }
+  },
+  "pacing": {
+    "sleep_between_weeks": 3.0,
+    "sleep_between_seasons": 8.0
+  }
+}

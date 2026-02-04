@@ -26,7 +26,12 @@ from datetime import date
 from typing import Optional, Tuple, Dict
 
 from db_utils import get_conn
+from mfl_config import load_config
 import mfl_api
+
+DEFAULT_START_WEEK = 1
+DEFAULT_END_WEEK = 17
+DEFAULT_LAST_REGULAR_WEEK = 14
 
 
 # ---------------------------
@@ -67,10 +72,14 @@ def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
     ).fetchone()
 
     if not row:
-        return 1, 17, 14
+        return (
+            DEFAULT_START_WEEK,
+            DEFAULT_END_WEEK,
+            DEFAULT_LAST_REGULAR_WEEK,
+        )
 
-    start_week = _safe_int(row[0]) or 1
-    end_week = _safe_int(row[1]) or _safe_int(row[2]) or 17
+    start_week = _safe_int(row[0]) or DEFAULT_START_WEEK
+    end_week = _safe_int(row[1]) or _safe_int(row[2]) or DEFAULT_END_WEEK
     last_regular = _safe_int(row[2]) or end_week
     return start_week, end_week, last_regular
 
@@ -606,6 +615,8 @@ def rebuild_rosters_current_from_api(conn, season: int):
 # ---------------------------
 
 def main():
+    global DEFAULT_START_WEEK, DEFAULT_END_WEEK, DEFAULT_LAST_REGULAR_WEEK
+
     parser = argparse.ArgumentParser(
         description="Build rosters_current (current week) directly from MFL API."
     )
@@ -615,12 +626,23 @@ def main():
         default=None,
         help="Season to build (default = auto-detect current fantasy season).",
     )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Optional path to config JSON (defaults to mfl_config.json if present).",
+    )
     args = parser.parse_args()
+
+    cfg = load_config(args.config)
+    DEFAULT_START_WEEK = cfg.start_week_default
+    DEFAULT_END_WEEK = cfg.end_week_default
+    DEFAULT_LAST_REGULAR_WEEK = cfg.last_regular_week_default
 
     season = args.season if args.season is not None else get_current_season()
     print(f"Building rosters_current from API for season {season}…")
 
-    conn = get_conn()
+    conn = get_conn(cfg.db_path)
     ensure_rosters_current_table(conn)
     rebuild_rosters_current_from_api(conn, season)
     conn.close()

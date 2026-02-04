@@ -30,11 +30,18 @@ except ImportError:  # pragma: no cover (older Python fallback)
     ZoneInfo = None
 
 from db_utils import get_conn
+from mfl_config import load_config
 import mfl_api
 
 # Pacing (slow & gentle)
 SLEEP_BETWEEN_WEEKS = 3.0
 SLEEP_BETWEEN_SEASONS = 8.0
+TIMEZONE_NAME = "America/New_York"
+MONDAY_REFRESH_HOUR = 23
+MONDAY_REFRESH_MINUTE = 30
+DEFAULT_START_WEEK = 1
+DEFAULT_END_WEEK = 17
+DEFAULT_LAST_REGULAR_WEEK = 14
 
 
 def get_current_season() -> int:
@@ -58,14 +65,18 @@ def _now_et() -> datetime:
     """
     if ZoneInfo is None:
         return datetime.now()
-    return datetime.now(ZoneInfo("America/New_York"))
+    return datetime.now(ZoneInfo(TIMEZONE_NAME))
 
 
 def _in_monday_1130_window(ts: datetime) -> bool:
     """
-    Monday 11:30 PM ET through 11:59 PM ET.
+    Monday weekly refresh window from configured HH:MM through HH:59.
     """
-    return ts.weekday() == 0 and ts.hour == 23 and ts.minute >= 30
+    return (
+        ts.weekday() == 0
+        and ts.hour == MONDAY_REFRESH_HOUR
+        and ts.minute >= MONDAY_REFRESH_MINUTE
+    )
 
 
 def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
@@ -83,10 +94,14 @@ def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
     ).fetchone()
 
     if not row:
-        return 1, 17, 14
+        return (
+            DEFAULT_START_WEEK,
+            DEFAULT_END_WEEK,
+            DEFAULT_LAST_REGULAR_WEEK,
+        )
 
-    start_week = _safe_int(row[0]) or 1
-    end_week = _safe_int(row[1]) or _safe_int(row[2]) or 17
+    start_week = _safe_int(row[0]) or DEFAULT_START_WEEK
+    end_week = _safe_int(row[1]) or _safe_int(row[2]) or DEFAULT_END_WEEK
     last_regular = _safe_int(row[2]) or end_week
     return start_week, end_week, last_regular
 
@@ -396,14 +411,17 @@ def load_weekly_rosters_for_season(
 def run_monday_1130_job(conn, season: int):
     """
     Scheduled mode:
-      - only runs in Monday 11:30 PM ET window
+      - only runs in configured Monday evening ET window
       - in-season week selection is clamped to metadata end_week
     """
     ts = _now_et()
     print(f"Current ET time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
 
     if not _in_monday_1130_window(ts):
-        print("Not in Monday 11:30 PM ET window; skipping rosters_weekly run.")
+        print(
+            f"Not in Monday {MONDAY_REFRESH_HOUR:02d}:{MONDAY_REFRESH_MINUTE:02d} "
+            "ET window; skipping rosters_weekly run."
+        )
         return
 
     start_week, end_week, _ = get_season_week_bounds(conn, season)
@@ -461,6 +479,10 @@ def load_weekly_rosters_all_seasons(conn, start_season: int, end_season: int):
 
 
 def main():
+    global SLEEP_BETWEEN_WEEKS, SLEEP_BETWEEN_SEASONS
+    global TIMEZONE_NAME, MONDAY_REFRESH_HOUR, MONDAY_REFRESH_MINUTE
+    global DEFAULT_START_WEEK, DEFAULT_END_WEEK, DEFAULT_LAST_REGULAR_WEEK
+
     default_season = get_current_season()
 
     parser = argparse.ArgumentParser(
@@ -495,12 +517,28 @@ def main():
         action="store_true",
         help="Run only during Monday 11:30 PM ET window (for scheduler use).",
     )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=None,
+        help="Optional path to config JSON (defaults to mfl_config.json if present).",
+    )
 
     args = parser.parse_args()
     if args.week is not None and args.season is None:
         parser.error("--week requires --season.")
 
-    conn = get_conn()
+    cfg = load_config(args.config)
+    SLEEP_BETWEEN_WEEKS = cfg.sleep_between_weeks
+    SLEEP_BETWEEN_SEASONS = cfg.sleep_between_seasons
+    TIMEZONE_NAME = cfg.timezone
+    MONDAY_REFRESH_HOUR = cfg.monday_refresh_hour
+    MONDAY_REFRESH_MINUTE = cfg.monday_refresh_minute
+    DEFAULT_START_WEEK = cfg.start_week_default
+    DEFAULT_END_WEEK = cfg.end_week_default
+    DEFAULT_LAST_REGULAR_WEEK = cfg.last_regular_week_default
+
+    conn = get_conn(cfg.db_path)
     ensure_rosters_weekly_table(conn)
 
     try:

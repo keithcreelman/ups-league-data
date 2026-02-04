@@ -661,6 +661,7 @@
     YEAR: String(YEAR),
     aav: safeInt(calc.aav),
     contract_info: String(calc.contractInfo),
+    contract_status: "A",
     contract_year: safeInt(years),
     guaranteed: safeInt(calc.gtd),
     leagueId: String(L),

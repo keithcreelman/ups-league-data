@@ -252,6 +252,36 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .kpi .value{ font-size:18px; font-weight:1000; margin-top:3px; }
 .kpi .hint{ font-size:11px; color: rgba(233,238,249,.65); margin-top:4px; }
 
+.ccc-summaryPage{
+  margin-top: 12px;
+}
+
+.ccc-miniGrid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap:10px;
+  margin-bottom: 10px;
+}
+
+.ccc-miniKpi{
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255,255,255,.05);
+}
+
+.ccc-miniKpi .label{
+  font-size:11px;
+  color: var(--muted);
+  font-weight:800;
+}
+
+.ccc-miniKpi .value{
+  margin-top:4px;
+  font-size:18px;
+  font-weight:1000;
+}
+
 /* Tabs */
 .ccc-tabs{
   margin-top: 12px;

@@ -567,6 +567,97 @@
     `;
   }
 
+  function buildPositionBreakdown(eligibleRows, submittedRows) {
+    const map = new Map();
+    const upsert = (pos) => {
+      const key = pos || "NA";
+      if (!map.has(key)) {
+        map.set(key, {
+          pos: key,
+          eligible_count: 0,
+          eligible_salary: 0,
+          submitted_count: 0,
+          submitted_salary: 0,
+        });
+      }
+      return map.get(key);
+    };
+
+    (eligibleRows || []).forEach((r) => {
+      const row = upsert(posKeyFromRow(r));
+      row.eligible_count += 1;
+      row.eligible_salary += safeInt(r.salary);
+    });
+    (submittedRows || []).forEach((r) => {
+      const row = upsert(posKeyFromRow(r));
+      row.submitted_count += 1;
+      row.submitted_salary += safeInt(r.salary);
+    });
+
+    const out = Array.from(map.values());
+    out.sort((a, b) => {
+      const ta = a.eligible_count + a.submitted_count;
+      const tb = b.eligible_count + b.submitted_count;
+      if (ta !== tb) return tb - ta;
+      return a.pos.localeCompare(b.pos);
+    });
+    return out;
+  }
+
+  function renderSummaryPage(eligibleRows, submittedRows) {
+    const eligibleCount = eligibleRows.length;
+    const submittedCount = submittedRows.length;
+    const eligibleSalary = eligibleRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
+    const submittedSalary = submittedRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
+    const rows = buildPositionBreakdown(eligibleRows, submittedRows);
+
+    const top = `
+      <div class="ccc-miniGrid">
+        <div class="ccc-miniKpi"><div class="label">Eligible Players</div><div class="value">${eligibleCount}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Eligible Salary</div><div class="value">${eligibleSalary.toLocaleString()}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Submitted Players</div><div class="value">${submittedCount}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Submitted Salary</div><div class="value">${submittedSalary.toLocaleString()}</div></div>
+      </div>
+    `;
+
+    if (!rows.length) {
+      return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No summary rows.</div></div>`;
+    }
+
+    const body = rows
+      .map(
+        (r) => `
+      <tr class="pos-${htmlEsc(r.pos)}">
+        <td>${htmlEsc(r.pos)}</td>
+        <td>${safeInt(r.eligible_count)}</td>
+        <td>${safeInt(r.eligible_salary).toLocaleString()}</td>
+        <td>${safeInt(r.submitted_count)}</td>
+        <td>${safeInt(r.submitted_salary).toLocaleString()}</td>
+      </tr>`
+      )
+      .join("");
+
+    return `
+      <div class="ccc-summaryPage">
+        ${top}
+        <div class="ccc-tableWrap">
+          <table class="ccc-table">
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Eligible</th>
+                <th>Eligible Salary</th>
+                <th>Submitted</th>
+                <th>Submitted Salary</th>
+              </tr>
+            </thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
   // ======================================================
   // 8) STATE + TEAM LIST
   // ======================================================
@@ -578,6 +669,7 @@
     adminReason: "",
     selectedSeason: "",
     selectedTeam: "",
+    selectedPosition: "__ALL_POS__",
     showAllTeams: false,
     detectedFranchiseId: "",
     asOfDate: null,
@@ -657,6 +749,51 @@
       opt.value = t.id;
       opt.textContent = t.name;
       opt.selected = t.id === selectedId;
+      sel.appendChild(opt);
+    });
+  }
+
+  function buildPositionList(eligibilityRows, submissionRows) {
+    const set = new Set();
+    (eligibilityRows || []).forEach((r) => {
+      const p = posKeyFromRow(r);
+      if (p) set.add(p);
+    });
+    (submissionRows || []).forEach((r) => {
+      const p = posKeyFromRow(r);
+      if (p) set.add(p);
+    });
+
+    const preferredOrder = ["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"];
+    const arr = Array.from(set);
+    arr.sort((a, b) => {
+      const ia = preferredOrder.indexOf(a);
+      const ib = preferredOrder.indexOf(b);
+      if (ia !== -1 || ib !== -1) {
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      }
+      return a.localeCompare(b);
+    });
+    return arr;
+  }
+
+  function populatePositionSelect(positions, selected) {
+    const sel = $("#positionSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    const allOpt = document.createElement("option");
+    allOpt.value = "__ALL_POS__";
+    allOpt.textContent = "All Positions";
+    allOpt.selected = selected === "__ALL_POS__";
+    sel.appendChild(allOpt);
+
+    (positions || []).forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      opt.selected = selected === p;
       sel.appendChild(opt);
     });
   }
@@ -828,6 +965,7 @@
     const cccError = $("#cccError");
     const cccMeta = $("#cccMeta");
     const summary = $("#summary");
+    const tabSummary = $("#tabSummary");
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
     const tabSubmitted = $("#tabSubmitted");
@@ -841,6 +979,7 @@
     const searchLower = safeStr(state.search).trim().toLowerCase();
     const season = normalizeSeasonValue(state.selectedSeason);
     const showAllTeams = !!state.showAllTeams;
+    const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
     const selectedTeamId = pad4(state.selectedTeam);
 
     const seasonEligibility = eligibility.filter(
@@ -858,11 +997,20 @@
       ? seasonSubmissions
       : seasonSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
+    const positionFilteredEligibility =
+      selectedPosition === "__ALL_POS__"
+        ? teamFilteredEligibility
+        : teamFilteredEligibility.filter((r) => posKeyFromRow(r) === selectedPosition);
+    const positionFilteredSubmissions =
+      selectedPosition === "__ALL_POS__"
+        ? teamFilteredSubmissions
+        : teamFilteredSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
+
     const scoped = searchLower
-      ? teamFilteredEligibility.filter((r) =>
+      ? positionFilteredEligibility.filter((r) =>
           safeStr(r.player_name).toLowerCase().includes(searchLower)
         )
-      : teamFilteredEligibility.slice();
+      : positionFilteredEligibility.slice();
 
     const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
@@ -872,7 +1020,7 @@
         `Season: ${season || "?"}` +
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
-        (state.adminReason ? ` | ${state.adminReason}` : "");
+        (state.commishMode && state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
     const eligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) === 1);
@@ -893,10 +1041,10 @@
     );
 
     const submittedRowsRaw = searchLower
-      ? teamFilteredSubmissions.filter((r) =>
+      ? positionFilteredSubmissions.filter((r) =>
           safeStr(r.player_name).toLowerCase().includes(searchLower)
         )
-      : teamFilteredSubmissions.slice();
+      : positionFilteredSubmissions.slice();
 
     const submittedRows = sortRows(
       submittedRowsRaw,
@@ -905,12 +1053,12 @@
     );
 
     const teamNameSource =
-      (teamFilteredEligibility[0] && teamFilteredEligibility[0].franchise_name) ||
-      (teamFilteredSubmissions[0] && teamFilteredSubmissions[0].franchise_name) ||
+      (positionFilteredEligibility[0] && positionFilteredEligibility[0].franchise_name) ||
+      (positionFilteredSubmissions[0] && positionFilteredSubmissions[0].franchise_name) ||
       "";
     const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
 
-    const mymUsed = teamFilteredSubmissions.length;
+    const mymUsed = positionFilteredSubmissions.length;
     const uniqueTeamsInSeason = new Set(
       seasonEligibility.map((r) => pad4(r.franchise_id)).filter(Boolean)
     ).size;
@@ -922,7 +1070,7 @@
     if (summary) {
       summary.innerHTML = renderSummary(
         teamName,
-        teamFilteredEligibility,
+        positionFilteredEligibility,
         eligibleRows,
         mymUsed,
         mymRemaining,
@@ -930,6 +1078,7 @@
         !!asOfDate
       );
     }
+    if (tabSummary) tabSummary.innerHTML = renderSummaryPage(scoped, submittedRowsRaw);
     if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
     if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible");
     if (tabSubmitted) tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
@@ -1197,11 +1346,13 @@
   async function load() {
     try {
       must("#cccMeta");
+      must("#tabSummary");
       must("#tabEligible");
       must("#tabIneligible");
       must("#tabSubmitted");
       must("#seasonSelect");
       must("#teamSelect");
+      must("#positionSelect");
       must("#showAllTeamsChk");
       must("#commishModeWrap");
       must("#commishModeChk");
@@ -1301,6 +1452,9 @@
       if (teamSelect) teamSelect.disabled = !!state.showAllTeams;
 
       populateTeamSelect(teams, state.selectedTeam);
+      const positions = buildPositionList(seasonRows, seasonSubmissionRows);
+      state.selectedPosition = "__ALL_POS__";
+      populatePositionSelect(positions, state.selectedPosition);
 
       setTab("eligible");
 
@@ -1441,10 +1595,12 @@
   function setTab(tab) {
     state.activeTab = tab;
 
+    const tabSummary = $("#tabSummary");
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
     const tabSubmitted = $("#tabSubmitted");
 
+    if (tabSummary) tabSummary.style.display = tab === "summary" ? "" : "none";
     if (tabEligible) tabEligible.style.display = tab === "eligible" ? "" : "none";
     if (tabIneligible) tabIneligible.style.display = tab === "ineligible" ? "" : "none";
     if (tabSubmitted) tabSubmitted.style.display = tab === "submitted" ? "" : "none";
@@ -1500,6 +1656,11 @@
         const stillValid = teams.some((t) => t.id === state.selectedTeam);
         if (!stillValid) state.selectedTeam = teams[0] ? teams[0].id : "";
         populateTeamSelect(teams, state.selectedTeam);
+        const positions = buildPositionList(seasonRows, seasonSubmissionRows);
+        if (state.selectedPosition !== "__ALL_POS__" && !positions.includes(state.selectedPosition)) {
+          state.selectedPosition = "__ALL_POS__";
+        }
+        populatePositionSelect(positions, state.selectedPosition);
         render();
       });
 
@@ -1519,6 +1680,13 @@
         state.showAllTeams = false;
         const showAll = $("#showAllTeamsChk");
         if (showAll) showAll.checked = false;
+        render();
+      });
+
+    const positionSelect = $("#positionSelect");
+    if (positionSelect)
+      positionSelect.addEventListener("change", (e) => {
+        state.selectedPosition = safeStr(e.target.value || "__ALL_POS__");
         render();
       });
 

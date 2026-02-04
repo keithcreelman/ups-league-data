@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204z">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204aa">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -25,6 +25,10 @@
         <div class="ccc-field">
           Team
           <select id="teamSelect" class="ccc-select"></select>
+        </div>
+        <div class="ccc-field">
+          Position
+          <select id="positionSelect" class="ccc-select"></select>
         </div>
         <label class="ccc-check">
           <input id="showAllTeamsChk" type="checkbox" />
@@ -62,11 +66,13 @@
   <div id="summary" class="ccc-summary"></div>
 
   <div class="ccc-tabs">
+    <button class="ccc-tab" type="button" data-tab="summary">Summary</button>
     <button class="ccc-tab active" type="button" data-tab="eligible">Eligible</button>
     <button class="ccc-tab" type="button" data-tab="ineligible">Not Eligible</button>
     <button class="ccc-tab" type="button" data-tab="submitted">MYM - Submitted</button>
   </div>
 
+  <div id="tabSummary" style="display:none;"></div>
   <div id="tabEligible"></div>
   <div id="tabIneligible" style="display:none;"></div>
   <div id="tabSubmitted" style="display:none;"></div>
@@ -128,4 +134,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204z"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204aa"></script>

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-04 12:53:16",
+    "generated_at": "2026-02-04 21:16:17",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6539,7 +6539,7 @@
       "player_name": "Walker III, Kenneth",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 32000,
+      "salary": 60000,
       "contract_year": 2,
       "contract_status": "Veteran",
       "acquired_date": "2025-11-12 22:53:34",
@@ -6547,7 +6547,7 @@
       "mym_deadline": "2025-11-26 22:53:34",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-12. Deadline to submit a MYM has passed. Deadline was 2025-11-26.",
-      "contract_info": "CL 3| TCV 76K| AAV 32K| Y1-12, Y2-32, Y3-32| Ext: PG"
+      "contract_info": "CL 2| TCV 76K| AAV 38K| Y1-60K, Y2-16K| GTD: 57K| Ext: PG"
     },
     {
       "season": 2025,

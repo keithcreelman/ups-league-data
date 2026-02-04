@@ -79,6 +79,25 @@
     return el;
   }
 
+  const LOCAL_OVERRIDE_KEY = "ccc_mym_submit_overrides_v1";
+
+  function loadLocalOverrides() {
+    try {
+      const raw = localStorage.getItem(LOCAL_OVERRIDE_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveLocalOverrides(overrides) {
+    try {
+      localStorage.setItem(LOCAL_OVERRIDE_KEY, JSON.stringify(overrides || {}));
+    } catch (e) {}
+  }
+
   // ======================================================
   // 3) URL HELPERS
   // ======================================================
@@ -182,7 +201,14 @@
   // ======================================================
   // 6) ELIGIBILITY OVERRIDE
   // ======================================================
+  function hasSubmittedMYM(row) {
+    const status = safeStr(row.contract_status).toLowerCase();
+    return status.includes("mym");
+  }
+
   function computeEligible(row, asOfDate) {
+    if (hasSubmittedMYM(row)) return 0;
+
     const acqType = safeStr(row.mym_acq_type || "").toUpperCase();
     if (acqType === "ROOKIE_DRAFT") return 0;
 
@@ -386,6 +412,7 @@
     asOfDate: null,
     search: "",
     activeTab: "eligible",
+    localOverrides: loadLocalOverrides(),
   };
 
   function buildTeamList(rows) {
@@ -426,13 +453,71 @@
     return row || null;
   }
 
+  function applyLocalOverrides(rows) {
+    const overrides = state.localOverrides || {};
+    rows.forEach((r) => {
+      const ov = overrides[safeStr(r.player_id)];
+      if (!ov) return;
+
+      r.contract_status = safeStr(ov.contract_status || r.contract_status);
+      if (safeInt(ov.contract_year) > 0) r.contract_year = safeInt(ov.contract_year);
+      if (safeStr(ov.contract_info)) r.contract_info = safeStr(ov.contract_info);
+      r.eligible_flag = 0;
+      r.rule_explanation = "Not eligible. MYM contract already submitted.";
+    });
+  }
+
   function applyEffectiveEligibility(rows, asOfDate) {
     rows.forEach((r) => {
       r._eligibleEffective = safeInt(r.eligible_flag);
+      if (hasSubmittedMYM(r)) r._eligibleEffective = 0;
       if (state.isAdmin && asOfDate) {
         r._eligibleEffective = computeEligible(r, asOfDate);
       }
     });
+  }
+
+  function applyPostSubmitLocalUpdate(row, payload, out) {
+    const pid = safeStr(row && row.player_id);
+    if (!pid) return;
+
+    const post = (out && out.postCheck) || {};
+    const statusFinal = safeStr(post.contractStatus || payload.contract_status || "MYM");
+    const yearFinal = safeInt(post.contractYear || payload.contract_year);
+    const infoFinal = safeStr(post.contractInfo || payload.contract_info || "");
+
+    let usageAdjusted = false;
+    state.payload.eligibility.forEach((r) => {
+      if (safeStr(r.player_id) !== pid) return;
+
+      if (!r._mymJustSubmitted) {
+        r._mymJustSubmitted = 1;
+      }
+
+      r.contract_status = statusFinal;
+      if (yearFinal > 0) r.contract_year = yearFinal;
+      if (infoFinal) r.contract_info = infoFinal;
+      r.eligible_flag = 0;
+      r.rule_explanation = "Not eligible. MYM contract already submitted.";
+
+      if (!usageAdjusted) {
+        const fid = pad4(r.franchise_id);
+        const usageRow = state.payload.usage.find((u) => pad4(u.franchise_id) === fid);
+        if (usageRow) {
+          usageRow.mym_used = safeInt(usageRow.mym_used) + 1;
+          usageRow.mym_remaining = Math.max(0, safeInt(usageRow.mym_remaining) - 1);
+        }
+        usageAdjusted = true;
+      }
+    });
+
+    state.localOverrides[pid] = {
+      contract_status: statusFinal,
+      contract_year: yearFinal,
+      contract_info: infoFinal,
+      at: Date.now(),
+    };
+    saveLocalOverrides(state.localOverrides);
   }
 
   function render() {
@@ -742,8 +827,9 @@
       console.log("[MYM submitDebug]", out.submitDebug);
     }
 
+    applyPostSubmitLocalUpdate(row, payload, out);
     closeMYMModal();
-    await load(); // refresh dashboard
+    render();
   } catch (e) {
     const msg = e && e.message ? e.message : String(e);
     if (err) {
@@ -786,6 +872,7 @@
 
       const raw = await res.json();
       state.payload = normalizePayload(raw);
+      applyLocalOverrides(state.payload.eligibility);
 
       state.detectedFranchiseId = detectFranchiseId();
 

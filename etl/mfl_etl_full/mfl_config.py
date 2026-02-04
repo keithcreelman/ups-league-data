@@ -18,8 +18,12 @@ class MflConfig:
     start_week_default: int
     end_week_default: int
     last_regular_week_default: int
+    daily_refresh_hour: int
+    daily_refresh_minute: int
     monday_refresh_hour: int
     monday_refresh_minute: int
+    nfl_kickoff_event: str
+    season_complete_event: str
     sleep_between_weeks: float
     sleep_between_seasons: float
 
@@ -86,6 +90,20 @@ def load_config(config_path: str | None = None) -> MflConfig:
         _deep_get(raw, ("schedule", "weekly_refresh", "minute"), 30),
         30,
     )
+    daily_refresh_hour = _safe_int(
+        _deep_get(raw, ("schedule", "daily_refresh", "hour"), 0),
+        0,
+    )
+    daily_refresh_minute = _safe_int(
+        _deep_get(raw, ("schedule", "daily_refresh", "minute"), 0),
+        0,
+    )
+    nfl_kickoff_event = str(
+        _deep_get(raw, ("season_window", "start_event"), "nfl_kickoff")
+    )
+    season_complete_event = str(
+        _deep_get(raw, ("season_window", "end_event"), "ups_season_complete")
+    )
     sleep_between_weeks = _safe_float(
         _deep_get(raw, ("pacing", "sleep_between_weeks"), 3.0),
         3.0,
@@ -101,8 +119,12 @@ def load_config(config_path: str | None = None) -> MflConfig:
         start_week_default=start_week_default,
         end_week_default=end_week_default,
         last_regular_week_default=last_regular_week_default,
+        daily_refresh_hour=daily_refresh_hour,
+        daily_refresh_minute=daily_refresh_minute,
         monday_refresh_hour=monday_refresh_hour,
         monday_refresh_minute=monday_refresh_minute,
+        nfl_kickoff_event=nfl_kickoff_event,
+        season_complete_event=season_complete_event,
         sleep_between_weeks=sleep_between_weeks,
         sleep_between_seasons=sleep_between_seasons,
     )

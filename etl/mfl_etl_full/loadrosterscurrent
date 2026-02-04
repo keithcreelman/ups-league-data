@@ -18,12 +18,18 @@
 # Usage:
 #   python loadrosterscurrent.py
 #   python loadrosterscurrent.py --season 2025
+#   python loadrosterscurrent.py --daily-midnight
 
 import argparse
 import json
 import re
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, Tuple, Dict
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover (older Python fallback)
+    ZoneInfo = None
 
 from db_utils import get_conn
 from mfl_config import load_config
@@ -32,6 +38,9 @@ import mfl_api
 DEFAULT_START_WEEK = 1
 DEFAULT_END_WEEK = 17
 DEFAULT_LAST_REGULAR_WEEK = 14
+TIMEZONE_NAME = "America/New_York"
+DAILY_REFRESH_HOUR = 0
+DAILY_REFRESH_MINUTE = 0
 
 
 # ---------------------------
@@ -52,6 +61,22 @@ def _safe_int(value) -> Optional[int]:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _now_local() -> datetime:
+    if ZoneInfo is None:
+        return datetime.now()
+    return datetime.now(ZoneInfo(TIMEZONE_NAME))
+
+
+def _in_daily_refresh_window(ts: datetime) -> bool:
+    """
+    Daily refresh window from configured HH:MM through HH:59.
+    """
+    return (
+        ts.hour == DAILY_REFRESH_HOUR
+        and ts.minute >= DAILY_REFRESH_MINUTE
+    )
 
 
 def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
@@ -610,12 +635,32 @@ def rebuild_rosters_current_from_api(conn, season: int):
     )
 
 
+def run_daily_refresh_job(conn, season: int):
+    """
+    Scheduled mode:
+      - only runs in configured daily refresh window (default midnight ET)
+    """
+    ts = _now_local()
+    print(f"Current local time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    if not _in_daily_refresh_window(ts):
+        print(
+            f"Not in daily refresh window {DAILY_REFRESH_HOUR:02d}:{DAILY_REFRESH_MINUTE:02d}; "
+            "skipping rosters_current run."
+        )
+        return
+
+    print(f"{season}: running scheduled rosters_current refresh.")
+    rebuild_rosters_current_from_api(conn, season)
+
+
 # ---------------------------
 # CLI
 # ---------------------------
 
 def main():
     global DEFAULT_START_WEEK, DEFAULT_END_WEEK, DEFAULT_LAST_REGULAR_WEEK
+    global TIMEZONE_NAME, DAILY_REFRESH_HOUR, DAILY_REFRESH_MINUTE
 
     parser = argparse.ArgumentParser(
         description="Build rosters_current (current week) directly from MFL API."
@@ -632,19 +677,30 @@ def main():
         default=None,
         help="Optional path to config JSON (defaults to mfl_config.json if present).",
     )
+    parser.add_argument(
+        "--daily-midnight",
+        action="store_true",
+        help="Run only during the configured daily refresh window (default midnight).",
+    )
     args = parser.parse_args()
 
     cfg = load_config(args.config)
     DEFAULT_START_WEEK = cfg.start_week_default
     DEFAULT_END_WEEK = cfg.end_week_default
     DEFAULT_LAST_REGULAR_WEEK = cfg.last_regular_week_default
+    TIMEZONE_NAME = cfg.timezone
+    DAILY_REFRESH_HOUR = cfg.daily_refresh_hour
+    DAILY_REFRESH_MINUTE = cfg.daily_refresh_minute
 
     season = args.season if args.season is not None else get_current_season()
     print(f"Building rosters_current from API for season {season}…")
 
     conn = get_conn(cfg.db_path)
     ensure_rosters_current_table(conn)
-    rebuild_rosters_current_from_api(conn, season)
+    if args.daily_midnight:
+        run_daily_refresh_job(conn, season)
+    else:
+        rebuild_rosters_current_from_api(conn, season)
     conn.close()
     print("Done.")
 

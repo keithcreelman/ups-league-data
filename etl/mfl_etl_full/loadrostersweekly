@@ -11,6 +11,7 @@
 # Usage:
 #   python loadrostersweekly --season 2025
 #   python loadrostersweekly --season 2025 --week 14
+#   python loadrostersweekly --daily-midnight-inseason
 #   python loadrostersweekly --monday-1130
 #
 # Assumes:
@@ -37,11 +38,15 @@ import mfl_api
 SLEEP_BETWEEN_WEEKS = 3.0
 SLEEP_BETWEEN_SEASONS = 8.0
 TIMEZONE_NAME = "America/New_York"
+DAILY_REFRESH_HOUR = 0
+DAILY_REFRESH_MINUTE = 0
 MONDAY_REFRESH_HOUR = 23
 MONDAY_REFRESH_MINUTE = 30
 DEFAULT_START_WEEK = 1
 DEFAULT_END_WEEK = 17
 DEFAULT_LAST_REGULAR_WEEK = 14
+NFL_KICKOFF_EVENT = "nfl_kickoff"
+SEASON_COMPLETE_EVENT = "ups_season_complete"
 
 
 def get_current_season() -> int:
@@ -77,6 +82,56 @@ def _in_monday_1130_window(ts: datetime) -> bool:
         and ts.hour == MONDAY_REFRESH_HOUR
         and ts.minute >= MONDAY_REFRESH_MINUTE
     )
+
+
+def _in_daily_refresh_window(ts: datetime) -> bool:
+    """
+    Daily refresh window from configured HH:MM through HH:59.
+    """
+    return ts.hour == DAILY_REFRESH_HOUR and ts.minute >= DAILY_REFRESH_MINUTE
+
+
+def get_league_event_date(conn, season: int, event_name: str) -> Optional[date]:
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT date
+        FROM leagueevents
+        WHERE event = ? AND nfl_season = ?
+        """,
+        (event_name, str(season)),
+    ).fetchone()
+    if not row or not row[0]:
+        return None
+    try:
+        return date.fromisoformat(str(row[0]))
+    except ValueError:
+        print(f"{season}: invalid date '{row[0]}' for event '{event_name}'.")
+        return None
+
+
+def is_in_season_window(conn, season: int, today_local: date) -> bool:
+    kickoff = get_league_event_date(conn, season, NFL_KICKOFF_EVENT)
+    if kickoff is None:
+        print(
+            f"{season}: missing leagueevents.{NFL_KICKOFF_EVENT}; "
+            "treating as out-of-season."
+        )
+        return False
+
+    season_complete = get_league_event_date(conn, season, SEASON_COMPLETE_EVENT)
+
+    if today_local < kickoff:
+        print(f"{season}: today {today_local} is before kickoff {kickoff}; skipping.")
+        return False
+    if season_complete and today_local > season_complete:
+        print(
+            f"{season}: today {today_local} is after season complete {season_complete}; "
+            "skipping."
+        )
+        return False
+
+    return True
 
 
 def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
@@ -408,22 +463,7 @@ def load_weekly_rosters_for_season(
     print(f"{season}: completed through week {bounded_end}.")
 
 
-def run_monday_1130_job(conn, season: int):
-    """
-    Scheduled mode:
-      - only runs in configured Monday evening ET window
-      - in-season week selection is clamped to metadata end_week
-    """
-    ts = _now_et()
-    print(f"Current ET time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-
-    if not _in_monday_1130_window(ts):
-        print(
-            f"Not in Monday {MONDAY_REFRESH_HOUR:02d}:{MONDAY_REFRESH_MINUTE:02d} "
-            "ET window; skipping rosters_weekly run."
-        )
-        return
-
+def run_current_week_refresh(conn, season: int):
     start_week, end_week, _ = get_season_week_bounds(conn, season)
     api_week = infer_api_current_week(conn, season)
     if api_week is None:
@@ -442,6 +482,52 @@ def run_monday_1130_job(conn, season: int):
 
     print(f"{season}: running weekly refresh for week {target_week}.")
     load_week_for_season(conn, season, target_week)
+
+
+def run_monday_1130_job(conn, season: int):
+    """
+    Scheduled mode:
+      - only runs in configured Monday evening ET window
+      - in-season week selection is clamped to metadata end_week
+    """
+    ts = _now_et()
+    print(f"Current ET time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    if not _in_monday_1130_window(ts):
+        print(
+            f"Not in Monday {MONDAY_REFRESH_HOUR:02d}:{MONDAY_REFRESH_MINUTE:02d} "
+            "ET window; skipping rosters_weekly run."
+        )
+        return
+
+    if not is_in_season_window(conn, season, ts.date()):
+        print(f"{season}: outside configured in-season window; skipping.")
+        return
+
+    run_current_week_refresh(conn, season)
+
+
+def run_daily_midnight_inseason_job(conn, season: int):
+    """
+    Scheduled mode:
+      - only runs in configured daily refresh window (default midnight ET)
+      - only runs during in-season window based on leagueevents
+    """
+    ts = _now_et()
+    print(f"Current ET time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    if not _in_daily_refresh_window(ts):
+        print(
+            f"Not in daily refresh window {DAILY_REFRESH_HOUR:02d}:{DAILY_REFRESH_MINUTE:02d} "
+            "ET; skipping rosters_weekly run."
+        )
+        return
+
+    if not is_in_season_window(conn, season, ts.date()):
+        print(f"{season}: outside configured in-season window; skipping.")
+        return
+
+    run_current_week_refresh(conn, season)
 
 
 def get_available_seasons(conn, start_season: int, end_season: int):
@@ -480,7 +566,9 @@ def load_weekly_rosters_all_seasons(conn, start_season: int, end_season: int):
 
 def main():
     global SLEEP_BETWEEN_WEEKS, SLEEP_BETWEEN_SEASONS
-    global TIMEZONE_NAME, MONDAY_REFRESH_HOUR, MONDAY_REFRESH_MINUTE
+    global TIMEZONE_NAME, DAILY_REFRESH_HOUR, DAILY_REFRESH_MINUTE
+    global MONDAY_REFRESH_HOUR, MONDAY_REFRESH_MINUTE
+    global NFL_KICKOFF_EVENT, SEASON_COMPLETE_EVENT
     global DEFAULT_START_WEEK, DEFAULT_END_WEEK, DEFAULT_LAST_REGULAR_WEEK
 
     default_season = get_current_season()
@@ -518,6 +606,11 @@ def main():
         help="Run only during Monday 11:30 PM ET window (for scheduler use).",
     )
     parser.add_argument(
+        "--daily-midnight-inseason",
+        action="store_true",
+        help="Run only during daily midnight window and only inside season window.",
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default=None,
@@ -532,8 +625,12 @@ def main():
     SLEEP_BETWEEN_WEEKS = cfg.sleep_between_weeks
     SLEEP_BETWEEN_SEASONS = cfg.sleep_between_seasons
     TIMEZONE_NAME = cfg.timezone
+    DAILY_REFRESH_HOUR = cfg.daily_refresh_hour
+    DAILY_REFRESH_MINUTE = cfg.daily_refresh_minute
     MONDAY_REFRESH_HOUR = cfg.monday_refresh_hour
     MONDAY_REFRESH_MINUTE = cfg.monday_refresh_minute
+    NFL_KICKOFF_EVENT = cfg.nfl_kickoff_event
+    SEASON_COMPLETE_EVENT = cfg.season_complete_event
     DEFAULT_START_WEEK = cfg.start_week_default
     DEFAULT_END_WEEK = cfg.end_week_default
     DEFAULT_LAST_REGULAR_WEEK = cfg.last_regular_week_default
@@ -545,6 +642,11 @@ def main():
         if args.monday_1130:
             season = args.season or default_season
             run_monday_1130_job(conn, season)
+            return
+
+        if args.daily_midnight_inseason:
+            season = args.season or default_season
+            run_daily_midnight_inseason_job(conn, season)
             return
 
         if args.season is not None and args.week is not None:

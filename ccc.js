@@ -405,6 +405,14 @@
     const isEligibleTab = tabMode === "eligible";
     const isSubmittedTab = tabMode === "submitted";
     const showOverrideCols = !!state.commishMode;
+    const sortTh = (key, label, minWidthStyle) => {
+      const isSorted = sortState.tab === tabMode && sortState.key === key;
+      const widthAttr = minWidthStyle ? ` style="${minWidthStyle}"` : "";
+      return `<th data-sort="${key}" class="is-sortable${isSorted ? " is-sorted" : ""}"${widthAttr}>${label} <span class="sort">${sortIcon(
+        tabMode,
+        key
+      )}</span></th>`;
+    };
 
     const head = `
       <div class="ccc-tableWrap" data-table="${tabMode}">
@@ -414,23 +422,23 @@
               ${
                 isSubmittedTab
                   ? `
-                <th data-sort="submitted">Submitted <span class="sort">${sortIcon(tabMode, "submitted")}</span></th>
-                <th data-sort="team">Team <span class="sort">${sortIcon(tabMode, "team")}</span></th>
-                <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
-                <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
-                <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
-                <th data-sort="contractYear">CL <span class="sort">${sortIcon(tabMode, "contractYear")}</span></th>
-                <th data-sort="status">Status <span class="sort">${sortIcon(tabMode, "status")}</span></th>
+                ${sortTh("submitted", "Submitted")}
+                ${sortTh("team", "Team")}
+                ${sortTh("player", "Player")}
+                ${sortTh("pos", "Pos")}
+                ${sortTh("salary", "Salary")}
+                ${sortTh("contractYear", "CL")}
+                ${sortTh("status", "Status")}
                 ${showOverrideCols ? `<th>Commish Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
               `
                   : `
                 ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
-                <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
-                <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
-                <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
-                <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
-                <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
+                ${sortTh("player", "Player")}
+                ${sortTh("pos", "Pos")}
+                ${sortTh("salary", "Salary")}
+                ${sortTh("acquired", "Acquired")}
+                ${sortTh("deadline", "Deadline")}
                 ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
               `
               }

@@ -403,28 +403,30 @@
   async function getAdminFlagFromBrowser(leagueId, year) {
     const L = safeStr(leagueId || getLeagueId() || DEFAULT_LEAGUE_ID);
     const YEAR = safeStr(year || getYear() || DEFAULT_YEAR);
-    const candidates = [];
-
-    if (window && window.location && window.location.origin) {
-      candidates.push(
-        `${window.location.origin}/${encodeURIComponent(
-          YEAR
-        )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`
-      );
+    const host = safeStr((window && window.location && window.location.hostname) || "").toLowerCase();
+    const onMflHost = host.endsWith(".myfantasyleague.com") || host === "myfantasyleague.com";
+    if (!onMflHost) {
+      return {
+        ok: false,
+        isAdmin: false,
+        reason: "Commish check requires MFL page session",
+        emailCount: 0,
+        L,
+        YEAR,
+        source: "browser",
+      };
     }
-    candidates.push(
-      `https://api.myfantasyleague.com/${encodeURIComponent(
-        YEAR
-      )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`
-    );
 
-    for (const url of candidates) {
-      try {
-        const res = await fetch(url, {
-          cache: "no-store",
-          credentials: "include",
-        });
-        if (!res.ok) continue;
+    const url = `${window.location.origin}/${encodeURIComponent(
+      YEAR
+    )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`;
+
+    try {
+      const res = await fetch(url, {
+        cache: "no-store",
+        credentials: "include",
+      });
+      if (res.ok) {
         const data = await res.json();
         const parsed = parseLeagueAdminFromData(data);
         return {
@@ -433,15 +435,13 @@
           YEAR,
           source: "browser",
         };
-      } catch (e) {
-        // Try next endpoint.
       }
-    }
+    } catch (e) {}
 
     return {
       ok: false,
       isAdmin: false,
-      reason: "Could not verify commish mode from current login",
+      reason: "Could not verify commish mode from current MFL session",
       emailCount: 0,
       L,
       YEAR,
@@ -2506,19 +2506,26 @@
       state.detectedFranchiseId = detectFranchiseId();
 
       const workerAdmin = await getAdminFlagFromWorker();
+      const browserAdmin = await getAdminFlagFromBrowser(workerAdmin.L, workerAdmin.YEAR);
+      state.detectedFranchiseId = await resolveCurrentFranchiseId(
+        workerAdmin.L,
+        workerAdmin.YEAR,
+        state.detectedFranchiseId
+      );
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
-      // Secure-by-default: only enable commish tools when we can positively match
-      // the current viewer franchise to the commish franchise id reported by worker.
-      let canCommish =
-        !!workerAdmin.ok &&
-        !!workerAdmin.isAdmin &&
-        !!currentFranchiseId &&
-        !!commishFranchiseId &&
-        currentFranchiseId === commishFranchiseId;
-      const adminReason = canCommish
-        ? safeStr(workerAdmin.reason || "Commish mode")
-        : `Owner mode (commish tools hidden)`;
+
+      // Commish tools are browser-session gated. Worker admin is only a secondary sanity check.
+      let canCommish = !!(browserAdmin.ok && browserAdmin.isAdmin);
+      let adminReason = canCommish
+        ? safeStr(browserAdmin.reason || "Commish mode")
+        : "Owner mode (commish tools hidden)";
+
+      // If both ids are known and mismatch, force owner mode.
+      if (canCommish && currentFranchiseId && commishFranchiseId && currentFranchiseId !== commishFranchiseId) {
+        canCommish = false;
+        adminReason = "Owner mode (commish tools hidden)";
+      }
 
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;

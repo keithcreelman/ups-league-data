@@ -270,6 +270,8 @@ table.ccc-table tbody td{
   vertical-align: top;
   transition: background .12s ease, box-shadow .12s ease, filter .12s ease;
   background: rgba(255,255,255,.07); /* neutral fallback */
+  color: #f7fbff;
+  font-weight: 700;
 }
 
 .pill{
@@ -291,8 +293,8 @@ table.ccc-table tbody td{
 .pill.good{ border-color: rgba(51,209,154,.45); background: rgba(51,209,154,.12); }
 .pill.bad{ border-color: rgba(255,107,107,.45); background: rgba(255,107,107,.12); }
 
-.muted{ color: var(--muted); }
-.playerCell{ font-weight: 1000; }
+.muted{ color: rgba(235,239,255,.78); font-weight: 700; }
+.playerCell{ font-weight: 1000; color:#fdfdff; }
 .explain{
   color: rgba(233,238,249,.78);
   line-height: 1.25;
@@ -308,14 +310,14 @@ table.ccc-table tbody td{
 /* ===== Table shading boost ===== */
 
 /* Strong, full-row fills per position (tinted backgrounds) */
-tr.pos-QB td{ background: rgba(59,130,246,.55); color: #f7fbff; }
-tr.pos-RB td{ background: rgba(34,197,94,.55); color: #f7fbff; }
-tr.pos-WR td{ background: rgba(168,85,247,.55); color: #f8f5ff; }
-tr.pos-TE td{ background: rgba(249,115,22,.55); color: #fff7ed; }
-tr.pos-K  td{ background: rgba(234,179,8,.52); color: #fffbea; }
-tr.pos-DL td{ background: rgba(239,68,68,.52); color: #fff5f5; }
-tr.pos-LB td{ background: rgba(6,182,212,.55); color: #f5fdff; }
-tr.pos-DB td{ background: rgba(99,102,241,.58); color: #f5f6ff; }
+tr.pos-QB td{ background: rgba(59,130,246,.60); color: #f7fbff; box-shadow: inset 0 0 0 1px rgba(59,130,246,.65); }
+tr.pos-RB td{ background: rgba(34,197,94,.62); color: #f7fbff; box-shadow: inset 0 0 0 1px rgba(34,197,94,.65); }
+tr.pos-WR td{ background: rgba(168,85,247,.62); color: #f8f5ff; box-shadow: inset 0 0 0 1px rgba(168,85,247,.65); }
+tr.pos-TE td{ background: rgba(249,115,22,.62); color: #fff7ed; box-shadow: inset 0 0 0 1px rgba(249,115,22,.65); }
+tr.pos-K  td{ background: rgba(234,179,8,.58);  color: #fffbea; box-shadow: inset 0 0 0 1px rgba(234,179,8,.60); }
+tr.pos-DL td{ background: rgba(239,68,68,.60); color: #fff5f5; box-shadow: inset 0 0 0 1px rgba(239,68,68,.63); }
+tr.pos-LB td{ background: rgba(6,182,212,.62); color: #f5fdff; box-shadow: inset 0 0 0 1px rgba(6,182,212,.65); }
+tr.pos-DB td{ background: rgba(99,102,241,.64); color: #f5f6ff; box-shadow: inset 0 0 0 1px rgba(99,102,241,.67); }
 
 /* Fallback zebra only for rows without a position class */
 table.ccc-table tbody tr:not([class*=\"pos-\"]) td:nth-child(odd){
@@ -328,7 +330,7 @@ table.ccc-table tbody tr:not([class*=\"pos-\"]) td:nth-child(even){
 /* Hover brighten */
 table.ccc-table tbody tr:hover td{
   filter: brightness(1.12);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.24);
 }
 
 /* Optional: subtle vertical dividers to improve readability */
@@ -348,14 +350,14 @@ table.ccc-table thead th{
 }
 
 /* Keep your left border accent (make it a touch thicker) */
-tr.pos-QB td:first-child{ border-left: 5px solid rgba(59,130,246,.85); }
-tr.pos-RB td:first-child{ border-left: 5px solid rgba(34,197,94,.85); }
-tr.pos-WR td:first-child{ border-left: 5px solid rgba(168,85,247,.85); }
-tr.pos-TE td:first-child{ border-left: 5px solid rgba(249,115,22,.85); }
-tr.pos-K  td:first-child{ border-left: 5px solid rgba(234,179,8,.85); }
-tr.pos-DL td:first-child{ border-left: 5px solid rgba(239,68,68,.85); }
-tr.pos-LB td:first-child{ border-left: 5px solid rgba(6,182,212,.85); }
-tr.pos-DB td:first-child{ border-left: 5px solid rgba(99,102,241,.90); }
+tr.pos-QB td:first-child{ border-left: 6px solid rgba(59,130,246,.90); }
+tr.pos-RB td:first-child{ border-left: 6px solid rgba(34,197,94,.90); }
+tr.pos-WR td:first-child{ border-left: 6px solid rgba(168,85,247,.90); }
+tr.pos-TE td:first-child{ border-left: 6px solid rgba(249,115,22,.90); }
+tr.pos-K  td:first-child{ border-left: 6px solid rgba(234,179,8,.90); }
+tr.pos-DL td:first-child{ border-left: 6px solid rgba(239,68,68,.90); }
+tr.pos-LB td:first-child{ border-left: 6px solid rgba(6,182,212,.90); }
+tr.pos-DB td:first-child{ border-left: 6px solid rgba(99,102,241,.92); }
 
 /* ===== Modal (fixed readability + no lockups) ===== */
 .ccc-modal{

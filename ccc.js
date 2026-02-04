@@ -22,6 +22,7 @@
   // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
+  const COMMISH_FRANCHISE_ID = "0008";
 
   // MYM submit endpoint
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
@@ -2530,19 +2531,17 @@
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
 
-      // Commish tools require both admin capability and a matching browser session hint.
-      let canCommish = !!(workerAdmin.ok && workerAdmin.isAdmin && workerAdmin.sessionMatch);
-      let adminReason = canCommish
+      // Explicit gating requested: commish tools only for franchise 0008.
+      const commishGateFranchise = pad4(COMMISH_FRANCHISE_ID || commishFranchiseId || "");
+      let canCommish =
+        !!workerAdmin.ok &&
+        !!workerAdmin.isAdmin &&
+        !!currentFranchiseId &&
+        !!commishGateFranchise &&
+        currentFranchiseId === commishGateFranchise;
+      const adminReason = canCommish
         ? safeStr(workerAdmin.reason || "Commish mode")
-        : workerAdmin.sessionKnown
-        ? "Owner mode (commish tools hidden)"
-        : "Owner mode (no commish session hint)";
-
-      // If both ids are known and mismatch, force owner mode.
-      if (canCommish && currentFranchiseId && commishFranchiseId && currentFranchiseId !== commishFranchiseId) {
-        canCommish = false;
-        adminReason = "Owner mode (commish tools hidden)";
-      }
+        : "Owner mode (commish tools hidden)";
 
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;

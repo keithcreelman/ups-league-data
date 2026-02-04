@@ -1,586 +1,221 @@
-:root{
-  --bg:#0b1220;
-  --panel:#0f1a2e;
-  --card:#0e1730;
-  --muted:#9aa7bd;
-  --text:#e9eef9;
-  --line:rgba(255,255,255,.09);
-  --accent:#4ea1ff;
-  --accent2:#8b5cff;
-  --good:#33d19a;
-  --warn:#ffcc66;
-  --bad:#ff6b6b;
-  --chip:#182646;
-  --shadow: 0 14px 50px rgba(0,0,0,.35);
-  --radius: 18px;
+:root {
+  /* Core Surface Palette */
+  --bg: #070c14;
+  --surface-panel: #0f1a2e;
+  --surface-card: #162238;
+  --surface-hover: rgba(78, 161, 255, 0.08);
+  
+  /* UI Lines & Accents */
+  --line: rgba(255, 255, 255, 0.06);
+  --line-bright: rgba(255, 255, 255, 0.12);
+  --accent: #4ea1ff;
+  --accent-glow: rgba(78, 161, 255, 0.3);
+  
+  /* Semantic Status */
+  --pos-qb: #4ea1ff; --pos-rb: #33d19a; --pos-wr: #bf6dff;
+  --pos-te: #ffcc66; --pos-k: #ff78b4;  --pos-def: #ff6b6b;
+
+  /* Typography */
+  --text-main: #e9eef9;
+  --text-muted: #9aa7bd;
+  --text-dim: rgba(154, 167, 189, 0.5);
+  
+  /* Utils */
+  --radius-lg: 16px;
+  --radius-md: 8px;
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* ===== CCC base scope ===== */
-#cccApp{
+/* 1. Base Layout */
+#cccApp {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   background: var(--bg);
-  border-radius: var(--radius);
+  color: var(--text-main);
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+  -webkit-font-smoothing: antialiased;
 }
 
-#cccApp * { box-sizing:border-box; }
-
-#cccApp{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color:var(--text);
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 14px;
-}
-
-/* Header */
-.ccc-hero{
-  background:
-    radial-gradient(900px 500px at 25% 10%, rgba(78,161,255,.25), transparent 60%),
-    radial-gradient(900px 500px at 85% 10%, rgba(139,92,255,.22), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px 16px 14px;
+/* 2. Hero & Glass Header */
+.ccc-hero {
+  background: linear-gradient(180deg, var(--surface-panel), var(--bg));
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
 }
 
-.ccc-topRow{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:14px;
-  flex-wrap:wrap;
+.ccc-hero::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 20% 0%, var(--accent-glow), transparent 40%);
+  pointer-events: none;
 }
 
-.ccc-title{
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: .2px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.ccc-title span.badge{
-  font-size: 11px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.10);
-  border: 1px solid var(--line);
-  color: var(--muted);
+.ccc-title {
+  font-size: 24px;
   font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.ccc-sub{
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-/* Nav */
-.ccc-nav{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top: 12px;
-}
-
-.ccc-navTitle{
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .06em;
+.ccc-title .badge {
+  font-size: 10px;
   text-transform: uppercase;
-  color: rgba(233,238,249,.74);
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  background: var(--line);
+  border: 1px solid var(--line-bright);
+  border-radius: 6px;
+  color: var(--text-muted);
 }
 
-.ccc-navWarn{
-  font-size: 12px;
-  font-weight: 1000;
-  color: #ff5f61;
+/* 3. Interactive Controls */
+.ccc-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 15px;
 }
 
-.ccc-eligWarn{
-  margin: 10px 0 0 0;
-  padding: 12px;
-  border: 1px solid rgba(255,95,97,.55);
-  border-radius: 12px;
-  background: rgba(255,95,97,.12);
-  color: #ff6f72;
-  font-size: 18px;
-  font-weight: 1000;
-  text-align: center;
-  letter-spacing: .02em;
-}
-
-/* Buttons */
-.ccc-chipBtn{
+.ccc-input-group {
+  display: flex;
+  background: var(--surface-card);
   border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  cursor:pointer;
-  user-select:none;
-  transition: transform .06s ease, background .12s ease;
-}
-.ccc-chipBtn:hover{ background: rgba(255,255,255,.10); }
-.ccc-chipBtn:active{ transform: translateY(1px); }
-.ccc-chipBtn.primary{
-  background: linear-gradient(135deg, rgba(78,161,255,.30), rgba(139,92,255,.22));
-  border-color: rgba(78,161,255,.35);
-}
-.ccc-chipBtn.disabled{
-  opacity:.55;
-  cursor:not-allowed;
+  border-radius: var(--radius-md);
+  padding: 4px;
 }
 
-/* Controls */
-.ccc-controls{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-
-.ccc-adminControls{
-  margin-left:auto;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-  display:flex;
-}
-.ccc-adminLabel{ color: rgba(233,238,249,.75); font-weight:900; }
-
-.ccc-field{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.ccc-check{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.ccc-check input[type="checkbox"]{
-  width:14px;
-  height:14px;
-  accent-color:#4ea1ff;
-}
-
-.ccc-input, .ccc-select{
-  background: rgba(0,0,0,.22);
-  border: 1px solid var(--line);
-  color: var(--text);
-  padding: 8px 10px;
-  border-radius: 12px;
-  outline:none;
-  font-size: 12px;
-}
-
-.ccc-input::placeholder{ color: rgba(233,238,249,.45); }
-
-.ccc-btn{
-  background: rgba(17,29,50,.96);
-  border: 1px solid rgba(255,255,255,.18);
-  color: rgba(245,250,255,.96);
-  padding: 9px 12px;
-  border-radius: 12px;
-  cursor:pointer;
-  font-weight: 900;
-  font-size: 12px;
-}
-.ccc-btn:hover{
-  background: rgba(27,40,66,.98);
-  border-color: rgba(255,255,255,.24);
-}
-
-.ccc-btn-offer{
-  background: rgba(30,43,68,.96);
-  border-color: rgba(255,255,255,.26);
-  color: rgba(245,250,255,.98);
-}
-.ccc-btn-offer:hover{
-  background: rgba(42,56,84,.98);
-  border-color: rgba(255,255,255,.34);
-}
-
-table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(78,161,255,.25); border-color: rgba(78,161,255,.85); }
-table.ccc-table tbody tr.pos-RB .ccc-btn-offer{ background: rgba(51,209,154,.25); border-color: rgba(51,209,154,.85); }
-table.ccc-table tbody tr.pos-WR .ccc-btn-offer{ background: rgba(191,109,255,.25); border-color: rgba(191,109,255,.88); }
-table.ccc-table tbody tr.pos-TE .ccc-btn-offer{ background: rgba(184,138,35,.25); border-color: rgba(184,138,35,.88); }
-table.ccc-table tbody tr.pos-K .ccc-btn-offer{ background: rgba(255,120,180,.25); border-color: rgba(255,120,180,.88); }
-table.ccc-table tbody tr.pos-DL .ccc-btn-offer{ background: rgba(255,107,107,.25); border-color: rgba(255,107,107,.88); }
-table.ccc-table tbody tr.pos-LB .ccc-btn-offer{ background: rgba(6,182,212,.25); border-color: rgba(6,182,212,.88); }
-table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25); border-color: rgba(255,145,60,.88); }
-
-/* Summary */
-.ccc-summary{
-  margin-top: 12px;
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,.22);
-  border-radius: var(--radius);
-  padding: 12px 12px;
-}
-
-.ccc-summaryTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.ccc-summaryTitle{
-  font-weight: 900;
+.ccc-input, .ccc-select {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 8px 12px;
   font-size: 13px;
-  color: var(--text);
+  outline: none;
 }
 
-.ccc-kpis{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top: 10px;
+.ccc-btn {
+  background: var(--surface-card);
+  border: 1px solid var(--line-bright);
+  color: var(--text-main);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.kpi{
-  background: rgba(255,255,255,.06);
+.ccc-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* 4. The Interactive Table */
+.ccc-table-container {
+  margin-top: 20px;
+  background: var(--surface-panel);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 10px 10px;
-  min-width: 170px;
+  border-radius: var(--radius-lg);
+  overflow: hidden; /* Clips the bottom row corners */
 }
 
-.kpi .label{ font-size:11px; color: var(--muted); font-weight:800; }
-.kpi .value{ font-size:18px; font-weight:1000; margin-top:3px; }
-.kpi .hint{ font-size:11px; color: rgba(233,238,249,.65); margin-top:4px; }
-
-.ccc-summaryPage{
-  margin-top: 12px;
-}
-
-.ccc-miniGrid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap:10px;
-  margin-bottom: 10px;
-}
-
-.ccc-miniKpi{
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px;
-  background: rgba(255,255,255,.05);
-}
-
-.ccc-miniKpi .label{
-  font-size:11px;
-  color: var(--muted);
-  font-weight:800;
-}
-
-.ccc-miniKpi .value{
-  margin-top:4px;
-  font-size:18px;
-  font-weight:1000;
-}
-
-/* Tabs */
-.ccc-tabs{
-  margin-top: 12px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.ccc-tab{
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  border-radius: 999px;
-  padding: 9px 12px;
-  cursor:pointer;
-  font-weight: 1000;
-  font-size: 12px;
-}
-.ccc-tab.active{
-  background: linear-gradient(135deg, rgba(78,161,255,.30), rgba(139,92,255,.18));
-  border-color: rgba(78,161,255,.35);
-}
-
-/* Table */
-.ccc-tableWrap{
-  margin-top: 10px;
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,.26);
-  border-radius: var(--radius);
-  overflow:auto;
-}
-
-table.ccc-table{
-  width:100%;
+table.ccc-table {
+  width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
-  color: rgba(233,238,249,.92);
+  font-size: 13px;
+  text-align: left;
 }
 
-table.ccc-table thead th{
+/* Sticky Header Strategy */
+table.ccc-table thead th {
   position: sticky;
   top: 0;
-  z-index: 2;
-  background: rgba(15,26,46,.98);
-  color: rgba(233,238,249,.92);
-  font-size: 12px;
-  font-weight: 1000;
-  text-align:left;
-  padding: 12px 10px;
-  border-bottom: 1px solid var(--line);
-  letter-spacing: .15px;
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-}
-
-table.ccc-table thead th .sort{
+  background: #121d33; /* Solid background for legibility */
+  padding: 16px 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
   font-size: 11px;
-  opacity: .75;
-  margin-left: 6px;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--line-bright);
+  z-index: 10;
 }
 
-table.ccc-table tbody td{
-  padding: 12px 10px;
-  border: 1px solid rgba(255,255,255,.08);
-  font-size: 12px;
-  vertical-align: top;
-  transition: background .12s ease, box-shadow .12s ease, filter .12s ease;
-  background: rgba(255,255,255,.07); /* neutral fallback */
-  color: #f7fbff;
+/* Zebra / Hover Rows */
+table.ccc-table tbody tr {
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s ease;
+}
+
+table.ccc-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+table.ccc-table td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+/* Dynamic Offer Buttons based on Position */
+.btn-offer {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--line-bright);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* Clean Position-specific styling using the variables */
+tr.pos-QB .btn-offer { border-color: var(--pos-qb); color: var(--pos-qb); }
+tr.pos-RB .btn-offer { border-color: var(--pos-rb); color: var(--pos-rb); }
+tr.pos-WR .btn-offer { border-color: var(--pos-wr); color: var(--pos-wr); }
+
+/* 5. Summary KPIs (The "Stats" Bar) */
+.ccc-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: var(--surface-card);
+  border: 1px solid var(--line);
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.stat-card .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
   font-weight: 700;
 }
 
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
-  font-weight: 1000;
-  font-size: 11px;
-  white-space: nowrap;
+.stat-card .value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 4px;
+  color: var(--accent);
 }
 
-.pill.auction{ border-color: rgba(78,161,255,.35); background: rgba(78,161,255,.12); }
-.pill.waiver { border-color: rgba(139,92,255,.35); background: rgba(139,92,255,.12); }
-.pill.rookie { border-color: rgba(255,204,102,.45); background: rgba(255,204,102,.12); }
-.pill.good{ border-color: rgba(51,209,154,.45); background: rgba(51,209,154,.12); }
-.pill.bad{ border-color: rgba(255,107,107,.45); background: rgba(255,107,107,.12); }
-
-.muted{ color: rgba(235,239,255,.78); font-weight: 700; }
-.playerCell{ font-weight: 1000; color:#fdfdff; }
-.explain{
-  color: rgba(233,238,249,.78);
-  line-height: 1.25;
-  max-width: 560px;
-}
-
-.ccc-error{
-  margin-top: 10px;
-  font-size: 12px;
-  color: #ffb4b4;
-}
-
-/* ===== FIX: solid, high-contrast rows ===== */
-
-/* 1) Cells should NOT paint their own backgrounds */
-table.ccc-table tbody td{
-  background: transparent !important;     /* key: let the row color show through */
-  border: none;                           /* remove full grid look */
-  border-bottom: 1px solid rgba(255,255,255,.08); /* clean row separator */
-  color: rgba(245,250,255,.92);
-}
-
-/* Optional: keep subtle vertical dividers (lighter than before) */
-table.ccc-table th,
-table.ccc-table td{
-  border-right: 1px solid rgba(255,255,255,.06);
-}
-table.ccc-table th:last-child,
-table.ccc-table td:last-child{
-  border-right: none;
-}
-
-/* 2) Default row fill (applies to every row) */
-table.ccc-table tbody tr{
-  background: rgba(255,255,255,.06);     /* solid row fill */
-}
-
-/* 3) Position-based row fills (subtle tints, still solid) */
-table.ccc-table tbody tr.pos-QB{ background: rgba(78,161,255,.14); }
-table.ccc-table tbody tr.pos-RB{ background: rgba(51,209,154,.16); }
-table.ccc-table tbody tr.pos-WR{ background: rgba(191,109,255,.16); }
-table.ccc-table tbody tr.pos-TE{ background: rgba(184,138,35,.17); }
-table.ccc-table tbody tr.pos-K { background: rgba(255,120,180,.18); }
-table.ccc-table tbody tr.pos-DL{ background: rgba(255,107,107,.16); }
-table.ccc-table tbody tr.pos-LB{ background: rgba(6,182,212,.15); }
-table.ccc-table tbody tr.pos-DB{ background: rgba(255,145,60,.18); }
-
-/* 4) Remove the old zebra fallback (it causes mixed-color rows) */
-table.ccc-table tbody tr:not([class*="pos-"]) td:nth-child(odd),
-table.ccc-table tbody tr:not([class*="pos-"]) td:nth-child(even){
-  background: transparent !important;
-}
-
-/* 5) Keep your left accent bar, but make it cleaner */
-table.ccc-table tbody tr.pos-QB td:first-child{ border-left: 6px solid rgba(78,161,255,.95); }
-table.ccc-table tbody tr.pos-RB td:first-child{ border-left: 6px solid rgba(51,209,154,.95); }
-table.ccc-table tbody tr.pos-WR td:first-child{ border-left: 6px solid rgba(191,109,255,.95); }
-table.ccc-table tbody tr.pos-TE td:first-child{ border-left: 6px solid rgba(184,138,35,.95); }
-table.ccc-table tbody tr.pos-K  td:first-child{ border-left: 6px solid rgba(255,120,180,.95); }
-table.ccc-table tbody tr.pos-DL td:first-child{ border-left: 6px solid rgba(255,107,107,.95); }
-table.ccc-table tbody tr.pos-LB td:first-child{ border-left: 6px solid rgba(6,182,212,.95); }
-table.ccc-table tbody tr.pos-DB td:first-child{ border-left: 6px solid rgba(255,145,60,.95); }
-
-/* 6) Hover: slightly brighten the whole row (still solid) */
-table.ccc-table tbody tr:hover{
-  filter: brightness(1.12);
-}
-
-/* ===== Modal (fixed readability + no lockups) ===== */
-.ccc-modal{
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  display: none; /* toggled via .is-open */
-  justify-content: center;
-  align-items: flex-start;
-  padding: 6vh 12px 24px;
-}
-
-.ccc-modal.is-open{
-  display: flex;
-}
-
-.ccc-modal-backdrop{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.88);
-  backdrop-filter: blur(2px);
-}
-
-/* Freeze whole page */
-body.ccc-modalOpen{
-  overflow: hidden;
-}
-
-/* Disable clicks everywhere except the modal */
-body.ccc-modalOpen > *{
-  pointer-events: none;
-}
-
-body.ccc-modalOpen #mymModal,
-body.ccc-modalOpen #mymModal *{
-  pointer-events: auto;
-}
-
-.ccc-modal-card{
-  position: relative;
-  z-index: 1;
-  width: min(720px, 100%);
-  border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(8,12,20,.98);
-  box-shadow: 0 30px 110px rgba(0,0,0,.75);
-  overflow: hidden;
-}
-
-.ccc-modal-card::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(900px 500px at 25% 10%, rgba(78,161,255,.14), transparent 60%),
-    radial-gradient(900px 500px at 85% 10%, rgba(139,92,255,.12), transparent 60%);
-  pointer-events: none;
-}
-.ccc-modal-card > *{ position: relative; z-index: 1; }
-
-.ccc-modal-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  padding: 14px 14px 10px;
-  border-bottom: 1px solid var(--line);
-}
-
-.ccc-modal-title{ font-size:18px; font-weight:1000; color: rgba(245,250,255,.98); line-height: 1.2; }
-.ccc-modal-sub{ margin-top:4px; font-size:12px; color: rgba(233,238,249,.88); font-weight: 700; }
-
-.ccc-modal-x{
-  background: rgba(255,255,255,.08);
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 10px;
-  padding: 6px 10px;
-  cursor:pointer;
-  font-weight:1000;
-}
-
-.ccc-modal-body{ padding: 12px 14px; }
-.ccc-modal-row{ padding: 6px 0; }
-.ccc-modal-label{ font-size:12px; color: var(--muted); font-weight:900; margin-bottom:8px; }
-.ccc-modal-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-
-.ccc-modal-foot{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-}
-
-.ccc-code{
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.45);
-  border-radius: 12px;
-  padding: 10px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 12px;
-  color: rgba(233,238,249,.96);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-
-
-/* Responsive */
-@media (max-width: 960px){
-  #cccApp{ padding: 10px; }
-  .ccc-topRow{ flex-direction: column; align-items: flex-start; }
-  .ccc-controls{ width: 100%; justify-content: flex-start; }
-  .ccc-nav{ overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
-  .ccc-tableWrap{ margin-left: -10px; margin-right: -10px; padding: 0 10px; }
-}
-@media (max-width: 720px){
-  .kpi{ min-width: 46%; }
-  table.ccc-table{ min-width: 760px; }
-  table.ccc-table th,
-  table.ccc-table td{ padding: 10px 8px; }
-  table.ccc-table thead th{ position: sticky; }
-}
-@media (max-width: 520px){
-  .kpi{ min-width: 100%; }
-  .ccc-tabs{ flex-wrap: wrap; }
-  .ccc-chipBtn{ width: 100%; justify-content: center; }
+/* Custom Scrollbar for the Table Wrap */
+.ccc-table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+.ccc-table-container::-webkit-scrollbar-track { background: var(--bg); }
+.ccc-table-container::-webkit-scrollbar-thumb { 
+  background: var(--line-bright); 
+  border-radius: 10px; 
 }

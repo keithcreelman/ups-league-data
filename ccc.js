@@ -209,10 +209,35 @@
     };
 
     try {
+      // 1) Explicit globals (when rendered inside MFL pages)
+      const globalCandidates = [
+        window.FRANCHISE_ID,
+        window.franchise_id,
+        window.franchiseId,
+        window.mflFranchiseId,
+        window.MFL_FRANCHISE_ID,
+      ];
+      for (const g of globalCandidates) {
+        const v = pad4(g);
+        if (v) return v;
+      }
+
+      // 2) Current URL / referrer
       const fromSelf = readFromUrl(window.location.href);
       if (fromSelf) return fromSelf;
       const fromReferrer = readFromUrl(document.referrer || "");
       if (fromReferrer) return fromReferrer;
+
+      // 3) Look for /home/<league>/<franchise> in links on page
+      try {
+        const links = Array.from(document.querySelectorAll('a[href*="/home/"]'));
+        for (const a of links) {
+          const href = a && a.getAttribute ? a.getAttribute("href") : "";
+          const v = readFromUrl(href || "");
+          if (v) return v;
+        }
+      } catch (e) {}
+
       return "";
     } catch (e) {
       return "";
@@ -2506,15 +2531,17 @@
       const workerAdmin = await getAdminFlagFromWorker();
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
-      let canCommish = !!(workerAdmin.ok && workerAdmin.isAdmin);
-      // If we can identify the current franchise and it does not match the commish franchise,
-      // force owner mode to prevent exposing commish controls.
-      if (canCommish && currentFranchiseId && commishFranchiseId && currentFranchiseId !== commishFranchiseId) {
-        canCommish = false;
-      }
+      // Secure-by-default: only enable commish tools when we can positively match
+      // the current viewer franchise to the commish franchise id reported by worker.
+      let canCommish =
+        !!workerAdmin.ok &&
+        !!workerAdmin.isAdmin &&
+        !!currentFranchiseId &&
+        !!commishFranchiseId &&
+        currentFranchiseId === commishFranchiseId;
       const adminReason = canCommish
         ? safeStr(workerAdmin.reason || "Commish mode")
-        : "Owner mode (commish tools hidden)";
+        : `Owner mode (commish tools hidden)`;
 
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;

@@ -63,6 +63,16 @@
     return `${y}-${m}-${da}`;
   }
 
+  function fmtLocalYMDHM(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    const h = String(d.getHours()).padStart(2, "0");
+    const mi = String(d.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${da} ${h}:${mi}`;
+  }
+
   function must(sel) {
     const el = $(sel);
     if (!el) throw new Error(`Missing required element: ${sel}`);
@@ -328,7 +338,7 @@
       .sort((a, b) => a.d - b.d)[0];
 
     const soonestTxt = soonest ? fmtYMD(soonest.r.mym_deadline) : "N/A";
-    const asOfTxt = asOfDate ? asOfDate.toISOString().slice(0, 16).replace("T", " ") : "";
+    const asOfTxt = asOfDate ? fmtLocalYMDHM(asOfDate) : "";
 
     return `
       <div class="ccc-summaryTop">
@@ -572,7 +582,7 @@
     if (pill) {
       if (state.isAdmin && state.asOfDate) {
         pill.style.display = "";
-        pill.textContent = `As-Of: ${state.asOfDate.toISOString().slice(0, 16).replace("T", " ")}`;
+        pill.textContent = `As-Of: ${fmtLocalYMDHM(state.asOfDate)}`;
       } else {
         pill.style.display = "none";
       }

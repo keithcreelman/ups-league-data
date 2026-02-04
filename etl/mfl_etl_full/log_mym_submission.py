@@ -9,7 +9,7 @@ import argparse
 import hashlib
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -78,7 +78,7 @@ def load_doc(path: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
 def normalize_timestamp(raw_ts: str) -> str:
     ts = safe_str(raw_ts)
     if not ts:
-        return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return ts
 
 
@@ -158,7 +158,7 @@ def main() -> int:
 
     doc["submissions"] = submissions
     doc["meta"] = {
-        "generated_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         "source": "mym-submission-log",
         "count": len(submissions),
     }

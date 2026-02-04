@@ -604,14 +604,18 @@
     return out;
   }
 
-  function renderSummaryPage(eligibleRows, submittedRows) {
+  function renderSummaryPage(eligibleRows, submittedRows, teamName, positionLabel) {
     const eligibleCount = eligibleRows.length;
     const submittedCount = submittedRows.length;
     const eligibleSalary = eligibleRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
     const submittedSalary = submittedRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
     const rows = buildPositionBreakdown(eligibleRows, submittedRows);
+    const scopeTxt = positionLabel && positionLabel !== "__ALL_POS__" ? ` | Position: ${positionLabel}` : "";
 
     const top = `
+      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Summary${htmlEsc(
+      scopeTxt
+    )}</div>
       <div class="ccc-miniGrid">
         <div class="ccc-miniKpi"><div class="label">Eligible Players</div><div class="value">${eligibleCount}</div></div>
         <div class="ccc-miniKpi"><div class="label">Eligible Salary</div><div class="value">${eligibleSalary.toLocaleString()}</div></div>
@@ -670,6 +674,7 @@
     selectedSeason: "",
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
+    positionFilterEnabled: false,
     showAllTeams: false,
     detectedFranchiseId: "",
     asOfDate: null,
@@ -980,6 +985,7 @@
     const season = normalizeSeasonValue(state.selectedSeason);
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
+    const positionFilterEnabled = !!state.positionFilterEnabled;
     const selectedTeamId = pad4(state.selectedTeam);
 
     const seasonEligibility = eligibility.filter(
@@ -998,11 +1004,11 @@
       : seasonSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
     const positionFilteredEligibility =
-      selectedPosition === "__ALL_POS__"
+      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
         ? teamFilteredEligibility
         : teamFilteredEligibility.filter((r) => posKeyFromRow(r) === selectedPosition);
     const positionFilteredSubmissions =
-      selectedPosition === "__ALL_POS__"
+      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
         ? teamFilteredSubmissions
         : teamFilteredSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
 
@@ -1078,7 +1084,14 @@
         !!asOfDate
       );
     }
-    if (tabSummary) tabSummary.innerHTML = renderSummaryPage(scoped, submittedRowsRaw);
+    if (tabSummary) {
+      tabSummary.innerHTML = renderSummaryPage(
+        eligibleRows,
+        submittedRowsRaw,
+        teamName,
+        positionFilterEnabled ? selectedPosition : "__ALL_POS__"
+      );
+    }
     if (tabEligible) {
       tabEligible.innerHTML = renderEligibleAvailabilityNotice(season) + renderTable(eligibleRows, "eligible");
     }
@@ -1354,6 +1367,7 @@
       must("#seasonSelect");
       must("#teamSelect");
       must("#positionSelect");
+      must("#positionFilterChk");
       must("#showAllTeamsChk");
       must("#commishModeWrap");
       must("#commishModeChk");
@@ -1455,7 +1469,12 @@
       populateTeamSelect(teams, state.selectedTeam);
       const positions = buildPositionList(seasonRows, seasonSubmissionRows);
       state.selectedPosition = "__ALL_POS__";
+      state.positionFilterEnabled = false;
       populatePositionSelect(positions, state.selectedPosition);
+      const positionFilterChk = $("#positionFilterChk");
+      if (positionFilterChk) positionFilterChk.checked = !!state.positionFilterEnabled;
+      const positionSelect = $("#positionSelect");
+      if (positionSelect) positionSelect.disabled = !state.positionFilterEnabled;
 
       setTab("eligible");
 
@@ -1688,6 +1707,19 @@
     if (positionSelect)
       positionSelect.addEventListener("change", (e) => {
         state.selectedPosition = safeStr(e.target.value || "__ALL_POS__");
+        render();
+      });
+
+    const positionFilterChk = $("#positionFilterChk");
+    if (positionFilterChk)
+      positionFilterChk.addEventListener("change", (e) => {
+        state.positionFilterEnabled = !!e.target.checked;
+        const sel = $("#positionSelect");
+        if (sel) sel.disabled = !state.positionFilterEnabled;
+        if (!state.positionFilterEnabled) {
+          state.selectedPosition = "__ALL_POS__";
+          if (sel) sel.value = "__ALL_POS__";
+        }
         render();
       });
 

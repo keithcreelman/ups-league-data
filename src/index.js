@@ -32,6 +32,7 @@ export default {
           { status: 500, headers: { "content-type": "application/json", ...corsHeaders } }
         );
       }
+      const cookieHeader = cookie.includes("=") ? cookie : `MFL_USER_ID=${cookie}`;
 
       // ---------- MYM contract submit ----------
       if (path === "/offer-mym") {
@@ -104,7 +105,7 @@ export default {
         const probe = await fetch(importUrl, {
           method: "GET",
           redirect: "manual",
-          headers: { Cookie: cookie, "User-Agent": "ups-league-data-worker" },
+          headers: { Cookie: cookieHeader, "User-Agent": "ups-league-data-worker" },
           cf: { cacheTtl: 0, cacheEverything: false },
         });
         const loc = probe.headers.get("Location") || probe.headers.get("location");
@@ -119,7 +120,7 @@ export default {
           const verifyUrl = verifyUrlBase + encodeURIComponent(String(nonce));
           const verifyRes = await fetch(verifyUrl, {
             headers: {
-              Cookie: cookie,
+              Cookie: cookieHeader,
               "User-Agent": "ups-league-data-worker",
             },
             cf: { cacheTtl: 0, cacheEverything: false },
@@ -156,20 +157,16 @@ export default {
 
         for (const statusCandidate of statusAttempts) {
           const dataXml = makeDataXml(statusCandidate);
-          const form = new URLSearchParams();
-          form.set("TYPE", "salaries");
-          form.set("L", leagueId);
-          form.set("APPEND", "1");
-          form.set("DATA", dataXml);
+          const bodyData = `DATA=${encodeURIComponent(dataXml)}`;
 
           const res = await fetch(targetImportUrl, {
             method: "POST",
             headers: {
-              Cookie: cookie,
+              Cookie: cookieHeader,
               "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
               "User-Agent": "ups-league-data-worker",
             },
-            body: form.toString(),
+            body: bodyData,
             redirect: "manual",
             cf: { cacheTtl: 0, cacheEverything: false },
           });
@@ -236,7 +233,7 @@ export default {
       const res = await fetch(mflUrl, {
         headers: {
           // pass the commish cookie here
-          Cookie: cookie,
+          Cookie: cookieHeader,
           "User-Agent": "ups-league-data-worker",
         },
         cf: { cacheTtl: 0, cacheEverything: false },

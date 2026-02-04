@@ -345,6 +345,7 @@
         isAdmin: !!j.isAdmin,
         reason: safeStr(j.reason || ""),
         emailCount: safeInt(j.emailCount || 0),
+        commishFranchiseId: pad4(j.commishFranchiseId || j.commish_franchise_id || ""),
         L,
         YEAR,
       };
@@ -353,6 +354,7 @@
         ok: false,
         isAdmin: false,
         reason: `Worker check failed: ${e && e.message ? e.message : e}`,
+        commishFranchiseId: "",
         L,
         YEAR,
       };
@@ -429,6 +431,60 @@
       YEAR,
       source: "browser",
     };
+  }
+
+  function parseMyFranchiseId(data) {
+    const cand =
+      (data &&
+        (data?.franchise?.id ||
+          data?.myfranchise?.id ||
+          data?.myfranchise?.franchise?.id ||
+          data?.franchise?.franchise_id ||
+          data?.myfranchise?.franchise_id ||
+          data?.franchise_id ||
+          data?.franchiseId)) ||
+      "";
+    return pad4(cand);
+  }
+
+  async function resolveCurrentFranchiseId(leagueId, year, existingId) {
+    const existing = pad4(existingId);
+    if (existing) return existing;
+
+    const L = safeStr(leagueId || getLeagueId() || DEFAULT_LEAGUE_ID);
+    const YEAR = safeStr(year || getYear() || DEFAULT_YEAR);
+    const candidates = [];
+
+    if (window && window.location && window.location.origin) {
+      candidates.push(
+        `${window.location.origin}/${encodeURIComponent(
+          YEAR
+        )}/export?TYPE=myfranchise&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`
+      );
+    }
+    if (typeof window.apiKey === "string" && window.apiKey.trim()) {
+      candidates.push(
+        `https://api.myfantasyleague.com/${encodeURIComponent(
+          YEAR
+        )}/export?TYPE=myfranchise&L=${encodeURIComponent(L)}&APIKEY=${encodeURIComponent(
+          window.apiKey.trim()
+        )}&JSON=1&_=${Date.now()}`
+      );
+    }
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, {
+          cache: "no-store",
+          credentials: "include",
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const fid = parseMyFranchiseId(data);
+        if (fid) return fid;
+      } catch (e) {}
+    }
+    return "";
   }
 
   // ======================================================
@@ -2434,16 +2490,37 @@
       state.detectedFranchiseId = detectFranchiseId();
 
       const workerAdmin = await getAdminFlagFromWorker();
+      state.detectedFranchiseId = await resolveCurrentFranchiseId(
+        workerAdmin.L,
+        workerAdmin.YEAR,
+        state.detectedFranchiseId
+      );
       const browserAdmin = await getAdminFlagFromBrowser(workerAdmin.L, workerAdmin.YEAR);
-      const admin = browserAdmin.ok ? browserAdmin : workerAdmin;
 
-      // Safety: only grant commish tools when current browser login proves commish access.
-      state.isAdmin = !!(browserAdmin.ok && browserAdmin.isAdmin);
-      state.canCommishMode = !!(browserAdmin.ok && browserAdmin.isAdmin);
+      const currentFranchiseId = pad4(state.detectedFranchiseId);
+      const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
+      let canCommish = false;
+      let adminReason = "";
+      if (browserAdmin.ok) {
+        canCommish = !!browserAdmin.isAdmin;
+        adminReason = safeStr(browserAdmin.reason || "");
+      } else if (workerAdmin.ok && workerAdmin.isAdmin) {
+        canCommish =
+          !!currentFranchiseId &&
+          !!commishFranchiseId &&
+          currentFranchiseId === commishFranchiseId;
+        adminReason = canCommish
+          ? "Commish verified by franchise match"
+          : "Owner mode (commish tools hidden)";
+      } else {
+        canCommish = false;
+        adminReason = safeStr(workerAdmin.reason || "Owner mode");
+      }
+
+      state.isAdmin = canCommish;
+      state.canCommishMode = canCommish;
       state.commishMode = state.canCommishMode ? true : false;
-      state.adminReason = state.canCommishMode
-        ? safeStr(admin.reason || "")
-        : safeStr(browserAdmin.reason || "No private owner data visible (owner mode)");
+      state.adminReason = adminReason;
 
       const commishWrap = $("#commishModeWrap");
       const commishChk = $("#commishModeChk");

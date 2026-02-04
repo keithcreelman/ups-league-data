@@ -77,6 +77,35 @@ export default {
           return acc + (hasEmail ? 1 : 0);
         }, 0);
 
+        let commishFranchiseId = "";
+        try {
+          const myFrUrl = `https://api.myfantasyleague.com/${encodeURIComponent(
+            year
+          )}/export?TYPE=myfranchise&L=${encodeURIComponent(leagueId)}&JSON=1&_=${Date.now()}`;
+          const myFrRes = await fetch(myFrUrl, {
+            headers: {
+              Cookie: cookieHeader,
+              "User-Agent": "ups-league-data-worker",
+            },
+            cf: { cacheTtl: 0, cacheEverything: false },
+          });
+          if (myFrRes.ok) {
+            const myFrData = await myFrRes.json();
+            const cand =
+              (myFrData &&
+                (myFrData?.franchise?.id ||
+                  myFrData?.myfranchise?.id ||
+                  myFrData?.myfranchise?.franchise?.id ||
+                  myFrData?.franchise?.franchise_id ||
+                  myFrData?.myfranchise?.franchise_id)) ||
+              "";
+            commishFranchiseId = String(cand || "")
+              .replace(/\D/g, "")
+              .padStart(4, "0")
+              .slice(-4);
+          }
+        } catch (_) {}
+
         return {
           ok: true,
           isAdmin: emailCount > 1,
@@ -84,6 +113,7 @@ export default {
             ? "Private owner data visible (commish)"
             : "No private owner data visible (not commish)",
           emailCount,
+          commishFranchiseId,
           mflHttp: 200,
         };
       };
@@ -594,6 +624,7 @@ export default {
           isAdmin: adminState.isAdmin,
           reason: adminState.reason,
           emailCount: adminState.emailCount,
+          commishFranchiseId: adminState.commishFranchiseId || "",
         }),
         { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
       );

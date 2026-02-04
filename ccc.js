@@ -724,6 +724,10 @@
       return; // do NOT close modal on failure
     }
 
+    if (out && out.postCheck) {
+      console.log("[MYM postCheck]", out.postCheck);
+    }
+
     closeMYMModal();
     await load(); // refresh dashboard
   } catch (e) {

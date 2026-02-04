@@ -58,6 +58,7 @@ export default {
         const salary = String(body.salary ?? "").trim();
         const contractYear = String(body.contract_year ?? body.contractYear ?? "").trim();
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
+        const contractStatus = String(body.contract_status || body.contractStatus || "A").trim();
 
         if (!leagueId || !playerId || !salary || !contractYear) {
           return new Response(
@@ -78,9 +79,9 @@ export default {
 
         const dataXml =
           `<salaries><leagueUnit unit="LEAGUE">` +
-          `<player id="${esc(playerId)}" salary="${esc(salary)}" contractYear="${esc(
-            contractYear
-          )}" contractInfo="${esc(contractInfo)}" />` +
+          `<player id="${esc(playerId)}" salary="${esc(salary)}" contractStatus="${esc(
+            contractStatus
+          )}" contractYear="${esc(contractYear)}" contractInfo="${esc(contractInfo)}" />` +
           `</leagueUnit></salaries>`;
 
         const form = new URLSearchParams();
@@ -130,12 +131,46 @@ export default {
           !lowered.includes("invalid") &&
           !lowered.includes("not authorized");
 
+        // Verify post-import state from MFL export so callers can confirm site-side data changed.
+        let postCheck = null;
+        if (looksOk) {
+          const verifyUrl =
+            `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
+            `/export?TYPE=salaries&L=${encodeURIComponent(leagueId)}&JSON=1&_=${Date.now()}`;
+          const verifyRes = await fetch(verifyUrl, {
+            headers: {
+              Cookie: cookie,
+              "User-Agent": "ups-league-data-worker",
+            },
+            cf: { cacheTtl: 0, cacheEverything: false },
+          });
+          if (verifyRes.ok) {
+            const v = await verifyRes.json();
+            const leagueUnit = (v?.salaries && (v.salaries.leagueUnit || v.salaries.leagueunit)) || {};
+            const playersRaw = leagueUnit.player || [];
+            const players = Array.isArray(playersRaw) ? playersRaw : [playersRaw].filter(Boolean);
+            const found = players.find((p) => String(p.id) === String(playerId));
+            if (found) {
+              postCheck = {
+                id: String(found.id || ""),
+                salary: String(found.salary || ""),
+                contractYear: String(found.contractYear || ""),
+                contractInfo: String(found.contractInfo || ""),
+                contractStatus: String(found.contractStatus || ""),
+              };
+            } else {
+              postCheck = { id: String(playerId), found: false };
+            }
+          }
+        }
+
         return new Response(
           JSON.stringify({
             ok: looksOk,
             reason: looksOk ? "Submitted to MFL" : "MFL import rejected request",
             upstreamStatus: mflRes ? mflRes.status : 0,
             upstreamPreview: text.slice(0, 800),
+            postCheck,
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );

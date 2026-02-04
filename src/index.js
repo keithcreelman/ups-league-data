@@ -77,24 +77,20 @@ export default {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
-        const attrs = [
-          `id="${esc(playerId)}"`,
-          `salary="${esc(salary)}"`,
-          `contractYear="${esc(contractYear)}"`,
-          `contractInfo="${esc(contractInfo)}"`,
-        ];
-        if (contractStatus) attrs.push(`contractStatus="${esc(contractStatus)}"`);
-
-        const dataXml =
-          `<salaries><leagueUnit unit="LEAGUE">` +
-          `<player ${attrs.join(" ")} />` +
-          `</leagueUnit></salaries>`;
-
-        const form = new URLSearchParams();
-        form.set("TYPE", "salaries");
-        form.set("L", leagueId);
-        form.set("APPEND", "1");
-        form.set("DATA", dataXml);
+        const makeDataXml = (statusValue) => {
+          const attrs = [
+            `id="${esc(playerId)}"`,
+            `salary="${esc(salary)}"`,
+            `contractYear="${esc(contractYear)}"`,
+            `contractInfo="${esc(contractInfo)}"`,
+          ];
+          if (statusValue) attrs.push(`contractStatus="${esc(statusValue)}"`);
+          return (
+            `<salaries><leagueUnit unit="LEAGUE">` +
+            `<player ${attrs.join(" ")} />` +
+            `</leagueUnit></salaries>`
+          );
+        };
 
         const importQuery =
           `TYPE=salaries&L=${encodeURIComponent(leagueId)}&APPEND=1`;
@@ -116,63 +112,99 @@ export default {
           targetImportUrl = loc;
         }
 
-        const mflRes = await fetch(targetImportUrl, {
-          method: "POST",
-          headers: {
-            Cookie: cookie,
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "User-Agent": "ups-league-data-worker",
-          },
-          body: form.toString(),
-          redirect: "manual",
-          cf: { cacheTtl: 0, cacheEverything: false },
-        });
-        const text = await mflRes.text();
-
-        const lowered = text.toLowerCase();
-        const looksOk =
-          !!mflRes &&
-          mflRes.ok &&
-          !lowered.includes("error") &&
-          !lowered.includes("invalid") &&
-          !lowered.includes("not authorized");
-
-        // Verify pre/post state from MFL export so callers can confirm site-side data changed.
-        let preCheck = null;
-        let postCheck = null;
-        if (looksOk) {
-          const verifyUrlBase =
-            `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
-            `/export?TYPE=salaries&L=${encodeURIComponent(leagueId)}&JSON=1&_=` ;
-          const readPlayer = async (nonce) => {
-            const verifyUrl = verifyUrlBase + encodeURIComponent(String(nonce));
-            const verifyRes = await fetch(verifyUrl, {
-              headers: {
-                Cookie: cookie,
-                "User-Agent": "ups-league-data-worker",
-              },
-              cf: { cacheTtl: 0, cacheEverything: false },
-            });
-            if (!verifyRes.ok) return null;
-            const v = await verifyRes.json();
-            const leagueUnit = (v?.salaries && (v.salaries.leagueUnit || v.salaries.leagueunit)) || {};
-            const playersRaw = leagueUnit.player || [];
-            const players = Array.isArray(playersRaw) ? playersRaw : [playersRaw].filter(Boolean);
-            const found = players.find((p) => String(p.id) === String(playerId));
-            if (!found) return { id: String(playerId), found: false };
-            return {
-              id: String(found.id || ""),
-              salary: String(found.salary || ""),
-              contractYear: String(found.contractYear || ""),
-              contractInfo: String(found.contractInfo || ""),
-              contractStatus: String(found.contractStatus || ""),
-            };
+        const verifyUrlBase =
+          `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
+          `/export?TYPE=salaries&L=${encodeURIComponent(leagueId)}&JSON=1&_=`;
+        const readPlayer = async (nonce) => {
+          const verifyUrl = verifyUrlBase + encodeURIComponent(String(nonce));
+          const verifyRes = await fetch(verifyUrl, {
+            headers: {
+              Cookie: cookie,
+              "User-Agent": "ups-league-data-worker",
+            },
+            cf: { cacheTtl: 0, cacheEverything: false },
+          });
+          if (!verifyRes.ok) return null;
+          const v = await verifyRes.json();
+          const leagueUnit = (v?.salaries && (v.salaries.leagueUnit || v.salaries.leagueunit)) || {};
+          const playersRaw = leagueUnit.player || [];
+          const players = Array.isArray(playersRaw) ? playersRaw : [playersRaw].filter(Boolean);
+          const found = players.find((p) => String(p.id) === String(playerId));
+          if (!found) return { id: String(playerId), found: false };
+          return {
+            id: String(found.id || ""),
+            salary: String(found.salary || ""),
+            contractYear: String(found.contractYear || ""),
+            contractInfo: String(found.contractInfo || ""),
+            contractStatus: String(found.contractStatus || ""),
           };
+        };
 
-          preCheck = await readPlayer(Date.now() - 1);
-          // small delay helps MFL propagate import state before verify fetch
+        const preCheck = await readPlayer(Date.now() - 1);
+
+        const importAttempts = [];
+        const statusAttempts = Array.from(
+          new Set([contractStatus, "A", "", preCheck?.contractStatus || ""]).values()
+        );
+
+        let mflRes = null;
+        let text = "";
+        let looksOk = false;
+        let postCheck = preCheck;
+        let dataXmlUsed = "";
+        let statusUsed = "";
+
+        for (const statusCandidate of statusAttempts) {
+          const dataXml = makeDataXml(statusCandidate);
+          const form = new URLSearchParams();
+          form.set("TYPE", "salaries");
+          form.set("L", leagueId);
+          form.set("APPEND", "1");
+          form.set("DATA", dataXml);
+
+          const res = await fetch(targetImportUrl, {
+            method: "POST",
+            headers: {
+              Cookie: cookie,
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+              "User-Agent": "ups-league-data-worker",
+            },
+            body: form.toString(),
+            redirect: "manual",
+            cf: { cacheTtl: 0, cacheEverything: false },
+          });
+          const bodyText = await res.text();
+          const lowered = bodyText.toLowerCase();
+          const requestOk =
+            res.ok &&
+            !lowered.includes("error") &&
+            !lowered.includes("invalid") &&
+            !lowered.includes("not authorized");
+
           await new Promise((r) => setTimeout(r, 250));
-          postCheck = await readPlayer(Date.now());
+          const verifyAfter = await readPlayer(Date.now());
+          const changed =
+            !!preCheck &&
+            !!verifyAfter &&
+            (String(preCheck.contractYear || "") !== String(verifyAfter.contractYear || "") ||
+              String(preCheck.contractInfo || "") !== String(verifyAfter.contractInfo || "") ||
+              String(preCheck.contractStatus || "") !== String(verifyAfter.contractStatus || ""));
+
+          importAttempts.push({
+            statusTried: statusCandidate || "(none)",
+            upstreamStatus: res.status,
+            requestOk,
+            changed,
+          });
+
+          mflRes = res;
+          text = bodyText;
+          postCheck = verifyAfter || preCheck;
+          dataXmlUsed = dataXml;
+          statusUsed = statusCandidate || "";
+          looksOk = requestOk;
+
+          if (changed) break;
         }
 
         return new Response(
@@ -187,7 +219,9 @@ export default {
               targetImportUrl,
               contentType: "application/x-www-form-urlencoded;charset=UTF-8",
               formFields: { TYPE: "salaries", L: leagueId, APPEND: "1" },
-              dataXml,
+              statusUsed,
+              dataXml: dataXmlUsed,
+              importAttempts,
             },
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }

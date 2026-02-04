@@ -1,0 +1,70 @@
+name: Log MYM Submission
+
+on:
+  repository_dispatch:
+    types: [log-mym-submission]
+
+concurrency:
+  group: log-mym-submission
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Append submission log
+        env:
+          LEAGUE_ID: ${{ github.event.client_payload.league_id }}
+          SEASON: ${{ github.event.client_payload.season }}
+          YEAR: ${{ github.event.client_payload.year }}
+          PLAYER_ID: ${{ github.event.client_payload.player_id }}
+          PLAYER_NAME: ${{ github.event.client_payload.player_name }}
+          POSITION: ${{ github.event.client_payload.position }}
+          FRANCHISE_ID: ${{ github.event.client_payload.franchise_id }}
+          FRANCHISE_NAME: ${{ github.event.client_payload.franchise_name }}
+          SALARY: ${{ github.event.client_payload.salary }}
+          CONTRACT_YEAR: ${{ github.event.client_payload.contract_year }}
+          CONTRACT_STATUS: ${{ github.event.client_payload.contract_status }}
+          CONTRACT_INFO: ${{ github.event.client_payload.contract_info }}
+          SUBMITTED_AT_UTC: ${{ github.event.client_payload.submitted_at_utc }}
+          COMMISH_OVERRIDE_FLAG: ${{ github.event.client_payload.commish_override_flag }}
+          OVERRIDE_AS_OF_DATE: ${{ github.event.client_payload.override_as_of_date }}
+          SOURCE: ${{ github.event.client_payload.source }}
+          SUBMISSION_ID: ${{ github.event.client_payload.submission_id }}
+        run: |
+          python etl/mfl_etl_full/log_mym_submission.py --json-path mym_submissions.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- mym_submissions.json; then
+            echo "No submission log changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mym_submissions.json
+          git commit -m "Log MYM submission"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying..."
+            sleep 2
+          done
+          echo "Failed to push after 3 attempts."
+          exit 1

@@ -28,3 +28,12 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
   - queues `repository_dispatch` through the Cloudflare Worker endpoint `/refresh-mym-json`
   - requires worker secret `GITHUB_PAT` (a GitHub token with `repo` access)
   - optional worker vars: `GITHUB_REPO_OWNER`, `GITHUB_REPO_NAME`
+
+## MYM submission log
+- Submission log file: `mym_submissions.json`
+- Workflow: `.github/workflows/log-mym-submission.yml`
+- Trigger: `repository_dispatch` event type `log-mym-submission` (sent by Worker after successful MYM submit)
+- App behavior:
+  - third tab `MYM - Submitted` pulls from `mym_submissions.json`
+  - includes `Commish Override` and `Override As-Of` columns
+  - if a submission exists in salaries but not yet in logs, app shows an `Inferred` row until log arrives

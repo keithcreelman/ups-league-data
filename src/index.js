@@ -83,6 +83,58 @@ export default {
         };
       };
 
+      const dispatchRepoEvent = async (eventType, clientPayload) => {
+        const repoOwner = String(env.GITHUB_REPO_OWNER || "keithcreelman").trim();
+        const repoName = String(env.GITHUB_REPO_NAME || "ups-league-data").trim();
+        const githubToken = String(env.GITHUB_PAT || "").trim();
+        if (!githubToken) {
+          return {
+            ok: false,
+            queued: false,
+            reason: "Missing GITHUB_PAT worker secret",
+          };
+        }
+
+        const dispatchUrl = `https://api.github.com/repos/${encodeURIComponent(
+          repoOwner
+        )}/${encodeURIComponent(repoName)}/dispatches`;
+
+        const dispatchRes = await fetch(dispatchUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "User-Agent": "ups-league-data-worker",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          body: JSON.stringify({
+            event_type: eventType,
+            client_payload: clientPayload || {},
+          }),
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+
+        if (dispatchRes.status !== 204) {
+          const preview = (await dispatchRes.text()).slice(0, 600);
+          return {
+            ok: false,
+            queued: false,
+            reason: "GitHub dispatch failed",
+            upstreamStatus: dispatchRes.status,
+            upstreamPreview: preview,
+            repo: `${repoOwner}/${repoName}`,
+          };
+        }
+
+        return {
+          ok: true,
+          queued: true,
+          reason: "Dispatch queued",
+          repo: `${repoOwner}/${repoName}`,
+        };
+      };
+
       // ---------- Queue GitHub JSON refresh ----------
       if (path === "/refresh-mym-json") {
         if (request.method !== "POST") {
@@ -117,52 +169,20 @@ export default {
           );
         }
 
-        const repoOwner = String(env.GITHUB_REPO_OWNER || "keithcreelman").trim();
-        const repoName = String(env.GITHUB_REPO_NAME || "ups-league-data").trim();
-        const githubToken = String(env.GITHUB_PAT || "").trim();
-        if (!githubToken) {
-          return new Response(
-            JSON.stringify({
-              ok: false,
-              queued: false,
-              reason: "Missing GITHUB_PAT worker secret",
-            }),
-            { status: 500, headers: { "content-type": "application/json", ...corsHeaders } }
-          );
-        }
-
-        const dispatchUrl = `https://api.github.com/repos/${encodeURIComponent(
-          repoOwner
-        )}/${encodeURIComponent(repoName)}/dispatches`;
-        const dispatchRes = await fetch(dispatchUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${githubToken}`,
-            Accept: "application/vnd.github+json",
-            "Content-Type": "application/json",
-            "User-Agent": "ups-league-data-worker",
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-          body: JSON.stringify({
-            event_type: "refresh-mym-json",
-            client_payload: {
-              league_id: leagueId,
-              year,
-              source: "ccc-roster-refresh",
-            },
-          }),
-          cf: { cacheTtl: 0, cacheEverything: false },
+        const dispatchOut = await dispatchRepoEvent("refresh-mym-json", {
+          league_id: leagueId,
+          year,
+          source: "ccc-roster-refresh",
         });
 
-        if (dispatchRes.status !== 204) {
-          const preview = (await dispatchRes.text()).slice(0, 600);
+        if (!dispatchOut.ok) {
           return new Response(
             JSON.stringify({
               ok: false,
               queued: false,
-              reason: "GitHub dispatch failed",
-              upstreamStatus: dispatchRes.status,
-              upstreamPreview: preview,
+              reason: dispatchOut.reason || "GitHub dispatch failed",
+              upstreamStatus: dispatchOut.upstreamStatus || 0,
+              upstreamPreview: dispatchOut.upstreamPreview || "",
             }),
             { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
           );
@@ -173,7 +193,7 @@ export default {
             ok: true,
             queued: true,
             reason: "Refresh queued",
-            repo: `${repoOwner}/${repoName}`,
+            repo: dispatchOut.repo || "",
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );
@@ -201,11 +221,29 @@ export default {
         const leagueId = String(L || body.L || body.leagueId || "").trim();
         const year = String(YEAR || body.YEAR || body.year || "2025").trim();
         const playerId = String(body.player_id || body.playerId || "").trim();
+        const playerName = String(body.player_name || body.playerName || "").trim();
+        const franchiseId = String(body.franchise_id || body.franchiseId || "").trim();
+        const franchiseName = String(body.franchise_name || body.franchiseName || "").trim();
+        const position = String(body.position || body.pos || "").trim();
         const salary = String(body.salary ?? "").trim();
         const contractYear = String(body.contract_year ?? body.contractYear ?? "").trim();
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
         const requestedContractStatus = String(body.contract_status || body.contractStatus || "").trim();
         const payloadPlayerStatus = String(body.player_status || body.playerStatus || "").trim();
+        const overrideAsOfDate = String(
+          body.override_as_of_date || body.override_as_of || body.overrideAsOf || ""
+        ).trim();
+        const submittedAtUtc = String(
+          body.submitted_at_utc || body.submittedAtUtc || new Date().toISOString()
+        ).trim();
+        const commishOverrideFlag = (() => {
+          const raw = String(
+            body.commish_override_flag || body.commish_override || body.commishOverride || ""
+          )
+            .trim()
+            .toLowerCase();
+          return raw === "1" || raw === "true" || raw === "yes" ? 1 : 0;
+        })();
 
         if (!leagueId || !playerId || !salary || !contractYear) {
           return new Response(
@@ -373,6 +411,7 @@ export default {
         let postCheck = preCheck;
         let dataXmlUsed = "";
         let statusUsed = "";
+        let anyChanged = false;
 
         for (const statusCandidate of statusAttempts) {
           const dataXml = makeDataXml(statusCandidate);
@@ -419,8 +458,40 @@ export default {
           dataXmlUsed = dataXml;
           statusUsed = statusCandidate || "";
           looksOk = requestOk;
+          if (changed) anyChanged = true;
 
           if (changed) break;
+        }
+
+        let logDispatch = { ok: false, queued: false, skipped: true, reason: "No applied change detected" };
+        if (looksOk && anyChanged) {
+          try {
+            logDispatch = await dispatchRepoEvent("log-mym-submission", {
+              league_id: leagueId,
+              year: year,
+              season: year,
+              player_id: playerId,
+              player_name: playerName,
+              position: position,
+              franchise_id: franchiseId,
+              franchise_name: franchiseName,
+              salary: salary,
+              contract_year: contractYear,
+              contract_status: statusUsed || contractStatus,
+              contract_info: contractInfo,
+              submitted_at_utc: submittedAtUtc || new Date().toISOString(),
+              commish_override_flag: commishOverrideFlag,
+              override_as_of_date: overrideAsOfDate,
+              source: "worker-offer-mym",
+            });
+          } catch (e) {
+            logDispatch = {
+              ok: false,
+              queued: false,
+              skipped: false,
+              reason: `Submission log dispatch error: ${e?.message || String(e)}`,
+            };
+          }
         }
 
         return new Response(
@@ -439,6 +510,7 @@ export default {
               playerStatusLookup,
               dataXml: dataXmlUsed,
               importAttempts,
+              logDispatch,
             },
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }

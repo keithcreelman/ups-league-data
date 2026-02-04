@@ -5,6 +5,7 @@
   // 1) CONFIG
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
+  const MYM_SUBMISSIONS_URL = "https://keithcreelman.github.io/ups-league-data/mym_submissions.json";
 
   // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
@@ -72,6 +73,11 @@
     const h = String(d.getHours()).padStart(2, "0");
     const mi = String(d.getMinutes()).padStart(2, "0");
     return `${y}-${m}-${da} ${h}:${mi}`;
+  }
+
+  function fmtLocalFromValue(x) {
+    const d = parseDate(x);
+    return d ? fmtLocalYMDHM(d) : "";
   }
 
   function must(sel) {
@@ -144,13 +150,14 @@
   // 4) PAYLOAD NORMALIZATION
   // ======================================================
   function normalizePayload(raw) {
-    if (Array.isArray(raw)) return { eligibility: raw, usage: [], meta: {} };
+    if (Array.isArray(raw)) return { eligibility: raw, usage: [], submissions: [], meta: {} };
 
     const all = raw.View_MYM_All || raw.view_mym_all || raw.mym_all || null;
     if (Array.isArray(all)) {
       return {
         eligibility: all,
         usage: raw.View_MYM_Usage || raw.usage || [],
+        submissions: raw.submissions || raw.View_MYM_Submissions || [],
         meta: raw.meta || {},
       };
     }
@@ -158,8 +165,102 @@
     return {
       eligibility: raw.eligibility || raw.View_MYM_Eligibility || [],
       usage: raw.usage || raw.View_MYM_Usage || [],
+      submissions: raw.submissions || raw.View_MYM_Submissions || [],
       meta: raw.meta || {},
     };
+  }
+
+  function normalizeSubmissions(raw) {
+    if (Array.isArray(raw)) return raw;
+    if (!raw || typeof raw !== "object") return [];
+    if (Array.isArray(raw.submissions)) return raw.submissions;
+    if (Array.isArray(raw.rows)) return raw.rows;
+    return [];
+  }
+
+  function normalizeSubmissionRow(r) {
+    return {
+      submission_id: safeStr(r.submission_id || r.id),
+      league_id: safeStr(r.league_id || r.L || r.leagueId),
+      season: safeStr(r.season || r.year),
+      franchise_id: pad4(r.franchise_id || r.franchiseId),
+      franchise_name: safeStr(r.franchise_name || r.franchiseName),
+      player_id: safeStr(r.player_id || r.playerId || r.id),
+      player_name: safeStr(r.player_name || r.playerName),
+      position: safeStr(r.position || r.pos || r.positional_grouping),
+      salary: safeInt(r.salary),
+      contract_year: safeInt(r.contract_year || r.contractYear),
+      contract_status: safeStr(r.contract_status || r.contractStatus),
+      contract_info: safeStr(r.contract_info || r.contractInfo),
+      submitted_at_utc: safeStr(r.submitted_at_utc || r.submitted_at || r.submittedAt),
+      commish_override_flag: safeInt(
+        r.commish_override_flag || r.commish_override || r.override_flag
+      )
+        ? 1
+        : 0,
+      override_as_of_date: safeStr(
+        r.override_as_of_date || r.override_as_of || r.overrideAsOf
+      ),
+      source: safeStr(r.source),
+      inferred: safeInt(r.inferred) ? 1 : 0,
+    };
+  }
+
+  function submissionNaturalKey(r) {
+    return [
+      safeStr(r.season || ""),
+      safeStr(r.player_id || ""),
+      safeStr(r.contract_year || ""),
+      safeStr(r.contract_info || ""),
+      safeStr(r.contract_status || ""),
+    ].join("|");
+  }
+
+  function buildSubmittedRows(eligibilityRows, loggedRows, meta) {
+    const out = [];
+    const keySet = new Set();
+
+    (loggedRows || []).forEach((raw) => {
+      const r = normalizeSubmissionRow(raw);
+      const key = submissionNaturalKey(r);
+      keySet.add(key);
+      out.push(r);
+    });
+
+    const inferredTs = safeStr(meta && meta.generated_at);
+    (eligibilityRows || []).forEach((row) => {
+      if (!hasSubmittedMYM(row)) return;
+      const inferred = normalizeSubmissionRow({
+        season: row.season,
+        player_id: row.player_id,
+        player_name: row.player_name,
+        position: row.positional_grouping || row.position,
+        franchise_id: row.franchise_id,
+        franchise_name: row.franchise_name,
+        salary: row.salary,
+        contract_year: row.contract_year,
+        contract_status: row.contract_status,
+        contract_info: row.contract_info,
+        submitted_at_utc: inferredTs,
+        source: "derived-from-dashboard",
+        inferred: 1,
+      });
+      const key = submissionNaturalKey(inferred);
+      if (keySet.has(key)) return;
+      keySet.add(key);
+      out.push(inferred);
+    });
+
+    out.sort((a, b) => {
+      const ad = parseDate(a.submitted_at_utc);
+      const bd = parseDate(b.submitted_at_utc);
+      const at = ad ? ad.getTime() : 0;
+      const bt = bd ? bd.getTime() : 0;
+      if (at !== bt) return bt - at;
+      return safeStr(a.player_name).localeCompare(safeStr(b.player_name));
+    });
+
+    return out;
   }
 
   // ======================================================
@@ -249,12 +350,20 @@
 
   function getSortValue(r, key) {
     switch (key) {
+      case "submitted":
+        return (parseDate(r.submitted_at_utc) || new Date("1900-01-01")).getTime();
       case "player":
         return safeStr(r.player_name).toLowerCase();
+      case "team":
+        return safeStr(r.franchise_name).toLowerCase();
       case "pos":
         return safeStr(r.positional_grouping || r.position).toLowerCase();
       case "salary":
         return safeInt(r.salary);
+      case "contractYear":
+        return safeInt(r.contract_year);
+      case "status":
+        return safeStr(r.contract_status).toLowerCase();
       case "acqType":
         return safeStr(r.mym_acq_type).toLowerCase();
       case "acquired":
@@ -288,23 +397,77 @@
     }
 
     const isEligibleTab = tabMode === "eligible";
+    const isSubmittedTab = tabMode === "submitted";
 
     const head = `
       <div class="ccc-tableWrap" data-table="${tabMode}">
         <table class="ccc-table">
           <thead>
             <tr>
-              ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
-              <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
-              <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
-              <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
-              <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
-              <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
-              ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
+              ${
+                isSubmittedTab
+                  ? `
+                <th data-sort="submitted">Submitted <span class="sort">${sortIcon(tabMode, "submitted")}</span></th>
+                <th data-sort="team">Team <span class="sort">${sortIcon(tabMode, "team")}</span></th>
+                <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
+                <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
+                <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
+                <th data-sort="contractYear">CL <span class="sort">${sortIcon(tabMode, "contractYear")}</span></th>
+                <th data-sort="status">Status <span class="sort">${sortIcon(tabMode, "status")}</span></th>
+                <th>Commish Override</th>
+                <th>Override As-Of</th>
+                <th style="min-width:260px;">Contract Info</th>
+              `
+                  : `
+                ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
+                <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
+                <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
+                <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
+                <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
+                <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
+                ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
+              `
+              }
             </tr>
           </thead>
           <tbody>
     `;
+
+    if (isSubmittedTab) {
+      const bodySubmitted = rows
+        .map((r) => {
+          const submitted = htmlEsc(fmtLocalFromValue(r.submitted_at_utc) || "N/A");
+          const team = htmlEsc(r.franchise_name || r.franchise_id || "");
+          const player = htmlEsc(r.player_name || r.player_id);
+          const posDisp = htmlEsc(r.position || "");
+          const salary = safeInt(r.salary).toLocaleString();
+          const cl = safeInt(r.contract_year) || "";
+          const status = htmlEsc(r.contract_status || "");
+          const override = safeInt(r.commish_override_flag) ? "Yes" : "No";
+          const overrideAsOf = htmlEsc(r.override_as_of_date || "—");
+          const info = htmlEsc(r.contract_info || "");
+          const inferredTag = safeInt(r.inferred)
+            ? `<span class="pill" style="margin-left:6px;">Inferred</span>`
+            : "";
+          return `
+        <tr class="pos-${htmlEsc(posKeyFromRow(r))}">
+          <td>${submitted}${inferredTag}</td>
+          <td>${team}</td>
+          <td class="playerCell">${player}</td>
+          <td class="muted">${posDisp}</td>
+          <td>${salary}</td>
+          <td>${cl}</td>
+          <td>${status}</td>
+          <td>${override}</td>
+          <td class="muted">${overrideAsOf}</td>
+          <td class="explain">${info}</td>
+        </tr>
+      `;
+        })
+        .join("");
+
+      return head + bodySubmitted + `</tbody></table></div>`;
+    }
 
     const body = rows
       .map((r) => {
@@ -405,7 +568,7 @@
   // 8) STATE + TEAM LIST
   // ======================================================
   const state = {
-    payload: { eligibility: [], usage: [], meta: {} },
+    payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     isAdmin: false,
     adminReason: "",
     selectedTeam: "__ALL__",
@@ -519,16 +682,40 @@
       at: Date.now(),
     };
     saveLocalOverrides(state.localOverrides);
+
+    const existingSubs = Array.isArray(state.payload.submissions)
+      ? state.payload.submissions
+      : [];
+    const localSubmission = normalizeSubmissionRow({
+      submission_id: `${safeStr(row.player_id)}-${Date.now()}`,
+      league_id: payload.L || payload.leagueId || "",
+      season: payload.YEAR || payload.year || row.season || "",
+      franchise_id: row.franchise_id,
+      franchise_name: row.franchise_name,
+      player_id: row.player_id,
+      player_name: row.player_name,
+      position: row.positional_grouping || row.position,
+      salary: payload.salary || row.salary,
+      contract_year: yearFinal || payload.contract_year,
+      contract_status: statusFinal,
+      contract_info: infoFinal,
+      submitted_at_utc: payload.submitted_at_utc || new Date().toISOString(),
+      commish_override_flag: safeInt(payload.commish_override_flag) ? 1 : 0,
+      override_as_of_date: safeStr(payload.override_as_of_date || ""),
+      source: "local-submit",
+    });
+    state.payload.submissions = [localSubmission, ...existingSubs];
   }
 
   function render() {
-    const { eligibility, usage, meta } = state.payload;
+    const { eligibility, usage, submissions, meta } = state.payload;
 
     const cccError = $("#cccError");
     const cccMeta = $("#cccMeta");
     const summary = $("#summary");
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
+    const tabSubmitted = $("#tabSubmitted");
 
     if (cccError) cccError.textContent = "";
 
@@ -562,7 +749,9 @@
     }
 
     const eligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) === 1);
-    const ineligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) !== 1);
+    const ineligibleRowsRaw = scoped.filter(
+      (r) => safeInt(r._eligibleEffective) !== 1 && !hasSubmittedMYM(r)
+    );
 
     const eligibleRows = sortRows(
       eligibleRowsRaw,
@@ -574,6 +763,23 @@
       ineligibleRowsRaw,
       sortState.tab === "ineligible" ? sortState.key : "acquired",
       sortState.tab === "ineligible" ? sortState.dir : "desc"
+    );
+
+    const submittedAll = buildSubmittedRows(eligibility, submissions, meta);
+    let submittedRowsRaw = submittedAll.slice();
+    if (state.selectedTeam !== "__ALL__") {
+      const fid = pad4(state.selectedTeam);
+      submittedRowsRaw = submittedRowsRaw.filter((r) => pad4(r.franchise_id) === fid);
+    }
+    if (searchLower) {
+      submittedRowsRaw = submittedRowsRaw.filter((r) =>
+        safeStr(r.player_name).toLowerCase().includes(searchLower)
+      );
+    }
+    const submittedRows = sortRows(
+      submittedRowsRaw,
+      sortState.tab === "submitted" ? sortState.key : "submitted",
+      sortState.tab === "submitted" ? sortState.dir : "desc"
     );
 
     const teamName =
@@ -595,6 +801,7 @@
     if (summary) summary.innerHTML = renderSummary(teamName, scoped, eligibleRows, usageRow, asOfDate, state.isAdmin);
     if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
     if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible");
+    if (tabSubmitted) tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
   }
 
   // ======================================================
@@ -757,9 +964,17 @@
     contract_year: safeInt(years),
     guaranteed: safeInt(calc.gtd),
     leagueId: String(L),
+    franchise_id: safeStr(row.franchise_id),
+    franchise_name: safeStr(row.franchise_name),
+    player_name: safeStr(row.player_name),
     player_status: safeStr(row.player_status || row.status),
     player_id: String(row.player_id),
+    position: safeStr(row.positional_grouping || row.position),
     salary: safeInt(salary),
+    submitted_at_utc: new Date().toISOString(),
+    commish_override_flag: state.isAdmin && state.asOfDate ? 1 : 0,
+    override_as_of_date:
+      state.isAdmin && state.asOfDate ? fmtLocalYMDHM(state.asOfDate) : "",
     tcv: safeInt(calc.tcv),
     type: "MYM",
     year: String(YEAR)
@@ -850,6 +1065,7 @@
       must("#cccMeta");
       must("#tabEligible");
       must("#tabIneligible");
+      must("#tabSubmitted");
       must("#teamSelect");
       must("#searchBox");
       must("#adminBadge");
@@ -868,11 +1084,25 @@
       $("#cccMeta").textContent = "Loading MYM data…";
 
       const bust = (MYM_JSON_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
-      const res = await fetch(MYM_JSON_URL + bust, { cache: "no-store" });
+      const subBust =
+        (MYM_SUBMISSIONS_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+
+      const [res, subRes] = await Promise.all([
+        fetch(MYM_JSON_URL + bust, { cache: "no-store" }),
+        fetch(MYM_SUBMISSIONS_URL + subBust, { cache: "no-store" }).catch(() => null),
+      ]);
       if (!res.ok) throw new Error("MYM JSON HTTP " + res.status);
 
       const raw = await res.json();
       state.payload = normalizePayload(raw);
+      let subRows = [];
+      if (subRes && subRes.ok) {
+        try {
+          const subRaw = await subRes.json();
+          subRows = normalizeSubmissions(subRaw);
+        } catch (e) {}
+      }
+      state.payload.submissions = subRows;
       applyLocalOverrides(state.payload.eligibility);
 
       state.detectedFranchiseId = detectFranchiseId();
@@ -1045,9 +1275,11 @@
 
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
+    const tabSubmitted = $("#tabSubmitted");
 
     if (tabEligible) tabEligible.style.display = tab === "eligible" ? "" : "none";
     if (tabIneligible) tabIneligible.style.display = tab === "ineligible" ? "" : "none";
+    if (tabSubmitted) tabSubmitted.style.display = tab === "submitted" ? "" : "none";
 
     $$(".ccc-tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
   }

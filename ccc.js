@@ -948,7 +948,7 @@
 
       if (btn) btn.textContent = "Refreshing...";
 
-      const waited = await waitForRosterBuildChange(beforeBuilt, 120000, 4000);
+      const waited = await waitForRosterBuildChange(beforeBuilt, 240000, 5000);
       if (!waited.ok || !waited.out || !waited.out.ok) {
         const msg = safeStr((waited && waited.message) || "Refresh queued but reload failed.");
         alert(`Roster refresh queued.\n${msg}`);
@@ -994,9 +994,14 @@
         out = text ? JSON.parse(text) : {};
       } catch (_) {}
 
-      if (!res.ok || out.ok !== true) {
+      if (!res.ok || out.ok !== true || out.queued !== true) {
+        const notQueuedHint =
+          out && out.ok === true && out.queued !== true
+            ? "Worker is not on the latest refresh endpoint. Deploy worker updates first."
+            : "";
         const msg =
           safeStr(out.reason) ||
+          notQueuedHint ||
           (text ? text.slice(0, 240) : "") ||
           `HTTP ${res.status}`;
         return { ok: false, message: msg };
@@ -1023,7 +1028,7 @@
       if (out && out.ok) {
         lastOut = out;
         const afterBuilt = safeStr(out.built || "");
-        const changed = !!afterBuilt && !!beforeBuilt && afterBuilt !== beforeBuilt;
+        const changed = beforeBuilt ? !!afterBuilt && afterBuilt !== beforeBuilt : !!afterBuilt;
         if (changed) return { ok: true, out, changed: true };
       }
       await sleep(pollMs);

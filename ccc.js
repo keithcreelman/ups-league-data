@@ -2528,6 +2528,11 @@
       state.detectedFranchiseId = detectFranchiseId();
 
       const workerAdmin = await getAdminFlagFromWorker();
+      state.detectedFranchiseId = await resolveCurrentFranchiseId(
+        workerAdmin.L,
+        workerAdmin.YEAR,
+        state.detectedFranchiseId
+      );
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
 

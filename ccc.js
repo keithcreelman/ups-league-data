@@ -209,34 +209,11 @@
     };
 
     try {
-      // 1) Explicit globals (when rendered inside MFL pages)
-      const globalCandidates = [
-        window.FRANCHISE_ID,
-        window.franchise_id,
-        window.franchiseId,
-        window.mflFranchiseId,
-        window.MFL_FRANCHISE_ID,
-      ];
-      for (const g of globalCandidates) {
-        const v = pad4(g);
-        if (v) return v;
-      }
-
-      // 2) Current URL / referrer
+      // Use only URL/referrer-derived ids to avoid false positives from generic page links.
       const fromSelf = readFromUrl(window.location.href);
       if (fromSelf) return fromSelf;
       const fromReferrer = readFromUrl(document.referrer || "");
       if (fromReferrer) return fromReferrer;
-
-      // 3) Look for /home/<league>/<franchise> in links on page
-      try {
-        const links = Array.from(document.querySelectorAll('a[href*="/home/"]'));
-        for (const a of links) {
-          const href = a && a.getAttribute ? a.getAttribute("href") : "";
-          const v = readFromUrl(href || "");
-          if (v) return v;
-        }
-      } catch (e) {}
 
       return "";
     } catch (e) {

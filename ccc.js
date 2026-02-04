@@ -6,6 +6,12 @@
   // ======================================================
   const MYM_JSON_URL = "https://keithcreelman.github.io/ups-league-data/mym_dashboard.json";
   const MYM_SUBMISSIONS_URL = "https://keithcreelman.github.io/ups-league-data/mym_submissions.json";
+  const SEASON_CAP_PER_TEAM = 5;
+  const MYM_EVENTS_BY_SEASON = {
+    "2024": { contract_deadline: "2024-09-01", season_complete: "2024-12-30" },
+    "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
+    "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
+  };
 
   // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
@@ -516,9 +522,7 @@
     return head + body + `</tbody></table></div>`;
   }
 
-  function renderSummary(teamName, rowsAll, rowsElig, usageRow, asOfDate, isAdmin) {
-    const used = usageRow ? safeInt(usageRow.mym_used) : 0;
-    const remaining = usageRow ? safeInt(usageRow.mym_remaining) : 0;
+  function renderSummary(teamName, rowsAll, rowsElig, used, remaining, asOfDate, isAdmin) {
 
     const soonest = rowsElig
       .map((r) => ({ r, d: parseDate(r.mym_deadline) }))
@@ -571,6 +575,7 @@
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     isAdmin: false,
     adminReason: "",
+    selectedSeason: "",
     selectedTeam: "__ALL__",
     detectedFranchiseId: "",
     asOfDate: null,
@@ -580,9 +585,47 @@
     localOverrides: loadLocalOverrides(),
   };
 
-  function buildTeamList(rows) {
+  function normalizeSeasonValue(v) {
+    const s = safeStr(v);
+    const m = s.match(/\d{4}/);
+    return m ? m[0] : s;
+  }
+
+  function buildSeasonList(eligibilityRows, submissionRows) {
+    const set = new Set();
+    (eligibilityRows || []).forEach((r) => {
+      const s = normalizeSeasonValue(r.season);
+      if (s) set.add(s);
+    });
+    (submissionRows || []).forEach((r) => {
+      const s = normalizeSeasonValue(r.season);
+      if (s) set.add(s);
+    });
+    return Array.from(set).sort((a, b) => safeInt(b) - safeInt(a));
+  }
+
+  function populateSeasonSelect(seasons, selectedSeason) {
+    const sel = $("#seasonSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    const list = (seasons && seasons.length ? seasons : [selectedSeason || DEFAULT_YEAR]).filter(Boolean);
+    list.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      opt.selected = s === selectedSeason;
+      sel.appendChild(opt);
+    });
+  }
+
+  function buildTeamList(rows, submittedRows) {
     const map = new Map();
-    rows.forEach((r) => {
+    (rows || []).forEach((r) => {
+      const id = pad4(r.franchise_id);
+      const nm = safeStr(r.franchise_name);
+      if (id && !map.has(id)) map.set(id, nm || id);
+    });
+    (submittedRows || []).forEach((r) => {
       const id = pad4(r.franchise_id);
       const nm = safeStr(r.franchise_name);
       if (id && !map.has(id)) map.set(id, nm || id);
@@ -616,6 +659,68 @@
     );
     if (!row) row = usageRows.find((u) => pad4(u.franchise_id) === franchiseId);
     return row || null;
+  }
+
+  function parseYMDDate(ymd) {
+    const s = safeStr(ymd);
+    if (!s) return null;
+    const d = new Date(`${s}T00:00:00`);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function getMymSeasonWindow(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return null;
+    const evt = MYM_EVENTS_BY_SEASON[s] || {};
+    const deadlineYmd = safeStr(evt.contract_deadline) || `${s}-09-01`;
+    const start = parseYMDDate(deadlineYmd);
+    const end = parseYMDDate(`${safeInt(s) + 1}-01-31`);
+    if (!start || !end) return null;
+    return { season: s, start, end, deadlineYmd };
+  }
+
+  function isMymActiveForSeason(season, nowDate) {
+    const win = getMymSeasonWindow(season);
+    if (!win) return false;
+    const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
+    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
+  }
+
+  function updateModuleStatusChips() {
+    const season = normalizeSeasonValue(state.selectedSeason);
+    const nowRef = new Date();
+    const mymActive = isMymActiveForSeason(season, nowRef);
+    const mymChip = $("#moduleMymChip");
+    const mymMsg = $("#moduleMymMsg");
+
+    if (mymChip) {
+      mymChip.classList.toggle("disabled", !mymActive);
+      mymChip.classList.toggle("primary", mymActive);
+    }
+
+    if (mymMsg) {
+      if (mymActive) {
+        mymMsg.textContent = "";
+      } else {
+        const win = getMymSeasonWindow(season);
+        const deadlineTxt = win ? win.deadlineYmd : "contract deadline";
+        mymMsg.textContent = `Not available until after ${deadlineTxt}`;
+      }
+    }
+
+    const setModuleState = (id, active) => {
+      const el = $(id);
+      if (!el) return;
+      el.classList.toggle("disabled", !active);
+      el.classList.toggle("primary", !!active);
+    };
+
+    // Placeholder scheduling statuses for upcoming modules.
+    setModuleState("#moduleExtensionsChip", true);
+    const m = safeInt(season ? new Date().getMonth() + 1 : 0);
+    const inFebToDeadline = m >= 2 && m <= 8;
+    setModuleState("#moduleRestructuresChip", inFebToDeadline);
+    setModuleState("#moduleAuctionChip", inFebToDeadline);
   }
 
   function applyLocalOverrides(rows) {
@@ -709,7 +814,7 @@
   }
 
   function render() {
-    const { eligibility, usage, submissions, meta } = state.payload;
+    const { eligibility, submissions, meta } = state.payload;
 
     const cccError = $("#cccError");
     const cccMeta = $("#cccMeta");
@@ -725,18 +830,21 @@
 
     const searchLower = safeStr(state.search).trim().toLowerCase();
 
-    let scoped = eligibility.slice();
+    const season = normalizeSeasonValue(state.selectedSeason);
+    let scopedBase = eligibility.slice();
+    if (season) {
+      scopedBase = scopedBase.filter((r) => normalizeSeasonValue(r.season) === season);
+    }
     if (state.selectedTeam !== "__ALL__") {
       const fid = pad4(state.selectedTeam);
-      scoped = scoped.filter((r) => pad4(r.franchise_id) === fid);
-    }
-    if (searchLower) {
-      scoped = scoped.filter((r) =>
-        safeStr(r.player_name).toLowerCase().includes(searchLower)
-      );
+      scopedBase = scopedBase.filter((r) => pad4(r.franchise_id) === fid);
     }
 
-    const season = scoped[0] ? scoped[0].season : eligibility[0] ? eligibility[0].season : "";
+    let scoped = scopedBase.slice();
+    if (searchLower) {
+      scoped = scoped.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower));
+    }
+
     const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
 
@@ -766,12 +874,15 @@
       sortState.tab === "ineligible" ? sortState.dir : "desc"
     );
 
-    const submittedAll = buildSubmittedRows(eligibility, submissions, meta);
-    let submittedRowsRaw = submittedAll.slice();
+    const submittedAll = buildSubmittedRows(eligibility, submissions, meta).filter(
+      (r) => !season || normalizeSeasonValue(r.season) === season
+    );
+    let submittedRowsBase = submittedAll.slice();
     if (state.selectedTeam !== "__ALL__") {
       const fid = pad4(state.selectedTeam);
-      submittedRowsRaw = submittedRowsRaw.filter((r) => pad4(r.franchise_id) === fid);
+      submittedRowsBase = submittedRowsBase.filter((r) => pad4(r.franchise_id) === fid);
     }
+    let submittedRowsRaw = submittedRowsBase.slice();
     if (searchLower) {
       submittedRowsRaw = submittedRowsRaw.filter((r) =>
         safeStr(r.player_name).toLowerCase().includes(searchLower)
@@ -783,26 +894,40 @@
       sortState.tab === "submitted" ? sortState.dir : "desc"
     );
 
-    const teamName =
+    const teamNameSource =
+      (scopedBase[0] && scopedBase[0].franchise_name) ||
+      (submittedRowsBase[0] && submittedRowsBase[0].franchise_name) ||
+      "";
+    const teamName = state.selectedTeam === "__ALL__" ? "All Teams" : safeStr(teamNameSource || "Team");
+
+    const mymUsed = submittedRowsBase.length;
+    const uniqueTeamsInSeason = new Set(
+      eligibility
+        .filter((r) => !season || normalizeSeasonValue(r.season) === season)
+        .map((r) => pad4(r.franchise_id))
+        .filter(Boolean)
+    ).size;
+    const capTotal =
       state.selectedTeam === "__ALL__"
-        ? "All Teams"
-        : scoped[0]
-        ? safeStr(scoped[0].franchise_name)
-        : "Team";
+        ? Math.max(0, uniqueTeamsInSeason * SEASON_CAP_PER_TEAM)
+        : SEASON_CAP_PER_TEAM;
+    const mymRemaining = Math.max(0, capTotal - mymUsed);
 
-    let usageRow = null;
-    if (state.selectedTeam !== "__ALL__") {
-      usageRow = getUsageRow(usage, pad4(state.selectedTeam), season);
-    } else {
-      const used = usage.reduce((acc, u) => acc + safeInt(u.mym_used), 0);
-      const remaining = usage.reduce((acc, u) => acc + safeInt(u.mym_remaining), 0);
-      usageRow = { mym_used: used, mym_remaining: remaining };
+    if (summary) {
+      summary.innerHTML = renderSummary(
+        teamName,
+        scopedBase,
+        eligibleRows,
+        mymUsed,
+        mymRemaining,
+        asOfDate,
+        state.isAdmin
+      );
     }
-
-    if (summary) summary.innerHTML = renderSummary(teamName, scoped, eligibleRows, usageRow, asOfDate, state.isAdmin);
     if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
     if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible");
     if (tabSubmitted) tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
+    updateModuleStatusChips();
   }
 
   // ======================================================
@@ -1069,6 +1194,7 @@
       must("#tabEligible");
       must("#tabIneligible");
       must("#tabSubmitted");
+      must("#seasonSelect");
       must("#teamSelect");
       must("#searchBox");
       must("#adminBadge");
@@ -1131,7 +1257,21 @@
         $("#asOfInput").value = "";
       }
 
-      const teams = buildTeamList(state.payload.eligibility);
+      const seasons = buildSeasonList(state.payload.eligibility, state.payload.submissions);
+      const requestedSeason = normalizeSeasonValue(getYear() || DEFAULT_YEAR);
+      const seasonSelected = seasons.includes(requestedSeason)
+        ? requestedSeason
+        : seasons[0] || requestedSeason;
+      state.selectedSeason = seasonSelected;
+      populateSeasonSelect(seasons, state.selectedSeason);
+
+      const seasonRows = state.payload.eligibility.filter(
+        (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+      );
+      const seasonSubmissionRows = state.payload.submissions.filter(
+        (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+      );
+      const teams = buildTeamList(seasonRows, seasonSubmissionRows);
       const detected = teams.some((t) => t.id === state.detectedFranchiseId)
         ? state.detectedFranchiseId
         : "__ALL__";
@@ -1319,6 +1459,23 @@
     );
 
     // Filters
+    const seasonSelect = $("#seasonSelect");
+    if (seasonSelect)
+      seasonSelect.addEventListener("change", (e) => {
+        state.selectedSeason = normalizeSeasonValue(e.target.value);
+        const seasonRows = state.payload.eligibility.filter(
+          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+        );
+        const seasonSubmissionRows = (state.payload.submissions || []).filter(
+          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+        );
+        const teams = buildTeamList(seasonRows, seasonSubmissionRows);
+        const stillValid = teams.some((t) => t.id === state.selectedTeam);
+        if (!stillValid) state.selectedTeam = "__ALL__";
+        populateTeamSelect(teams, state.selectedTeam);
+        render();
+      });
+
     const teamSelect = $("#teamSelect");
     if (teamSelect)
       teamSelect.addEventListener("change", (e) => {

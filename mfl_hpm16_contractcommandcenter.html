@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204x">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204y">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -13,6 +13,11 @@
       </div>
 
       <div class="ccc-controls">
+        <div class="ccc-field">
+          League Yr
+          <select id="seasonSelect" class="ccc-select"></select>
+        </div>
+
         <div class="ccc-field">
           Team
           <select id="teamSelect" class="ccc-select"></select>
@@ -29,11 +34,14 @@
     </div>
 
     <div class="ccc-nav">
-      <button class="ccc-chipBtn primary" type="button" data-tool="mym">MYM Assistant</button>
-      <button class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Extensions</button>
-      <button class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Restructures</button>
-      <button class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Auction Contracts</button>
-      <button class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Usage / Logs</button>
+      <span class="ccc-navTitle">Active Now</span>
+      <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-tool="mym">MYM Assistant</button>
+      <button id="moduleExtensionsChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Extensions</button>
+
+      <span class="ccc-navTitle">Coming Up</span>
+      <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Restructures</button>
+      <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Auction Contracts</button>
+      <span id="moduleMymMsg" class="ccc-navWarn"></span>
 
       <span id="adminControls" class="ccc-adminControls" style="display:none;">
         <span class="ccc-field ccc-adminLabel">As-Of Override</span>
@@ -112,4 +120,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204x"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204y"></script>

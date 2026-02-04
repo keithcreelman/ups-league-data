@@ -567,13 +567,17 @@
     `;
   }
 
-  function buildPositionBreakdown(eligibleRows, submittedRows) {
+  function buildTeamPositionBreakdown(eligibleRows, submittedRows) {
+    const posOrder = ["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"];
     const map = new Map();
-    const upsert = (pos) => {
-      const key = pos || "NA";
+    const upsert = (team, pos) => {
+      const t = safeStr(team || "Unknown Team");
+      const p = pos || "NA";
+      const key = `${t}||${p}`;
       if (!map.has(key)) {
         map.set(key, {
-          pos: key,
+          team: t,
+          pos: p,
           eligible_count: 0,
           eligible_salary: 0,
           submitted_count: 0,
@@ -584,18 +588,27 @@
     };
 
     (eligibleRows || []).forEach((r) => {
-      const row = upsert(posKeyFromRow(r));
+      const row = upsert(r.franchise_name || r.franchise_id, posKeyFromRow(r));
       row.eligible_count += 1;
       row.eligible_salary += safeInt(r.salary);
     });
     (submittedRows || []).forEach((r) => {
-      const row = upsert(posKeyFromRow(r));
+      const row = upsert(r.franchise_name || r.franchise_id, posKeyFromRow(r));
       row.submitted_count += 1;
       row.submitted_salary += safeInt(r.salary);
     });
 
     const out = Array.from(map.values());
     out.sort((a, b) => {
+      const teamCmp = safeStr(a.team).localeCompare(safeStr(b.team));
+      if (teamCmp !== 0) return teamCmp;
+      const ia = posOrder.indexOf(a.pos);
+      const ib = posOrder.indexOf(b.pos);
+      if (ia !== -1 || ib !== -1) {
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        if (ia !== ib) return ia - ib;
+      }
       const ta = a.eligible_count + a.submitted_count;
       const tb = b.eligible_count + b.submitted_count;
       if (ta !== tb) return tb - ta;
@@ -609,7 +622,7 @@
     const submittedCount = submittedRows.length;
     const eligibleSalary = eligibleRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
     const submittedSalary = submittedRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
-    const rows = buildPositionBreakdown(eligibleRows, submittedRows);
+    const rows = buildTeamPositionBreakdown(eligibleRows, submittedRows);
     const scopeTxt = positionLabel && positionLabel !== "__ALL_POS__" ? ` | Position: ${positionLabel}` : "";
 
     const top = `
@@ -632,7 +645,7 @@
       .map(
         (r) => `
       <tr class="pos-${htmlEsc(r.pos)}">
-        <td>${htmlEsc(teamName)}</td>
+        <td>${htmlEsc(r.team)}</td>
         <td>${htmlEsc(r.pos)}</td>
         <td>${safeInt(r.eligible_count)}</td>
         <td>${safeInt(r.eligible_salary).toLocaleString()}</td>

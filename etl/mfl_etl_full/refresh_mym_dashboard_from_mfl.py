@@ -22,9 +22,10 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
-def default_year() -> int:
-    today = date.today()
-    return today.year - 1 if today.month < 3 else today.year
+def default_year(today: date | None = None) -> int:
+    d = today or date.today()
+    # League year flips on March 1: before that, use prior year.
+    return d.year if d >= date(d.year, 3, 1) else d.year - 1
 
 
 def safe_int(value: Any, default: int = 0) -> int:
@@ -198,7 +199,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json-path", default="mym_dashboard.json")
     parser.add_argument("--league-id", default=os.environ.get("MFL_LEAGUE_ID", "74598"))
-    parser.add_argument("--year", type=int, default=safe_int(os.environ.get("MFL_YEAR"), default_year()))
+    year_env = (os.environ.get("MFL_YEAR") or "").strip()
+    default_target_year = safe_int(year_env, default_year()) if year_env else default_year()
+    parser.add_argument("--year", type=int, default=default_target_year)
     parser.add_argument("--cookie", default=os.environ.get("MFL_COOKIE", ""))
     args = parser.parse_args()
 

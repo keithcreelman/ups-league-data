@@ -19,4 +19,8 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Required repository secrets:
   - `MFL_COOKIE` (commissioner cookie value or full `MFL_USER_ID=...`)
   - `MFL_LEAGUE_ID` (e.g., `74598`)
-  - `MFL_YEAR` (e.g., `2025`)
+- Optional repository secret:
+  - `MFL_YEAR` (override dynamic year selection)
+- Dynamic year rule (if `MFL_YEAR` is not set):
+  - on/after March 1: use current year
+  - before March 1: use prior year

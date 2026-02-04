@@ -59,7 +59,8 @@ export default {
         const salary = String(body.salary ?? "").trim();
         const contractYear = String(body.contract_year ?? body.contractYear ?? "").trim();
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
-        const contractStatus = String(body.contract_status || body.contractStatus || "").trim();
+        const requestedContractStatus = String(body.contract_status || body.contractStatus || "").trim();
+        const payloadPlayerStatus = String(body.player_status || body.playerStatus || "").trim();
 
         if (!leagueId || !playerId || !salary || !contractYear) {
           return new Response(
@@ -92,6 +93,69 @@ export default {
             `</leagueUnit></salaries>`
           );
         };
+
+        const rookieLike = (raw) => {
+          const val = String(raw || "").trim().toLowerCase();
+          if (!val) return false;
+          return (
+            val === "r" ||
+            val.startsWith("r-") ||
+            val.includes("rookie") ||
+            val.includes("mym - rookie")
+          );
+        };
+
+        let playerStatusLookup = {
+          source: "none",
+          value: "",
+          rookie: null,
+        };
+
+        if (payloadPlayerStatus) {
+          playerStatusLookup = {
+            source: "payload",
+            value: payloadPlayerStatus,
+            rookie: rookieLike(payloadPlayerStatus),
+          };
+        } else {
+          try {
+            const playerStatusUrl =
+              `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
+              `/export?TYPE=players&L=${encodeURIComponent(leagueId)}&P=${encodeURIComponent(playerId)}&JSON=1&_=` +
+              Date.now();
+            const playerRes = await fetch(playerStatusUrl, {
+              headers: {
+                Cookie: cookieHeader,
+                "User-Agent": "ups-league-data-worker",
+              },
+              cf: { cacheTtl: 0, cacheEverything: false },
+            });
+            if (playerRes.ok) {
+              const pdata = await playerRes.json();
+              const playersRaw = pdata?.players?.player || [];
+              const players = Array.isArray(playersRaw)
+                ? playersRaw
+                : [playersRaw].filter(Boolean);
+              const p = players.find((x) => String(x?.id || "") === String(playerId));
+              const pStatus = String(p?.status || "").trim();
+              if (pStatus) {
+                playerStatusLookup = {
+                  source: "mfl_players_export",
+                  value: pStatus,
+                  rookie: rookieLike(pStatus),
+                };
+              }
+            }
+          } catch (_) {
+            // Fall through to requested status if lookup fails.
+          }
+        }
+
+        const isRookie =
+          playerStatusLookup.rookie !== null
+            ? playerStatusLookup.rookie
+            : rookieLike(requestedContractStatus);
+        const contractStatus = isRookie ? "MYM - Rookie" : "MYM - Vet";
 
         const importQuery =
           `TYPE=salaries&L=${encodeURIComponent(leagueId)}&APPEND=1`;
@@ -217,6 +281,7 @@ export default {
               contentType: "application/x-www-form-urlencoded;charset=UTF-8",
               formFields: { TYPE: "salaries", L: leagueId, APPEND: "1" },
               statusUsed,
+              playerStatusLookup,
               dataXml: dataXmlUsed,
               importAttempts,
             },

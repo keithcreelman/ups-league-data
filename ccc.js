@@ -671,6 +671,7 @@
     contract_year: safeInt(years),
     guaranteed: safeInt(calc.gtd),
     leagueId: String(L),
+    player_status: safeStr(row.player_status || row.status),
     player_id: String(row.player_id),
     salary: safeInt(salary),
     tcv: safeInt(calc.tcv),

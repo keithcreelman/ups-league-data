@@ -222,6 +222,18 @@
     }
   }
 
+  function isAdminDebugEnabled() {
+    try {
+      const u = new URL(window.location.href);
+      const v = safeStr(
+        u.searchParams.get("DEBUG_ADMIN") || u.searchParams.get("DEBUG") || ""
+      ).toLowerCase();
+      return v === "1" || v === "true" || v === "yes" || v === "on";
+    } catch (e) {
+      return false;
+    }
+  }
+
   // ======================================================
   // 4) PAYLOAD NORMALIZATION
   // ======================================================
@@ -1111,6 +1123,7 @@
     search: "",
     activeTab: "eligible",
     localOverrides: loadLocalOverrides(),
+    adminDebug: null,
   };
 
   function normalizeSeasonValue(v) {
@@ -1778,13 +1791,24 @@
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
 
     if (cccMeta) {
-      cccMeta.textContent =
+      let metaText =
         `Season: ${season || "?"} | module: ${
           state.activeModule === "restructure" ? "Restructure" : "MYM"
         }` +
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
         (state.commishMode && state.adminReason ? ` | ${state.adminReason}` : "");
+      if (isAdminDebugEnabled() && state.adminDebug) {
+        const d = state.adminDebug;
+        metaText +=
+          ` | dbg can:${d.canCommish ? 1 : 0}` +
+          ` workerOk:${d.workerOk ? 1 : 0}` +
+          ` workerAdmin:${d.workerIsAdmin ? 1 : 0}` +
+          ` session:${d.sessionMatch ? 1 : 0}` +
+          ` fid:${htmlEsc(d.currentFranchiseId || "-")}` +
+          ` commishFid:${htmlEsc(d.commishFranchiseId || "-")}`;
+      }
+      cccMeta.textContent = metaText;
     }
 
     const restructureActiveNow =
@@ -2552,6 +2576,16 @@
       state.canCommishMode = canCommish;
       state.commishMode = state.canCommishMode ? true : false;
       state.adminReason = adminReason;
+      state.adminDebug = {
+        canCommish: !!canCommish,
+        workerOk: !!workerAdmin.ok,
+        workerIsAdmin: !!workerAdmin.isAdmin,
+        sessionKnown: !!workerAdmin.sessionKnown,
+        sessionMatch: !!workerAdmin.sessionMatch,
+        currentFranchiseId,
+        commishFranchiseId: commishGateFranchise,
+        workerReason: safeStr(workerAdmin.reason || ""),
+      };
 
       const commishWrap = $("#commishModeWrap");
       const commishChk = $("#commishModeChk");

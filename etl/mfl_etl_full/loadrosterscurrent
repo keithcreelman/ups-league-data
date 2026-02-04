@@ -1,0 +1,631 @@
+# loadrosterscurrent.py
+#
+# Build a "current week" snapshot table (rosters_current) directly from the
+# MFL API (no dependency on rosters_weekly for the current week).
+#
+# - Calls mfl_api.get_rosters(conn, season) with NO week argument: MFL returns
+#   the current week.
+# - Flattens franchise -> players.
+# - Uses players/franchises tables for metadata lookups.
+# - Adds contract parsing and derived fields:
+#       contract_length (CL)
+#       tcv (TCV with fallbacks)
+#       aav (AAV with fallbacks)
+#       salary_yearminus1, salary_yearminus2 (from rosters_weekly prior seasons)
+#       salary_yearplus1, salary_yearplus2 (from Y2/Y3 or salary)
+#       extension_flag (1 if "Ext:" present in contract_info)
+#
+# Usage:
+#   python loadrosterscurrent.py
+#   python loadrosterscurrent.py --season 2025
+
+import argparse
+import json
+import re
+from datetime import date
+from typing import Optional, Tuple, Dict
+
+from db_utils import get_conn
+import mfl_api
+
+
+# ---------------------------
+# Season helper
+# ---------------------------
+
+def get_current_season() -> int:
+    """
+    Same pattern as your other scripts:
+    before March, treat 'current season' as last year.
+    """
+    today = date.today()
+    return today.year - 1 if today.month < 3 else today.year
+
+
+def _safe_int(value) -> Optional[int]:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
+    """
+    Read season boundaries from metadata_leaguedetails.
+
+    Returns:
+        (start_week, end_week, last_regular_season_week)
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT start_week, end_week, last_regular_season_week
+        FROM metadata_leaguedetails
+        WHERE season = ?
+        """,
+        (season,),
+    ).fetchone()
+
+    if not row:
+        return 1, 17, 14
+
+    start_week = _safe_int(row[0]) or 1
+    end_week = _safe_int(row[1]) or _safe_int(row[2]) or 17
+    last_regular = _safe_int(row[2]) or end_week
+    return start_week, end_week, last_regular
+
+
+# ---------------------------
+# Table / lookup helpers
+# ---------------------------
+
+def ensure_rosters_current_table(conn):
+    """
+    Create rosters_current if it doesn't exist.
+
+    NOTE: This is a superset of your weekly fields + derived columns.
+    """
+    cur = conn.cursor()
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS rosters_current (
+            season              INTEGER NOT NULL,
+            week                INTEGER NOT NULL,
+            franchise_id        TEXT    NOT NULL,
+            team_name           TEXT,
+            player_id           TEXT    NOT NULL,
+            player_name         TEXT,
+            position            TEXT,
+            nfl_team            TEXT,
+            status              TEXT,
+            salary              INTEGER,
+            contract_year       INTEGER,   -- remaining years from API (contractYear)
+            contract_status     TEXT,
+            contract_info       TEXT,
+            raw_json            TEXT,
+
+            contract_length     INTEGER,   -- CL (original term)
+            tcv                 INTEGER,   -- Total Contract Value
+            aav                 INTEGER,   -- Average Annual Value
+
+            salary_yearminus1   INTEGER,
+            salary_yearminus2   INTEGER,
+            salary_yearplus1    INTEGER,
+            salary_yearplus2    INTEGER,
+
+            extension_flag      INTEGER,   -- 1 if Ext: present in contract_info
+
+            PRIMARY KEY (season, franchise_id, player_id, status)
+        )
+        """
+    )
+    conn.commit()
+
+
+def lookup_team_name(conn, season: int, franchise_id: str) -> Optional[str]:
+    """
+    Returns team_name from franchises table.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT team_name
+        FROM franchises
+        WHERE season = ? AND franchise_id = ?
+        """,
+        (season, franchise_id),
+    ).fetchone()
+    return row[0] if row else None
+
+
+def lookup_player_metadata(conn, season: int, player_id: str):
+    """
+    Try to get name, position, nfl_team from players table.
+    Falls back to (None, None, None) if not found.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT name, position, nfl_team
+        FROM players
+        WHERE season = ? AND player_id = ?
+        """,
+        (season, player_id),
+    ).fetchone()
+    if row:
+        return row[0], row[1], row[2]
+    return None, None, None
+
+
+def get_latest_week(conn, season: int) -> Optional[int]:
+    """
+    For historical seasons: get max(week) that has rows in rosters_weekly.
+    Used ONLY for salary_yearminus1/2.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        "SELECT MAX(week) FROM rosters_weekly WHERE season = ?",
+        (season,),
+    ).fetchone()
+    return row[0] if row and row[0] is not None else None
+
+
+def get_last_week_salary_map(conn, season: int) -> Dict[str, Optional[int]]:
+    """
+    For a given season, find the last week with data and build:
+        { player_id: salary }
+    from rosters_weekly for that week.
+
+    If no data for that season, returns {}.
+    """
+    last_week = get_latest_week(conn, season)
+    if last_week is None:
+        return {}
+
+    cur = conn.cursor()
+    rows = cur.execute(
+        """
+        SELECT player_id, salary
+        FROM rosters_weekly
+        WHERE season = ? AND week = ?
+        """,
+        (season, last_week),
+    ).fetchall()
+
+    out = {}
+    for pid, sal in rows:
+        out[str(pid)] = sal
+    return out
+
+
+# ---------------------------
+# Contract parsing helpers
+# ---------------------------
+
+def _parse_money(token: str) -> Optional[int]:
+    """
+    Parse a money token like '12K', '5', '5.0', '40000', '61,' etc. to an int.
+
+    Rules:
+      - Strip non-numeric / non-decimal / 'K' characters (commas, spaces, etc.).
+      - If token contains 'K', strip it and multiply by 1000.
+      - Otherwise parse as float.
+      - If no 'K' and value < 1000, assume it's 'thousands' and *1000.
+    """
+    if not token:
+        return None
+
+    # Normalize
+    t = token.strip().upper().replace("$", "")
+    if not t:
+        return None
+
+    # Remove everything except digits, '.', '-', and 'K'
+    t = re.sub(r"[^0-9K.\-]", "", t)
+    if not t:
+        return None
+
+    mult = 1
+    if "K" in t:
+        t = t.replace("K", "")
+        mult = 1000
+
+    if not t:
+        return None
+
+    try:
+        val = float(t)
+    except ValueError:
+        return None
+
+    amt = int(val * mult)
+
+    # If we didn't have an explicit 'K' and it's still small, assume K
+    if mult == 1 and amt < 1000:
+        amt *= 1000
+
+    return amt
+
+
+def _extract_chunk_after(label: str, s: str) -> Optional[str]:
+    """
+    From a contract_info string, pull the chunk after a label until '|' or end.
+
+    e.g. label='TCV', s='CL 2| TCV 12K| AAV 11K| ...'  -> '12K'
+    """
+    idx = s.find(label)
+    if idx == -1:
+        return None
+    seg = s[idx + len(label):].lstrip()
+    end = seg.find("|")
+    chunk = seg if end == -1 else seg[:end]
+    return chunk.strip()
+
+
+def _extract_aav_chunk(s: str) -> Optional[str]:
+    """
+    For AAV we only want the *first* number before '|' or '/'.
+
+    e.g. 'AAV 5K/15K|' -> '5K'
+    """
+    idx = s.find("AAV")
+    if idx == -1:
+        return None
+    seg = s[idx + 3:].lstrip()
+    end = len(seg)
+    for sep in ("|", "/"):
+        pos = seg.find(sep)
+        if pos != -1 and pos < end:
+            end = pos
+    chunk = seg[:end]
+    return chunk.strip()
+
+
+def _extract_y_chunk(label: str, s: str) -> Optional[str]:
+    """
+    Extract the numeric piece after Y1-, Y2-, Y3- up to next 'Y' or '|' or end.
+
+    e.g. '... Y1- 5K Y2- 15K|' -> for 'Y1-' -> '5K'
+    """
+    idx = s.find(label)
+    if idx == -1:
+        return None
+    seg = s[idx + len(label):]
+    end = len(seg)
+    for sep in ("Y", "|"):
+        pos = seg.find(sep)
+        if pos != -1 and pos < end:
+            end = pos
+    chunk = seg[:end]
+    return chunk.strip()
+
+
+def parse_contract_info(
+    contract_info: Optional[str],
+    salary: Optional[int],
+    contract_year: Optional[int],
+) -> Tuple[int, Optional[int], Optional[int],
+           Optional[int], Optional[int], Optional[int], int]:
+    """
+    Parse contract_info string and derive:
+
+      contract_length (CL)
+      tcv
+      aav
+      y1, y2, y3 salary breakdowns (if present)
+      extension_flag (1/0)
+
+    Falls back to:
+      - tcv = sum(Y1..Y3) if TCV not present and Y values exist
+      - else tcv = salary * contract_length if salary & CL present
+      - aav = parsed AAV OR (tcv / CL) OR salary
+    """
+    if not contract_info:
+        contract_info = ""
+    s = contract_info
+
+    # --- contract_length (CL) ---
+    cl_chunk = _extract_chunk_after("CL", s)
+    contract_length = 1
+    if cl_chunk:
+        try:
+            contract_length = int(cl_chunk)
+        except ValueError:
+            contract_length = 1
+
+    # --- TCV ---
+    tcv = None
+    tcv_chunk = _extract_chunk_after("TCV", s)
+    if tcv_chunk:
+        tcv = _parse_money(tcv_chunk)
+
+    # --- AAV (first number only) ---
+    aav = None
+    aav_chunk = _extract_aav_chunk(s)
+    if aav_chunk:
+        aav = _parse_money(aav_chunk)
+
+    # --- Y1 / Y2 / Y3 ---
+    y1 = y2 = y3 = None
+    y1_chunk = _extract_y_chunk("Y1-", s)
+    y2_chunk = _extract_y_chunk("Y2-", s)
+    y3_chunk = _extract_y_chunk("Y3-", s)
+
+    if y1_chunk:
+        y1 = _parse_money(y1_chunk)
+    if y2_chunk:
+        y2 = _parse_money(y2_chunk)
+    if y3_chunk:
+        y3 = _parse_money(y3_chunk)
+
+    # --- Extension flag (Ext: ...) ---
+    extension_flag = 1 if "EXT:" in s.upper() else 0
+
+    # --- TCV fallback ---
+    if tcv is None:
+        total_y = sum(v for v in (y1, y2, y3) if v is not None)
+        if total_y > 0:
+            tcv = total_y
+        elif salary is not None and contract_length:
+            tcv = salary * contract_length
+
+    # --- AAV fallback ---
+    if aav is None:
+        if tcv is not None and contract_length:
+            aav = tcv // contract_length
+        else:
+            aav = salary
+
+    return contract_length, tcv, aav, y1, y2, y3, extension_flag
+
+
+# ---------------------------
+# Core builder (API-based)
+# ---------------------------
+
+def rebuild_rosters_current_from_api(conn, season: int):
+    cur = conn.cursor()
+
+    start_week, end_week, _ = get_season_week_bounds(conn, season)
+
+    # First call with NO week param so MFL tells us "current" week.
+    data = mfl_api.get_rosters(conn, season)
+    if not data or "rosters" not in data or "franchise" not in data["rosters"]:
+        print(f"{season}: no API roster data returned; nothing to build.")
+        return
+
+    franchises = data["rosters"]["franchise"]
+    if isinstance(franchises, dict):
+        franchises = [franchises]
+
+    # Infer week from first franchise (MFL usually includes week there)
+    first_week = None
+    for f in franchises:
+        fw = f.get("@week") or f.get("week")
+        if fw is not None:
+            try:
+                first_week = int(fw)
+            except ValueError:
+                first_week = None
+        if first_week is not None:
+            break
+
+    api_week = first_week if first_week is not None else end_week
+    target_week = min(max(api_week, start_week), end_week)
+
+    if target_week != api_week:
+        print(
+            f"{season}: API week {api_week} is outside metadata bounds "
+            f"({start_week}-{end_week}); using week {target_week}."
+        )
+        data = mfl_api.get_rosters(conn, season, week=target_week)
+        if not data or "rosters" not in data or "franchise" not in data["rosters"]:
+            print(
+                f"{season}: no roster data for bounded week {target_week}; "
+                "nothing to build."
+            )
+            return
+        franchises = data["rosters"]["franchise"]
+        if isinstance(franchises, dict):
+            franchises = [franchises]
+    else:
+        print(f"{season}: API current week detected as {api_week}.")
+
+    week_current = target_week
+
+    # Salary maps for prior seasons (for yearminus1/2)
+    prev_season = season - 1
+    prev2_season = season - 2
+
+    prev_salary_map = get_last_week_salary_map(conn, prev_season) if prev_season >= 2010 else {}
+    prev2_salary_map = get_last_week_salary_map(conn, prev2_season) if prev2_season >= 2010 else {}
+
+    # Clear out existing snapshot for this season
+    cur.execute("DELETE FROM rosters_current WHERE season = ?", (season,))
+    conn.commit()
+
+    allowed_statuses = {"ROSTER", "INJURED_RESERVE", "IR", "TAXI", "DEV"}
+    to_insert = []
+
+    for f in franchises:
+        fr_id = f.get("@id") or f.get("id") or f.get("franchise_id")
+        if not fr_id or fr_id in ("0", "", None):
+            continue
+
+        team_name = lookup_team_name(conn, season, fr_id)
+
+        players = f.get("player", [])
+        if isinstance(players, dict):
+            players = [players]
+
+        for p in players:
+            if not isinstance(p, dict):
+                continue
+
+            pid = p.get("id")
+            if not pid or pid in ("0", "", None):
+                continue
+
+            status = (p.get("status") or "").upper()
+            if status not in allowed_statuses:
+                continue
+
+            pid_str = str(pid)
+
+            # Metadata from players table first
+            meta_name, meta_pos, meta_team = lookup_player_metadata(conn, season, pid_str)
+
+            player_name = meta_name or p.get("name")
+            position = meta_pos or p.get("position")
+            nfl_team = meta_team or p.get("team")
+
+            # Salary from API ("40000.00" -> 40000)
+            salary = None
+            salary_raw = p.get("salary")
+            if salary_raw not in (None, ""):
+                try:
+                    salary = int(float(salary_raw))
+                except Exception:
+                    salary = None
+
+            # contractYear from API (remaining years)
+            contract_year = None
+            cy_raw = p.get("contractYear")
+            if cy_raw not in (None, ""):
+                try:
+                    contract_year = int(cy_raw)
+                except Exception:
+                    contract_year = None
+
+            contract_status = p.get("contractStatus")
+
+            # contractInfo from API (with fallback to snake_case if ever used)
+            contract_info = p.get("contractInfo") or p.get("contract_info")
+
+            # --- Parse contract_info ---
+            contract_length, tcv, aav, y1, y2, y3, extension_flag = parse_contract_info(
+                contract_info, salary, contract_year
+            )
+
+            # Determine years_remaining
+            years_remaining = contract_year if contract_year is not None else contract_length
+
+            # -------------------
+            # Past salaries
+            # -------------------
+            salary_yearminus1 = None
+            salary_yearminus2 = None
+
+            if contract_length and years_remaining is not None:
+                years_completed = contract_length - years_remaining
+                # Only pull prior-season salary if we are not in Year 1
+                if years_completed >= 1:
+                    salary_yearminus1 = prev_salary_map.get(pid_str)
+                if years_completed >= 2:
+                    salary_yearminus2 = prev2_salary_map.get(pid_str)
+
+            # -------------------
+            # Future salaries
+            # -------------------
+            def _future_val(candidate: Optional[int]) -> Optional[int]:
+                if candidate is not None:
+                    return candidate
+                return salary
+
+            salary_yearplus1 = None
+            salary_yearplus2 = None
+
+            if contract_length == 3:
+                if years_remaining == 3:
+                    # Year 1 of 3: have Y2, Y3
+                    salary_yearplus1 = _future_val(y2)
+                    salary_yearplus2 = _future_val(y3)
+                elif years_remaining == 2:
+                    # Year 2 of 3: only one year left -> Y3
+                    salary_yearplus1 = _future_val(y3)
+                # years_remaining == 1 -> final year, no future years
+            elif contract_length == 2:
+                if years_remaining == 2:
+                    # Year 1 of 2: future year is Y2
+                    salary_yearplus1 = _future_val(y2)
+                # years_remaining == 1 -> no future years
+            # CL=1 -> no future years
+
+            to_insert.append((
+                season,
+                week_current,
+                fr_id,
+                team_name,
+                pid_str,
+                player_name,
+                position,
+                nfl_team,
+                status,
+                salary,
+                contract_year,
+                contract_status,
+                contract_info,
+                json.dumps(p, ensure_ascii=False),  # nicer raw_json
+                contract_length,
+                tcv,
+                aav,
+                salary_yearminus1,
+                salary_yearminus2,
+                salary_yearplus1,
+                salary_yearplus2,
+                extension_flag,
+            ))
+
+    # Insert into rosters_current
+    cur.executemany(
+        """
+        INSERT INTO rosters_current (
+            season, week, franchise_id, team_name,
+            player_id, player_name, position, nfl_team,
+            status, salary, contract_year, contract_status,
+            contract_info, raw_json,
+            contract_length, tcv, aav,
+            salary_yearminus1, salary_yearminus2,
+            salary_yearplus1, salary_yearplus2,
+            extension_flag
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        to_insert,
+    )
+    conn.commit()
+
+    print(
+        f"{season}: rosters_current built from API for week {week_current} "
+        f"({len(to_insert)} rows)."
+    )
+
+
+# ---------------------------
+# CLI
+# ---------------------------
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Build rosters_current (current week) directly from MFL API."
+    )
+    parser.add_argument(
+        "--season",
+        type=int,
+        default=None,
+        help="Season to build (default = auto-detect current fantasy season).",
+    )
+    args = parser.parse_args()
+
+    season = args.season if args.season is not None else get_current_season()
+    print(f"Building rosters_current from API for season {season}…")
+
+    conn = get_conn()
+    ensure_rosters_current_table(conn)
+    rebuild_rosters_current_from_api(conn, season)
+    conn.close()
+    print("Done.")
+
+
+if __name__ == "__main__":
+    main()

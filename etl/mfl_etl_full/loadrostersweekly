@@ -1,0 +1,535 @@
+# load_rosters_weekly.py
+#
+# Barebones loader for weekly MFL rosters into rosters_weekly.
+# - For each season/week:
+#     * pull rosters from MFL
+#     * flatten franchise -> players
+#     * compare API row count vs DB row count
+#     * if mismatch, delete & reload that season/week
+# - Week ranges are bounded by metadata_leaguedetails (start_week/end_week).
+#
+# Usage:
+#   python loadrostersweekly --season 2025
+#   python loadrostersweekly --season 2025 --week 14
+#   python loadrostersweekly --monday-1130
+#
+# Assumes:
+#   - db_utils.get_conn() returns a sqlite3 connection
+#   - mfl_api.get_rosters(conn, season, week=week) returns JSON
+#     with shape: { "rosters": { "franchise": [ { id, player: [...] }, ... ] } }
+
+import argparse
+import json
+import time
+from datetime import date, datetime
+from typing import Optional, Tuple
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:  # pragma: no cover (older Python fallback)
+    ZoneInfo = None
+
+from db_utils import get_conn
+import mfl_api
+
+# Pacing (slow & gentle)
+SLEEP_BETWEEN_WEEKS = 3.0
+SLEEP_BETWEEN_SEASONS = 8.0
+
+
+def get_current_season() -> int:
+    """
+    Before March, treat current fantasy season as prior year.
+    """
+    today = date.today()
+    return today.year - 1 if today.month < 3 else today.year
+
+
+def _safe_int(value) -> Optional[int]:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _now_et() -> datetime:
+    """
+    Return current time in ET when possible.
+    """
+    if ZoneInfo is None:
+        return datetime.now()
+    return datetime.now(ZoneInfo("America/New_York"))
+
+
+def _in_monday_1130_window(ts: datetime) -> bool:
+    """
+    Monday 11:30 PM ET through 11:59 PM ET.
+    """
+    return ts.weekday() == 0 and ts.hour == 23 and ts.minute >= 30
+
+
+def get_season_week_bounds(conn, season: int) -> Tuple[int, int, int]:
+    """
+    Returns (start_week, end_week, last_regular_week) from metadata_leaguedetails.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT start_week, end_week, last_regular_season_week
+        FROM metadata_leaguedetails
+        WHERE season = ?
+        """,
+        (season,),
+    ).fetchone()
+
+    if not row:
+        return 1, 17, 14
+
+    start_week = _safe_int(row[0]) or 1
+    end_week = _safe_int(row[1]) or _safe_int(row[2]) or 17
+    last_regular = _safe_int(row[2]) or end_week
+    return start_week, end_week, last_regular
+
+
+def infer_api_current_week(conn, season: int) -> Optional[int]:
+    """
+    Ask MFL for rosters with no W= param and infer the returned week.
+    """
+    data = mfl_api.get_rosters(conn, season)
+    if not data or "rosters" not in data or "franchise" not in data["rosters"]:
+        return None
+
+    franchises = data["rosters"]["franchise"]
+    if isinstance(franchises, dict):
+        franchises = [franchises]
+
+    for fr in franchises:
+        week_val = fr.get("@week") or fr.get("week")
+        week = _safe_int(week_val)
+        if week is not None:
+            return week
+    return None
+
+
+def lookup_team_name(conn, season: int, franchise_id: str):
+    """
+    Returns the franchise/team name from the franchises table.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT team_name
+        FROM franchises
+        WHERE season = ? AND franchise_id = ?
+        """,
+        (season, franchise_id),
+    ).fetchone()
+    return row[0] if row else None
+
+def ensure_rosters_weekly_table(conn):
+    """Create rosters_weekly table if it doesn't exist."""
+    cur = conn.cursor()
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS rosters_weekly (
+            season         INTEGER NOT NULL,
+            week           INTEGER NOT NULL,
+            franchise_id   TEXT    NOT NULL,
+            team_name      TEXT,
+            player_id      TEXT    NOT NULL,
+            player_name    TEXT,
+            position       TEXT,
+            nfl_team       TEXT,
+            status         TEXT,
+            salary         INTEGER,
+            contract_year  INTEGER,
+            contract_status TEXT,
+            contract_info  TEXT,
+            raw_json       TEXT,
+            PRIMARY KEY (season, week, franchise_id, player_id, status)
+        )
+        """
+    )
+    conn.commit()
+
+
+def lookup_player_metadata(conn, season: int, player_id: str):
+    """
+    Try to get name, position, nfl_team from players table.
+    Falls back to (None, None, None) if not found.
+    """
+    cur = conn.cursor()
+    row = cur.execute(
+        """
+        SELECT name, position, nfl_team
+        FROM players
+        WHERE season = ? AND player_id = ?
+        """,
+        (season, player_id),
+    ).fetchone()
+    if row:
+        return row[0], row[1], row[2]
+    return None, None, None
+
+
+def load_week_for_season(conn, season: int, week: int):
+    """
+    Load a single (season, week) into rosters_weekly.
+
+    - Flattens franchise -> players.
+    - Resolves player metadata (name, position, nfl_team) from players table first.
+    - Adds team_name from franchises.
+    - Adds contract_year (contractYear) and contract_status (contractStatus).
+    - If API vs DB row counts differ by more than 5% OR there are NULL salaries,
+      we delete all rows for that season/week and reload from API.
+    """
+    cur = conn.cursor()
+
+    # --- Fetch from MFL ---
+    data = mfl_api.get_rosters(conn, season, week=week)
+    if not data or "rosters" not in data or "franchise" not in data["rosters"]:
+        # No payload from API
+        db_rows = cur.execute(
+            "SELECT COUNT(*) FROM rosters_weekly WHERE season = ? AND week = ?",
+            (season, week),
+        ).fetchone()[0]
+        print(f"{season} W{week}: no API data (null payload). DB rows={db_rows}")
+        return 0, db_rows
+
+    franchises = data["rosters"]["franchise"]
+    if isinstance(franchises, dict):
+        franchises = [franchises]
+
+    rows = []
+
+    allowed_statuses = {
+        "ROSTER",
+        "INJURED_RESERVE",
+        "IR",
+        "TAXI",
+        "TAXI_SQUAD",
+        "DEV",
+    }
+
+    # --- Flatten JSON into rows ---
+    for f in franchises:
+        fr_id = f.get("@id") or f.get("id") or f.get("franchise_id")
+        if not fr_id or fr_id in ("0", "", None):
+            continue
+
+        # Team / franchise name (from franchises table)
+        team_name = lookup_team_name(conn, season, fr_id)
+
+        players = f.get("player", [])
+        if isinstance(players, dict):
+            players = [players]
+
+        for p in players:
+            if not isinstance(p, dict):
+                continue
+
+            pid = p.get("id")
+            if not pid or pid in ("0", "", None):
+                continue
+
+            status = (p.get("status") or "").upper()
+            if status not in allowed_statuses:
+                continue
+
+            # Resolve player metadata from players table first
+            meta_name, meta_pos, meta_team = lookup_player_metadata(conn, season, pid)
+
+            player_name = meta_name or p.get("name")
+            position = meta_pos or p.get("position")
+            nfl_team = meta_team or p.get("team")
+
+            # Salary: "40000.00" -> 40000
+            salary = None
+            salary_raw = p.get("salary")
+            if salary_raw not in (None, ""):
+                try:
+                    salary = int(float(salary_raw))
+                except Exception:
+                    salary = None
+
+            # contractYear -> contract_year (INT, 2011+)
+            contract_year = None
+            cy_raw = p.get("contractYear")
+            if cy_raw not in (None, ""):
+                try:
+                    contract_year = int(cy_raw)
+                except Exception:
+                    contract_year = None
+
+            # contractStatus -> contract_status (TEXT, 2011+)
+            contract_status = p.get("contractStatus")
+
+            # Optional contract_info (not in older years)
+            contract_info = p.get("contractInfo") or p.get("contract_Info") or p.get("contractinfo")
+
+            rows.append((
+                season,
+                week,
+                fr_id,
+                team_name,
+                pid,
+                player_name,
+                position,
+                nfl_team,
+                status,
+                salary,
+                contract_year,
+                contract_status,
+                contract_info,
+                json.dumps(p, ensure_ascii=False),
+            ))
+
+    api_rows = len(rows)
+
+    # --- Current DB state BEFORE any reload ---
+    db_rows = cur.execute(
+        "SELECT COUNT(*) FROM rosters_weekly WHERE season = ? AND week = ?",
+        (season, week),
+    ).fetchone()[0]
+
+    null_salary_rows = cur.execute(
+        """
+        SELECT COUNT(*)
+        FROM rosters_weekly
+        WHERE season = ? AND week = ? AND salary IS NULL
+        """,
+        (season, week),
+    ).fetchone()[0]
+
+    # Completion ratio: how close DB and API row counts are
+    completion_ratio = None
+    if api_rows > 0 and db_rows > 0:
+        hi = max(api_rows, db_rows)
+        lo = min(api_rows, db_rows)
+        completion_ratio = lo / hi
+
+    print(
+        f"{season} W{week}: API rows={api_rows}, DB rows={db_rows}, "
+        f"DB NULL salary={null_salary_rows}, "
+        f"completion_ratio={completion_ratio if completion_ratio is not None else 'n/a'}"
+    )
+
+    # --- Decide whether to reload ---
+
+    # No API rows: nothing we can do, keep whatever is there
+    if api_rows == 0:
+        print(f"{season} W{week}: API returned 0 rows; no reload.")
+        return 0, db_rows
+
+    # If DB already has data and it's >=95% aligned AND no NULL salaries,
+    # treat as "good enough" and do NOT reload.
+    if (
+        db_rows > 0
+        and completion_ratio is not None
+        and completion_ratio >= 0.95
+        and null_salary_rows == 0
+    ):
+        print(f"{season} W{week}: within 95% and salaries complete; no reload.")
+        return api_rows, db_rows
+
+    # Otherwise, we reload: delete all rows for that week and re-insert
+    print(f"{season} W{week}: reloading…")
+    cur.execute(
+        "DELETE FROM rosters_weekly WHERE season = ? AND week = ?",
+        (season, week),
+    )
+
+    if rows:
+        cur.executemany(
+            """
+            INSERT OR REPLACE INTO rosters_weekly (
+                season, week, franchise_id, team_name,
+                player_id, player_name, position, nfl_team,
+                status, salary, contract_year, contract_status,
+                contract_info, raw_json
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            rows,
+        )
+
+    conn.commit()
+    print(f"{season} W{week}: saved.")
+
+    return api_rows, db_rows
+
+
+def load_weekly_rosters_for_season(
+    conn,
+    season: int,
+    start_week: Optional[int] = None,
+    end_week: Optional[int] = None,
+):
+    """
+    Load weekly rosters for a season, bounded by metadata_leaguedetails.
+    """
+    meta_start, meta_end, last_reg = get_season_week_bounds(conn, season)
+    bounded_start = max(start_week if start_week is not None else meta_start, meta_start)
+    bounded_end = min(end_week if end_week is not None else meta_end, meta_end)
+
+    if bounded_start > bounded_end:
+        print(
+            f"{season}: no weeks to process after bounds "
+            f"(requested {start_week}-{end_week}, metadata {meta_start}-{meta_end})."
+        )
+        return
+
+    print(
+        f"{season}: weekly rosters load for weeks {bounded_start}-{bounded_end} "
+        f"(regular season through week {last_reg})."
+    )
+
+    for week in range(bounded_start, bounded_end + 1):
+        load_week_for_season(conn, season, week)
+        if week < bounded_end:
+            print(f"{season} W{week}: sleeping {SLEEP_BETWEEN_WEEKS} seconds…")
+            time.sleep(SLEEP_BETWEEN_WEEKS)
+
+    print(f"{season}: completed through week {bounded_end}.")
+
+
+def run_monday_1130_job(conn, season: int):
+    """
+    Scheduled mode:
+      - only runs in Monday 11:30 PM ET window
+      - in-season week selection is clamped to metadata end_week
+    """
+    ts = _now_et()
+    print(f"Current ET time: {ts.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    if not _in_monday_1130_window(ts):
+        print("Not in Monday 11:30 PM ET window; skipping rosters_weekly run.")
+        return
+
+    start_week, end_week, _ = get_season_week_bounds(conn, season)
+    api_week = infer_api_current_week(conn, season)
+    if api_week is None:
+        print(
+            f"{season}: could not infer API current week; "
+            f"falling back to metadata end_week {end_week}."
+        )
+        target_week = end_week
+    else:
+        target_week = min(max(api_week, start_week), end_week)
+        if target_week != api_week:
+            print(
+                f"{season}: API week {api_week} outside metadata bounds "
+                f"({start_week}-{end_week}); using week {target_week}."
+            )
+
+    print(f"{season}: running weekly refresh for week {target_week}.")
+    load_week_for_season(conn, season, target_week)
+
+
+def get_available_seasons(conn, start_season: int, end_season: int):
+    cur = conn.cursor()
+    rows = cur.execute(
+        """
+        SELECT season
+        FROM league_years
+        WHERE season BETWEEN ? AND ?
+        ORDER BY season
+        """,
+        (start_season, end_season),
+    ).fetchall()
+    if rows:
+        return [int(r[0]) for r in rows]
+    return list(range(start_season, end_season + 1))
+
+
+def load_weekly_rosters_all_seasons(conn, start_season: int, end_season: int):
+    seasons = get_available_seasons(conn, start_season, end_season)
+    print(f"Seasons to process (weekly rosters): {seasons}")
+
+    for idx, season in enumerate(seasons, start=1):
+        print(f"[{idx}/{len(seasons)}] Season {season} – begin")
+        load_weekly_rosters_for_season(conn, season)
+
+        if idx < len(seasons):
+            print(
+                f"Season {season}: sleeping {SLEEP_BETWEEN_SEASONS} seconds "
+                f"before next season…"
+            )
+            time.sleep(SLEEP_BETWEEN_SEASONS)
+
+    print("All seasons completed for rosters_weekly.")
+
+
+def main():
+    default_season = get_current_season()
+
+    parser = argparse.ArgumentParser(
+        description="Load weekly MFL rosters into rosters_weekly."
+    )
+    parser.add_argument(
+        "--season",
+        type=int,
+        default=None,
+        help=f"Single season to process (default in scheduled mode: {default_season}).",
+    )
+    parser.add_argument(
+        "--week",
+        type=int,
+        default=None,
+        help="Optional single week (requires --season).",
+    )
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=None,
+        help="Start season for range mode.",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=None,
+        help="End season for range mode.",
+    )
+    parser.add_argument(
+        "--monday-1130",
+        action="store_true",
+        help="Run only during Monday 11:30 PM ET window (for scheduler use).",
+    )
+
+    args = parser.parse_args()
+    if args.week is not None and args.season is None:
+        parser.error("--week requires --season.")
+
+    conn = get_conn()
+    ensure_rosters_weekly_table(conn)
+
+    try:
+        if args.monday_1130:
+            season = args.season or default_season
+            run_monday_1130_job(conn, season)
+            return
+
+        if args.season is not None and args.week is not None:
+            start_week, end_week, _ = get_season_week_bounds(conn, args.season)
+            bounded_week = min(max(args.week, start_week), end_week)
+            if bounded_week != args.week:
+                print(
+                    f"{args.season}: requested week {args.week} adjusted to {bounded_week} "
+                    f"based on metadata bounds {start_week}-{end_week}."
+                )
+            load_week_for_season(conn, args.season, bounded_week)
+            return
+
+        if args.season is not None:
+            load_weekly_rosters_for_season(conn, args.season)
+            return
+
+        range_start = args.start if args.start is not None else default_season
+        range_end = args.end if args.end is not None else range_start
+        load_weekly_rosters_all_seasons(conn, range_start, range_end)
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()

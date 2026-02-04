@@ -1,9 +1,9 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204aa">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204ab">
 
 <div id="cccApp">
   <div class="ccc-hero">
     <div class="ccc-topRow">
-      <div>
+      <div style="display:none;">
         <div class="ccc-title">
           Contract Command Center
           <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
@@ -53,7 +53,6 @@
       <span class="ccc-navTitle">Coming Up</span>
       <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Restructures</button>
       <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Auction Contracts</button>
-      <span id="moduleMymMsg" class="ccc-navWarn"></span>
 
       <span id="adminControls" class="ccc-adminControls" style="display:none;">
         <span class="ccc-field ccc-adminLabel">As-Of Override</span>
@@ -68,13 +67,11 @@
   <div class="ccc-tabs">
     <button class="ccc-tab" type="button" data-tab="summary">Summary</button>
     <button class="ccc-tab active" type="button" data-tab="eligible">Eligible</button>
-    <button class="ccc-tab" type="button" data-tab="ineligible">Not Eligible</button>
     <button class="ccc-tab" type="button" data-tab="submitted">MYM - Submitted</button>
   </div>
 
   <div id="tabSummary" style="display:none;"></div>
   <div id="tabEligible"></div>
-  <div id="tabIneligible" style="display:none;"></div>
   <div id="tabSubmitted" style="display:none;"></div>
 
   <div id="cccError" class="ccc-error"></div>
@@ -134,4 +131,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204aa"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204ab"></script>

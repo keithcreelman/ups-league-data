@@ -99,6 +99,19 @@
   color: #ff5f61;
 }
 
+.ccc-eligWarn{
+  margin: 10px 0 0 0;
+  padding: 12px;
+  border: 1px solid rgba(255,95,97,.55);
+  border-radius: 12px;
+  background: rgba(255,95,97,.12);
+  color: #ff6f72;
+  font-size: 18px;
+  font-weight: 1000;
+  text-align: center;
+  letter-spacing: .02em;
+}
+
 /* Buttons */
 .ccc-chipBtn{
   border: 1px solid var(--line);

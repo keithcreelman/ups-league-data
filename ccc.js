@@ -837,21 +837,10 @@
     const nowRef = new Date();
     const mymActive = isMymActiveForSeason(season, nowRef);
     const mymChip = $("#moduleMymChip");
-    const mymMsg = $("#moduleMymMsg");
 
     if (mymChip) {
       mymChip.classList.toggle("disabled", !mymActive);
       mymChip.classList.toggle("primary", mymActive);
-    }
-
-    if (mymMsg) {
-      if (mymActive) {
-        mymMsg.textContent = "";
-      } else {
-        const win = getMymSeasonWindow(season);
-        const deadlineTxt = win ? win.deadlineYmd : "contract deadline";
-        mymMsg.textContent = `Not available until after ${deadlineTxt}`;
-      }
     }
 
     const setModuleState = (id, active) => {
@@ -867,6 +856,17 @@
     const inFebToDeadline = m >= 2 && m <= 8;
     setModuleState("#moduleRestructuresChip", inFebToDeadline);
     setModuleState("#moduleAuctionChip", inFebToDeadline);
+  }
+
+  function renderEligibleAvailabilityNotice(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return "";
+    if (isMymActiveForSeason(s, new Date())) return "";
+    const win = getMymSeasonWindow(s);
+    const deadlineTxt = win ? win.deadlineYmd : "contract deadline";
+    return `<div class="ccc-eligWarn">MYM Not Available Until After Contract Deadline Date (${htmlEsc(
+      deadlineTxt
+    )})</div>`;
   }
 
   function applyLocalOverrides(rows) {
@@ -1079,8 +1079,10 @@
       );
     }
     if (tabSummary) tabSummary.innerHTML = renderSummaryPage(scoped, submittedRowsRaw);
-    if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
-    if (tabIneligible) tabIneligible.innerHTML = renderTable(ineligibleRows, "ineligible");
+    if (tabEligible) {
+      tabEligible.innerHTML = renderEligibleAvailabilityNotice(season) + renderTable(eligibleRows, "eligible");
+    }
+    if (tabIneligible) tabIneligible.innerHTML = "";
     if (tabSubmitted) tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
     updateModuleStatusChips();
   }
@@ -1348,7 +1350,6 @@
       must("#cccMeta");
       must("#tabSummary");
       must("#tabEligible");
-      must("#tabIneligible");
       must("#tabSubmitted");
       must("#seasonSelect");
       must("#teamSelect");

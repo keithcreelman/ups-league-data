@@ -188,8 +188,9 @@
   }
 
   function detectFranchiseId() {
-    try {
-      const u = new URL(window.location.href);
+    const readFromUrl = (urlText) => {
+      if (!urlText) return "";
+      const u = new URL(urlText, window.location.origin);
       const qs = u.searchParams;
       const cand =
         qs.get("FRANCHISE_ID") ||
@@ -199,7 +200,20 @@
         qs.get("F") ||
         qs.get("FR") ||
         "";
-      return pad4(cand);
+      const byQuery = pad4(cand);
+      if (byQuery) return byQuery;
+
+      const p = safeStr(u.pathname || "");
+      const m = p.match(/\/home\/\d+\/(\d{1,4})(?:\/|$)/i);
+      return m ? pad4(m[1]) : "";
+    };
+
+    try {
+      const fromSelf = readFromUrl(window.location.href);
+      if (fromSelf) return fromSelf;
+      const fromReferrer = readFromUrl(document.referrer || "");
+      if (fromReferrer) return fromReferrer;
+      return "";
     } catch (e) {
       return "";
     }
@@ -2490,32 +2504,17 @@
       state.detectedFranchiseId = detectFranchiseId();
 
       const workerAdmin = await getAdminFlagFromWorker();
-      state.detectedFranchiseId = await resolveCurrentFranchiseId(
-        workerAdmin.L,
-        workerAdmin.YEAR,
-        state.detectedFranchiseId
-      );
-      const browserAdmin = await getAdminFlagFromBrowser(workerAdmin.L, workerAdmin.YEAR);
-
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
-      let canCommish = false;
-      let adminReason = "";
-      if (browserAdmin.ok) {
-        canCommish = !!browserAdmin.isAdmin;
-        adminReason = safeStr(browserAdmin.reason || "");
-      } else if (workerAdmin.ok && workerAdmin.isAdmin) {
-        canCommish =
-          !!currentFranchiseId &&
-          !!commishFranchiseId &&
-          currentFranchiseId === commishFranchiseId;
-        adminReason = canCommish
-          ? "Commish verified by franchise match"
-          : "Owner mode (commish tools hidden)";
-      } else {
+      let canCommish = !!(workerAdmin.ok && workerAdmin.isAdmin);
+      // If we can identify the current franchise and it does not match the commish franchise,
+      // force owner mode to prevent exposing commish controls.
+      if (canCommish && currentFranchiseId && commishFranchiseId && currentFranchiseId !== commishFranchiseId) {
         canCommish = false;
-        adminReason = safeStr(workerAdmin.reason || "Owner mode");
       }
+      const adminReason = canCommish
+        ? safeStr(workerAdmin.reason || "Commish mode")
+        : "Owner mode (commish tools hidden)";
 
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;

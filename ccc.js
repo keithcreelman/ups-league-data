@@ -404,6 +404,7 @@
 
     const isEligibleTab = tabMode === "eligible";
     const isSubmittedTab = tabMode === "submitted";
+    const showOverrideCols = !!state.commishMode;
 
     const head = `
       <div class="ccc-tableWrap" data-table="${tabMode}">
@@ -420,8 +421,7 @@
                 <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
                 <th data-sort="contractYear">CL <span class="sort">${sortIcon(tabMode, "contractYear")}</span></th>
                 <th data-sort="status">Status <span class="sort">${sortIcon(tabMode, "status")}</span></th>
-                <th>Commish Override</th>
-                <th>Override As-Of</th>
+                ${showOverrideCols ? `<th>Commish Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
               `
                   : `
@@ -464,8 +464,7 @@
           <td>${salary}</td>
           <td>${cl}</td>
           <td>${status}</td>
-          <td>${override}</td>
-          <td class="muted">${overrideAsOf}</td>
+          ${showOverrideCols ? `<td>${override}</td><td class="muted">${overrideAsOf}</td>` : ``}
           <td class="explain">${info}</td>
         </tr>
       `;
@@ -522,7 +521,7 @@
     return head + body + `</tbody></table></div>`;
   }
 
-  function renderSummary(teamName, rowsAll, rowsElig, used, remaining, asOfDate, isAdmin) {
+  function renderSummary(teamName, rowsAll, rowsElig, used, remaining, asOfDate, showAsOfPill) {
 
     const soonest = rowsElig
       .map((r) => ({ r, d: parseDate(r.mym_deadline) }))
@@ -536,7 +535,7 @@
       <div class="ccc-summaryTop">
         <div class="ccc-summaryTitle">${htmlEsc(teamName)} MYM Snapshot</div>
         <div class="muted" style="font-size:12px;">
-          ${isAdmin ? `<span class="pill">As-Of: ${htmlEsc(asOfTxt)}</span>` : ``}
+          ${showAsOfPill ? `<span class="pill">As-Of: ${htmlEsc(asOfTxt)}</span>` : ``}
         </div>
       </div>
 
@@ -574,9 +573,12 @@
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     isAdmin: false,
+    canCommishMode: false,
+    commishMode: false,
     adminReason: "",
     selectedSeason: "",
-    selectedTeam: "__ALL__",
+    selectedTeam: "",
+    showAllTeams: false,
     detectedFranchiseId: "",
     asOfDate: null,
     asOfOverrideActive: false,
@@ -618,7 +620,7 @@
     });
   }
 
-  function buildTeamList(rows, submittedRows) {
+  function buildTeamList(rows, submittedRows, ownerFranchiseId) {
     const map = new Map();
     (rows || []).forEach((r) => {
       const id = pad4(r.franchise_id);
@@ -635,7 +637,14 @@
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    return [{ id: "__ALL__", name: "All Teams" }, ...list];
+    const ownerId = pad4(ownerFranchiseId);
+    if (!ownerId) return list;
+
+    const idx = list.findIndex((x) => x.id === ownerId);
+    if (idx <= 0) return list;
+    const owner = list[idx];
+    const rest = list.slice(0, idx).concat(list.slice(idx + 1));
+    return [owner, ...rest];
   }
 
   function populateTeamSelect(teams, selectedId) {
@@ -741,7 +750,7 @@
     rows.forEach((r) => {
       r._eligibleEffective = safeInt(r.eligible_flag);
       if (hasSubmittedMYM(r)) r._eligibleEffective = 0;
-      if (state.isAdmin && asOfDate) {
+      if (state.commishMode && asOfDate) {
         r._eligibleEffective = computeEligible(r, asOfDate);
       }
     });
@@ -825,25 +834,35 @@
 
     if (cccError) cccError.textContent = "";
 
-    const asOfDate = state.isAdmin ? state.asOfDate : null;
+    const asOfDate =
+      state.commishMode && state.asOfOverrideActive && state.asOfDate ? state.asOfDate : null;
     applyEffectiveEligibility(eligibility, asOfDate);
 
     const searchLower = safeStr(state.search).trim().toLowerCase();
-
     const season = normalizeSeasonValue(state.selectedSeason);
-    let scopedBase = eligibility.slice();
-    if (season) {
-      scopedBase = scopedBase.filter((r) => normalizeSeasonValue(r.season) === season);
-    }
-    if (state.selectedTeam !== "__ALL__") {
-      const fid = pad4(state.selectedTeam);
-      scopedBase = scopedBase.filter((r) => pad4(r.franchise_id) === fid);
-    }
+    const showAllTeams = !!state.showAllTeams;
+    const selectedTeamId = pad4(state.selectedTeam);
 
-    let scoped = scopedBase.slice();
-    if (searchLower) {
-      scoped = scoped.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower));
-    }
+    const seasonEligibility = eligibility.filter(
+      (r) => !season || normalizeSeasonValue(r.season) === season
+    );
+    const seasonSubmissions = buildSubmittedRows(eligibility, submissions, meta).filter(
+      (r) => !season || normalizeSeasonValue(r.season) === season
+    );
+
+    const teamFilteredEligibility = showAllTeams
+      ? seasonEligibility
+      : seasonEligibility.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+
+    const teamFilteredSubmissions = showAllTeams
+      ? seasonSubmissions
+      : seasonSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+
+    const scoped = searchLower
+      ? teamFilteredEligibility.filter((r) =>
+          safeStr(r.player_name).toLowerCase().includes(searchLower)
+        )
+      : teamFilteredEligibility.slice();
 
     const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
@@ -853,7 +872,6 @@
         `Season: ${season || "?"}` +
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
-        (state.isAdmin ? ` | admin: yes` : "") +
         (state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
@@ -874,20 +892,12 @@
       sortState.tab === "ineligible" ? sortState.dir : "desc"
     );
 
-    const submittedAll = buildSubmittedRows(eligibility, submissions, meta).filter(
-      (r) => !season || normalizeSeasonValue(r.season) === season
-    );
-    let submittedRowsBase = submittedAll.slice();
-    if (state.selectedTeam !== "__ALL__") {
-      const fid = pad4(state.selectedTeam);
-      submittedRowsBase = submittedRowsBase.filter((r) => pad4(r.franchise_id) === fid);
-    }
-    let submittedRowsRaw = submittedRowsBase.slice();
-    if (searchLower) {
-      submittedRowsRaw = submittedRowsRaw.filter((r) =>
-        safeStr(r.player_name).toLowerCase().includes(searchLower)
-      );
-    }
+    const submittedRowsRaw = searchLower
+      ? teamFilteredSubmissions.filter((r) =>
+          safeStr(r.player_name).toLowerCase().includes(searchLower)
+        )
+      : teamFilteredSubmissions.slice();
+
     const submittedRows = sortRows(
       submittedRowsRaw,
       sortState.tab === "submitted" ? sortState.key : "submitted",
@@ -895,33 +905,29 @@
     );
 
     const teamNameSource =
-      (scopedBase[0] && scopedBase[0].franchise_name) ||
-      (submittedRowsBase[0] && submittedRowsBase[0].franchise_name) ||
+      (teamFilteredEligibility[0] && teamFilteredEligibility[0].franchise_name) ||
+      (teamFilteredSubmissions[0] && teamFilteredSubmissions[0].franchise_name) ||
       "";
-    const teamName = state.selectedTeam === "__ALL__" ? "All Teams" : safeStr(teamNameSource || "Team");
+    const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
 
-    const mymUsed = submittedRowsBase.length;
+    const mymUsed = teamFilteredSubmissions.length;
     const uniqueTeamsInSeason = new Set(
-      eligibility
-        .filter((r) => !season || normalizeSeasonValue(r.season) === season)
-        .map((r) => pad4(r.franchise_id))
-        .filter(Boolean)
+      seasonEligibility.map((r) => pad4(r.franchise_id)).filter(Boolean)
     ).size;
-    const capTotal =
-      state.selectedTeam === "__ALL__"
-        ? Math.max(0, uniqueTeamsInSeason * SEASON_CAP_PER_TEAM)
-        : SEASON_CAP_PER_TEAM;
+    const capTotal = showAllTeams
+      ? Math.max(0, uniqueTeamsInSeason * SEASON_CAP_PER_TEAM)
+      : SEASON_CAP_PER_TEAM;
     const mymRemaining = Math.max(0, capTotal - mymUsed);
 
     if (summary) {
       summary.innerHTML = renderSummary(
         teamName,
-        scopedBase,
+        teamFilteredEligibility,
         eligibleRows,
         mymUsed,
         mymRemaining,
         asOfDate,
-        state.isAdmin
+        !!asOfDate
       );
     }
     if (tabEligible) tabEligible.innerHTML = renderTable(eligibleRows, "eligible");
@@ -997,7 +1003,7 @@
 
     const pill = $("#mymAsOfPill");
     if (pill) {
-      if (state.isAdmin && state.asOfDate) {
+      if (state.commishMode && state.asOfOverrideActive && state.asOfDate) {
         pill.style.display = "";
         pill.textContent = `As-Of: ${fmtLocalYMDHM(state.asOfDate)}`;
       } else {
@@ -1098,9 +1104,9 @@
     position: safeStr(row.positional_grouping || row.position),
     salary: safeInt(salary),
     submitted_at_utc: new Date().toISOString(),
-    commish_override_flag: state.isAdmin && state.asOfOverrideActive && state.asOfDate ? 1 : 0,
+    commish_override_flag: state.commishMode && state.asOfOverrideActive && state.asOfDate ? 1 : 0,
     override_as_of_date:
-      state.isAdmin && state.asOfOverrideActive && state.asOfDate
+      state.commishMode && state.asOfOverrideActive && state.asOfDate
         ? fmtLocalYMDHM(state.asOfDate)
         : "",
     tcv: safeInt(calc.tcv),
@@ -1196,6 +1202,9 @@
       must("#tabSubmitted");
       must("#seasonSelect");
       must("#teamSelect");
+      must("#showAllTeamsChk");
+      must("#commishModeWrap");
+      must("#commishModeChk");
       must("#searchBox");
       must("#adminBadge");
       must("#adminControls");
@@ -1238,12 +1247,19 @@
 
       const admin = await getAdminFlagFromWorker();
       state.isAdmin = !!admin.isAdmin;
+      state.canCommishMode = !!admin.isAdmin;
+      state.commishMode = state.canCommishMode ? !!state.commishMode : false;
       state.adminReason = safeStr(admin.reason || "");
 
-      $("#adminBadge").style.display = state.isAdmin ? "" : "none";
-      $("#adminControls").style.display = state.isAdmin ? "flex" : "none";
+      const commishWrap = $("#commishModeWrap");
+      const commishChk = $("#commishModeChk");
+      if (commishWrap) commishWrap.style.display = state.canCommishMode ? "flex" : "none";
+      if (commishChk) commishChk.checked = !!state.commishMode;
 
-      if (state.isAdmin) {
+      $("#adminBadge").style.display = state.commishMode ? "" : "none";
+      $("#adminControls").style.display = state.commishMode ? "flex" : "none";
+
+      if (state.canCommishMode) {
         const now = new Date();
         state.asOfDate = now;
         state.asOfOverrideActive = false;
@@ -1271,11 +1287,18 @@
       const seasonSubmissionRows = state.payload.submissions.filter(
         (r) => normalizeSeasonValue(r.season) === state.selectedSeason
       );
-      const teams = buildTeamList(seasonRows, seasonSubmissionRows);
+      const teams = buildTeamList(seasonRows, seasonSubmissionRows, state.detectedFranchiseId);
       const detected = teams.some((t) => t.id === state.detectedFranchiseId)
         ? state.detectedFranchiseId
-        : "__ALL__";
+        : teams[0]
+        ? teams[0].id
+        : "";
       state.selectedTeam = detected;
+      state.showAllTeams = false;
+      const showAllTeamsChk = $("#showAllTeamsChk");
+      if (showAllTeamsChk) showAllTeamsChk.checked = !!state.showAllTeams;
+      const teamSelect = $("#teamSelect");
+      if (teamSelect) teamSelect.disabled = !!state.showAllTeams;
 
       populateTeamSelect(teams, state.selectedTeam);
 
@@ -1469,10 +1492,23 @@
         const seasonSubmissionRows = (state.payload.submissions || []).filter(
           (r) => normalizeSeasonValue(r.season) === state.selectedSeason
         );
-        const teams = buildTeamList(seasonRows, seasonSubmissionRows);
+        const teams = buildTeamList(
+          seasonRows,
+          seasonSubmissionRows,
+          state.detectedFranchiseId
+        );
         const stillValid = teams.some((t) => t.id === state.selectedTeam);
-        if (!stillValid) state.selectedTeam = "__ALL__";
+        if (!stillValid) state.selectedTeam = teams[0] ? teams[0].id : "";
         populateTeamSelect(teams, state.selectedTeam);
+        render();
+      });
+
+    const showAllTeamsChk = $("#showAllTeamsChk");
+    if (showAllTeamsChk)
+      showAllTeamsChk.addEventListener("change", (e) => {
+        state.showAllTeams = !!e.target.checked;
+        const sel = $("#teamSelect");
+        if (sel) sel.disabled = state.showAllTeams;
         render();
       });
 
@@ -1480,6 +1516,24 @@
     if (teamSelect)
       teamSelect.addEventListener("change", (e) => {
         state.selectedTeam = e.target.value;
+        state.showAllTeams = false;
+        const showAll = $("#showAllTeamsChk");
+        if (showAll) showAll.checked = false;
+        render();
+      });
+
+    const commishModeChk = $("#commishModeChk");
+    if (commishModeChk)
+      commishModeChk.addEventListener("change", (e) => {
+        if (!state.canCommishMode) return;
+        state.commishMode = !!e.target.checked;
+        const adminBadge = $("#adminBadge");
+        const adminControls = $("#adminControls");
+        if (adminBadge) adminBadge.style.display = state.commishMode ? "" : "none";
+        if (adminControls) adminControls.style.display = state.commishMode ? "flex" : "none";
+        if (!state.commishMode) {
+          state.asOfOverrideActive = false;
+        }
         render();
       });
 
@@ -1508,7 +1562,7 @@
     const asOfInput = $("#asOfInput");
     if (asOfInput)
       asOfInput.addEventListener("change", () => {
-        if (!state.isAdmin) return;
+        if (!state.canCommishMode || !state.commishMode) return;
         const v = asOfInput.value;
         const d = v ? new Date(v) : new Date();
         state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
@@ -1519,7 +1573,7 @@
     const asOfResetBtn = $("#asOfResetBtn");
     if (asOfResetBtn)
       asOfResetBtn.addEventListener("click", () => {
-        if (!state.isAdmin) return;
+        if (!state.canCommishMode || !state.commishMode) return;
         const now = new Date();
         state.asOfDate = now;
         state.asOfOverrideActive = false;

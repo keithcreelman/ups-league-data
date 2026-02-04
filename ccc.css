@@ -149,6 +149,21 @@
   color: var(--muted);
 }
 
+.ccc-check{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.ccc-check input[type="checkbox"]{
+  width:14px;
+  height:14px;
+  accent-color:#4ea1ff;
+}
+
 .ccc-input, .ccc-select{
   background: rgba(0,0,0,.22);
   border: 1px solid var(--line);

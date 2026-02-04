@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204y">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204z">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -7,12 +7,16 @@
         <div class="ccc-title">
           Contract Command Center
           <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
-          <span class="badge">MYM</span>
         </div>
         <div id="cccMeta" class="ccc-sub">Loading…</div>
       </div>
 
       <div class="ccc-controls">
+        <label id="commishModeWrap" class="ccc-check" style="display:none;">
+          <input id="commishModeChk" type="checkbox" />
+          Commish Mode
+        </label>
+
         <div class="ccc-field">
           League Yr
           <select id="seasonSelect" class="ccc-select"></select>
@@ -22,6 +26,10 @@
           Team
           <select id="teamSelect" class="ccc-select"></select>
         </div>
+        <label class="ccc-check">
+          <input id="showAllTeamsChk" type="checkbox" />
+          Show all teams
+        </label>
 
         <div class="ccc-field">
           Search
@@ -120,4 +128,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204y"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204z"></script>

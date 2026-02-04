@@ -183,6 +183,12 @@ export default {
             upstreamPreview: text.slice(0, 800),
             preCheck,
             postCheck,
+            submitDebug: {
+              targetImportUrl,
+              contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+              formFields: { TYPE: "salaries", L: leagueId, APPEND: "1" },
+              dataXml,
+            },
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );

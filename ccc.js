@@ -731,6 +731,9 @@
     if (out && out.postCheck) {
       console.log("[MYM postCheck]", out.postCheck);
     }
+    if (out && out.submitDebug) {
+      console.log("[MYM submitDebug]", out.submitDebug);
+    }
 
     closeMYMModal();
     await load(); // refresh dashboard

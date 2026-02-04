@@ -632,6 +632,7 @@
       .map(
         (r) => `
       <tr class="pos-${htmlEsc(r.pos)}">
+        <td>${htmlEsc(teamName)}</td>
         <td>${htmlEsc(r.pos)}</td>
         <td>${safeInt(r.eligible_count)}</td>
         <td>${safeInt(r.eligible_salary).toLocaleString()}</td>
@@ -648,6 +649,7 @@
           <table class="ccc-table">
             <thead>
               <tr>
+                <th>Team</th>
                 <th>Position</th>
                 <th>Eligible</th>
                 <th>Eligible Salary</th>

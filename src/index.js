@@ -16,6 +16,8 @@ export default {
       const path = url.pathname || "/";
       const L = url.searchParams.get("L") || "";
       const YEAR = url.searchParams.get("YEAR") || "2025";
+      const browserMflUserId = String(url.searchParams.get("MFL_USER_ID") || "").trim();
+      const browserApiKey = String(url.searchParams.get("APIKEY") || "").trim();
 
       if (
         !L &&
@@ -37,6 +39,22 @@ export default {
           { status: 500, headers: { "content-type": "application/json", ...corsHeaders } }
         );
       }
+      const normalizeCookieValue = (raw) => {
+        let v = String(raw || "").trim();
+        if (!v) return "";
+        v = v.replace(/^MFL_USER_ID=/i, "").split(";")[0].trim();
+        try {
+          v = decodeURIComponent(v);
+        } catch (_) {}
+        return v;
+      };
+      const secretCookieValue = normalizeCookieValue(cookie);
+      const browserCookieValue = normalizeCookieValue(browserMflUserId);
+      const sessionByCookie = !!browserCookieValue && browserCookieValue === secretCookieValue;
+      const commishApiKey = String(env.COMMISH_API_KEY || "").trim();
+      const sessionByApiKey = !!commishApiKey && !!browserApiKey && browserApiKey === commishApiKey;
+      const sessionKnown = !!browserCookieValue || (!!commishApiKey && !!browserApiKey);
+      const sessionMatch = sessionByCookie || sessionByApiKey;
       const cookieHeader = cookie.includes("=") ? cookie : `MFL_USER_ID=${cookie}`;
 
       const getLeagueAdminState = async (leagueId, year) => {
@@ -613,6 +631,8 @@ export default {
             ok: false,
             isAdmin: false,
             reason: adminState.reason,
+            sessionKnown,
+            sessionMatch,
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );
@@ -625,6 +645,10 @@ export default {
           reason: adminState.reason,
           emailCount: adminState.emailCount,
           commishFranchiseId: adminState.commishFranchiseId || "",
+          sessionKnown,
+          sessionMatch,
+          sessionByCookie,
+          sessionByApiKey,
         }),
         { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
       );

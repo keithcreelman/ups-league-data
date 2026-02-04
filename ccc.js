@@ -341,6 +341,16 @@
   // ======================================================
   // 5) ADMIN CHECK (WORKER)
   // ======================================================
+  function getBrowserMflUserId() {
+    try {
+      const c = safeStr(document.cookie || "");
+      const m = c.match(/(?:^|;\s*)MFL_USER_ID=([^;]+)/i);
+      return safeStr(m ? m[1] : "");
+    } catch (e) {
+      return "";
+    }
+  }
+
   async function getAdminFlagFromWorker() {
     let L = getLeagueId();
     let YEAR = getYear();
@@ -348,9 +358,16 @@
     if (!L) L = DEFAULT_LEAGUE_ID;
     if (!YEAR) YEAR = DEFAULT_YEAR;
 
-    const url = `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(
-      YEAR
-    )}&_=${Date.now()}`;
+    const params = [
+      `L=${encodeURIComponent(L)}`,
+      `YEAR=${encodeURIComponent(YEAR)}`,
+      `_${Date.now()}`,
+    ];
+    const userCookie = getBrowserMflUserId();
+    if (userCookie) params.push(`MFL_USER_ID=${encodeURIComponent(userCookie)}`);
+    const apiKey = typeof window.apiKey === "string" ? safeStr(window.apiKey) : "";
+    if (apiKey) params.push(`APIKEY=${encodeURIComponent(apiKey)}`);
+    const url = `${ADMIN_WORKER_URL}?${params.join("&")}`;
 
     try {
       const res = await fetch(url, { cache: "no-store" });
@@ -362,6 +379,8 @@
         reason: safeStr(j.reason || ""),
         emailCount: safeInt(j.emailCount || 0),
         commishFranchiseId: pad4(j.commishFranchiseId || j.commish_franchise_id || ""),
+        sessionKnown: !!j.sessionKnown,
+        sessionMatch: !!j.sessionMatch,
         L,
         YEAR,
       };
@@ -371,6 +390,8 @@
         isAdmin: false,
         reason: `Worker check failed: ${e && e.message ? e.message : e}`,
         commishFranchiseId: "",
+        sessionKnown: false,
+        sessionMatch: false,
         L,
         YEAR,
       };
@@ -2506,20 +2527,16 @@
       state.detectedFranchiseId = detectFranchiseId();
 
       const workerAdmin = await getAdminFlagFromWorker();
-      const browserAdmin = await getAdminFlagFromBrowser(workerAdmin.L, workerAdmin.YEAR);
-      state.detectedFranchiseId = await resolveCurrentFranchiseId(
-        workerAdmin.L,
-        workerAdmin.YEAR,
-        state.detectedFranchiseId
-      );
       const currentFranchiseId = pad4(state.detectedFranchiseId);
       const commishFranchiseId = pad4(workerAdmin.commishFranchiseId || "");
 
-      // Commish tools are browser-session gated. Worker admin is only a secondary sanity check.
-      let canCommish = !!(browserAdmin.ok && browserAdmin.isAdmin);
+      // Commish tools require both admin capability and a matching browser session hint.
+      let canCommish = !!(workerAdmin.ok && workerAdmin.isAdmin && workerAdmin.sessionMatch);
       let adminReason = canCommish
-        ? safeStr(browserAdmin.reason || "Commish mode")
-        : "Owner mode (commish tools hidden)";
+        ? safeStr(workerAdmin.reason || "Commish mode")
+        : workerAdmin.sessionKnown
+        ? "Owner mode (commish tools hidden)"
+        : "Owner mode (no commish session hint)";
 
       // If both ids are known and mismatch, force owner mode.
       if (canCommish && currentFranchiseId && commishFranchiseId && currentFranchiseId !== commishFranchiseId) {

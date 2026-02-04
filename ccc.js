@@ -724,6 +724,9 @@
       return; // do NOT close modal on failure
     }
 
+    if (out && out.preCheck) {
+      console.log("[MYM preCheck]", out.preCheck);
+    }
     if (out && out.postCheck) {
       console.log("[MYM postCheck]", out.postCheck);
     }

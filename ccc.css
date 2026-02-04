@@ -148,16 +148,19 @@
 .ccc-input::placeholder{ color: rgba(233,238,249,.45); }
 
 .ccc-btn{
-  background: rgba(255,255,255,.08);
-  border: 1px solid var(--line);
-  color: var(--text);
+  background: rgba(17,29,50,.96);
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(245,250,255,.96);
   padding: 9px 12px;
   border-radius: 12px;
   cursor:pointer;
   font-weight: 900;
   font-size: 12px;
 }
-.ccc-btn:hover{ background: rgba(255,255,255,.12); }
+.ccc-btn:hover{
+  background: rgba(27,40,66,.98);
+  border-color: rgba(255,255,255,.24);
+}
 
 /* Summary */
 .ccc-summary{

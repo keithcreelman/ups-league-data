@@ -58,7 +58,7 @@ export default {
         const salary = String(body.salary ?? "").trim();
         const contractYear = String(body.contract_year ?? body.contractYear ?? "").trim();
         const contractInfo = String(body.contract_info || body.contractInfo || "").trim();
-        const contractStatus = String(body.contract_status || body.contractStatus || "A").trim();
+        const contractStatus = String(body.contract_status || body.contractStatus || "").trim();
 
         if (!leagueId || !playerId || !salary || !contractYear) {
           return new Response(
@@ -77,11 +77,17 @@ export default {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
+        const attrs = [
+          `id="${esc(playerId)}"`,
+          `salary="${esc(salary)}"`,
+          `contractYear="${esc(contractYear)}"`,
+          `contractInfo="${esc(contractInfo)}"`,
+        ];
+        if (contractStatus) attrs.push(`contractStatus="${esc(contractStatus)}"`);
+
         const dataXml =
           `<salaries><leagueUnit unit="LEAGUE">` +
-          `<player id="${esc(playerId)}" salary="${esc(salary)}" contractStatus="${esc(
-            contractStatus
-          )}" contractYear="${esc(contractYear)}" contractInfo="${esc(contractInfo)}" />` +
+          `<player ${attrs.join(" ")} />` +
           `</leagueUnit></salaries>`;
 
         const form = new URLSearchParams();
@@ -131,37 +137,42 @@ export default {
           !lowered.includes("invalid") &&
           !lowered.includes("not authorized");
 
-        // Verify post-import state from MFL export so callers can confirm site-side data changed.
+        // Verify pre/post state from MFL export so callers can confirm site-side data changed.
+        let preCheck = null;
         let postCheck = null;
         if (looksOk) {
-          const verifyUrl =
+          const verifyUrlBase =
             `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
-            `/export?TYPE=salaries&L=${encodeURIComponent(leagueId)}&JSON=1&_=${Date.now()}`;
-          const verifyRes = await fetch(verifyUrl, {
-            headers: {
-              Cookie: cookie,
-              "User-Agent": "ups-league-data-worker",
-            },
-            cf: { cacheTtl: 0, cacheEverything: false },
-          });
-          if (verifyRes.ok) {
+            `/export?TYPE=salaries&L=${encodeURIComponent(leagueId)}&JSON=1&_=` ;
+          const readPlayer = async (nonce) => {
+            const verifyUrl = verifyUrlBase + encodeURIComponent(String(nonce));
+            const verifyRes = await fetch(verifyUrl, {
+              headers: {
+                Cookie: cookie,
+                "User-Agent": "ups-league-data-worker",
+              },
+              cf: { cacheTtl: 0, cacheEverything: false },
+            });
+            if (!verifyRes.ok) return null;
             const v = await verifyRes.json();
             const leagueUnit = (v?.salaries && (v.salaries.leagueUnit || v.salaries.leagueunit)) || {};
             const playersRaw = leagueUnit.player || [];
             const players = Array.isArray(playersRaw) ? playersRaw : [playersRaw].filter(Boolean);
             const found = players.find((p) => String(p.id) === String(playerId));
-            if (found) {
-              postCheck = {
-                id: String(found.id || ""),
-                salary: String(found.salary || ""),
-                contractYear: String(found.contractYear || ""),
-                contractInfo: String(found.contractInfo || ""),
-                contractStatus: String(found.contractStatus || ""),
-              };
-            } else {
-              postCheck = { id: String(playerId), found: false };
-            }
-          }
+            if (!found) return { id: String(playerId), found: false };
+            return {
+              id: String(found.id || ""),
+              salary: String(found.salary || ""),
+              contractYear: String(found.contractYear || ""),
+              contractInfo: String(found.contractInfo || ""),
+              contractStatus: String(found.contractStatus || ""),
+            };
+          };
+
+          preCheck = await readPlayer(Date.now() - 1);
+          // small delay helps MFL propagate import state before verify fetch
+          await new Promise((r) => setTimeout(r, 250));
+          postCheck = await readPlayer(Date.now());
         }
 
         return new Response(
@@ -170,6 +181,7 @@ export default {
             reason: looksOk ? "Submitted to MFL" : "MFL import rejected request",
             upstreamStatus: mflRes ? mflRes.status : 0,
             upstreamPreview: text.slice(0, 800),
+            preCheck,
             postCheck,
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }

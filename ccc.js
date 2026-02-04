@@ -911,6 +911,12 @@
       sortState.dir = "desc";
 
       render();
+
+      return {
+        ok: true,
+        built: safeStr((state.payload.meta && state.payload.meta.generated_at) || ""),
+        count: Array.isArray(state.payload.eligibility) ? state.payload.eligibility.length : 0,
+      };
     } catch (e) {
       const msg = e && e.message ? e.message : String(e);
       const cccError = $("#cccError");
@@ -918,6 +924,43 @@
       if (cccMeta) cccMeta.textContent = "";
       if (cccError) cccError.textContent = "Could not load MYM dashboard: " + msg;
       console.error(e);
+      return { ok: false, message: msg };
+    }
+  }
+
+  async function handleRosterRefreshClick() {
+    const btn = $("#refreshBtn");
+    const beforeBuilt = safeStr((state.payload.meta && state.payload.meta.generated_at) || "");
+    const label = btn ? btn.textContent : "Roster Refresh";
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Refreshing...";
+    }
+
+    try {
+      const out = await load();
+      if (!out || !out.ok) {
+        const msg = safeStr((out && out.message) || "Unknown refresh error");
+        alert(`Roster refresh failed.\n${msg}`);
+        return;
+      }
+
+      const afterBuilt = safeStr(out.built || "");
+      const changed = !!afterBuilt && !!beforeBuilt && afterBuilt !== beforeBuilt;
+      const count = safeInt(out.count);
+
+      if (changed) {
+        alert(`Roster refresh complete.\nUpdated build: ${afterBuilt}\nPlayers loaded: ${count}`);
+      } else {
+        const builtTxt = afterBuilt ? `\nBuild: ${afterBuilt}` : "";
+        alert(`Roster refresh complete.\nNo newer build detected.${builtTxt}`);
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
     }
   }
 
@@ -989,7 +1032,10 @@
       });
 
     const refreshBtn = $("#refreshBtn");
-    if (refreshBtn) refreshBtn.addEventListener("click", () => load());
+    if (refreshBtn) {
+      refreshBtn.textContent = "Roster Refresh";
+      refreshBtn.addEventListener("click", () => handleRosterRefreshClick());
+    }
 
     // Admin as-of
     const asOfInput = $("#asOfInput");

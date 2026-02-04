@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: "20 * * * *"
 
+concurrency:
+  group: refresh-mym-dashboard
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -50,4 +54,5 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add mym_dashboard.json
           git commit -m "Auto-refresh MYM dashboard JSON from MFL"
-          git push
+          git pull --rebase origin main
+          git push origin HEAD:main

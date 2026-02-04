@@ -34,6 +34,151 @@ export default {
       }
       const cookieHeader = cookie.includes("=") ? cookie : `MFL_USER_ID=${cookie}`;
 
+      const getLeagueAdminState = async (leagueId, year) => {
+        const mflUrl = `https://api.myfantasyleague.com/${encodeURIComponent(
+          year
+        )}/export?TYPE=league&L=${encodeURIComponent(leagueId)}&JSON=1&_=${Date.now()}`;
+
+        const res = await fetch(mflUrl, {
+          headers: {
+            Cookie: cookieHeader,
+            "User-Agent": "ups-league-data-worker",
+          },
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+
+        if (!res.ok) {
+          return {
+            ok: false,
+            isAdmin: false,
+            reason: `MFL HTTP ${res.status}`,
+            emailCount: 0,
+            mflHttp: res.status,
+          };
+        }
+
+        const data = await res.json();
+        const league = data.league || data;
+        const frBlock =
+          league.franchises ||
+          (league.league && league.league.franchises) ||
+          null;
+
+        const frArr = (frBlock && (frBlock.franchise || frBlock)) || [];
+        const franchises = Array.isArray(frArr) ? frArr : [frArr].filter(Boolean);
+
+        const emailCount = franchises.reduce((acc, f) => {
+          const hasEmail = !!(f && (f.email || (f.owner && f.owner.email)));
+          return acc + (hasEmail ? 1 : 0);
+        }, 0);
+
+        return {
+          ok: true,
+          isAdmin: emailCount > 1,
+          reason: emailCount > 1
+            ? "Private owner data visible (commish)"
+            : "No private owner data visible (not commish)",
+          emailCount,
+          mflHttp: 200,
+        };
+      };
+
+      // ---------- Queue GitHub JSON refresh ----------
+      if (path === "/refresh-mym-json") {
+        if (request.method !== "POST") {
+          return new Response(
+            JSON.stringify({ ok: false, reason: "Method not allowed" }),
+            { status: 405, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+
+        const leagueId = String(L || "").trim();
+        const year = String(YEAR || "2025").trim();
+        const adminState = await getLeagueAdminState(leagueId, year);
+        if (!adminState.ok) {
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              queued: false,
+              reason: adminState.reason,
+              mflHttp: adminState.mflHttp,
+            }),
+            { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+        if (!adminState.isAdmin) {
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              queued: false,
+              reason: "Only league admin can queue refresh",
+            }),
+            { status: 403, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+
+        const repoOwner = String(env.GITHUB_REPO_OWNER || "keithcreelman").trim();
+        const repoName = String(env.GITHUB_REPO_NAME || "ups-league-data").trim();
+        const githubToken = String(env.GITHUB_PAT || "").trim();
+        if (!githubToken) {
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              queued: false,
+              reason: "Missing GITHUB_PAT worker secret",
+            }),
+            { status: 500, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+
+        const dispatchUrl = `https://api.github.com/repos/${encodeURIComponent(
+          repoOwner
+        )}/${encodeURIComponent(repoName)}/dispatches`;
+        const dispatchRes = await fetch(dispatchUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "User-Agent": "ups-league-data-worker",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          body: JSON.stringify({
+            event_type: "refresh-mym-json",
+            client_payload: {
+              league_id: leagueId,
+              year,
+              source: "ccc-roster-refresh",
+            },
+          }),
+          cf: { cacheTtl: 0, cacheEverything: false },
+        });
+
+        if (dispatchRes.status !== 204) {
+          const preview = (await dispatchRes.text()).slice(0, 600);
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              queued: false,
+              reason: "GitHub dispatch failed",
+              upstreamStatus: dispatchRes.status,
+              upstreamPreview: preview,
+            }),
+            { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            queued: true,
+            reason: "Refresh queued",
+            repo: `${repoOwner}/${repoName}`,
+          }),
+          { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
+        );
+      }
+
       // ---------- MYM contract submit ----------
       if (path === "/offer-mym") {
         if (request.method !== "POST") {
@@ -300,58 +445,24 @@ export default {
         );
       }
 
-      // ---------- Call MFL (must be full domain, not /2025/export) ----------
-      const mflUrl = `https://api.myfantasyleague.com/${encodeURIComponent(
-        YEAR
-      )}/export?TYPE=league&L=${encodeURIComponent(L)}&JSON=1&_=${Date.now()}`;
-
-      const res = await fetch(mflUrl, {
-        headers: {
-          // pass the commish cookie here
-          Cookie: cookieHeader,
-          "User-Agent": "ups-league-data-worker",
-        },
-        cf: { cacheTtl: 0, cacheEverything: false },
-      });
-
-      if (!res.ok) {
+      const adminState = await getLeagueAdminState(L, YEAR);
+      if (!adminState.ok) {
         return new Response(
           JSON.stringify({
             ok: false,
             isAdmin: false,
-            reason: `MFL HTTP ${res.status}`,
+            reason: adminState.reason,
           }),
           { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
         );
       }
 
-      const data = await res.json();
-
-      // ---------- Detect commish by presence of private owner info ----------
-      const league = data.league || data;
-      const frBlock =
-        league.franchises ||
-        (league.league && league.league.franchises) ||
-        null;
-
-      const frArr = (frBlock && (frBlock.franchise || frBlock)) || [];
-      const franchises = Array.isArray(frArr) ? frArr : [frArr].filter(Boolean);
-
-      const emailCount = franchises.reduce((acc, f) => {
-        const hasEmail = !!(f && (f.email || (f.owner && f.owner.email)));
-        return acc + (hasEmail ? 1 : 0);
-      }, 0);
-
-      const isAdmin = emailCount > 1;
-
       return new Response(
         JSON.stringify({
           ok: true,
-          isAdmin,
-          reason: isAdmin
-            ? "Private owner data visible (commish)"
-            : "No private owner data visible (not commish)",
-          emailCount,
+          isAdmin: adminState.isAdmin,
+          reason: adminState.reason,
+          emailCount: adminState.emailCount,
         }),
         { status: 200, headers: { "content-type": "application/json", ...corsHeaders } }
       );

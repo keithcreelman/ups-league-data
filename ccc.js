@@ -15,6 +15,7 @@
 
   // MYM submit endpoint
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
+  const ROSTER_REFRESH_URL = "https://ups-league-data.keith-creelman.workers.dev/refresh-mym-json";
 
   // ======================================================
   // 2) DOM + SAFE HELPERS
@@ -939,22 +940,33 @@
     }
 
     try {
-      const out = await load();
-      if (!out || !out.ok) {
-        const msg = safeStr((out && out.message) || "Unknown refresh error");
-        alert(`Roster refresh failed.\n${msg}`);
+      const trigger = await triggerRosterRefreshFromGit();
+      if (!trigger.ok) {
+        alert(`Roster refresh failed.\n${trigger.message}`);
         return;
       }
 
-      const afterBuilt = safeStr(out.built || "");
-      const changed = !!afterBuilt && !!beforeBuilt && afterBuilt !== beforeBuilt;
-      const count = safeInt(out.count);
+      if (btn) btn.textContent = "Refreshing...";
+
+      const waited = await waitForRosterBuildChange(beforeBuilt, 120000, 4000);
+      if (!waited.ok || !waited.out || !waited.out.ok) {
+        const msg = safeStr((waited && waited.message) || "Refresh queued but reload failed.");
+        alert(`Roster refresh queued.\n${msg}`);
+        return;
+      }
+
+      const afterBuilt = safeStr(waited.out.built || "");
+      const count = safeInt(waited.out.count);
+      const changed = waited.changed;
 
       if (changed) {
         alert(`Roster refresh complete.\nUpdated build: ${afterBuilt}\nPlayers loaded: ${count}`);
       } else {
-        const builtTxt = afterBuilt ? `\nBuild: ${afterBuilt}` : "";
-        alert(`Roster refresh complete.\nNo newer build detected.${builtTxt}`);
+        const builtTxt = afterBuilt ? `\nCurrent build: ${afterBuilt}` : "";
+        alert(
+          `Roster refresh was queued, but no new build was detected yet.\n` +
+            `Please try again in about a minute.${builtTxt}`
+        );
       }
     } finally {
       if (btn) {
@@ -962,6 +974,62 @@
         btn.textContent = label;
       }
     }
+  }
+
+  async function triggerRosterRefreshFromGit() {
+    const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+    const YEAR = getYear() || DEFAULT_YEAR;
+    const url =
+      `${ROSTER_REFRESH_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}`;
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const text = await res.text();
+      let out = {};
+      try {
+        out = text ? JSON.parse(text) : {};
+      } catch (_) {}
+
+      if (!res.ok || out.ok !== true) {
+        const msg =
+          safeStr(out.reason) ||
+          (text ? text.slice(0, 240) : "") ||
+          `HTTP ${res.status}`;
+        return { ok: false, message: msg };
+      }
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, message: safeStr(e && e.message ? e.message : e) };
+    }
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function waitForRosterBuildChange(beforeBuilt, timeoutMs, pollMs) {
+    const started = Date.now();
+    let lastOut = null;
+
+    // Give GitHub Actions a moment to start before polling.
+    await sleep(5000);
+
+    while (Date.now() - started < timeoutMs) {
+      const out = await load();
+      if (out && out.ok) {
+        lastOut = out;
+        const afterBuilt = safeStr(out.built || "");
+        const changed = !!afterBuilt && !!beforeBuilt && afterBuilt !== beforeBuilt;
+        if (changed) return { ok: true, out, changed: true };
+      }
+      await sleep(pollMs);
+    }
+
+    return { ok: true, out: lastOut, changed: false };
   }
 
   // ======================================================

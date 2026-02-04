@@ -268,11 +268,8 @@ table.ccc-table tbody td{
   border-bottom: 1px solid rgba(255,255,255,.06);
   font-size: 12px;
   vertical-align: top;
-  transition: background .12s ease, box-shadow .12s ease;
-}
-
-table.ccc-table tbody tr:hover td{
-  background: rgba(78,161,255,.08);
+  transition: background .12s ease, box-shadow .12s ease, filter .12s ease;
+  background: rgba(255,255,255,.07); /* neutral fallback */
 }
 
 .pill{
@@ -310,18 +307,28 @@ table.ccc-table tbody tr:hover td{
 
 /* ===== Table shading boost ===== */
 
-/* Stronger zebra stripes */
-table.ccc-table tbody tr:nth-child(odd) td{
-  background: rgba(255,255,255,.095);
+/* Strong, full-row fills per position (tinted backgrounds) */
+tr.pos-QB td{ background: rgba(59,130,246,.55); color: #f7fbff; }
+tr.pos-RB td{ background: rgba(34,197,94,.55); color: #f7fbff; }
+tr.pos-WR td{ background: rgba(168,85,247,.55); color: #f8f5ff; }
+tr.pos-TE td{ background: rgba(249,115,22,.55); color: #fff7ed; }
+tr.pos-K  td{ background: rgba(234,179,8,.52); color: #fffbea; }
+tr.pos-DL td{ background: rgba(239,68,68,.52); color: #fff5f5; }
+tr.pos-LB td{ background: rgba(6,182,212,.55); color: #f5fdff; }
+tr.pos-DB td{ background: rgba(99,102,241,.58); color: #f5f6ff; }
+
+/* Fallback zebra only for rows without a position class */
+table.ccc-table tbody tr:not([class*=\"pos-\"]) td:nth-child(odd){
+  background: rgba(255,255,255,.09);
 }
-table.ccc-table tbody tr:nth-child(even) td{
-  background: rgba(255,255,255,.14);
+table.ccc-table tbody tr:not([class*=\"pos-\"]) td:nth-child(even){
+  background: rgba(255,255,255,.12);
 }
 
-/* Stronger hover with a soft glow */
+/* Hover brighten */
 table.ccc-table tbody tr:hover td{
-  background: rgba(78,161,255,.24) !important;
-  box-shadow: inset 0 0 0 1px rgba(78,161,255,.30);
+  filter: brightness(1.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22);
 }
 
 /* Optional: subtle vertical dividers to improve readability */
@@ -339,16 +346,6 @@ table.ccc-table thead th{
   background: rgba(10,16,30,.98);
   border-bottom: 1px solid rgba(255,255,255,.12);
 }
-
-/* Position-based row tints (light but noticeable) */
-tr.pos-QB td{ background-image: linear-gradient(90deg, rgba(59,130,246,.32), rgba(0,0,0,0)); }
-tr.pos-RB td{ background-image: linear-gradient(90deg, rgba(34,197,94,.32), rgba(0,0,0,0)); }
-tr.pos-WR td{ background-image: linear-gradient(90deg, rgba(168,85,247,.32), rgba(0,0,0,0)); }
-tr.pos-TE td{ background-image: linear-gradient(90deg, rgba(249,115,22,.32), rgba(0,0,0,0)); }
-tr.pos-K  td{ background-image: linear-gradient(90deg, rgba(234,179,8,.32), rgba(0,0,0,0)); }
-tr.pos-DL td{ background-image: linear-gradient(90deg, rgba(239,68,68,.32), rgba(0,0,0,0)); }
-tr.pos-LB td{ background-image: linear-gradient(90deg, rgba(6,182,212,.32), rgba(0,0,0,0)); }
-tr.pos-DB td{ background-image: linear-gradient(90deg, rgba(99,102,241,.36), rgba(0,0,0,0)); }
 
 /* Keep your left border accent (make it a touch thicker) */
 tr.pos-QB td:first-child{ border-left: 5px solid rgba(59,130,246,.85); }

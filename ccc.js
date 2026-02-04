@@ -339,6 +339,7 @@
   function canRestructureRow(row) {
     const years = safeInt(row.contract_year);
     if (years <= 1 || years > 3) return false;
+    if (safeInt(row.salary) <= 1000) return false;
     if (rookieLike(row.contract_status)) return false;
     return true;
   }
@@ -356,6 +357,44 @@
     const m = s.match(/^(.*?)(?:\|\s*)?(Ext:.*)$/i);
     if (!m) return { base: s, ext: "" };
     return { base: safeStr(m[1]).replace(/\|\s*$/, ""), ext: safeStr(m[2]) };
+  }
+
+  function parseMoneyToken(raw) {
+    const s = safeStr(raw).replace(/,/g, "").trim();
+    if (!s) return 0;
+    const m = s.match(/^([0-9]+(?:\.[0-9]+)?)(K)?$/i);
+    if (!m) return safeInt(s);
+    const num = parseFloat(m[1]);
+    if (isNaN(num)) return 0;
+    return m[2] ? Math.round(num * 1000) : Math.round(num);
+  }
+
+  function roundToK(value) {
+    const n = safeInt(value);
+    if (n <= 0) return 0;
+    return Math.ceil(n / 1000) * 1000;
+  }
+
+  function parseContractAmounts(contractInfo, years, fallbackSalary) {
+    const base = splitContractInfoBaseAndExt(contractInfo).base;
+    const tcvMatch = base.match(/TCV\s+([0-9]+(?:\.[0-9]+)?K?)/i);
+    const y1Match = base.match(/Y1-([0-9]+(?:\.[0-9]+)?K?)/i);
+    const y2Match = base.match(/Y2-([0-9]+(?:\.[0-9]+)?K?)/i);
+    const y3Match = base.match(/Y3-([0-9]+(?:\.[0-9]+)?K?)/i);
+
+    const fallback = Math.max(1000, roundToK(fallbackSalary));
+    const y1Parsed = roundToK(parseMoneyToken(y1Match ? y1Match[1] : ""));
+    const y2Parsed = roundToK(parseMoneyToken(y2Match ? y2Match[1] : ""));
+    const y3Parsed = roundToK(parseMoneyToken(y3Match ? y3Match[1] : ""));
+    const tcvParsed = roundToK(parseMoneyToken(tcvMatch ? tcvMatch[1] : ""));
+
+    const y1 = y1Parsed || fallback;
+    const y2 = years === 3 ? y2Parsed || fallback : y2Parsed;
+    const y3 = years === 3 ? y3Parsed || fallback : 0;
+    const tcvFromYears = y1 + (years === 3 ? y2 + y3 : y2 || fallback);
+    const tcv = Math.max(years * 1000, tcvParsed || tcvFromYears);
+
+    return { tcv, y1, y2, y3 };
   }
 
   function isStep1000(v) {
@@ -845,7 +884,6 @@
     selectedSeason: "",
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
-    positionFilterEnabled: false,
     showAllTeams: false,
     pageSize: 50,
     tableDensity: "regular",
@@ -1270,7 +1308,6 @@
     const season = normalizeSeasonValue(state.selectedSeason);
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
-    const positionFilterEnabled = !!state.positionFilterEnabled;
     const selectedTeamId = pad4(state.selectedTeam);
 
     const seasonEligibility = eligibility.filter(
@@ -1295,15 +1332,15 @@
       : seasonRestructureSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
     const positionFilteredEligibility =
-      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
+      selectedPosition === "__ALL_POS__"
         ? teamFilteredEligibility
         : teamFilteredEligibility.filter((r) => posKeyFromRow(r) === selectedPosition);
     const positionFilteredMymSubmissions =
-      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
+      selectedPosition === "__ALL_POS__"
         ? teamFilteredMymSubmissions
         : teamFilteredMymSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
     const positionFilteredRestructureSubmissions =
-      !positionFilterEnabled || selectedPosition === "__ALL_POS__"
+      selectedPosition === "__ALL_POS__"
         ? teamFilteredRestructureSubmissions
         : teamFilteredRestructureSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
 
@@ -1398,7 +1435,7 @@
         eligibleRows,
         submittedRowsRaw,
         teamName,
-        positionFilterEnabled ? selectedPosition : "__ALL_POS__"
+        selectedPosition
       );
     }
     if (tabEligible) {
@@ -1802,10 +1839,13 @@
   function openRestructureModal(row) {
     ensureRestructureModalExists();
     const years = safeInt(row.contract_year) >= 3 ? 3 : 2;
-    const baseTcv = Math.max((safeInt(row.salary) || 1000) * years, years * 1000);
-    const tcv = Math.ceil(baseTcv / 1000) * 1000;
-    const y1 = Math.max(Math.ceil((tcv * 0.2) / 1000) * 1000, 1000);
-    const y2Default = years === 3 ? 1000 : Math.max(1000, tcv - y1);
+    const parsed = parseContractAmounts(row.contract_info, years, safeInt(row.salary) || 1000);
+    const tcv = Math.max(years * 1000, parsed.tcv);
+    const y1 = Math.max(1000, parsed.y1 || safeInt(row.salary) || 1000);
+    const y2Default =
+      years === 3
+        ? Math.max(1000, parsed.y2 || safeInt(row.salary) || 1000)
+        : Math.max(1000, parsed.y2 || tcv - y1);
 
     restructureModalState.open = true;
     restructureModalState.row = row;
@@ -1994,7 +2034,6 @@
       must("#seasonSelect");
       must("#teamSelect");
       must("#positionSelect");
-      must("#positionFilterChk");
       must("#showAllTeamsChk");
       must("#pageSizeSelect");
       must("#densitySelect");
@@ -2115,7 +2154,7 @@
         ? teams[0].id
         : "";
       state.selectedTeam = detected;
-      state.showAllTeams = false;
+      state.showAllTeams = !!state.canCommishMode;
       const showAllTeamsChk = $("#showAllTeamsChk");
       if (showAllTeamsChk) showAllTeamsChk.checked = !!state.showAllTeams;
       const teamSelect = $("#teamSelect");
@@ -2124,12 +2163,9 @@
       populateTeamSelect(teams, state.selectedTeam);
       const positions = buildPositionList(seasonRows, mergedSubmissionRows);
       state.selectedPosition = "__ALL_POS__";
-      state.positionFilterEnabled = false;
       populatePositionSelect(positions, state.selectedPosition);
-      const positionFilterChk = $("#positionFilterChk");
-      if (positionFilterChk) positionFilterChk.checked = !!state.positionFilterEnabled;
       const positionSelect = $("#positionSelect");
-      if (positionSelect) positionSelect.disabled = !state.positionFilterEnabled;
+      if (positionSelect) positionSelect.disabled = false;
 
       const pageSizeSelect = $("#pageSizeSelect");
       if (pageSizeSelect) {
@@ -2405,20 +2441,6 @@
     if (positionSelect)
       positionSelect.addEventListener("change", (e) => {
         state.selectedPosition = safeStr(e.target.value || "__ALL_POS__");
-        resetAllTablePages();
-        render();
-      });
-
-    const positionFilterChk = $("#positionFilterChk");
-    if (positionFilterChk)
-      positionFilterChk.addEventListener("change", (e) => {
-        state.positionFilterEnabled = !!e.target.checked;
-        const sel = $("#positionSelect");
-        if (sel) sel.disabled = !state.positionFilterEnabled;
-        if (!state.positionFilterEnabled) {
-          state.selectedPosition = "__ALL_POS__";
-          if (sel) sel.value = "__ALL_POS__";
-        }
         resetAllTablePages();
         render();
       });

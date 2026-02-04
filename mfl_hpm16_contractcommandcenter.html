@@ -1,13 +1,21 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204aj">
+<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204ak">
 
 <div id="cccApp">
   <div class="ccc-hero">
     <div class="ccc-topRow">
-      <div style="display:none;">
-        <div class="ccc-title">
-          Contract Command Center
-          <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
+      <div class="ccc-brand">
+        <div class="ccc-titleRow">
+          <div class="ccc-title">
+            Contract Command Center
+            <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
+          </div>
+          <img
+            class="ccc-titleArtImg"
+            src="https://keithcreelman.github.io/ups-league-data/ccc_contracts.svg?v=20260204ak"
+            alt="Contracts illustration"
+          />
         </div>
+        <div class="ccc-subtag">Contract tools for salary planning, submissions, and offseason actions.</div>
         <div id="cccMeta" class="ccc-sub">Loading…</div>
       </div>
 
@@ -30,10 +38,6 @@
           Position
           <select id="positionSelect" class="ccc-select"></select>
         </div>
-        <label class="ccc-check">
-          <input id="positionFilterChk" type="checkbox" />
-          Filter by position
-        </label>
         <label class="ccc-check">
           <input id="showAllTeamsChk" type="checkbox" />
           Show all teams
@@ -67,7 +71,7 @@
 
     <div class="ccc-nav">
       <span class="ccc-navTitle">Active Now</span>
-      <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-tool="mym">MYM Assistant</button>
+      <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-tool="mym">MYM</button>
       <button id="moduleExtensionsChip" class="ccc-chipBtn disabled" type="button" title="Placeholder for future module">Extensions</button>
 
       <span class="ccc-navTitle">Coming Up</span>
@@ -217,4 +221,4 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204aj"></script>
+<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204ak"></script>

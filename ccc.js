@@ -274,7 +274,6 @@
               <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
               <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
               ${isEligibleTab ? `` : `<th style="min-width:320px;">Explanation</th>`}
-              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode, "acqType")}</span></th>
             </tr>
           </thead>
           <tbody>
@@ -319,7 +318,6 @@
           <td class="muted">${acquired}</td>
           <td class="muted">${deadline}</td>
           ${isEligibleTab ? `` : `<td class="explain">${expl}</td>`}
-          <td><span class="pill ${pillForType(acqType)}">${htmlEsc(acqType)}</span></td>
         </tr>
       `;
       })

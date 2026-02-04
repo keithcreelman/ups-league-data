@@ -12,23 +12,30 @@
   // Fallbacks if page URL lacks ?L= or YEAR=
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
-//MYM
+
+  // MYM submit endpoint
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
+
   // ======================================================
   // 2) DOM + SAFE HELPERS
   // ======================================================
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  function safeStr(x) { return (x === null || x === undefined) ? "" : String(x); }
+  function safeStr(x) {
+    return x === null || x === undefined ? "" : String(x);
+  }
+
   function safeInt(x) {
     const n = parseInt(String(x).replace(/[^\d-]/g, ""), 10);
     return isNaN(n) ? 0 : n;
   }
+
   function pad4(fid) {
     const d = safeStr(fid).replace(/\D/g, "");
     return d ? d.padStart(4, "0").slice(-4) : "";
   }
+
   function htmlEsc(s) {
     return safeStr(s)
       .replace(/&/g, "&amp;")
@@ -42,10 +49,11 @@
     const s = safeStr(x).trim();
     if (!s) return null;
     const t = s.replace(" ", "T");
-    const iso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? (t + ":00") : t;
+    const iso = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(t) ? t + ":00" : t;
     const d = new Date(iso);
     return isNaN(d.getTime()) ? null : d;
   }
+
   function fmtYMD(x) {
     const d = parseDate(x);
     if (!d) return "";
@@ -68,7 +76,9 @@
     try {
       const u = new URL(window.location.href);
       return u.searchParams.get("L") || "";
-    } catch (e) { return ""; }
+    } catch (e) {
+      return "";
+    }
   }
 
   function getYear() {
@@ -111,14 +121,14 @@
       return {
         eligibility: all,
         usage: raw.View_MYM_Usage || raw.usage || [],
-        meta: raw.meta || {}
+        meta: raw.meta || {},
       };
     }
 
     return {
       eligibility: raw.eligibility || raw.View_MYM_Eligibility || [],
       usage: raw.usage || raw.View_MYM_Usage || [],
-      meta: raw.meta || {}
+      meta: raw.meta || {},
     };
   }
 
@@ -132,7 +142,9 @@
     if (!L) L = DEFAULT_LEAGUE_ID;
     if (!YEAR) YEAR = DEFAULT_YEAR;
 
-    const url = `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(YEAR)}&_=${Date.now()}`;
+    const url = `${ADMIN_WORKER_URL}?L=${encodeURIComponent(L)}&YEAR=${encodeURIComponent(
+      YEAR
+    )}&_=${Date.now()}`;
 
     try {
       const res = await fetch(url, { cache: "no-store" });
@@ -144,10 +156,16 @@
         reason: safeStr(j.reason || ""),
         emailCount: safeInt(j.emailCount || 0),
         L,
-        YEAR
+        YEAR,
       };
     } catch (e) {
-      return { ok: false, isAdmin: false, reason: `Worker check failed: ${e && e.message ? e.message : e}`, L, YEAR };
+      return {
+        ok: false,
+        isAdmin: false,
+        reason: `Worker check failed: ${e && e.message ? e.message : e}`,
+        L,
+        YEAR,
+      };
     }
   }
 
@@ -161,7 +179,7 @@
     const deadline = parseDate(row.mym_deadline);
     if (!deadline || !asOfDate) return 0;
 
-    return (asOfDate.getTime() <= deadline.getTime()) ? 1 : 0;
+    return asOfDate.getTime() <= deadline.getTime() ? 1 : 0;
   }
 
   // ======================================================
@@ -176,32 +194,38 @@
 
   function posKeyFromRow(r) {
     const p = safeStr(r.positional_grouping || r.position).toUpperCase().trim();
-    // keep common buckets; otherwise pass through
-    if (["QB","RB","WR","TE","K","DL","LB","DB"].includes(p)) return p;
+    if (["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"].includes(p)) return p;
     return p || "NA";
   }
 
   const sortState = {
     tab: "eligible",
     key: "acquired",
-    dir: "desc" // asc | desc
+    dir: "desc", // asc | desc
   };
 
   function compareVals(a, b, dir) {
     if (a === b) return 0;
-    const d = (dir === "asc") ? 1 : -1;
-    return (a > b) ? d : -d;
+    const d = dir === "asc" ? 1 : -1;
+    return a > b ? d : -d;
   }
 
   function getSortValue(r, key) {
     switch (key) {
-      case "player": return safeStr(r.player_name).toLowerCase();
-      case "pos": return safeStr(r.positional_grouping || r.position).toLowerCase();
-      case "salary": return safeInt(r.salary);
-      case "acqType": return safeStr(r.mym_acq_type).toLowerCase();
-      case "acquired": return (parseDate(r.acquired_date) || new Date("1900-01-01")).getTime();
-      case "deadline": return (parseDate(r.mym_deadline) || new Date("2999-01-01")).getTime();
-      default: return safeStr(r.player_name).toLowerCase();
+      case "player":
+        return safeStr(r.player_name).toLowerCase();
+      case "pos":
+        return safeStr(r.positional_grouping || r.position).toLowerCase();
+      case "salary":
+        return safeInt(r.salary);
+      case "acqType":
+        return safeStr(r.mym_acq_type).toLowerCase();
+      case "acquired":
+        return (parseDate(r.acquired_date) || new Date("1900-01-01")).getTime();
+      case "deadline":
+        return (parseDate(r.mym_deadline) || new Date("2999-01-01")).getTime();
+      default:
+        return safeStr(r.player_name).toLowerCase();
     }
   }
 
@@ -226,19 +250,19 @@
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     }
 
-    const isEligibleTab = (tabMode === "eligible");
+    const isEligibleTab = tabMode === "eligible";
 
     const head = `
       <div class="ccc-tableWrap" data-table="${tabMode}">
         <table class="ccc-table">
           <thead>
             <tr>
-              <th data-sort="player">Player <span class="sort">${sortIcon(tabMode,"player")}</span></th>
-              <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode,"pos")}</span></th>
-              <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode,"salary")}</span></th>
-              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode,"acqType")}</span></th>
-              <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode,"acquired")}</span></th>
-              <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode,"deadline")}</span></th>
+              <th data-sort="player">Player <span class="sort">${sortIcon(tabMode, "player")}</span></th>
+              <th data-sort="pos">Pos <span class="sort">${sortIcon(tabMode, "pos")}</span></th>
+              <th data-sort="salary">Salary <span class="sort">${sortIcon(tabMode, "salary")}</span></th>
+              <th data-sort="acqType">Acq Type <span class="sort">${sortIcon(tabMode, "acqType")}</span></th>
+              <th data-sort="acquired">Acquired <span class="sort">${sortIcon(tabMode, "acquired")}</span></th>
+              <th data-sort="deadline">Deadline <span class="sort">${sortIcon(tabMode, "deadline")}</span></th>
               ${isEligibleTab ? `<th style="min-width:140px;">Actions</th>` : ``}
               <th style="min-width:320px;">Explanation</th>
             </tr>
@@ -246,20 +270,21 @@
           <tbody>
     `;
 
-    const body = rows.map(r => {
-      const player = htmlEsc(r.player_name);
-      const posDisp = htmlEsc(r.positional_grouping || r.position);
-      const posKey = htmlEsc(posKeyFromRow(r));
-      const salaryNum = safeInt(r.salary);
-      const salary = salaryNum.toLocaleString();
-      const acqType = safeStr(r.mym_acq_type);
+    const body = rows
+      .map((r) => {
+        const player = htmlEsc(r.player_name);
+        const posDisp = htmlEsc(r.positional_grouping || r.position);
+        const posKey = htmlEsc(posKeyFromRow(r));
+        const salaryNum = safeInt(r.salary);
+        const salary = salaryNum.toLocaleString();
+        const acqType = safeStr(r.mym_acq_type);
 
-      const acquired = htmlEsc(fmtYMD(r.acquired_date));
-      const deadline = htmlEsc(fmtYMD(r.mym_deadline));
-      const expl = htmlEsc(r.rule_explanation || "");
+        const acquired = htmlEsc(fmtYMD(r.acquired_date));
+        const deadline = htmlEsc(fmtYMD(r.mym_deadline));
+        const expl = htmlEsc(r.rule_explanation || "");
 
-      const actions = isEligibleTab
-        ? `
+        const actions = isEligibleTab
+          ? `
           <button
             type="button"
             class="ccc-btn"
@@ -273,9 +298,9 @@
             data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
           >Offer Contract</button>
         `
-        : ``;
+          : ``;
 
-      return `
+        return `
         <tr class="pos-${posKey}">
           <td class="playerCell">${player}</td>
           <td class="muted">${posDisp}</td>
@@ -287,7 +312,8 @@
           <td class="explain">${expl}</td>
         </tr>
       `;
-    }).join("");
+      })
+      .join("");
 
     return head + body + `</tbody></table></div>`;
   }
@@ -297,8 +323,8 @@
     const remaining = usageRow ? safeInt(usageRow.mym_remaining) : 0;
 
     const soonest = rowsElig
-      .map(r => ({ r, d: parseDate(r.mym_deadline) }))
-      .filter(x => x.d)
+      .map((r) => ({ r, d: parseDate(r.mym_deadline) }))
+      .filter((x) => x.d)
       .sort((a, b) => a.d - b.d)[0];
 
     const soonestTxt = soonest ? fmtYMD(soonest.r.mym_deadline) : "N/A";
@@ -351,12 +377,12 @@
     detectedFranchiseId: "",
     asOfDate: null,
     search: "",
-    activeTab: "eligible"
+    activeTab: "eligible",
   };
 
   function buildTeamList(rows) {
     const map = new Map();
-    rows.forEach(r => {
+    rows.forEach((r) => {
       const id = pad4(r.franchise_id);
       const nm = safeStr(r.franchise_name);
       if (id && !map.has(id)) map.set(id, nm || id);
@@ -374,24 +400,26 @@
     if (!sel) return;
 
     sel.innerHTML = "";
-    teams.forEach(t => {
+    teams.forEach((t) => {
       const opt = document.createElement("option");
       opt.value = t.id;
       opt.textContent = t.name;
-      opt.selected = (t.id === selectedId);
+      opt.selected = t.id === selectedId;
       sel.appendChild(opt);
     });
   }
 
   function getUsageRow(usageRows, franchiseId, season) {
     const seasonStr = safeStr(season);
-    let row = usageRows.find(u => pad4(u.franchise_id) === franchiseId && safeStr(u.season) === seasonStr);
-    if (!row) row = usageRows.find(u => pad4(u.franchise_id) === franchiseId);
+    let row = usageRows.find(
+      (u) => pad4(u.franchise_id) === franchiseId && safeStr(u.season) === seasonStr
+    );
+    if (!row) row = usageRows.find((u) => pad4(u.franchise_id) === franchiseId);
     return row || null;
   }
 
   function applyEffectiveEligibility(rows, asOfDate) {
-    rows.forEach(r => {
+    rows.forEach((r) => {
       r._eligibleEffective = safeInt(r.eligible_flag);
       if (state.isAdmin && asOfDate) {
         r._eligibleEffective = computeEligible(r, asOfDate);
@@ -418,15 +446,17 @@
     let scoped = eligibility.slice();
     if (state.selectedTeam !== "__ALL__") {
       const fid = pad4(state.selectedTeam);
-      scoped = scoped.filter(r => pad4(r.franchise_id) === fid);
+      scoped = scoped.filter((r) => pad4(r.franchise_id) === fid);
     }
     if (searchLower) {
-      scoped = scoped.filter(r => safeStr(r.player_name).toLowerCase().includes(searchLower));
+      scoped = scoped.filter((r) =>
+        safeStr(r.player_name).toLowerCase().includes(searchLower)
+      );
     }
 
-    const season = scoped[0] ? scoped[0].season : (eligibility[0] ? eligibility[0].season : "");
-    const built = (meta && meta.generated_at) ? safeStr(meta.generated_at) : "";
-    const minSeason = (meta && meta.min_season) ? safeStr(meta.min_season) : "";
+    const season = scoped[0] ? scoped[0].season : eligibility[0] ? eligibility[0].season : "";
+    const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
+    const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
 
     if (cccMeta) {
       cccMeta.textContent =
@@ -437,15 +467,27 @@
         (state.adminReason ? ` | ${state.adminReason}` : "");
     }
 
-    const eligibleRowsRaw = scoped.filter(r => safeInt(r._eligibleEffective) === 1);
-    const ineligibleRowsRaw = scoped.filter(r => safeInt(r._eligibleEffective) !== 1);
+    const eligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) === 1);
+    const ineligibleRowsRaw = scoped.filter((r) => safeInt(r._eligibleEffective) !== 1);
 
-    const eligibleRows = sortRows(eligibleRowsRaw, sortState.tab === "eligible" ? sortState.key : "acquired", sortState.tab === "eligible" ? sortState.dir : "desc");
-    const ineligibleRows = sortRows(ineligibleRowsRaw, sortState.tab === "ineligible" ? sortState.key : "acquired", sortState.tab === "ineligible" ? sortState.dir : "desc");
+    const eligibleRows = sortRows(
+      eligibleRowsRaw,
+      sortState.tab === "eligible" ? sortState.key : "acquired",
+      sortState.tab === "eligible" ? sortState.dir : "desc"
+    );
+
+    const ineligibleRows = sortRows(
+      ineligibleRowsRaw,
+      sortState.tab === "ineligible" ? sortState.key : "acquired",
+      sortState.tab === "ineligible" ? sortState.dir : "desc"
+    );
 
     const teamName =
-      (state.selectedTeam === "__ALL__") ? "All Teams" :
-      (scoped[0] ? safeStr(scoped[0].franchise_name) : "Team");
+      state.selectedTeam === "__ALL__"
+        ? "All Teams"
+        : scoped[0]
+        ? safeStr(scoped[0].franchise_name)
+        : "Team";
 
     let usageRow = null;
     if (state.selectedTeam !== "__ALL__") {
@@ -468,7 +510,7 @@
 
   function formatK(n) {
     const v = safeInt(n);
-    return (v % 1000 === 0) ? `${v / 1000}K` : `${v}`;
+    return v % 1000 === 0 ? `${v / 1000}K` : `${v}`;
   }
 
   function computeGuarantee(salary, years) {
@@ -561,7 +603,10 @@
     }
 
     const err = $("#mymModalErr");
-    if (err) { err.style.display = "none"; err.textContent = ""; }
+    if (err) {
+      err.style.display = "none";
+      err.textContent = "";
+    }
 
     setModalOption(2);
 
@@ -583,97 +628,71 @@
     mymModalState.row = null;
   }
 
-    async function submitMYMContract() {
-  const row = mymModalState.row;
-  if (!row) return;
+  // ✅ FIXED: single, clean submit function (no duplicate try blocks)
+  async function submitMYMContract() {
+    const row = mymModalState.row;
+    if (!row) return;
 
-  // ✅ DEFINE VARIABLES LOCALLY (no globals)
-  const L = getLeagueId() || DEFAULT_LEAGUE_ID;
-  const YEAR = getYear() || DEFAULT_YEAR;
+    const L = getLeagueId() || DEFAULT_LEAGUE_ID;
+    const YEAR = getYear() || DEFAULT_YEAR;
 
-  const salary = safeInt(row.salary);
-  const years = mymModalState.years;
-  const calc = buildContractInfo(salary, years);
+    const salary = safeInt(row.salary);
+    const years = mymModalState.years;
+    const calc = buildContractInfo(salary, years);
 
-  const payload = {
-    type: "MYM",
+    const payload = {
+      type: "MYM",
 
-    // 🔑 REQUIRED BY WORKER
-    L,
-    YEAR,
+      // REQUIRED BY WORKER
+      L,
+      YEAR,
 
-    // Optional redundancy (harmless)
-    leagueId: L,
-    year: YEAR,
+      // Optional redundancy (harmless)
+      leagueId: L,
+      year: YEAR,
 
-    player_id: String(row.player_id),
-    salary,
-    contract_year: years,
-    contract_info: calc.contractInfo,
-    tcv: calc.tcv,
-    aav: calc.aav,
-    guaranteed: calc.gtd
-  };
+      player_id: String(row.player_id),
+      salary,
+      contract_year: years,
+      contract_info: calc.contractInfo,
+      tcv: calc.tcv,
+      aav: calc.aav,
+      guaranteed: calc.gtd,
+    };
 
-  console.log("[MYM submit payload]", payload);
+    console.log("[MYM submit payload]", payload);
 
-  // UI: disable button while submitting
-  const btn = $("#mymSubmitBtn");
-  const err = $("#mymModalErr");
-  if (err) { err.style.display = "none"; err.textContent = ""; }
-  if (btn) { btn.disabled = true; btn.textContent = "Submitting..."; }
-
-  try {
-    const res = await fetch(OFFER_MYM_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    // Worker might return JSON OR text on error
-    const text = await res.text();
-    let out = {};
-    try { out = text ? JSON.parse(text) : {}; } catch (_) {}
-
-    if (!res.ok || out.ok !== true) {
-      const msg =
-        (out && (out.error || out.reason)) ||
-        (text && text.slice(0, 300)) ||
-        `Submit failed (HTTP ${res.status})`;
-
-      if (err) {
-        err.style.display = "";
-        err.textContent = msg;
-      }
-      return; // do NOT close modal on failure
-    }
-
-    // success
-    closeMYMModal();
-    await load(); // refresh dashboard so eligibility/usage updates
-
-  } catch (e) {
-    const msg = e && e.message ? e.message : String(e);
+    const btn = $("#mymSubmitBtn");
+    const err = $("#mymModalErr");
     if (err) {
-      err.style.display = "";
-      err.textContent = msg;
+      err.style.display = "none";
+      err.textContent = "";
     }
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = "Submit Contract"; }
-  }
-}
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+    }
+
     try {
       const res = await fetch(OFFER_MYM_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      const out = await res.json().catch(() => ({}));
+      // Worker might return JSON OR text on error
+      const text = await res.text();
+      let out = {};
+      try {
+        out = text ? JSON.parse(text) : {};
+      } catch (_) {}
 
-      if (!res.ok || !out || out.ok !== true) {
-        const msg = out && out.error ? out.error : `Submit failed (HTTP ${res.status})`;
-        const err = $("#mymModalErr");
+      if (!res.ok || out.ok !== true) {
+        const msg =
+          (out && (out.error || out.reason)) ||
+          (text && text.slice(0, 300)) ||
+          `Submit failed (HTTP ${res.status})`;
+
         if (err) {
           err.style.display = "";
           err.textContent = msg;
@@ -683,7 +702,19 @@
 
       // success
       closeMYMModal();
-
+      await load(); // refresh dashboard so eligibility/usage updates
+    } catch (e) {
+      const msg = e && e.message ? e.message : String(e);
+      if (err) {
+        err.style.display = "";
+        err.textContent = msg;
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Submit Contract";
+      }
+    }
   }
 
   // ======================================================
@@ -731,20 +762,24 @@
         const now = new Date();
         state.asOfDate = now;
         const pad = (n) => String(n).padStart(2, "0");
-        $("#asOfInput").value =
-          `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+          now.getDate()
+        )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       } else {
         state.asOfDate = null;
         $("#asOfInput").value = "";
       }
 
       const teams = buildTeamList(state.payload.eligibility);
-      const detected = teams.some(t => t.id === state.detectedFranchiseId) ? state.detectedFranchiseId : "__ALL__";
+      const detected = teams.some((t) => t.id === state.detectedFranchiseId)
+        ? state.detectedFranchiseId
+        : "__ALL__";
       state.selectedTeam = detected;
 
       populateTeamSelect(teams, state.selectedTeam);
 
       setTab("eligible");
+
       // default sort per tab
       sortState.tab = "eligible";
       sortState.key = "acquired";
@@ -752,7 +787,7 @@
 
       render();
     } catch (e) {
-      const msg = (e && e.message) ? e.message : String(e);
+      const msg = e && e.message ? e.message : String(e);
       const cccError = $("#cccError");
       const cccMeta = $("#cccMeta");
       if (cccMeta) cccMeta.textContent = "";
@@ -770,10 +805,10 @@
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
 
-    if (tabEligible) tabEligible.style.display = (tab === "eligible") ? "" : "none";
-    if (tabIneligible) tabIneligible.style.display = (tab === "ineligible") ? "" : "none";
+    if (tabEligible) tabEligible.style.display = tab === "eligible" ? "" : "none";
+    if (tabIneligible) tabIneligible.style.display = tab === "ineligible" ? "" : "none";
 
-    $$(".ccc-tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    $$(".ccc-tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
   }
 
   function handleHeaderSortClick(th, tableMode) {
@@ -786,7 +821,7 @@
       sortState.dir = "asc";
     } else {
       if (sortState.key === key) {
-        sortState.dir = (sortState.dir === "asc") ? "desc" : "asc";
+        sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
       } else {
         sortState.key = key;
         sortState.dir = "asc";
@@ -798,88 +833,104 @@
 
   function wireEvents() {
     // Tabs
-    $$(".ccc-tab").forEach(btn => btn.addEventListener("click", () => {
-      setTab(btn.dataset.tab);
-      render();
-    }));
+    $$(".ccc-tab").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        setTab(btn.dataset.tab);
+        render();
+      })
+    );
 
     // Filters
     const teamSelect = $("#teamSelect");
-    if (teamSelect) teamSelect.addEventListener("change", (e) => {
-      state.selectedTeam = e.target.value;
-      render();
-    });
+    if (teamSelect)
+      teamSelect.addEventListener("change", (e) => {
+        state.selectedTeam = e.target.value;
+        render();
+      });
 
     const searchBox = $("#searchBox");
-    if (searchBox) searchBox.addEventListener("input", (e) => {
-      state.search = e.target.value;
-      render();
-    });
+    if (searchBox)
+      searchBox.addEventListener("input", (e) => {
+        state.search = e.target.value;
+        render();
+      });
 
     const clearBtn = $("#clearBtn");
-    if (clearBtn) clearBtn.addEventListener("click", () => {
-      $("#searchBox").value = "";
-      state.search = "";
-      render();
-    });
+    if (clearBtn)
+      clearBtn.addEventListener("click", () => {
+        $("#searchBox").value = "";
+        state.search = "";
+        render();
+      });
 
     const refreshBtn = $("#refreshBtn");
     if (refreshBtn) refreshBtn.addEventListener("click", () => load());
 
     // Admin as-of
     const asOfInput = $("#asOfInput");
-    if (asOfInput) asOfInput.addEventListener("change", () => {
-      if (!state.isAdmin) return;
-      const v = asOfInput.value;
-      const d = v ? new Date(v) : new Date();
-      state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
-      render();
-    });
+    if (asOfInput)
+      asOfInput.addEventListener("change", () => {
+        if (!state.isAdmin) return;
+        const v = asOfInput.value;
+        const d = v ? new Date(v) : new Date();
+        state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
+        render();
+      });
 
     const asOfResetBtn = $("#asOfResetBtn");
-    if (asOfResetBtn) asOfResetBtn.addEventListener("click", () => {
-      if (!state.isAdmin) return;
-      const now = new Date();
-      state.asOfDate = now;
-      const pad = (n) => String(n).padStart(2, "0");
-      $("#asOfInput").value =
-        `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      render();
-    });
+    if (asOfResetBtn)
+      asOfResetBtn.addEventListener("click", () => {
+        if (!state.isAdmin) return;
+        const now = new Date();
+        state.asOfDate = now;
+        const pad = (n) => String(n).padStart(2, "0");
+        $("#asOfInput").value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+          now.getDate()
+        )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        render();
+      });
 
     // TABLE SORT (event delegation)
-    document.addEventListener("click", (e) => {
-      const th = e.target && e.target.closest ? e.target.closest("th[data-sort]") : null;
-      if (!th) return;
+    document.addEventListener(
+      "click",
+      (e) => {
+        const th = e.target && e.target.closest ? e.target.closest("th[data-sort]") : null;
+        if (!th) return;
 
-      const wrap = th.closest ? th.closest(".ccc-tableWrap") : null;
-      if (!wrap) return;
+        const wrap = th.closest ? th.closest(".ccc-tableWrap") : null;
+        if (!wrap) return;
 
-      const tableMode = wrap.getAttribute("data-table") || "eligible";
-      handleHeaderSortClick(th, tableMode);
-    }, true);
+        const tableMode = wrap.getAttribute("data-table") || "eligible";
+        handleHeaderSortClick(th, tableMode);
+      },
+      true
+    );
 
     // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
-    document.addEventListener("click", (e) => {
-      const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
-      if (!btn) return;
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest("[data-offer='1']") : null;
+        if (!btn) return;
 
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-      const row = {
-        player_id: btn.getAttribute("data-player-id"),
-        player_name: btn.getAttribute("data-player-name"),
-        salary: safeInt(btn.getAttribute("data-salary")),
-        franchise_id: btn.getAttribute("data-franchise-id"),
-        franchise_name: btn.getAttribute("data-franchise-name"),
-        mym_acq_type: btn.getAttribute("data-acq-type"),
-        mym_deadline: btn.getAttribute("data-deadline")
-      };
+        const row = {
+          player_id: btn.getAttribute("data-player-id"),
+          player_name: btn.getAttribute("data-player-name"),
+          salary: safeInt(btn.getAttribute("data-salary")),
+          franchise_id: btn.getAttribute("data-franchise-id"),
+          franchise_name: btn.getAttribute("data-franchise-name"),
+          mym_acq_type: btn.getAttribute("data-acq-type"),
+          mym_deadline: btn.getAttribute("data-deadline"),
+        };
 
-      openMYMModal(row);
-    }, true);
+        openMYMModal(row);
+      },
+      true
+    );
 
     // Close modal (backdrop/X/cancel)
     const modal = $("#mymModal");

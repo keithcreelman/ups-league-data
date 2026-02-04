@@ -119,10 +119,20 @@ export default {
           };
         } else {
           try {
+            const playersQs = new URLSearchParams({
+              TYPE: "players",
+              L: leagueId,
+              P: playerId,
+              DETAILS: "1",
+              JSON: "1",
+              _: String(Date.now()),
+            });
+            if (env.MFL_APIKEY) {
+              playersQs.set("APIKEY", String(env.MFL_APIKEY));
+            }
             const playerStatusUrl =
               `https://api.myfantasyleague.com/${encodeURIComponent(year)}` +
-              `/export?TYPE=players&L=${encodeURIComponent(leagueId)}&P=${encodeURIComponent(playerId)}&JSON=1&_=` +
-              Date.now();
+              `/export?${playersQs.toString()}`;
             const playerRes = await fetch(playerStatusUrl, {
               headers: {
                 Cookie: cookieHeader,

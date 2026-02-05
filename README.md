@@ -50,7 +50,9 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
   - Script: `etl/mfl_etl_full/sync_restructure_submissions_to_db.py`
   - Creates/maintains table: `restructure_submissions`
   - Ingests worker logs from `restructure_submissions.json`
-  - Also backfills historical inferred restructures from `rosters_weekly.contract_info` containing `restruct`
+  - Also backfills historical inferred restructures from:
+    - `rosters_weekly.contract_info` containing `restruct`
+    - `transactions_trades.raw_json/comments` containing `restruct` (adds commentary text)
   - Example:
     ```bash
     python etl/mfl_etl_full/sync_restructure_submissions_to_db.py \

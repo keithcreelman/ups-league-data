@@ -145,6 +145,7 @@ def ensure_table(conn: sqlite3.Connection) -> None:
             submitted_at_utc TEXT,
             commish_override_flag INTEGER DEFAULT 0,
             override_as_of_date TEXT,
+            commentary TEXT,
             xml_payload TEXT,
             inferred_flag INTEGER DEFAULT 0,
             inferred_from_season INTEGER,
@@ -162,6 +163,9 @@ def ensure_table(conn: sqlite3.Connection) -> None:
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_restructure_submissions_team ON restructure_submissions(franchise_id)"
     )
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(restructure_submissions)")}
+    if "commentary" not in cols:
+        conn.execute("ALTER TABLE restructure_submissions ADD COLUMN commentary TEXT")
 
 
 def normalize_json_row(conn: sqlite3.Connection, row: Dict[str, Any]) -> Dict[str, Any]:
@@ -194,6 +198,7 @@ def normalize_json_row(conn: sqlite3.Connection, row: Dict[str, Any]) -> Dict[st
         "submitted_at_utc": safe_str(row.get("submitted_at_utc") or row.get("submitted_at")),
         "commish_override_flag": 1 if safe_int(row.get("commish_override_flag"), 0) else 0,
         "override_as_of_date": safe_str(row.get("override_as_of_date")),
+        "commentary": safe_str(row.get("commentary") or row.get("notes")),
         "xml_payload": safe_str(row.get("xml_payload")),
         "inferred_flag": 0,
         "inferred_from_season": None,
@@ -252,11 +257,72 @@ def infer_historical_rows(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
             "submitted_at_utc": "",
             "commish_override_flag": 0,
             "override_as_of_date": "",
+            "commentary": f"Contract history note: {contract_info}",
             "xml_payload": "",
             "inferred_flag": 1,
             "inferred_from_season": safe_int(row["season"], 0),
             "inferred_from_week": safe_int(row["first_week"], 0),
             "inference_note": "Inferred from rosters_weekly contract_info containing 'restruct'.",
+        }
+        norm["submission_id"] = build_submission_id(norm)
+        out.append(norm)
+    return out
+
+
+def infer_trade_comment_rows(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+    sql = """
+    SELECT
+      t.season,
+      t.transactionid,
+      t.franchise_id,
+      COALESCE(t.franchise_name, '') AS franchise_name,
+      t.player_id,
+      COALESCE(t.player_name, '') AS player_name,
+      COALESCE(MAX(t.datetime_et), '') AS datetime_et,
+      COALESCE(MAX(t.comments), '') AS comments,
+      COALESCE(MAX(t.raw_json), '') AS raw_json
+    FROM transactions_trades t
+    WHERE lower(COALESCE(t.raw_json, '')) LIKE '%restruct%'
+      AND COALESCE(t.player_id, '') <> ''
+      AND COALESCE(t.comments, '') <> ''
+    GROUP BY t.season, t.transactionid, t.franchise_id, t.player_id
+    ORDER BY t.season, datetime_et, t.transactionid
+    """
+    out: List[Dict[str, Any]] = []
+    for row in conn.execute(sql).fetchall():
+        season = safe_str(row["season"])
+        league_id = get_league_id_for_season(conn, season)
+        comment = safe_str(row["comments"])
+        tx_id = safe_str(row["transactionid"])
+        dt_txt = safe_str(row["datetime_et"])
+
+        norm: Dict[str, Any] = {
+            "submission_id": "",
+            "source": "inferred-trade-comment",
+            "league_id": league_id,
+            "season": season,
+            "franchise_id": safe_str(row["franchise_id"]).zfill(4)[-4:],
+            "franchise_name": safe_str(row["franchise_name"]),
+            "franchise_logo": "",
+            "player_id": safe_str(row["player_id"]),
+            "player_name": safe_str(row["player_name"]),
+            "position": "",
+            "salary": 0,
+            "contract_year": 0,
+            "contract_status": "",
+            "contract_info": "",
+            "tcv": 0,
+            "aav": 0,
+            "guaranteed": 0,
+            "submitted_at_utc": dt_txt or now_utc_iso(),
+            "commish_override_flag": 0,
+            "override_as_of_date": "",
+            "commentary": f"[{tx_id}] {comment}",
+            "xml_payload": "",
+            "inferred_flag": 1,
+            "inferred_from_season": safe_int(row["season"], 0),
+            "inferred_from_week": None,
+            "inference_note": "Inferred from transactions_trades comment containing 'restruct'.",
         }
         norm["submission_id"] = build_submission_id(norm)
         out.append(norm)
@@ -282,12 +348,12 @@ def upsert_rows(conn: sqlite3.Connection, rows: Iterable[Dict[str, Any]]) -> tup
     INSERT INTO restructure_submissions (
       submission_id, source, league_id, season, franchise_id, franchise_name, franchise_logo,
       player_id, player_name, position, salary, contract_year, contract_status, contract_info,
-      tcv, aav, guaranteed, submitted_at_utc, commish_override_flag, override_as_of_date,
+      tcv, aav, guaranteed, submitted_at_utc, commish_override_flag, override_as_of_date, commentary,
       xml_payload, inferred_flag, inferred_from_season, inferred_from_week, inference_note
     ) VALUES (
       :submission_id, :source, :league_id, :season, :franchise_id, :franchise_name, :franchise_logo,
       :player_id, :player_name, :position, :salary, :contract_year, :contract_status, :contract_info,
-      :tcv, :aav, :guaranteed, :submitted_at_utc, :commish_override_flag, :override_as_of_date,
+      :tcv, :aav, :guaranteed, :submitted_at_utc, :commish_override_flag, :override_as_of_date, :commentary,
       :xml_payload, :inferred_flag, :inferred_from_season, :inferred_from_week, :inference_note
     )
     ON CONFLICT(submission_id) DO UPDATE SET
@@ -310,6 +376,7 @@ def upsert_rows(conn: sqlite3.Connection, rows: Iterable[Dict[str, Any]]) -> tup
       submitted_at_utc=excluded.submitted_at_utc,
       commish_override_flag=excluded.commish_override_flag,
       override_as_of_date=excluded.override_as_of_date,
+      commentary=excluded.commentary,
       xml_payload=excluded.xml_payload,
       inferred_flag=excluded.inferred_flag,
       inferred_from_season=excluded.inferred_from_season,
@@ -355,8 +422,9 @@ def main() -> int:
         json_raw_rows = load_json_rows(json_path)
         json_rows = [normalize_json_row(conn, row) for row in json_raw_rows]
         inferred_rows = infer_historical_rows(conn) if include_inferred else []
+        trade_comment_rows = infer_trade_comment_rows(conn) if include_inferred else []
 
-        all_rows = dedupe_by_submission_id([*json_rows, *inferred_rows])
+        all_rows = dedupe_by_submission_id([*json_rows, *inferred_rows, *trade_comment_rows])
         inserted, updated = upsert_rows(conn, all_rows)
         conn.commit()
 
@@ -372,6 +440,7 @@ def main() -> int:
         print(f"JSON path: {json_path}")
         print(f"Loaded JSON rows: {len(json_rows)}")
         print(f"Loaded inferred rows: {len(inferred_rows)}")
+        print(f"Loaded trade-comment rows: {len(trade_comment_rows)}")
         print(f"Upserted rows: {len(all_rows)} (inserted={inserted}, updated={updated})")
         print(f"Table count: {total_db} (worker={worker_db}, inferred={inferred_db})")
 

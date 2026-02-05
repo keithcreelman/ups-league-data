@@ -5,8 +5,10 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Public URL (GitHub Pages): https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html
 - Preferred embed: in MFL `Setup → Appearance → Front Office Home Page Message`, switch to HTML/source view and paste:
   ```html
-  <iframe src="https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html" style="width:100%; height:1400px; border:0;" loading="lazy"></iframe>
+  <div id="cccMount"></div>
+  <script src="https://keithcreelman.github.io/ups-league-data/mfl_hpm_embed_loader.js?v=20260204aw"></script>
   ```
+- The loader auto-passes `L`, `YEAR`, and `FRANCHISE_ID` from the live MFL page into the iframe.
 - If the iframe is blocked by MFL, copy the raw HTML from `mfl_hpm16_contractcommandcenter.html` in this repo and paste it directly into the message editor.
 - Cache-busting: CSS/JS links use `?v=` query tokens; bump them whenever you update `ccc.css` or `ccc.js` so browsers pick up the latest build. GitHub Pages updates a few minutes after each push to `main`.
 
@@ -44,3 +46,15 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Submission log file: `restructure_submissions.json`
 - Workflow: `.github/workflows/log-restructure-submission.yml`
 - Trigger: `repository_dispatch` event type `log-restructure-submission` (sent by Worker after successful restructure import)
+- SQLite storage sync:
+  - Script: `etl/mfl_etl_full/sync_restructure_submissions_to_db.py`
+  - Creates/maintains table: `restructure_submissions`
+  - Ingests worker logs from `restructure_submissions.json`
+  - Also backfills historical inferred restructures from `rosters_weekly.contract_info` containing `restruct`
+  - Example:
+    ```bash
+    python etl/mfl_etl_full/sync_restructure_submissions_to_db.py \
+      --db-path /Users/keithcreelman/Desktop/MFL_Scripts/Datastorage/mfl_database.db \
+      --json-path /Users/keithcreelman/Documents/New\ project/restructure_submissions.json \
+      --include-inferred 1
+    ```

@@ -1863,7 +1863,8 @@
 
     syncTabLabels();
     syncModuleChipSelection();
-    syncCommishConsole(seasonEligibility);
+    // Keep commish console list aligned with current team/position/search filters.
+    syncCommishConsole(scopedEligibility);
     if (summary) {
       summary.innerHTML = renderSummary(
         teamName,

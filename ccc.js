@@ -328,9 +328,18 @@
       pos_rank: safeInt(r.pos_rank),
       tag_tier: safeInt(r.tag_tier),
       tag_rank_band: safeStr(r.tag_rank_band),
+      tag_base_bid: safeInt(r.tag_base_bid),
+      tag_bid: safeInt(r.tag_bid || r.tag_salary),
       tag_salary: safeInt(r.tag_salary),
+      tag_bid_bump_applied: safeInt(r.tag_bid_bump_applied),
+      prior_aav_week1: safeInt(r.prior_aav_week1),
+      tag_side: safeStr(r.tag_side),
+      tag_limit_per_side: safeInt(r.tag_limit_per_side || 1),
+      is_tag_eligible: safeInt(r.is_tag_eligible || 0),
+      eligibility_reason: safeStr(r.eligibility_reason),
       tag_formula: safeStr(r.tag_formula),
       tracking_context: safeStr(r.tracking_context || "in-season"),
+      scoring_weeks_used: safeStr(r.scoring_weeks_used),
     };
   }
 
@@ -719,6 +728,10 @@
         return safeInt(r.tag_tier || 99999);
       case "tagSalary":
         return safeInt(r.tag_salary);
+      case "tagBid":
+        return safeInt(r.tag_bid || r.tag_salary);
+      case "priorAav":
+        return safeInt(r.prior_aav_week1 || r.aav);
       case "tagFormula":
         return safeStr(r.tag_formula).toLowerCase();
       case "contractYear":
@@ -1156,7 +1169,7 @@
   function renderTagSummary(teamName, rows) {
     const count = rows.length;
     const avgTagSalary = count
-      ? Math.round(rows.reduce((acc, r) => acc + safeInt(r.tag_salary), 0) / count)
+      ? Math.round(rows.reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0) / count)
       : 0;
     const tier1 = rows.filter((r) => safeInt(r.tag_tier) === 1).length;
     const tier2 = rows.filter((r) => safeInt(r.tag_tier) === 2).length;
@@ -1198,7 +1211,7 @@
       const pos = safeStr(r.positional_grouping || r.position || "NA");
       const rec = byPos.get(pos) || { pos, count: 0, total: 0, tier1: 0, tier2: 0, tier3: 0 };
       rec.count += 1;
-      rec.total += safeInt(r.tag_salary);
+      rec.total += safeInt(r.tag_bid || r.tag_salary);
       const t = safeInt(r.tag_tier);
       if (t === 1) rec.tier1 += 1;
       else if (t === 2) rec.tier2 += 1;
@@ -1218,7 +1231,7 @@
       <div class="ccc-miniGrid">
         <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${rows.length}</div></div>
         <div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${rows
-          .reduce((acc, r) => acc + safeInt(r.tag_salary), 0)
+          .reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0)
           .toLocaleString()}</div></div>
       </div>
     `;
@@ -1323,10 +1336,12 @@
             <td>${htmlEsc(posKeyFromRow(r))}</td>
             <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.prior_aav_week1 || r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
             <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
             <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
-            <td class="cell-num">${safeInt(r.tag_salary).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.tag_base_bid || r.tag_salary).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
           </tr>
         `;
@@ -1344,10 +1359,12 @@
               ${sortTh("pos", "Pos")}
               ${sortTh("salary", "Salary", "", "is-num")}
               ${sortTh("aav", "AAV", "", "is-num")}
+              ${sortTh("priorAav", "Prior AAV (W1)", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
               ${sortTh("tagRank", "Pos Rank", "", "is-num")}
               ${sortTh("tagTier", "Tier", "", "is-num")}
-              ${sortTh("tagSalary", "Tag Salary", "", "is-num")}
+              ${sortTh("tagSalary", "Tier Bid", "", "is-num")}
+              ${sortTh("tagBid", "Projected Tag Bid", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}
             </tr>
           </thead>
@@ -2098,6 +2115,11 @@
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
         (state.commishMode && state.adminReason ? ` | ${state.adminReason}` : "");
+      if (state.activeModule === "tag") {
+        const scoringWeeks =
+          (state.tagTrackingRows[0] && safeStr(state.tagTrackingRows[0].scoring_weeks_used)) || "";
+        if (scoringWeeks) metaText += ` | scoring weeks: ${scoringWeeks}`;
+      }
       if (isAdminDebugEnabled() && state.adminDebug) {
         const d = state.adminDebug;
         metaText +=
@@ -2112,13 +2134,16 @@
     }
 
     if (state.activeModule === "tag") {
+      const tagEligibleRows = scopedTagTracking.filter((r) => safeInt(r.is_tag_eligible) === 1);
       const tagRows = sortRows(
-        scopedTagTracking,
+        tagEligibleRows,
         sortState.tab === "eligible" ? sortState.key : "tagRank",
         sortState.tab === "eligible" ? sortState.dir : "asc"
       );
       const teamNameSource =
-        (positionFilteredTagTracking[0] && positionFilteredTagTracking[0].franchise_name) || "";
+        (tagRows[0] && tagRows[0].franchise_name) ||
+        (positionFilteredTagTracking[0] && positionFilteredTagTracking[0].franchise_name) ||
+        "";
       const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
 
       syncTabLabels();

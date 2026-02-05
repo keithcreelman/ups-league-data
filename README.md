@@ -6,7 +6,7 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Preferred embed: in MFL `Setup → Appearance → Front Office Home Page Message`, switch to HTML/source view and paste:
   ```html
   <div id="cccMount"></div>
-  <script src="https://keithcreelman.github.io/ups-league-data/mfl_hpm_embed_loader.js?v=20260204ax"></script>
+  <script src="https://keithcreelman.github.io/ups-league-data/mfl_hpm_embed_loader.js?v=20260204ay"></script>
   ```
 - The loader auto-passes `L`, `YEAR`, and `FRANCHISE_ID` from the live MFL page into the iframe.
 - If the iframe is blocked by MFL, copy the raw HTML from `mfl_hpm16_contractcommandcenter.html` in this repo and paste it directly into the message editor.
@@ -58,10 +58,12 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Tracking file: `tag_tracking.json`
 - Builder script: `etl/mfl_etl_full/build_tag_tracking.py`
 - Current tracking logic:
-  - candidates = `rosters_current` rows with `contract_year = 1` and active roster status
-  - ranking = `player_pointssummary.pos_rank` for the same season
-  - tier/salary formulas follow your positional tag matrix
-  - kicker rule = current salary + 1,000 (in-season proxy for prior-season salary + 1,000)
+  - candidates = `rosters_current` rows with `contract_year = 1`, active roster status, and non-rookie contract status
+  - scoring rank = sum of `player_weeklyscoringresults.score` for weeks `1..N`, where `N` comes from `metadata_leaguedetails.end_week` (16/17 legacy split)
+  - AAV source = `rosters_weekly` week `1` snapshot (`contract_info` AAV parse, fallback salary)
+  - tier/bid formulas follow your positional tag matrix
+  - non-kickers: if prior AAV is greater than or equal to tier bid, bid becomes prior AAV * 1.10 rounded up to nearest 1,000
+  - PK/PN: bid is always prior AAV + 1,000
 - Example build:
   ```bash
   python etl/mfl_etl_full/build_tag_tracking.py \
@@ -69,10 +71,3 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
     --season 2025 \
     --out-path /Users/keithcreelman/Documents/New\ project/tag_tracking.json
   ```
-  - Example:
-    ```bash
-    python etl/mfl_etl_full/sync_restructure_submissions_to_db.py \
-      --db-path /Users/keithcreelman/Desktop/MFL_Scripts/Datastorage/mfl_database.db \
-      --json-path /Users/keithcreelman/Documents/New\ project/restructure_submissions.json \
-      --include-inferred 1
-    ```

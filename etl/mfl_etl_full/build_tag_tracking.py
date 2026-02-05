@@ -7,7 +7,7 @@ Tag tracking (current season):
 - Ranking source is player_pointssummary.pos_rank for the same season.
 - Tag tier is determined by positional rank ranges.
 - Tag salary is determined by tier formula:
-  - Most positions: average AAV of players in the tier's rank band.
+  - Most positions: average week-1 AAV of players in the tier's salary-rank band.
   - Kickers (PK): prior season salary + 1,000 (tracked as current salary + 1,000 in-season).
 """
 
@@ -127,9 +127,9 @@ class TierRule:
 
 TAG_RULES: Dict[str, List[TierRule]] = {
     "QB": [
-        TierRule(1, 1, 3, 1, 3, "Avg Top 1-3 QB AAV"),
-        TierRule(2, 4, 6, 4, 6, "Avg Top 4-6 QB AAV"),
-        TierRule(3, 7, None, 7, 12, "Avg Top 7-12 QB AAV"),
+        TierRule(1, 1, 5, 1, 5, "Avg Top 1-5 QB AAV"),
+        TierRule(2, 6, 15, 6, 15, "Avg Top 6-15 QB AAV"),
+        TierRule(3, 16, None, 16, None, "Avg Top 16+ QB AAV"),
     ],
     "RB": [
         TierRule(1, 1, 4, 1, 4, "Avg Top 1-4 RB AAV"),
@@ -311,6 +311,9 @@ def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
     sql = """
     SELECT
       CAST(player_id AS TEXT) AS player_id,
+      COALESCE(position, '') AS position,
+      COALESCE(status, '') AS roster_status,
+      COALESCE(contract_status, '') AS contract_status,
       COALESCE(salary, 0) AS salary,
       COALESCE(contract_info, '') AS contract_info
     FROM rosters_weekly
@@ -322,11 +325,17 @@ def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
         pid = safe_str(row[0])
         if not pid:
             continue
-        salary = safe_int(row[1], 0)
-        info = safe_str(row[2])
+        roster_status = safe_str(row[2]).upper()
+        if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
+            continue
+        contract_status = safe_str(row[3]).upper()
+        if "WW" in contract_status or "WAIVER" in contract_status:
+            continue
+        salary = safe_int(row[4], 0)
+        info = safe_str(row[5])
         aav = effective_aav(0, salary, info)
         if aav > 0:
-            out[pid] = aav
+            out[pid] = max(safe_int(out.get(pid), 0), aav)
     return out
 
 
@@ -337,41 +346,68 @@ def avg_values(vals: List[int]) -> int:
     return round_up_1000(avg)
 
 
-def build_tier_bid_map(
-    scoring_map: Dict[str, Dict[str, Any]],
-    prior_aav_map: Dict[str, int],
-) -> Dict[Tuple[str, int], int]:
-    by_pos_rank: Dict[str, List[Tuple[int, int]]] = {}
-    for pid, score in scoring_map.items():
-        pos_group = safe_str(score.get("positional_grouping")).upper()
-        rank = safe_int(score.get("pos_rank"), 0)
-        prior_aav = safe_int(prior_aav_map.get(pid), 0)
-        if pos_group not in TAG_RULES or rank <= 0:
+def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
+    sql = """
+    SELECT
+      CAST(player_id AS TEXT) AS player_id,
+      COALESCE(position, '') AS position,
+      COALESCE(status, '') AS roster_status,
+      COALESCE(contract_status, '') AS contract_status,
+      COALESCE(salary, 0) AS salary,
+      COALESCE(contract_info, '') AS contract_info
+    FROM rosters_weekly
+    WHERE season = ?
+      AND week = 1
+    """
+    per_player: Dict[Tuple[str, str], int] = {}
+    for row in conn.execute(sql, (season,)).fetchall():
+        pid = safe_str(row[0])
+        if not pid:
             continue
-        if prior_aav <= 0:
+        pos_group = normalize_pos_group(row[1], "")
+        if pos_group not in TAG_RULES:
             continue
-        by_pos_rank.setdefault(pos_group, []).append((rank, prior_aav))
+        roster_status = safe_str(row[2]).upper()
+        if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
+            continue
+        contract_status = safe_str(row[3]).upper()
+        if "WW" in contract_status or "WAIVER" in contract_status:
+            continue
+        salary = safe_int(row[4], 0)
+        info = safe_str(row[5])
+        aav = effective_aav(0, salary, info)
+        if aav <= 0:
+            continue
+        key = (pos_group, pid)
+        per_player[key] = max(safe_int(per_player.get(key), 0), aav)
 
-    for pos_group in by_pos_rank:
-        by_pos_rank[pos_group].sort(key=lambda x: x[0])
+    by_pos: Dict[str, List[int]] = {}
+    for (pos_group, _pid), aav in per_player.items():
+        by_pos.setdefault(pos_group, []).append(aav)
+    for pos_group in by_pos:
+        by_pos[pos_group].sort(reverse=True)
+    return by_pos
 
+
+def build_tier_bid_map(week1_aav_by_pos: Dict[str, List[int]]) -> Dict[Tuple[str, int], int]:
     out: Dict[Tuple[str, int], int] = {}
     for pos_group, rules in TAG_RULES.items():
-        rank_aavs = by_pos_rank.get(pos_group, [])
+        salary_ranked_aavs = week1_aav_by_pos.get(pos_group, [])
         for rule in rules:
             if pos_group == "PK":
                 # PK/PN tier bid comes from player-specific prior AAV + 1K.
                 # Keep base at 0 to indicate per-player computation.
                 out[(pos_group, rule.tier)] = 0
                 continue
-            if rule.avg_rank_min is None or rule.avg_rank_max is None:
+            if rule.avg_rank_min is None:
                 out[(pos_group, rule.tier)] = 0
                 continue
-            vals = [
-                aav
-                for rank, aav in rank_aavs
-                if rank >= rule.avg_rank_min and rank <= rule.avg_rank_max and aav > 0
-            ]
+            start = max(0, rule.avg_rank_min - 1)
+            if rule.avg_rank_max is None:
+                end = len(salary_ranked_aavs)
+            else:
+                end = max(start, rule.avg_rank_max)
+            vals = salary_ranked_aavs[start:end]
             out[(pos_group, rule.tier)] = avg_values(vals)
     return out
 
@@ -391,7 +427,8 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
     candidates = fetch_candidates(conn, season)
     scoring_map = fetch_scoring_rank_map(conn, season, last_regular_week)
     prior_aav_map = fetch_week1_aav_map(conn, season)
-    tier_bid_map = build_tier_bid_map(scoring_map, prior_aav_map)
+    week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
+    tier_bid_map = build_tier_bid_map(week1_aav_by_pos)
 
     # Fallback for missing week 1 AAVs.
     for c in candidates:

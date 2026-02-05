@@ -6,7 +6,7 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
 - Preferred embed: in MFL `Setup → Appearance → Front Office Home Page Message`, switch to HTML/source view and paste:
   ```html
   <div id="cccMount"></div>
-  <script src="https://keithcreelman.github.io/ups-league-data/mfl_hpm_embed_loader.js?v=20260204aw"></script>
+  <script src="https://keithcreelman.github.io/ups-league-data/mfl_hpm_embed_loader.js?v=20260204ax"></script>
   ```
 - The loader auto-passes `L`, `YEAR`, and `FRANCHISE_ID` from the live MFL page into the iframe.
 - If the iframe is blocked by MFL, copy the raw HTML from `mfl_hpm16_contractcommandcenter.html` in this repo and paste it directly into the message editor.
@@ -53,6 +53,22 @@ Public JSON data exports for the UPS Salary Cap Dynasty League (MYM, extensions,
   - Also backfills historical inferred restructures from:
     - `rosters_weekly.contract_info` containing `restruct`
     - `transactions_trades.raw_json/comments` containing `restruct` (adds commentary text)
+
+## Tag tracking (in-season)
+- Tracking file: `tag_tracking.json`
+- Builder script: `etl/mfl_etl_full/build_tag_tracking.py`
+- Current tracking logic:
+  - candidates = `rosters_current` rows with `contract_year = 1` and active roster status
+  - ranking = `player_pointssummary.pos_rank` for the same season
+  - tier/salary formulas follow your positional tag matrix
+  - kicker rule = current salary + 1,000 (in-season proxy for prior-season salary + 1,000)
+- Example build:
+  ```bash
+  python etl/mfl_etl_full/build_tag_tracking.py \
+    --db-path /Users/keithcreelman/Desktop/MFL_Scripts/Datastorage/mfl_database.db \
+    --season 2025 \
+    --out-path /Users/keithcreelman/Documents/New\ project/tag_tracking.json
+  ```
   - Example:
     ```bash
     python etl/mfl_etl_full/sync_restructure_submissions_to_db.py \

@@ -8,6 +8,7 @@
   const MYM_SUBMISSIONS_URL = "https://keithcreelman.github.io/ups-league-data/mym_submissions.json";
   const RESTRUCTURE_SUBMISSIONS_URL =
     "https://keithcreelman.github.io/ups-league-data/restructure_submissions.json";
+  const TAG_TRACKING_URL = "https://keithcreelman.github.io/ups-league-data/tag_tracking.json";
   const SEASON_CAP_PER_TEAM = 5;
   const RESTRUCTURE_CAP_PER_TEAM = 3;
   const MYM_EVENTS_BY_SEASON = {
@@ -291,6 +292,45 @@
       ),
       source: safeStr(r.source),
       inferred: safeInt(r.inferred) ? 1 : 0,
+    };
+  }
+
+  function normalizeTagRows(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw.map(normalizeTagRow);
+    if (raw && typeof raw === "object") {
+      const rows = Array.isArray(raw.rows)
+        ? raw.rows
+        : Array.isArray(raw.tag_tracking)
+        ? raw.tag_tracking
+        : [];
+      return rows.map(normalizeTagRow);
+    }
+    return [];
+  }
+
+  function normalizeTagRow(r) {
+    return {
+      league_id: safeStr(r.league_id || r.L || r.leagueId),
+      season: normalizeSeasonValue(r.season || r.year),
+      franchise_id: pad4(r.franchise_id || r.franchiseId),
+      franchise_name: safeStr(r.franchise_name || r.franchiseName),
+      player_id: safeStr(r.player_id || r.playerId || r.id),
+      player_name: safeStr(r.player_name || r.playerName || r.name),
+      position: safeStr(r.position),
+      positional_grouping: safeStr(r.positional_grouping || r.pos_group || r.pos),
+      salary: safeInt(r.salary),
+      aav: safeInt(r.aav),
+      contract_year: safeInt(r.contract_year),
+      contract_status: safeStr(r.contract_status),
+      contract_info: safeStr(r.contract_info),
+      points_total: Number(r.points_total || 0),
+      pos_rank: safeInt(r.pos_rank),
+      tag_tier: safeInt(r.tag_tier),
+      tag_rank_band: safeStr(r.tag_rank_band),
+      tag_salary: safeInt(r.tag_salary),
+      tag_formula: safeStr(r.tag_formula),
+      tracking_context: safeStr(r.tracking_context || "in-season"),
     };
   }
 
@@ -640,6 +680,7 @@
 
   function posKeyFromRow(r) {
     const p = safeStr(r.positional_grouping || r.position).toUpperCase().trim();
+    if (p === "PK") return "K";
     if (["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"].includes(p)) return p;
     return p || "NA";
   }
@@ -668,6 +709,18 @@
         return safeStr(r.positional_grouping || r.position).toLowerCase();
       case "salary":
         return safeInt(r.salary);
+      case "aav":
+        return safeInt(r.aav);
+      case "points":
+        return Number(r.points_total || 0);
+      case "tagRank":
+        return safeInt(r.pos_rank || 99999);
+      case "tagTier":
+        return safeInt(r.tag_tier || 99999);
+      case "tagSalary":
+        return safeInt(r.tag_salary);
+      case "tagFormula":
+        return safeStr(r.tag_formula).toLowerCase();
       case "contractYear":
         return safeInt(r.contract_year);
       case "status":
@@ -729,6 +782,10 @@
   }
 
   function renderTable(rows, tabMode) {
+    if (state.activeModule === "tag") {
+      return renderTagTable(rows, tabMode);
+    }
+
     if (!rows.length) {
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     }
@@ -1096,12 +1153,218 @@
     `;
   }
 
+  function renderTagSummary(teamName, rows) {
+    const count = rows.length;
+    const avgTagSalary = count
+      ? Math.round(rows.reduce((acc, r) => acc + safeInt(r.tag_salary), 0) / count)
+      : 0;
+    const tier1 = rows.filter((r) => safeInt(r.tag_tier) === 1).length;
+    const tier2 = rows.filter((r) => safeInt(r.tag_tier) === 2).length;
+    const tier3 = rows.filter((r) => safeInt(r.tag_tier) === 3).length;
+
+    return `
+      <div class="ccc-summaryTop">
+        <div class="ccc-summaryTitle">${htmlEsc(teamName)} Tag Tracking Snapshot</div>
+      </div>
+      <div class="ccc-kpis">
+        <div class="kpi">
+          <div class="label">Tag Candidates</div>
+          <div class="value">${count}</div>
+          <div class="hint">expiring contracts (years remaining = 1)</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Avg Tag Salary</div>
+          <div class="value">${avgTagSalary.toLocaleString()}</div>
+          <div class="hint">based on current tag formulas</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Tier 1</div>
+          <div class="value">${tier1}</div>
+          <div class="hint">top positional finishers</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Tier 2 / 3</div>
+          <div class="value">${tier2} / ${tier3}</div>
+          <div class="hint">remaining tracked tiers</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTagSummaryPage(rows, teamName, positionLabel) {
+    const scopeTxt = positionLabel && positionLabel !== "__ALL_POS__" ? ` | Position: ${positionLabel}` : "";
+    const byPos = new Map();
+    (rows || []).forEach((r) => {
+      const pos = safeStr(r.positional_grouping || r.position || "NA");
+      const rec = byPos.get(pos) || { pos, count: 0, total: 0, tier1: 0, tier2: 0, tier3: 0 };
+      rec.count += 1;
+      rec.total += safeInt(r.tag_salary);
+      const t = safeInt(r.tag_tier);
+      if (t === 1) rec.tier1 += 1;
+      else if (t === 2) rec.tier2 += 1;
+      else if (t === 3) rec.tier3 += 1;
+      byPos.set(pos, rec);
+    });
+
+    const rowsOut = Array.from(byPos.values()).sort((a, b) => {
+      if (a.count !== b.count) return b.count - a.count;
+      return safeStr(a.pos).localeCompare(safeStr(b.pos));
+    });
+
+    const top = `
+      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Tag Summary${htmlEsc(
+      scopeTxt
+    )}</div>
+      <div class="ccc-miniGrid">
+        <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${rows.length}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${rows
+          .reduce((acc, r) => acc + safeInt(r.tag_salary), 0)
+          .toLocaleString()}</div></div>
+      </div>
+    `;
+
+    if (!rowsOut.length) {
+      return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No tag tracking rows.</div></div>`;
+    }
+
+    const body = rowsOut
+      .map((r) => {
+        const avg = r.count ? Math.round(r.total / r.count) : 0;
+        return `
+          <tr class="pos-${htmlEsc(r.pos)}">
+            <td>${htmlEsc(r.pos)}</td>
+            <td>${r.count}</td>
+            <td>${avg.toLocaleString()}</td>
+            <td>${r.tier1}</td>
+            <td>${r.tier2}</td>
+            <td>${r.tier3}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="ccc-summaryPage">
+        ${top}
+        <div class="ccc-tableWrap">
+          <table class="ccc-table">
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Tracked</th>
+                <th>Avg Tag Salary</th>
+                <th>Tier 1</th>
+                <th>Tier 2</th>
+                <th>Tier 3</th>
+              </tr>
+            </thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTagTable(rows, tabMode) {
+    if (tabMode === "submitted") {
+      return `<div class="ccc-tableWrap" style="padding:12px;">Tag submissions are coming next. Tracking is live now.</div>`;
+    }
+
+    if (!rows.length) {
+      return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
+    }
+
+    const pageSize = clampInt(state.pageSize || 50, 10, 500);
+    const totalRows = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+    const pageRaw = state.pageByTab[tabMode] || 1;
+    const pageNow = clampInt(pageRaw, 1, totalPages);
+    if (pageNow !== pageRaw) updateTabPage(tabMode, pageNow);
+    const start = (pageNow - 1) * pageSize;
+    const pageRows = rows.slice(start, start + pageSize);
+    const startLabel = totalRows ? start + 1 : 0;
+    const endLabel = totalRows ? Math.min(start + pageSize, totalRows) : 0;
+
+    const sortTh = (key, label, minWidthStyle, extraClass) => {
+      const isSorted = sortState.tab === tabMode && sortState.key === key;
+      const widthAttr = minWidthStyle ? ` style="${minWidthStyle}"` : "";
+      const className = ["is-sortable", isSorted ? "is-sorted" : "", extraClass || ""]
+        .join(" ")
+        .trim();
+      const ariaSort = isSorted ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
+      return `<th data-sort="${key}" aria-sort="${ariaSort}" class="${className}"${widthAttr}>${label} <span class="sort">${sortIcon(
+        tabMode,
+        key
+      )}</span></th>`;
+    };
+
+    const pager = `
+      <div class="ccc-tableMeta">
+        <div class="ccc-tableMetaInfo">Showing ${startLabel}-${endLabel} of ${totalRows}</div>
+        <div class="ccc-tableMetaActions">
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="prev" ${
+      pageNow <= 1 ? "disabled" : ""
+    }>Prev</button>
+          <span class="ccc-pageLabel">Page ${pageNow} / ${totalPages}</span>
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="next" ${
+      pageNow >= totalPages ? "disabled" : ""
+    }>Next</button>
+        </div>
+      </div>
+    `;
+
+    const body = pageRows
+      .map((r) => {
+        const posKey = htmlEsc(posKeyFromRow(r));
+        return `
+          <tr class="pos-${posKey}">
+            <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
+            <td class="playerCell">${htmlEsc(r.player_name)}</td>
+            <td>${htmlEsc(posKeyFromRow(r))}</td>
+            <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
+            <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
+            <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
+            <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
+            <td class="cell-num">${safeInt(r.tag_salary).toLocaleString()}</td>
+            <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      ${pager}
+      <div class="ccc-tableWrap ccc-density-${htmlEsc(state.tableDensity || "regular")}" data-table="${tabMode}">
+        <table class="ccc-table">
+          <thead>
+            <tr>
+              ${sortTh("team", "Team")}
+              ${sortTh("player", "Player")}
+              ${sortTh("pos", "Pos")}
+              ${sortTh("salary", "Salary", "", "is-num")}
+              ${sortTh("aav", "AAV", "", "is-num")}
+              ${sortTh("points", "Points", "", "is-num")}
+              ${sortTh("tagRank", "Pos Rank", "", "is-num")}
+              ${sortTh("tagTier", "Tier", "", "is-num")}
+              ${sortTh("tagSalary", "Tag Salary", "", "is-num")}
+              ${sortTh("tagFormula", "Formula", "min-width:240px;")}
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+      ${pager}
+    `;
+  }
+
   // ======================================================
   // 8) STATE + TEAM LIST
   // ======================================================
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     restructureSubmissions: [],
+    tagTrackingRows: [],
     isAdmin: false,
     canCommishMode: false,
     commishMode: false,
@@ -1132,7 +1395,7 @@
     return m ? m[0] : s;
   }
 
-  function buildSeasonList(eligibilityRows, submissionRows, restructureRows) {
+  function buildSeasonList(eligibilityRows, submissionRows, restructureRows, tagRows) {
     const set = new Set();
     (eligibilityRows || []).forEach((r) => {
       const s = normalizeSeasonValue(r.season);
@@ -1143,6 +1406,10 @@
       if (s) set.add(s);
     });
     (restructureRows || []).forEach((r) => {
+      const s = normalizeSeasonValue(r.season);
+      if (s) set.add(s);
+    });
+    (tagRows || []).forEach((r) => {
       const s = normalizeSeasonValue(r.season);
       if (s) set.add(s);
     });
@@ -1309,9 +1576,14 @@
     const nowRef = new Date();
     const mymActive = isMymActiveForSeason(season, nowRef);
     const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
+    const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
     const restructureChip = $("#moduleRestructuresChip");
 
+    if (tagChip) {
+      tagChip.classList.remove("disabled");
+      tagChip.classList.add("primary");
+    }
     if (mymChip) {
       mymChip.classList.toggle("disabled", !mymActive);
       mymChip.classList.toggle("primary", mymActive);
@@ -1334,6 +1606,8 @@
   }
 
   function renderEligibleAvailabilityNotice(season) {
+    if (state.activeModule === "tag") return "";
+
     if (state.activeModule === "restructure") {
       if (state.commishMode) return "";
       if (isRestructureActiveForSeason(season, new Date())) return "";
@@ -1501,16 +1775,23 @@
     const eligibleTab = $(`.ccc-tab[data-tab="eligible"]`);
     const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
     if (summaryTab) summaryTab.textContent = "Summary";
-    if (eligibleTab) eligibleTab.textContent = "Eligible";
+    if (eligibleTab) {
+      eligibleTab.textContent = state.activeModule === "tag" ? "Tag Tracking" : "Eligible";
+    }
     if (submittedTab) {
-      submittedTab.textContent =
-        state.activeModule === "restructure" ? "Restructure - Submitted" : "MYM - Submitted";
+      submittedTab.textContent = state.activeModule === "restructure"
+        ? "Restructure - Submitted"
+        : state.activeModule === "tag"
+        ? "Tag - Submitted"
+        : "MYM - Submitted";
     }
   }
 
   function syncModuleChipSelection() {
+    const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
     const restructureChip = $("#moduleRestructuresChip");
+    if (tagChip) tagChip.classList.toggle("is-selected", state.activeModule === "tag");
     if (mymChip) mymChip.classList.toggle("is-selected", state.activeModule === "mym");
     if (restructureChip) {
       restructureChip.classList.toggle("is-selected", state.activeModule === "restructure");
@@ -1752,6 +2033,9 @@
     const seasonRestructureSubmissions = (state.restructureSubmissions || [])
       .map((r) => normalizeSubmissionRow(r))
       .filter((r) => !season || normalizeSeasonValue(r.season) === season);
+    const seasonTagTracking = (state.tagTrackingRows || []).filter(
+      (r) => !season || normalizeSeasonValue(r.season) === season
+    );
 
     const teamFilteredEligibility = showAllTeams
       ? seasonEligibility
@@ -1763,6 +2047,9 @@
     const teamFilteredRestructureSubmissions = showAllTeams
       ? seasonRestructureSubmissions
       : seasonRestructureSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    const teamFilteredTagTracking = showAllTeams
+      ? seasonTagTracking
+      : seasonTagTracking.filter((r) => pad4(r.franchise_id) === selectedTeamId);
 
     const positionFilteredEligibility =
       selectedPosition === "__ALL_POS__"
@@ -1776,6 +2063,10 @@
       selectedPosition === "__ALL_POS__"
         ? teamFilteredRestructureSubmissions
         : teamFilteredRestructureSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
+    const positionFilteredTagTracking =
+      selectedPosition === "__ALL_POS__"
+        ? teamFilteredTagTracking
+        : teamFilteredTagTracking.filter((r) => posKeyFromRow(r) === selectedPosition);
 
     const scopedEligibility = searchLower
       ? positionFilteredEligibility.filter((r) =>
@@ -1786,6 +2077,11 @@
       state.activeModule === "restructure"
         ? positionFilteredRestructureSubmissions
         : positionFilteredMymSubmissions;
+    const scopedTagTracking = searchLower
+      ? positionFilteredTagTracking.filter((r) =>
+          safeStr(r.player_name).toLowerCase().includes(searchLower)
+        )
+      : positionFilteredTagTracking.slice();
 
     const built = meta && meta.generated_at ? safeStr(meta.generated_at) : "";
     const minSeason = meta && meta.min_season ? safeStr(meta.min_season) : "";
@@ -1793,7 +2089,11 @@
     if (cccMeta) {
       let metaText =
         `Season: ${season || "?"} | module: ${
-          state.activeModule === "restructure" ? "Restructure" : "MYM"
+          state.activeModule === "restructure"
+            ? "Restructure"
+            : state.activeModule === "tag"
+            ? "Tags"
+            : "MYM"
         }` +
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
@@ -1809,6 +2109,29 @@
           ` commishFid:${htmlEsc(d.commishFranchiseId || "-")}`;
       }
       cccMeta.textContent = metaText;
+    }
+
+    if (state.activeModule === "tag") {
+      const tagRows = sortRows(
+        scopedTagTracking,
+        sortState.tab === "eligible" ? sortState.key : "tagRank",
+        sortState.tab === "eligible" ? sortState.dir : "asc"
+      );
+      const teamNameSource =
+        (positionFilteredTagTracking[0] && positionFilteredTagTracking[0].franchise_name) || "";
+      const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
+
+      syncTabLabels();
+      syncModuleChipSelection();
+      syncCommishConsole(scopedEligibility);
+
+      if (summary) summary.innerHTML = renderTagSummary(teamName, tagRows);
+      if (tabSummary) tabSummary.innerHTML = renderTagSummaryPage(tagRows, teamName, selectedPosition);
+      if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
+      if (tabIneligible) tabIneligible.innerHTML = "";
+      if (tabSubmitted) tabSubmitted.innerHTML = renderTable([], "submitted");
+      updateModuleStatusChips();
+      return;
     }
 
     const restructureActiveNow =
@@ -2520,13 +2843,15 @@
         (MYM_SUBMISSIONS_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
       const restructureBust =
         (RESTRUCTURE_SUBMISSIONS_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+      const tagBust = (TAG_TRACKING_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
 
-      const [res, subRes, restructureSubRes] = await Promise.all([
+      const [res, subRes, restructureSubRes, tagRes] = await Promise.all([
         fetch(MYM_JSON_URL + bust, { cache: "no-store" }),
         fetch(MYM_SUBMISSIONS_URL + subBust, { cache: "no-store" }).catch(() => null),
         fetch(RESTRUCTURE_SUBMISSIONS_URL + restructureBust, { cache: "no-store" }).catch(
           () => null
         ),
+        fetch(TAG_TRACKING_URL + tagBust, { cache: "no-store" }).catch(() => null),
       ]);
       if (!res.ok) throw new Error("MYM JSON HTTP " + res.status);
 
@@ -2548,6 +2873,14 @@
         } catch (e) {}
       }
       state.restructureSubmissions = restructureRows;
+      let tagRows = [];
+      if (tagRes && tagRes.ok) {
+        try {
+          const tagRaw = await tagRes.json();
+          tagRows = normalizeTagRows(tagRaw);
+        } catch (e) {}
+      }
+      state.tagTrackingRows = tagRows;
       applyLocalOverrides(state.payload.eligibility);
 
       state.detectedFranchiseId = detectFranchiseId();
@@ -2617,7 +2950,8 @@
       const seasons = buildSeasonList(
         state.payload.eligibility,
         state.payload.submissions,
-        state.restructureSubmissions
+        state.restructureSubmissions,
+        state.tagTrackingRows
       );
       const requestedSeason = normalizeSeasonValue(getYear() || DEFAULT_YEAR);
       const seasonSelected = seasons.includes(requestedSeason)
@@ -2635,7 +2969,13 @@
       const seasonRestructureRows = (state.restructureSubmissions || []).filter(
         (r) => normalizeSeasonValue(r.season) === state.selectedSeason
       );
-      const mergedSubmissionRows = seasonSubmissionRows.concat(seasonRestructureRows);
+      const seasonTagRows = (state.tagTrackingRows || []).filter(
+        (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+      );
+      const mergedSubmissionRows = seasonSubmissionRows.concat(
+        seasonRestructureRows,
+        seasonTagRows
+      );
       const teams = buildTeamList(seasonRows, mergedSubmissionRows, state.detectedFranchiseId);
       const detected = teams.some((t) => t.id === state.detectedFranchiseId)
         ? state.detectedFranchiseId
@@ -2674,8 +3014,8 @@
 
       // default sort per tab
       sortState.tab = "eligible";
-      sortState.key = "acquired";
-      sortState.dir = "desc";
+      sortState.key = state.activeModule === "tag" ? "tagRank" : "acquired";
+      sortState.dir = state.activeModule === "tag" ? "asc" : "desc";
 
       render();
 
@@ -2843,6 +3183,17 @@
   }
 
   function wireEvents() {
+    const moduleTagsChip = $("#moduleTagsChip");
+    if (moduleTagsChip)
+      moduleTagsChip.addEventListener("click", () => {
+        state.activeModule = "tag";
+        sortState.tab = "eligible";
+        sortState.key = "tagRank";
+        sortState.dir = "asc";
+        resetAllTablePages();
+        render();
+      });
+
     const moduleMymChip = $("#moduleMymChip");
     if (moduleMymChip)
       moduleMymChip.addEventListener("click", () => {
@@ -2888,7 +3239,13 @@
         const seasonRestructureRows = (state.restructureSubmissions || []).filter(
           (r) => normalizeSeasonValue(r.season) === state.selectedSeason
         );
-        const mergedSubmissionRows = seasonSubmissionRows.concat(seasonRestructureRows);
+        const seasonTagRows = (state.tagTrackingRows || []).filter(
+          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
+        );
+        const mergedSubmissionRows = seasonSubmissionRows.concat(
+          seasonRestructureRows,
+          seasonTagRows
+        );
         const teams = buildTeamList(
           seasonRows,
           mergedSubmissionRows,

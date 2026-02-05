@@ -187,6 +187,18 @@ def build_export_url(server: str, season: int, params: dict) -> str:
     return f"{base}?{qs}"
 
 
+def get_nfl_schedule(season: int, week: str | int | None = "ALL") -> dict | None:
+    """
+    Fetch NFL schedule from MFL (global, not league-specific).
+    """
+    params = {"TYPE": "nflSchedule", "JSON": 1}
+    if week is not None:
+        params["W"] = week
+    base = f"https://api.myfantasyleague.com/{season}/export"
+    qs = urlencode(params)
+    return fetch_json(f"{base}?{qs}")
+
+
 def get_league_id(conn, season: int) -> str:
     """Look up the league_id for a season from league_years."""
 

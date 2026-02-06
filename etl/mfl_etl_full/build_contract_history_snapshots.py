@@ -2077,52 +2077,115 @@ def build_transaction_snapshot_rows_for_season(
                 year_values=prior_year_values,
             )
 
-        rows.append(
-            {
-                "season": season,
-                "position_filter": position.upper(),
-                "player_id": pid,
-                "player_name": safe_str(row.get("player_name")),
-                "nfl_team": safe_str(row.get("nfl_team")),
-                "event_seq": safe_int(row.get("event_seq"), 0),
-                "event_type": safe_str(row.get("event_type")),
-                "event_source": safe_str(row.get("event_source")),
-                "event_date": safe_str(row.get("event_date")),
-                "event_time": safe_str(row.get("event_time")),
-                "franchise_id": safe_str(row.get("franchise_id")),
-                "team_name": safe_str(row.get("team_name")),
-                "event_detail": safe_str(row.get("detail")),
-                "snapshot_week": snapshot_week,
-                "snapshot_source": snapshot_source,
-                "salary": salary,
-                "contract_year": contract_year,
-                "contract_status": contract_status,
-                "contract_info": contract_info,
-                "inferred_contract_info": inferred_contract_info,
-                "contract_length": safe_int(parts.contract_length, 0) if parts else 0,
-                "tcv": safe_int(parts.tcv, 0) if parts else 0,
-                "aav": safe_int(parts.aav, 0) if parts else 0,
-                "year_values_json": safe_str(parts.year_values_json) if parts else "{}",
-                "extension_flag": extension_flag,
-                "restructure_flag": restructure_flag,
-                "mym_flag": mym_flag,
-                "post_add_multi_year_flag": post_add_multi_year_flag,
-                "post_add_multi_year_reason": post_add_multi_year_reason,
-                "prior_snapshot_week": prior_snapshot_week,
-                "prior_snapshot_source": prior_snapshot_source,
-                "prior_salary": prior_salary,
-                "prior_contract_year": prior_contract_year,
-                "prior_contract_status": prior_contract_status,
-                "prior_contract_info": prior_contract_info,
-                "prior_inferred_contract_info": prior_inferred_contract_info,
-                "prior_contract_length": safe_int(prior_parts.contract_length, 0) if prior_parts else 0,
-                "prior_tcv": safe_int(prior_parts.tcv, 0) if prior_parts else 0,
-                "prior_aav": safe_int(prior_parts.aav, 0) if prior_parts else 0,
-                "prior_year_values_json": safe_str(prior_parts.year_values_json) if prior_parts else "{}",
-                "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-            }
-        )
-    return rows
+        base_row = {
+            "season": season,
+            "position_filter": position.upper(),
+            "player_id": pid,
+            "player_name": safe_str(row.get("player_name")),
+            "nfl_team": safe_str(row.get("nfl_team")),
+            "event_seq": safe_int(row.get("event_seq"), 0),
+            "event_type": safe_str(row.get("event_type")),
+            "event_source": safe_str(row.get("event_source")),
+            "event_date": safe_str(row.get("event_date")),
+            "event_time": safe_str(row.get("event_time")),
+            "franchise_id": safe_str(row.get("franchise_id")),
+            "team_name": safe_str(row.get("team_name")),
+            "event_detail": safe_str(row.get("detail")),
+            "snapshot_week": snapshot_week,
+            "snapshot_source": snapshot_source,
+            "salary": salary,
+            "contract_year": contract_year,
+            "contract_status": contract_status,
+            "contract_info": contract_info,
+            "inferred_contract_info": inferred_contract_info,
+            "contract_length": safe_int(parts.contract_length, 0) if parts else 0,
+            "tcv": safe_int(parts.tcv, 0) if parts else 0,
+            "aav": safe_int(parts.aav, 0) if parts else 0,
+            "year_values_json": safe_str(parts.year_values_json) if parts else "{}",
+            "extension_flag": extension_flag,
+            "restructure_flag": restructure_flag,
+            "mym_flag": mym_flag,
+            "post_add_multi_year_flag": post_add_multi_year_flag,
+            "post_add_multi_year_reason": post_add_multi_year_reason,
+            "prior_snapshot_week": prior_snapshot_week,
+            "prior_snapshot_source": prior_snapshot_source,
+            "prior_salary": prior_salary,
+            "prior_contract_year": prior_contract_year,
+            "prior_contract_status": prior_contract_status,
+            "prior_contract_info": prior_contract_info,
+            "prior_inferred_contract_info": prior_inferred_contract_info,
+            "prior_contract_length": safe_int(prior_parts.contract_length, 0) if prior_parts else 0,
+            "prior_tcv": safe_int(prior_parts.tcv, 0) if prior_parts else 0,
+            "prior_aav": safe_int(prior_parts.aav, 0) if prior_parts else 0,
+            "prior_year_values_json": safe_str(prior_parts.year_values_json) if prior_parts else "{}",
+            "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        if post_add_multi_year_flag == 1:
+            add_row = dict(base_row)
+            add_row["event_detail"] = (
+                f"{add_row['event_detail']}|default_1yr" if add_row.get("event_detail") else "default_1yr"
+            )
+            add_row["contract_year"] = 1
+            add_row["contract_length"] = 1
+            add_row["contract_status"] = "ADD_DEFAULT_1YR"
+            add_row["contract_info"] = ""
+            add_row["tcv"] = salary
+            add_row["aav"] = salary
+            add_row["year_values_json"] = json.dumps({"Y1": salary}, separators=(",", ":")) if salary > 0 else "{}"
+            add_row["inferred_contract_info"] = (
+                build_contract_info_string(1, salary, format_k(salary), {1: salary}, "Default Add")
+                if salary > 0
+                else ""
+            )
+            add_row["extension_flag"] = 0
+            add_row["restructure_flag"] = 0
+            add_row["mym_flag"] = 0
+            add_row["post_add_multi_year_flag"] = 0
+            add_row["post_add_multi_year_reason"] = ""
+
+            contract_row = dict(base_row)
+            contract_row["event_type"] = "CONTRACT_SUBMISSION"
+            contract_row["event_source"] = "CONTRACT:MYM"
+            contract_row["event_detail"] = (
+                f"{contract_row['event_detail']}|assumed_mym_from_multi_year_after_add"
+                if contract_row.get("event_detail")
+                else "assumed_mym_from_multi_year_after_add"
+            )
+            contract_row["mym_flag"] = 1
+
+            rows.append(add_row)
+            rows.append(contract_row)
+            continue
+
+        rows.append(base_row)
+
+    # Renumber event_seq per player for clean ordering
+    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    for r in rows:
+        grouped.setdefault(safe_str(r.get("player_id")), []).append(r)
+    final_rows: List[Dict[str, Any]] = []
+    for pid, plist in grouped.items():
+        def _sort_key(item: Dict[str, Any]):
+            etype = safe_str(item.get("event_type")).upper()
+            etype_rank = 1
+            if etype == "ACQUIRE":
+                etype_rank = 0
+            elif etype == "CONTRACT_SUBMISSION":
+                etype_rank = 1
+            return (
+                safe_str(item.get("event_date")),
+                safe_str(item.get("event_time")),
+                etype_rank,
+                safe_int(item.get("event_seq"), 0),
+            )
+
+        plist.sort(key=_sort_key)
+        for idx, item in enumerate(plist, 1):
+            item["event_seq"] = idx
+            final_rows.append(item)
+
+    return final_rows
 
 
 def ensure_table(conn: sqlite3.Connection, table_name: str) -> None:

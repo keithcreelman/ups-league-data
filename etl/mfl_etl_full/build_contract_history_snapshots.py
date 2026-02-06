@@ -2185,6 +2185,45 @@ def build_transaction_snapshot_rows_for_season(
             item["event_seq"] = idx
             final_rows.append(item)
 
+    # MYM baseline: assign MYM only to the last add (acquire) of the season.
+    by_season: Dict[Tuple[str, int], List[Dict[str, Any]]] = {}
+    for r in final_rows:
+        key = (safe_str(r.get("player_id")), safe_int(r.get("season"), 0))
+        by_season.setdefault(key, []).append(r)
+
+    for _key, group in by_season.items():
+        if not any(safe_int(r.get("mym_flag"), 0) == 1 for r in group):
+            continue
+        acquires = [r for r in group if safe_str(r.get("event_type")).upper() == "ACQUIRE"]
+        if not acquires:
+            continue
+        acquires.sort(
+            key=lambda r: (
+                safe_str(r.get("event_date")),
+                safe_str(r.get("event_time")),
+                safe_int(r.get("event_seq"), 0),
+            )
+        )
+        last_acq = acquires[-1]
+        anchor = None
+        for r in group:
+            if (
+                safe_str(r.get("event_type")).upper() == "CONTRACT_SUBMISSION"
+                and safe_str(r.get("event_date")) == safe_str(last_acq.get("event_date"))
+                and safe_str(r.get("event_time")) == safe_str(last_acq.get("event_time"))
+            ):
+                anchor = r
+                break
+        if anchor is None:
+            anchor = last_acq
+        for r in group:
+            r["mym_flag"] = 0
+        anchor["mym_flag"] = 1
+        if anchor.get("event_detail"):
+            anchor["event_detail"] = f"{anchor['event_detail']}|mym_last_add"
+        else:
+            anchor["event_detail"] = "mym_last_add"
+
     return final_rows
 
 

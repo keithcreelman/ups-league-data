@@ -127,6 +127,16 @@ def parse_contract_parts(contract_info: str, salary: int, contract_year: int) ->
         if yval > 0:
             year_values[f"Y{safe_int(yidx, 0)}"] = yval
 
+    # Handle legacy bracket lists like "[5K, 3K, 1K]"
+    if not year_values:
+        m_list = re.search(r"\[([0-9Kk.,\s]+)\]", txt)
+        if m_list:
+            tokens = re.findall(r"[0-9]+(?:\.[0-9]+)?K?", m_list.group(1))
+            for idx, tok in enumerate(tokens, 1):
+                val = parse_money_token(tok)
+                if val > 0:
+                    year_values[f"Y{idx}"] = val
+
     if tcv <= 0 and year_values:
         tcv = sum(year_values.values())
     if tcv <= 0 and salary > 0 and cl > 0:
@@ -945,7 +955,7 @@ def fetch_owner_change_events(
     # Add/Drop
     sql_adddrop = """
     SELECT
-      player_id, player_name, move_type, method, date_et, time_et, unix_timestamp,
+      player_id, player_name, move_type, method, salary, date_et, time_et, unix_timestamp,
       franchise_id, franchise_name, raw_json
     FROM transactions_adddrop
     WHERE season = ?
@@ -966,17 +976,21 @@ def fetch_owner_change_events(
                 raw_type = safe_str(payload.get("type"))
             except json.JSONDecodeError:
                 raw_type = ""
+        salary = safe_int(row[4], 0)
+        detail = ""
+        if salary > 0:
+            detail = f"salary={salary}"
         source_suffix = raw_type if raw_type else safe_str(row[3]).upper()
         out.setdefault(pid, []).append(
             {
                 "event_type": "ACQUIRE" if move_type == "ADD" else "DROP",
                 "event_source": f"ADDDROP:{source_suffix}",
-                "event_date": safe_str(row[4]),
-                "event_time": safe_str(row[5]),
-                "unix_timestamp": safe_int(row[6], 0),
-                "franchise_id": safe_str(row[7]).zfill(4)[-4:],
-                "team_name": safe_str(row[8]),
-                "detail": "",
+                "event_date": safe_str(row[5]),
+                "event_time": safe_str(row[6]),
+                "unix_timestamp": safe_int(row[7], 0),
+                "franchise_id": safe_str(row[8]).zfill(4)[-4:],
+                "team_name": safe_str(row[9]),
+                "detail": detail,
             }
         )
 
@@ -2134,6 +2148,46 @@ def build_transaction_snapshot_rows_for_season(
             or src == "FREE_AGENT"
         )
 
+    def extract_event_amount(item: Dict[str, Any]) -> int:
+        detail = safe_str(item.get("event_detail"))
+        if not detail:
+            return 0
+        m = re.search(r"bid=([0-9]+)", detail)
+        if m:
+            return safe_int(m.group(1), 0)
+        m = re.search(r"salary=([0-9]+)", detail)
+        if m:
+            return safe_int(m.group(1), 0)
+        return 0
+
+    def apply_default_add(row: Dict[str, Any]) -> Dict[str, Any]:
+        amount = extract_event_amount(row)
+        salary_amt = amount if amount > 0 else safe_int(row.get("salary"), 0)
+        row["event_detail"] = (
+            f"{row['event_detail']}|default_1yr" if row.get("event_detail") else "default_1yr"
+        )
+        row["contract_year"] = 1
+        row["contract_length"] = 1
+        row["contract_status"] = "ADD_DEFAULT_1YR"
+        row["contract_info"] = ""
+        row["tcv"] = salary_amt
+        row["aav"] = salary_amt
+        row["year_values_json"] = (
+            json.dumps({"Y1": salary_amt}, separators=(",", ":")) if salary_amt > 0 else "{}"
+        )
+        row["inferred_contract_info"] = (
+            build_contract_info_string(1, salary_amt, format_k(salary_amt), {1: salary_amt}, "Default Add")
+            if salary_amt > 0
+            else ""
+        )
+        row["extension_flag"] = 0
+        row["restructure_flag"] = 0
+        row["mym_flag"] = 0
+        row["post_add_multi_year_flag"] = 0
+        row["post_add_multi_year_reason"] = ""
+        row["salary"] = salary_amt
+        return row
+
     # Split last add into ADD + CONTRACT_SUBMISSION for baseline contract tracking.
     grouped: Dict[Tuple[str, int], List[Dict[str, Any]]] = {}
     for r in rows:
@@ -2158,38 +2212,9 @@ def build_transaction_snapshot_rows_for_season(
 
         if last_add:
             original = dict(last_add)
-            # Default add row (1-year)
-            add_row = dict(last_add)
-            add_row["event_detail"] = (
-                f"{add_row['event_detail']}|default_1yr" if add_row.get("event_detail") else "default_1yr"
-            )
-            add_row["contract_year"] = 1
-            add_row["contract_length"] = 1
-            add_row["contract_status"] = "ADD_DEFAULT_1YR"
-            add_row["contract_info"] = ""
-            add_row["tcv"] = safe_int(add_row.get("salary"), 0)
-            add_row["aav"] = safe_int(add_row.get("salary"), 0)
-            add_row["year_values_json"] = (
-                json.dumps({"Y1": safe_int(add_row.get("salary"), 0)}, separators=(",", ":"))
-                if safe_int(add_row.get("salary"), 0) > 0
-                else "{}"
-            )
-            add_row["inferred_contract_info"] = (
-                build_contract_info_string(
-                    1,
-                    safe_int(add_row.get("salary"), 0),
-                    format_k(safe_int(add_row.get("salary"), 0)),
-                    {1: safe_int(add_row.get("salary"), 0)},
-                    "Default Add",
-                )
-                if safe_int(add_row.get("salary"), 0) > 0
-                else ""
-            )
-            add_row["extension_flag"] = 0
-            add_row["restructure_flag"] = 0
-            add_row["mym_flag"] = 0
-            add_row["post_add_multi_year_flag"] = 0
-            add_row["post_add_multi_year_reason"] = ""
+            # Convert all add events to default 1-year for baseline.
+            for r in add_candidates:
+                apply_default_add(r)
 
             # Contract submission row (assumed off last add)
             contract_row = dict(original)
@@ -2214,8 +2239,36 @@ def build_transaction_snapshot_rows_for_season(
             contract_row["post_add_multi_year_flag"] = 1 if safe_int(contract_row.get("contract_year"), 0) > 1 else 0
             contract_row["post_add_multi_year_reason"] = src if safe_int(contract_row.get("contract_year"), 0) > 1 else ""
 
-            group = [r for r in group if r is not last_add]
-            group.extend([add_row, contract_row])
+            group.append(contract_row)
+
+        # Deduplicate same-timestamp add/drop duplicates (prefer ADDDROP over FREE_AGENT).
+        deduped: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
+        for r in group:
+            key = (
+                safe_str(r.get("event_type")),
+                safe_str(r.get("event_date")),
+                safe_str(r.get("event_time")),
+                safe_str(r.get("franchise_id")),
+            )
+            src = safe_str(r.get("event_source")).upper()
+            priority = 0
+            if src.startswith("ADDDROP"):
+                priority = 2
+            elif src == "FREE_AGENT":
+                priority = 1
+            existing = deduped.get(key)
+            if existing is None:
+                deduped[key] = r
+                deduped[key]["_dedupe_priority"] = priority
+            else:
+                if priority > safe_int(existing.get("_dedupe_priority"), 0):
+                    deduped[key] = r
+                    deduped[key]["_dedupe_priority"] = priority
+
+        group = list(deduped.values())
+        for r in group:
+            if "_dedupe_priority" in r:
+                r.pop("_dedupe_priority", None)
 
         def _sort_key(item: Dict[str, Any]):
             etype = safe_str(item.get("event_type")).upper()

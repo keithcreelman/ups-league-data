@@ -314,6 +314,10 @@ def build_contract_info_string(
     return "| ".join(parts)
 
 
+def contract_signature(parts: ContractParts) -> Tuple[int, int, int]:
+    return (safe_int(parts.contract_length, 0), safe_int(parts.tcv, 0), safe_int(parts.aav, 0))
+
+
 def detect_mym_flag(contract_status: str, contract_info: str) -> int:
     txt = f"{safe_str(contract_status)} {safe_str(contract_info)}".upper()
     return 1 if "MYM" in txt else 0
@@ -1578,6 +1582,23 @@ def build_rows_for_season(
             manual_review_reasons.append("gf_in_contract_info")
         if mid_year_multi_flag == 1:
             manual_review_reasons.append("mid_year_multi")
+
+        # Contract info mismatch (prefer inferred values for consistency)
+        if current and safe_str(current_ctx.get("contract_info")):
+            parsed_parts = parse_contract_parts(
+                safe_str(current_ctx.get("contract_info")),
+                current_salary,
+                current_years_remaining,
+            )
+            parsed_sig = contract_signature(parsed_parts)
+            inferred_sig = (
+                safe_int(current_contract_length, 0),
+                safe_int(inferred_tcv, 0),
+                safe_int(safe_int(current_ctx.get("aav"), 0), 0),
+            )
+            # Flag if TCV or CL differ materially from inferred values.
+            if parsed_sig[0] != inferred_sig[0] or (parsed_sig[1] and inferred_sig[1] and abs(parsed_sig[1] - inferred_sig[1]) >= 1000):
+                manual_review_reasons.append("contract_info_inconsistent")
         manual_review_flag = 1 if manual_review_reasons else 0
         manual_review_reason = "|".join(manual_review_reasons)
 
@@ -2523,7 +2544,12 @@ def main() -> None:
         )
     )
     txn_snapshot_csv = out_dir / f"contract_history_{position.lower()}_transaction_snapshots.csv"
-    write_csv(txn_snapshot_csv, txn_snapshot_rows)
+    # Do not emit prior_* contract fields to CSV (kept in DB for audit).
+    txn_snapshot_csv_rows = []
+    for r in txn_snapshot_rows:
+        filtered = {k: v for k, v in r.items() if not k.startswith("prior_")}
+        txn_snapshot_csv_rows.append(filtered)
+    write_csv(txn_snapshot_csv, txn_snapshot_csv_rows)
 
     # Focus output: players that were under contract in prior season and dropped pre-deadline.
     dropped_rows = [

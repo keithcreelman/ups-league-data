@@ -1923,6 +1923,7 @@ def build_transaction_snapshot_rows_for_season(
     timeline_rows = build_timeline_rows_for_season(conn, season, position)
     kickoff_date, season_end_date, week_dates, last_week = get_season_bounds(conn, season)
     snapshot_cache: Dict[int, Dict[str, Dict[str, Any]]] = {}
+    week1_snap = fetch_snapshot(conn, season, 1, position)
 
     def get_week_snapshot(week: int) -> Dict[str, Dict[str, Any]]:
         if week <= 0:
@@ -1932,6 +1933,56 @@ def build_transaction_snapshot_rows_for_season(
         return snapshot_cache[week]
 
     rows: List[Dict[str, Any]] = []
+
+    # Add rollover rows when a player has no transactions in-season.
+    timeline_players = {safe_str(r.get("player_id")) for r in timeline_rows}
+    for pid, snap in week1_snap.items():
+        if pid in timeline_players:
+            continue
+        rows.append(
+            {
+                "season": season,
+                "position_filter": position.upper(),
+                "player_id": pid,
+                "player_name": safe_str(snap.get("player_name")),
+                "nfl_team": safe_str(snap.get("nfl_team")),
+                "event_seq": 1,
+                "event_type": "ROLLOVER",
+                "event_source": "TRANSACTION_CONTRACT_ROLLOVER",
+                "event_date": f"{season}-03-01",
+                "event_time": "",
+                "franchise_id": safe_str(snap.get("franchise_id")),
+                "team_name": safe_str(snap.get("team_name")),
+                "event_detail": "no_transactions",
+                "snapshot_week": 1,
+                "snapshot_source": "rollover",
+                "salary": safe_int(snap.get("salary"), 0),
+                "contract_year": safe_int(snap.get("contract_year"), 0),
+                "contract_status": safe_str(snap.get("contract_status")),
+                "contract_info": safe_str(snap.get("contract_info")),
+                "inferred_contract_info": "",
+                "contract_length": safe_int(snap.get("contract_length"), 0),
+                "tcv": safe_int(snap.get("tcv"), 0),
+                "aav": safe_int(snap.get("aav"), 0),
+                "year_values_json": safe_str(snap.get("year_values_json") if snap else "{}"),
+                "extension_flag": 1 if "EXT:" in safe_str(snap.get("contract_info")).upper() else 0,
+                "restructure_flag": detect_restructure_flag(safe_str(snap.get("contract_status")), safe_str(snap.get("contract_info"))),
+                "mym_flag": detect_mym_flag(safe_str(snap.get("contract_status")), safe_str(snap.get("contract_info"))),
+                "prior_snapshot_week": 0,
+                "prior_snapshot_source": "",
+                "prior_salary": 0,
+                "prior_contract_year": 0,
+                "prior_contract_status": "",
+                "prior_contract_info": "",
+                "prior_inferred_contract_info": "",
+                "prior_contract_length": 0,
+                "prior_tcv": 0,
+                "prior_aav": 0,
+                "prior_year_values_json": "{}",
+                "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
+
     for row in timeline_rows:
         pid = safe_str(row.get("player_id"))
         event_date = parse_iso_date(safe_str(row.get("event_date")))
@@ -1954,6 +2005,14 @@ def build_transaction_snapshot_rows_for_season(
             if snap:
                 snapshot_source = "fallback_week1"
 
+        prior_snapshot_week = max(1, snapshot_week - 1) if snapshot_week > 1 else 1
+        prior_snapshot_source = "week-1" if snapshot_week > 1 else "week1"
+        prior_snap = get_week_snapshot(prior_snapshot_week).get(pid)
+        if not prior_snap and prior_snapshot_week != 1:
+            prior_snap = get_week_snapshot(1).get(pid)
+            if prior_snap:
+                prior_snapshot_source = "fallback_week1"
+
         salary = safe_int(snap.get("salary"), 0) if snap else 0
         contract_year = safe_int(snap.get("contract_year"), 0) if snap else 0
         contract_status = safe_str(snap.get("contract_status") if snap else "")
@@ -1972,6 +2031,21 @@ def build_transaction_snapshot_rows_for_season(
         extension_flag = 1 if "EXT:" in contract_info.upper() else 0
         mym_flag = detect_mym_flag(contract_status, contract_info)
         restructure_flag = detect_restructure_flag(contract_status, contract_info)
+
+        prior_salary = safe_int(prior_snap.get("salary"), 0) if prior_snap else 0
+        prior_contract_year = safe_int(prior_snap.get("contract_year"), 0) if prior_snap else 0
+        prior_contract_status = safe_str(prior_snap.get("contract_status") if prior_snap else "")
+        prior_contract_info = safe_str(prior_snap.get("contract_info") if prior_snap else "")
+        prior_parts = parse_contract_parts(prior_contract_info, prior_salary, prior_contract_year) if prior_snap else None
+        prior_inferred_contract_info = ""
+        if prior_parts:
+            prior_year_values = parse_year_values_json(prior_parts.year_values_json)
+            prior_inferred_contract_info = build_contract_info_string(
+                contract_length=prior_parts.contract_length,
+                tcv=prior_parts.tcv,
+                aav_label=format_k(prior_parts.aav),
+                year_values=prior_year_values,
+            )
 
         rows.append(
             {
@@ -2002,6 +2076,17 @@ def build_transaction_snapshot_rows_for_season(
                 "extension_flag": extension_flag,
                 "restructure_flag": restructure_flag,
                 "mym_flag": mym_flag,
+                "prior_snapshot_week": prior_snapshot_week,
+                "prior_snapshot_source": prior_snapshot_source,
+                "prior_salary": prior_salary,
+                "prior_contract_year": prior_contract_year,
+                "prior_contract_status": prior_contract_status,
+                "prior_contract_info": prior_contract_info,
+                "prior_inferred_contract_info": prior_inferred_contract_info,
+                "prior_contract_length": safe_int(prior_parts.contract_length, 0) if prior_parts else 0,
+                "prior_tcv": safe_int(prior_parts.tcv, 0) if prior_parts else 0,
+                "prior_aav": safe_int(prior_parts.aav, 0) if prior_parts else 0,
+                "prior_year_values_json": safe_str(prior_parts.year_values_json) if prior_parts else "{}",
                 "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
@@ -2237,11 +2322,42 @@ def ensure_txn_snapshot_table(conn: sqlite3.Connection, table_name: str) -> None
           extension_flag INTEGER,
           restructure_flag INTEGER,
           mym_flag INTEGER,
+          prior_snapshot_week INTEGER,
+          prior_snapshot_source TEXT,
+          prior_salary INTEGER,
+          prior_contract_year INTEGER,
+          prior_contract_status TEXT,
+          prior_contract_info TEXT,
+          prior_inferred_contract_info TEXT,
+          prior_contract_length INTEGER,
+          prior_tcv INTEGER,
+          prior_aav INTEGER,
+          prior_year_values_json TEXT,
           generated_at_utc TEXT,
           PRIMARY KEY (season, position_filter, player_id, event_seq)
         )
         """
     )
+
+    existing = {
+        safe_str(r[1]) for r in conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+    }
+    required_cols = {
+        "prior_snapshot_week": "INTEGER",
+        "prior_snapshot_source": "TEXT",
+        "prior_salary": "INTEGER",
+        "prior_contract_year": "INTEGER",
+        "prior_contract_status": "TEXT",
+        "prior_contract_info": "TEXT",
+        "prior_inferred_contract_info": "TEXT",
+        "prior_contract_length": "INTEGER",
+        "prior_tcv": "INTEGER",
+        "prior_aav": "INTEGER",
+        "prior_year_values_json": "TEXT",
+    }
+    for col_name, col_type in required_cols.items():
+        if col_name not in existing:
+            conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}")
 
 
 def sync_extension_flags(conn: sqlite3.Connection, table_name: str) -> None:

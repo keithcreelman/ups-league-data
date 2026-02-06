@@ -2648,9 +2648,32 @@ def main() -> None:
     txn_snapshot_csv = out_dir / f"contract_history_{position.lower()}_transaction_snapshots.csv"
     # Do not emit prior_* contract fields to CSV (kept in DB for audit).
     txn_snapshot_csv_rows = []
+    preferred_order = [
+        "season",
+        "player_name",
+        "event_type",
+        "event_source",
+        "event_date",
+        "team_name",
+        "salary",
+        "contract_year",
+        "contract_status",
+        "contract_info",
+        "inferred_contract_info",
+        "contract_length",
+        "tcv",
+        "aav",
+    ]
     for r in txn_snapshot_rows:
         filtered = {k: v for k, v in r.items() if not k.startswith("prior_")}
-        txn_snapshot_csv_rows.append(filtered)
+        ordered: Dict[str, Any] = {}
+        for key in preferred_order:
+            if key in filtered:
+                ordered[key] = filtered[key]
+        for key in filtered.keys():
+            if key not in ordered:
+                ordered[key] = filtered[key]
+        txn_snapshot_csv_rows.append(ordered)
     write_csv(txn_snapshot_csv, txn_snapshot_csv_rows)
 
     # Focus output: players that were under contract in prior season and dropped pre-deadline.

@@ -2121,8 +2121,45 @@ def build_transaction_snapshot_rows_for_season(
             "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-        if post_add_multi_year_flag == 1:
-            add_row = dict(base_row)
+        rows.append(base_row)
+
+    def is_add_source(item: Dict[str, Any]) -> bool:
+        if safe_str(item.get("event_type")).upper() != "ACQUIRE":
+            return False
+        src = safe_str(item.get("event_source")).upper()
+        return (
+            src.startswith("ADDDROP")
+            or src.startswith("AUCTION")
+            or src.startswith("ROOKIE_DRAFT")
+            or src == "FREE_AGENT"
+        )
+
+    # Split last add into ADD + CONTRACT_SUBMISSION for baseline contract tracking.
+    grouped: Dict[Tuple[str, int], List[Dict[str, Any]]] = {}
+    for r in rows:
+        key = (safe_str(r.get("player_id")), safe_int(r.get("season"), 0))
+        grouped.setdefault(key, []).append(r)
+
+    final_rows: List[Dict[str, Any]] = []
+    for _key, group in grouped.items():
+        # Remove any existing contract submission rows (rebuild off last add).
+        group = [r for r in group if safe_str(r.get("event_type")).upper() != "CONTRACT_SUBMISSION"]
+        add_candidates = [r for r in group if is_add_source(r)]
+        last_add = None
+        if add_candidates:
+            add_candidates.sort(
+                key=lambda r: (
+                    safe_str(r.get("event_date")),
+                    safe_str(r.get("event_time")),
+                    safe_int(r.get("event_seq"), 0),
+                )
+            )
+            last_add = add_candidates[-1]
+
+        if last_add:
+            original = dict(last_add)
+            # Default add row (1-year)
+            add_row = dict(last_add)
             add_row["event_detail"] = (
                 f"{add_row['event_detail']}|default_1yr" if add_row.get("event_detail") else "default_1yr"
             )
@@ -2130,12 +2167,22 @@ def build_transaction_snapshot_rows_for_season(
             add_row["contract_length"] = 1
             add_row["contract_status"] = "ADD_DEFAULT_1YR"
             add_row["contract_info"] = ""
-            add_row["tcv"] = salary
-            add_row["aav"] = salary
-            add_row["year_values_json"] = json.dumps({"Y1": salary}, separators=(",", ":")) if salary > 0 else "{}"
+            add_row["tcv"] = safe_int(add_row.get("salary"), 0)
+            add_row["aav"] = safe_int(add_row.get("salary"), 0)
+            add_row["year_values_json"] = (
+                json.dumps({"Y1": safe_int(add_row.get("salary"), 0)}, separators=(",", ":"))
+                if safe_int(add_row.get("salary"), 0) > 0
+                else "{}"
+            )
             add_row["inferred_contract_info"] = (
-                build_contract_info_string(1, salary, format_k(salary), {1: salary}, "Default Add")
-                if salary > 0
+                build_contract_info_string(
+                    1,
+                    safe_int(add_row.get("salary"), 0),
+                    format_k(safe_int(add_row.get("salary"), 0)),
+                    {1: safe_int(add_row.get("salary"), 0)},
+                    "Default Add",
+                )
+                if safe_int(add_row.get("salary"), 0) > 0
                 else ""
             )
             add_row["extension_flag"] = 0
@@ -2144,28 +2191,32 @@ def build_transaction_snapshot_rows_for_season(
             add_row["post_add_multi_year_flag"] = 0
             add_row["post_add_multi_year_reason"] = ""
 
-            contract_row = dict(base_row)
+            # Contract submission row (assumed off last add)
+            contract_row = dict(original)
             contract_row["event_type"] = "CONTRACT_SUBMISSION"
-            contract_row["event_source"] = "CONTRACT:MYM"
+            src = safe_str(original.get("event_source")).upper()
+            contract_source = "CONTRACT:UNKNOWN"
+            if "MYM" in safe_str(original.get("contract_status")).upper() or "MYM" in safe_str(original.get("contract_info")).upper():
+                contract_source = "CONTRACT:MYM"
+            elif src.startswith("AUCTION"):
+                contract_source = "CONTRACT:AUCTION"
+            elif src.startswith("ROOKIE_DRAFT"):
+                contract_source = "CONTRACT:ROOKIE_DRAFT"
+            elif src.startswith("ADDDROP") or src == "FREE_AGENT":
+                contract_source = "CONTRACT:ADD"
+            contract_row["event_source"] = contract_source
             contract_row["event_detail"] = (
-                f"{contract_row['event_detail']}|assumed_mym_from_multi_year_after_add"
+                f"{contract_row['event_detail']}|assumed_contract_from_last_add"
                 if contract_row.get("event_detail")
-                else "assumed_mym_from_multi_year_after_add"
+                else "assumed_contract_from_last_add"
             )
-            contract_row["mym_flag"] = 1
+            contract_row["mym_flag"] = 1 if contract_source == "CONTRACT:MYM" else contract_row.get("mym_flag", 0)
+            contract_row["post_add_multi_year_flag"] = 1 if safe_int(contract_row.get("contract_year"), 0) > 1 else 0
+            contract_row["post_add_multi_year_reason"] = src if safe_int(contract_row.get("contract_year"), 0) > 1 else ""
 
-            rows.append(add_row)
-            rows.append(contract_row)
-            continue
+            group = [r for r in group if r is not last_add]
+            group.extend([add_row, contract_row])
 
-        rows.append(base_row)
-
-    # Renumber event_seq per player for clean ordering
-    grouped: Dict[str, List[Dict[str, Any]]] = {}
-    for r in rows:
-        grouped.setdefault(safe_str(r.get("player_id")), []).append(r)
-    final_rows: List[Dict[str, Any]] = []
-    for pid, plist in grouped.items():
         def _sort_key(item: Dict[str, Any]):
             etype = safe_str(item.get("event_type")).upper()
             etype_rank = 1
@@ -2180,8 +2231,8 @@ def build_transaction_snapshot_rows_for_season(
                 safe_int(item.get("event_seq"), 0),
             )
 
-        plist.sort(key=_sort_key)
-        for idx, item in enumerate(plist, 1):
+        group.sort(key=_sort_key)
+        for idx, item in enumerate(group, 1):
             item["event_seq"] = idx
             final_rows.append(item)
 

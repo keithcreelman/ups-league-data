@@ -1968,6 +1968,8 @@ def build_transaction_snapshot_rows_for_season(
                 "extension_flag": 1 if "EXT:" in safe_str(snap.get("contract_info")).upper() else 0,
                 "restructure_flag": detect_restructure_flag(safe_str(snap.get("contract_status")), safe_str(snap.get("contract_info"))),
                 "mym_flag": detect_mym_flag(safe_str(snap.get("contract_status")), safe_str(snap.get("contract_info"))),
+                "post_add_multi_year_flag": 0,
+                "post_add_multi_year_reason": "",
                 "prior_snapshot_week": 0,
                 "prior_snapshot_source": "",
                 "prior_salary": 0,
@@ -2031,6 +2033,13 @@ def build_transaction_snapshot_rows_for_season(
         extension_flag = 1 if "EXT:" in contract_info.upper() else 0
         mym_flag = detect_mym_flag(contract_status, contract_info)
         restructure_flag = detect_restructure_flag(contract_status, contract_info)
+        post_add_multi_year_flag = 0
+        post_add_multi_year_reason = ""
+        if safe_int(contract_year, 0) > 1 and safe_str(row.get("event_type")).upper() == "ACQUIRE":
+            src = safe_str(row.get("event_source")).upper()
+            if src.startswith("ADDDROP") or src == "FREE_AGENT":
+                post_add_multi_year_flag = 1
+                post_add_multi_year_reason = src
 
         prior_salary = safe_int(prior_snap.get("salary"), 0) if prior_snap else 0
         prior_contract_year = safe_int(prior_snap.get("contract_year"), 0) if prior_snap else 0
@@ -2076,6 +2085,8 @@ def build_transaction_snapshot_rows_for_season(
                 "extension_flag": extension_flag,
                 "restructure_flag": restructure_flag,
                 "mym_flag": mym_flag,
+                "post_add_multi_year_flag": post_add_multi_year_flag,
+                "post_add_multi_year_reason": post_add_multi_year_reason,
                 "prior_snapshot_week": prior_snapshot_week,
                 "prior_snapshot_source": prior_snapshot_source,
                 "prior_salary": prior_salary,
@@ -2322,6 +2333,8 @@ def ensure_txn_snapshot_table(conn: sqlite3.Connection, table_name: str) -> None
           extension_flag INTEGER,
           restructure_flag INTEGER,
           mym_flag INTEGER,
+          post_add_multi_year_flag INTEGER,
+          post_add_multi_year_reason TEXT,
           prior_snapshot_week INTEGER,
           prior_snapshot_source TEXT,
           prior_salary INTEGER,
@@ -2354,6 +2367,8 @@ def ensure_txn_snapshot_table(conn: sqlite3.Connection, table_name: str) -> None
         "prior_tcv": "INTEGER",
         "prior_aav": "INTEGER",
         "prior_year_values_json": "TEXT",
+        "post_add_multi_year_flag": "INTEGER",
+        "post_add_multi_year_reason": "TEXT",
     }
     for col_name, col_type in required_cols.items():
         if col_name not in existing:

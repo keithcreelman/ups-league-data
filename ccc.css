@@ -1,19 +1,19 @@
 :root{
-  --bg:#0A111F;
-  --panel:#0F1B2D;
-  --card:#101E33;
-  --muted:#A7B4C8;
-  --text:#F2F6FF;
-  --line:rgba(255,255,255,.14);
-  --accent:#2FB6A3;
-  --accent2:#F0B15A;
-  --good:#33D19A;
-  --warn:#F0B15A;
-  --bad:#E56A6A;
-  --chip:#1B2A45;
-  --shadow: 0 14px 50px rgba(0,0,0,.35);
+  --bg:#F5F7FB;
+  --panel:#FFFFFF;
+  --card:#F2F5F9;
+  --muted:#5B6B80;
+  --text:#152033;
+  --line:rgba(15,23,42,.12);
+  --accent:#2563EB;
+  --accent2:#14B8A6;
+  --good:#16A34A;
+  --warn:#F59E0B;
+  --bad:#EF4444;
+  --chip:#E8EDF4;
+  --shadow: 0 10px 30px rgba(15,23,42,.08);
   --radius: 18px;
-  --control-bg: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+  --control-bg: #FFFFFF;
 }
 
 /* ===== CCC base scope ===== */
@@ -35,9 +35,9 @@
 /* Header */
 .ccc-hero{
   background:
-    radial-gradient(900px 500px at 20% 10%, rgba(47,182,163,.26), transparent 60%),
-    radial-gradient(900px 500px at 85% 10%, rgba(240,177,90,.22), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    radial-gradient(900px 500px at 20% 0%, rgba(37,99,235,.10), transparent 60%),
+    radial-gradient(900px 500px at 85% 0%, rgba(20,184,166,.10), transparent 60%),
+    #ffffff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 16px 16px 14px;
@@ -73,8 +73,8 @@
   display:flex;
   align-items:center;
   gap:10px;
-  color: #f6fbff;
-  text-shadow: 0 4px 20px rgba(47,182,163,.35);
+  color: #111827;
+  text-shadow: 0 1px 2px rgba(15,23,42,.08);
 }
 
 .ccc-title span.badge{
@@ -134,9 +134,9 @@
 .ccc-eligWarn{
   margin: 10px 0 0 0;
   padding: 12px;
-  border: 1px solid rgba(229,106,106,.55);
+  border: 1px solid rgba(239,68,68,.35);
   border-radius: 12px;
-  background: rgba(229,106,106,.12);
+  background: rgba(239,68,68,.08);
   color: var(--bad);
   font-size: 18px;
   font-weight: 1000;
@@ -146,8 +146,8 @@
 
 /* Buttons */
 .ccc-chipBtn{
-  border: 1px solid rgba(197,216,251,.24);
-  background: linear-gradient(180deg, rgba(21,35,61,.95), rgba(11,22,40,.95));
+  border: 1px solid var(--line);
+  background: #ffffff;
   color: var(--text);
   padding: 9px 12px;
   border-radius: 999px;
@@ -156,20 +156,20 @@
   cursor:pointer;
   user-select:none;
   transition: transform .12s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
-  box-shadow: 0 8px 18px rgba(4,10,20,.36), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow: 0 8px 18px rgba(15,23,42,.08);
 }
 .ccc-chipBtn:hover{
-  background: linear-gradient(180deg, rgba(33,50,81,.96), rgba(15,29,53,.96));
-  border-color: rgba(215,230,255,.48);
-  box-shadow: 0 10px 20px rgba(4,10,20,.42), inset 0 1px 0 rgba(255,255,255,.18);
+  background: #f7f9fc;
+  border-color: rgba(37,99,235,.35);
+  box-shadow: 0 10px 20px rgba(15,23,42,.1);
 }
 .ccc-chipBtn:active{ transform: translateY(1px); }
 .ccc-chipBtn.primary{
-  background: linear-gradient(135deg, rgba(47,182,163,.65), rgba(240,177,90,.55));
-  border-color: rgba(255,236,210,.7);
+  background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(20,184,166,.14));
+  border-color: rgba(37,99,235,.45);
 }
 .ccc-chipBtn.is-selected{
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.24), 0 0 0 2px rgba(47,182,163,.24);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 0 0 2px rgba(37,99,235,.2);
 }
 .ccc-chipBtn.disabled{
   opacity:.55;
@@ -185,8 +185,9 @@
   justify-content:flex-end;
   padding: 8px 10px;
   border-radius: 14px;
-  background: rgba(4,10,20,.42);
-  border: 1px solid rgba(255,255,255,.1);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 16px rgba(15,23,42,.06);
 }
 
 .ccc-adminControls{
@@ -229,20 +230,20 @@
 
 .ccc-input, .ccc-select{
   background: var(--control-bg);
-  border: 1px solid rgba(195,216,251,.34);
+  border: 1px solid var(--line);
   color: var(--text);
   padding: 9px 12px;
-  border-radius: 14px;
+  border-radius: 12px;
   outline:none;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 6px 14px rgba(6,14,28,.2);
+  box-shadow: none;
   transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
 .ccc-input:focus, .ccc-select:focus{
-  border-color: rgba(47,182,163,.9);
-  box-shadow: 0 0 0 3px rgba(47,182,163,.22), inset 0 1px 0 rgba(255,255,255,.2);
+  border-color: rgba(37,99,235,.85);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
 }
 
 .ccc-input::placeholder{ color: rgba(233,238,249,.45); }
@@ -264,20 +265,20 @@
 }
 
 .ccc-btn{
-  background: linear-gradient(180deg, rgba(26,42,70,.98), rgba(13,25,46,.98));
-  border: 1px solid rgba(202,223,255,.42);
-  color: rgba(247,251,255,.98);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--text);
   padding: 9px 14px;
   border-radius: 12px;
   cursor:pointer;
   font-weight: 900;
   font-size: 12px;
-  box-shadow: 0 10px 20px rgba(5,10,20,.3), inset 0 1px 0 rgba(255,255,255,.18);
+  box-shadow: 0 8px 18px rgba(15,23,42,.08);
   transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
 }
 .ccc-btn:hover{
-  border-color: rgba(230,240,255,.72);
-  box-shadow: 0 12px 22px rgba(5,10,20,.36), inset 0 1px 0 rgba(255,255,255,.22);
+  border-color: rgba(37,99,235,.45);
+  box-shadow: 0 10px 20px rgba(15,23,42,.12);
 }
 .ccc-btn:active{ transform: translateY(1px); }
 .ccc-btn:disabled{
@@ -286,37 +287,37 @@
   box-shadow: none;
 }
 .ccc-btn.is-selected{
-  background: linear-gradient(135deg, rgba(47,182,163,.65), rgba(240,177,90,.55));
-  border-color: rgba(255,236,210,.7);
+  background: linear-gradient(135deg, rgba(37,99,235,.15), rgba(20,184,166,.15));
+  border-color: rgba(37,99,235,.45);
 }
 
 .ccc-btn-offer{
-  background: linear-gradient(180deg, rgba(20,34,58,.97), rgba(11,24,44,.97));
-  border-color: rgba(192,215,250,.6);
-  color: rgba(245,250,255,.98);
+  background: #ffffff;
+  border-color: rgba(37,99,235,.35);
+  color: var(--text);
 }
 .ccc-btn-offer:hover{
   border-color: rgba(232,242,255,.78);
 }
 
 .ccc-btn-tag{
-  background: linear-gradient(180deg, rgba(18,28,48,.98), rgba(10,18,34,.98));
-  border-color: rgba(192,215,250,.55);
-  color: #f6fbff;
+  background: #ffffff;
+  border-color: rgba(37,99,235,.35);
+  color: var(--text);
 }
 .ccc-btn-tag.is-selected{
-  background: linear-gradient(180deg, rgba(10,18,34,.98), rgba(6,12,24,.98));
-  border-color: rgba(230,240,255,.7);
-  color: #ffffff;
+  background: rgba(37,99,235,.12);
+  border-color: rgba(37,99,235,.5);
+  color: var(--text);
 }
 .ccc-btn-tag:disabled{
-  background: linear-gradient(180deg, rgba(12,18,32,.92), rgba(6,10,20,.92));
-  border-color: rgba(160,180,210,.45);
-  color: #ffffff;
+  background: rgba(226,232,240,.7);
+  border-color: rgba(148,163,184,.5);
+  color: rgba(100,116,139,.9);
   opacity: 1;
 }
 
-table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(47,182,163,.25); border-color: rgba(47,182,163,.85); }
+table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(37,99,235,.12); border-color: rgba(37,99,235,.45); }
 table.ccc-table tbody tr.pos-RB .ccc-btn-offer{ background: rgba(51,209,154,.25); border-color: rgba(51,209,154,.85); }
 table.ccc-table tbody tr.pos-WR .ccc-btn-offer{ background: rgba(191,109,255,.25); border-color: rgba(191,109,255,.88); }
 table.ccc-table tbody tr.pos-TE .ccc-btn-offer{ background: rgba(184,138,35,.25); border-color: rgba(184,138,35,.88); }
@@ -328,14 +329,11 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 /* Summary */
 .ccc-summary{
   margin-top: 12px;
-  border: 2px solid rgba(255,255,255,.16);
-  background:
-    linear-gradient(180deg, rgba(12,20,36,.92), rgba(8,14,26,.9));
+  border: 1px solid var(--line);
+  background: #ffffff;
   border-radius: var(--radius);
   padding: 12px 12px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.08),
-    0 12px 28px rgba(0,0,0,.35);
+  box-shadow: 0 10px 24px rgba(15,23,42,.06);
 }
 
 .ccc-summaryControls{
@@ -345,30 +343,29 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   flex-wrap:wrap;
   margin: 6px 0 10px;
   padding: 8px 10px;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: rgba(6,12,22,.55);
+  background: #f7f9fc;
 }
 
 .ccc-calcBreakdown{
   margin-top: 12px;
-  border: 2px solid rgba(255,255,255,.14);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background:
-    linear-gradient(180deg, rgba(12,20,36,.85), rgba(6,12,22,.9));
+  background: #f7f9fc;
 }
 .ccc-calcBreakdown details{
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid var(--line);
   border-radius: 10px;
   padding: 6px 8px;
   margin-bottom: 8px;
-  background: rgba(10,16,28,.6);
+  background: #ffffff;
 }
 .ccc-calcBreakdown summary{
   cursor: pointer;
   font-weight: 900;
-  color: rgba(235,242,255,.95);
+  color: var(--text);
 }
 .ccc-calcTier{
   margin-top: 6px;
@@ -379,15 +376,15 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 }
 .ccc-calcRow{
   font-size: 12px;
-  color: rgba(223,234,251,.9);
+  color: var(--muted);
   padding: 2px 0;
 }
 
 .ccc-commishConsole{
-  border-color: rgba(240,177,90,.4);
+  border-color: rgba(245,158,11,.45);
   background:
-    radial-gradient(600px 180px at 0% 0%, rgba(240,177,90,.18), transparent 70%),
-    rgba(8,15,29,.72);
+    radial-gradient(600px 180px at 0% 0%, rgba(245,158,11,.10), transparent 70%),
+    #ffffff;
 }
 
 .ccc-commishConsole .ccc-adminControls{
@@ -437,11 +434,10 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 
 .ccc-summaryPage{
   margin-top: 12px;
-  border: 2px solid rgba(255,255,255,.14);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 12px;
-  background:
-    linear-gradient(180deg, rgba(10,18,34,.7), rgba(6,12,22,.75));
+  background: #ffffff;
 }
 
 .ccc-miniGrid{
@@ -455,7 +451,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background: rgba(255,255,255,.05);
+  background: #f8fafc;
 }
 
 .ccc-miniKpi .label{
@@ -480,7 +476,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 
 .ccc-tab{
   border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
+  background: #ffffff;
   color: var(--text);
   border-radius: 999px;
   padding: 9px 12px;
@@ -489,8 +485,8 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   font-size: 12px;
 }
 .ccc-tab.active{
-  background: linear-gradient(135deg, rgba(47,182,163,.28), rgba(240,177,90,.2));
-  border-color: rgba(47,182,163,.4);
+  background: rgba(37,99,235,.12);
+  border-color: rgba(37,99,235,.35);
 }
 
 /* Table */
@@ -521,9 +517,9 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 }
 
 .ccc-pageBtn{
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(16,27,46,.95);
-  color: rgba(245,250,255,.95);
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--text);
   border-radius: 10px;
   padding: 6px 10px;
   font-size: 12px;
@@ -538,18 +534,15 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 
 .ccc-tableWrap{
   margin-top: 12px;
-  border: 1px solid rgba(183,203,239,.38);
-  background:
-    linear-gradient(180deg, rgba(251,254,255,.96), rgba(240,246,255,.92));
+  border: 1px solid var(--line);
+  background: #ffffff;
   border-radius: 16px;
   overflow: auto;
   max-height: 68vh;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-x pan-y;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.8),
-    0 10px 28px rgba(0,0,0,.18);
+  box-shadow: 0 10px 22px rgba(15,23,42,.08);
   --row-pad-y: 12px;
   --row-pad-x: 12px;
   --header-pad-y: 13px;
@@ -591,15 +584,15 @@ table.ccc-table thead th{
   position: sticky;
   top: 0;
   z-index: 5;
-  background: linear-gradient(180deg, #1b2f53, #142745);
+  background: #f3f6fb;
   backdrop-filter: blur(8px);
-  color: rgba(241,247,255,.95);
+  color: #1a2637;
   font-size: var(--head-font-size);
   font-weight: 1000;
   text-align:left;
   padding: var(--header-pad-y) var(--header-pad-x);
-  border-bottom: 1px solid rgba(255,255,255,.28);
-  border-right: 1px solid rgba(255,255,255,.14);
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   letter-spacing: .2px;
   white-space: nowrap;
   user-select: none;
@@ -620,12 +613,12 @@ table.ccc-table thead th.is-sortable{
 }
 
 table.ccc-table thead th.is-sortable:hover{
-  background: rgba(20,34,58,.98);
+  background: #e9eef5;
 }
 
 table.ccc-table thead th.is-sorted{
-  color: #ffffff;
-  box-shadow: inset 0 -3px 0 rgba(47,182,163,.95);
+  color: #1a2637;
+  box-shadow: inset 0 -3px 0 rgba(37,99,235,.85);
 }
 
 table.ccc-table thead th .sort{
@@ -640,11 +633,11 @@ table.ccc-table thead th.is-num{
 
 table.ccc-table tbody td{
   padding: var(--row-pad-y) var(--row-pad-x);
-  border-bottom: 1px solid rgba(28,47,79,.14);
-  border-right: 1px solid rgba(28,47,79,.08);
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  border-right: 1px solid rgba(15,23,42,.06);
   font-size: var(--row-font-size);
   vertical-align: top;
-  color: #162540;
+  color: #1b2738;
   font-weight: 700;
   background: transparent;
 }
@@ -657,15 +650,15 @@ table.ccc-table tbody td:last-child{
   position: sticky;
   left: 0;
   z-index: 4;
-  background: rgba(223,234,251,.92);
+  background: #eef2f7;
 }
 
 table.ccc-table tbody tr{
-  background: rgba(255,255,255,.9);
+  background: #ffffff;
 }
 
 table.ccc-table tbody tr:nth-child(even){
-  background: rgba(245,249,255,.96);
+  background: #f8fafc;
 }
 
 table.ccc-table tbody tr:hover{
@@ -676,32 +669,32 @@ table.ccc-table tbody tr:hover td{
   color: inherit;
 }
 
-table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(47,182,163,.22), rgba(47,182,163,.07)); }
-table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(51,209,154,.24), rgba(51,209,154,.08)); }
-table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(191,109,255,.24), rgba(191,109,255,.08)); }
-table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(184,138,35,.24), rgba(184,138,35,.08)); }
-table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(255,120,180,.24), rgba(255,120,180,.08)); }
-table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(255,107,107,.24), rgba(255,107,107,.08)); }
-table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.24), rgba(6,182,212,.08)); }
-table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(255,145,60,.24), rgba(255,145,60,.08)); }
+table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(37,99,235,.10), rgba(37,99,235,.03)); }
+table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(34,197,94,.10), rgba(34,197,94,.03)); }
+table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.10), rgba(168,85,247,.03)); }
+table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.10), rgba(245,158,11,.03)); }
+table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.10), rgba(236,72,153,.03)); }
+table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.10), rgba(239,68,68,.03)); }
+table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(14,165,233,.10), rgba(14,165,233,.03)); }
+table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(234,88,12,.10), rgba(234,88,12,.03)); }
 
-table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(47,182,163,.95); }
-table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(51,209,154,.95); }
-table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(191,109,255,.95); }
-table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(184,138,35,.95); }
-table.ccc-table tbody tr.pos-K  td:first-child{ box-shadow: inset 4px 0 0 rgba(255,120,180,.95); }
-table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(255,107,107,.95); }
-table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.95); }
-table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(255,145,60,.95); }
+table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(37,99,235,.65); }
+table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(34,197,94,.65); }
+table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.65); }
+table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.65); }
+table.ccc-table tbody tr.pos-K  td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.65); }
+table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.65); }
+table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(14,165,233,.65); }
+table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(234,88,12,.65); }
 
-table.ccc-table tbody tr.pos-QB td:first-child{ background: rgba(47,182,163,.20); }
-table.ccc-table tbody tr.pos-RB td:first-child{ background: rgba(51,209,154,.22); }
-table.ccc-table tbody tr.pos-WR td:first-child{ background: rgba(191,109,255,.22); }
-table.ccc-table tbody tr.pos-TE td:first-child{ background: rgba(184,138,35,.22); }
-table.ccc-table tbody tr.pos-K td:first-child{ background: rgba(255,120,180,.22); }
-table.ccc-table tbody tr.pos-DL td:first-child{ background: rgba(255,107,107,.22); }
-table.ccc-table tbody tr.pos-LB td:first-child{ background: rgba(6,182,212,.22); }
-table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(255,145,60,.22); }
+table.ccc-table tbody tr.pos-QB td:first-child{ background: rgba(37,99,235,.10); }
+table.ccc-table tbody tr.pos-RB td:first-child{ background: rgba(34,197,94,.10); }
+table.ccc-table tbody tr.pos-WR td:first-child{ background: rgba(168,85,247,.10); }
+table.ccc-table tbody tr.pos-TE td:first-child{ background: rgba(245,158,11,.10); }
+table.ccc-table tbody tr.pos-K td:first-child{ background: rgba(236,72,153,.10); }
+table.ccc-table tbody tr.pos-DL td:first-child{ background: rgba(239,68,68,.10); }
+table.ccc-table tbody tr.pos-LB td:first-child{ background: rgba(14,165,233,.10); }
+table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(234,88,12,.10); }
 
 table.ccc-table .playerCell{
   font-weight: 1000;
@@ -726,11 +719,11 @@ table.ccc-table .cell-sub{
 }
 
 .ccc-tableWrap .muted{
-  color: rgba(36,62,104,.85);
+  color: rgba(71,85,105,.9);
 }
 
 table.ccc-table .muted{
-  color: #2d456f;
+  color: rgba(71,85,105,.9);
 }
 
 .pill{
@@ -740,20 +733,20 @@ table.ccc-table .muted{
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(255,255,255,.06);
+  background: #f7f9fc;
   font-weight: 1000;
   font-size: 11px;
   white-space: nowrap;
 }
 
-.pill.auction{ border-color: rgba(47,182,163,.45); background: rgba(47,182,163,.14); }
-.pill.waiver { border-color: rgba(120,150,200,.45); background: rgba(120,150,200,.12); }
-.pill.rookie { border-color: rgba(240,177,90,.5); background: rgba(240,177,90,.14); }
-.pill.good{ border-color: rgba(51,209,154,.45); background: rgba(51,209,154,.12); }
-.pill.bad{ border-color: rgba(229,106,106,.5); background: rgba(229,106,106,.12); }
+.pill.auction{ border-color: rgba(37,99,235,.35); background: rgba(37,99,235,.08); }
+.pill.waiver { border-color: rgba(100,116,139,.35); background: rgba(100,116,139,.08); }
+.pill.rookie { border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+.pill.good{ border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.08); }
+.pill.bad{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08); }
 
-.muted{ color: rgba(229,238,255,.90); font-weight: 700; }
-.playerCell{ font-weight: 1000; color:#132743; }
+.muted{ color: var(--muted); font-weight: 700; }
+.playerCell{ font-weight: 1000; color:#1b2738; }
 .explain{
   color: rgba(241,247,255,.93);
   line-height: 1.32;
@@ -763,11 +756,11 @@ table.ccc-table .muted{
 .ccc-error{
   margin-top: 10px;
   font-size: 12px;
-  color: rgba(229,106,106,.95);
+  color: rgba(239,68,68,.95);
 }
 
 .ccc-error.ok{
-  color: rgba(51,209,154,.95);
+  color: rgba(22,163,74,.95);
 }
 
 /* ===== Modal (fixed readability + no lockups) ===== */
@@ -788,7 +781,7 @@ table.ccc-table .muted{
 .ccc-modal-backdrop{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.88);
+  background: rgba(15,23,42,.55);
   backdrop-filter: blur(2px);
 }
 
@@ -816,9 +809,9 @@ body.ccc-modalOpen #tagModal *{
   z-index: 1;
   width: min(720px, 100%);
   border-radius: var(--radius);
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(8,12,20,.98);
-  box-shadow: 0 30px 110px rgba(0,0,0,.75);
+  border: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: 0 30px 90px rgba(15,23,42,.25);
   overflow: hidden;
 }
 
@@ -827,8 +820,8 @@ body.ccc-modalOpen #tagModal *{
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(900px 500px at 25% 10%, rgba(47,182,163,.16), transparent 60%),
-    radial-gradient(900px 500px at 85% 10%, rgba(240,177,90,.12), transparent 60%);
+    radial-gradient(900px 500px at 25% 0%, rgba(37,99,235,.08), transparent 60%),
+    radial-gradient(900px 500px at 85% 0%, rgba(20,184,166,.08), transparent 60%);
   pointer-events: none;
 }
 .ccc-modal-card > *{ position: relative; z-index: 1; }
@@ -841,11 +834,11 @@ body.ccc-modalOpen #tagModal *{
   border-bottom: 1px solid var(--line);
 }
 
-.ccc-modal-title{ font-size:18px; font-weight:1000; color: rgba(245,250,255,.98); line-height: 1.2; }
-.ccc-modal-sub{ margin-top:4px; font-size:12px; color: rgba(233,238,249,.88); font-weight: 700; }
+.ccc-modal-title{ font-size:18px; font-weight:1000; color: var(--text); line-height: 1.2; }
+.ccc-modal-sub{ margin-top:4px; font-size:12px; color: var(--muted); font-weight: 700; }
 
 .ccc-modal-x{
-  background: rgba(255,255,255,.08);
+  background: #f7f9fc;
   border: 1px solid var(--line);
   color: var(--text);
   border-radius: 10px;
@@ -874,13 +867,13 @@ body.ccc-modalOpen #tagModal *{
 }
 
 .ccc-code{
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.45);
+  border: 1px solid var(--line);
+  background: #f8fafc;
   border-radius: 12px;
   padding: 10px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 12px;
-  color: rgba(233,238,249,.96);
+  color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
 }

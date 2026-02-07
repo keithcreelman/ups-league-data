@@ -24,6 +24,7 @@
   const DEFAULT_LEAGUE_ID = "74598";
   const DEFAULT_YEAR = "2025";
   const COMMISH_FRANCHISE_ID = "0008";
+  const FORCE_SEASON_ROLLOVER = true;
 
   // MYM submit endpoint
   const OFFER_MYM_URL = "https://ups-league-data.keith-creelman.workers.dev/offer-mym";
@@ -46,6 +47,13 @@
   function safeInt(x) {
     const n = parseInt(String(x).replace(/[^\d-]/g, ""), 10);
     return isNaN(n) ? 0 : n;
+  }
+
+  function getEffectiveNow(season) {
+    if (!FORCE_SEASON_ROLLOVER) return new Date();
+    const s = safeInt(normalizeSeasonValue(season || getYear() || DEFAULT_YEAR));
+    const year = s ? s + 1 : new Date().getFullYear();
+    return new Date(year, 2, 1, 12, 0, 0);
   }
 
   function pad4(fid) {
@@ -119,7 +127,7 @@
     if (!info || !info.tagDeadline) return false;
     const end = new Date(info.tagDeadline.getTime());
     end.setHours(23, 59, 59, 999);
-    return Date.now() > end.getTime();
+    return getEffectiveNow(season).getTime() > end.getTime();
   }
 
   function fmtLocalYMDHM(d) {
@@ -2136,11 +2144,26 @@
     return now.getTime() >= win.start.getTime() && now.getTime() < win.endExclusive.getTime();
   }
 
+  function getAuctionSeasonWindow(season) {
+    const info = getTagDeadlineInfo(season);
+    if (!info || !info.rookieDraft) return null;
+    const start = new Date(info.rookieDraft.getTime());
+    return { season: normalizeSeasonValue(season), start };
+  }
+
+  function isAuctionActiveForSeason(season, nowDate) {
+    const win = getAuctionSeasonWindow(season);
+    if (!win) return false;
+    const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
+    return now.getTime() >= win.start.getTime();
+  }
+
   function updateModuleStatusChips() {
     const season = normalizeSeasonValue(state.selectedSeason);
-    const nowRef = new Date();
+    const nowRef = getEffectiveNow(season);
     const mymActive = isMymActiveForSeason(season, nowRef);
     const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
+    const auctionActive = isAuctionActiveForSeason(season, nowRef);
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
 
@@ -2169,7 +2192,7 @@
     // Placeholder scheduling statuses for upcoming modules.
     setModuleState("#moduleRestructuresChip", restructureActive, true);
     setModuleState("#moduleExtensionsChip", true, true);
-    setModuleState("#moduleAuctionChip", true, true);
+    setModuleState("#moduleAuctionChip", auctionActive, true);
   }
 
   function renderEligibleAvailabilityNotice(season) {
@@ -2177,7 +2200,7 @@
 
     if (state.activeModule === "restructure") {
       if (state.commishMode) return "";
-      if (isRestructureActiveForSeason(season, new Date())) return "";
+      if (isRestructureActiveForSeason(season, getEffectiveNow(season))) return "";
       const win = getRestructureSeasonWindow(season);
       const endTxt = win ? win.endYmd : "contract deadline";
       return `<div class="ccc-eligWarn">Restructures Available Feb 1 Through ${htmlEsc(
@@ -2187,7 +2210,7 @@
 
     const s = normalizeSeasonValue(season);
     if (!s) return "";
-    if (isMymActiveForSeason(s, new Date())) return "";
+    if (isMymActiveForSeason(s, getEffectiveNow(s))) return "";
     const win = getMymSeasonWindow(s);
     const deadlineTxt = win ? win.deadlineYmd : "contract deadline";
     return `<div class="ccc-eligWarn">MYM Not Available Until After Contract Deadline Date (${htmlEsc(
@@ -2736,7 +2759,7 @@
     }
 
     const restructureActiveNow =
-      state.commishMode || isRestructureActiveForSeason(season, new Date());
+      state.commishMode || isRestructureActiveForSeason(season, getEffectiveNow(season));
     const restructureUsageByTeam = computeSubmissionUsageByTeam(seasonRestructureSubmissions);
     const eligibleRowsRaw =
       state.activeModule === "restructure"

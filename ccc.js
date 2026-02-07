@@ -2697,6 +2697,7 @@
     const auctionActive = isAuctionActiveForSeason(baseSeason, nowRef);
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
+    const extensionsChip = $("#moduleExtensionsChip");
 
     if (tagChip) {
       tagChip.classList.remove("disabled");
@@ -2705,6 +2706,10 @@
     if (mymChip) {
       mymChip.classList.remove("disabled");
       mymChip.classList.toggle("primary", mymActive);
+    }
+    if (extensionsChip) {
+      extensionsChip.classList.remove("disabled");
+      extensionsChip.classList.add("primary");
     }
     const setModuleState = (id, active, lockForOwners) => {
       const el = $(id);
@@ -2722,7 +2727,6 @@
 
     // Placeholder scheduling statuses for upcoming modules.
     setModuleState("#moduleRestructuresChip", restructureActive, true);
-    setModuleState("#moduleExtensionsChip", true, true);
     setModuleState("#moduleAuctionChip", auctionActive, true);
   }
 
@@ -2902,13 +2906,20 @@
     const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
     if (summaryTab) summaryTab.textContent = "Summary";
     if (eligibleTab) {
-      eligibleTab.textContent = state.activeModule === "tag" ? "Tag Tracking" : "Eligible";
+      eligibleTab.textContent =
+        state.activeModule === "tag"
+          ? "Tag Tracking"
+          : state.activeModule === "extensions"
+          ? "Extensions"
+          : "Eligible";
     }
     if (submittedTab) {
       submittedTab.textContent = state.activeModule === "restructure"
         ? "Restructure - Submitted"
         : state.activeModule === "tag"
         ? "Tag - Submitted"
+        : state.activeModule === "extensions"
+        ? "Extensions"
         : "MYM - Submitted";
     }
   }
@@ -2917,10 +2928,14 @@
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
     const restructureChip = $("#moduleRestructuresChip");
+    const extensionsChip = $("#moduleExtensionsChip");
     if (tagChip) tagChip.classList.toggle("is-selected", state.activeModule === "tag");
     if (mymChip) mymChip.classList.toggle("is-selected", state.activeModule === "mym");
     if (restructureChip) {
       restructureChip.classList.toggle("is-selected", state.activeModule === "restructure");
+    }
+    if (extensionsChip) {
+      extensionsChip.classList.toggle("is-selected", state.activeModule === "extensions");
     }
   }
 
@@ -3309,6 +3324,24 @@
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
       if (tabSubmitted) tabSubmitted.innerHTML = renderTable([], "submitted");
+      updateModuleStatusChips();
+      return;
+    }
+
+    if (state.activeModule === "extensions") {
+      const landing = `
+        <div class="ccc-landing">
+          <div class="ccc-landingTitle">Not yet functional</div>
+        </div>
+      `;
+      syncTabLabels();
+      syncModuleChipSelection();
+      syncCommishConsole(scopedEligibility);
+      if (summary) summary.innerHTML = landing;
+      if (tabSummary) tabSummary.innerHTML = landing;
+      if (tabEligible) tabEligible.innerHTML = landing;
+      if (tabIneligible) tabIneligible.innerHTML = "";
+      if (tabSubmitted) tabSubmitted.innerHTML = "";
       updateModuleStatusChips();
       return;
     }
@@ -4524,6 +4557,18 @@
         sortState.key = "salary";
         sortState.dir = "desc";
         resetAllTablePages();
+        render();
+      });
+
+    const moduleExtensionsChip = $("#moduleExtensionsChip");
+    if (moduleExtensionsChip)
+      moduleExtensionsChip.addEventListener("click", () => {
+        state.activeModule = "extensions";
+        sortState.tab = "eligible";
+        sortState.key = "acquired";
+        sortState.dir = "desc";
+        resetAllTablePages();
+        setTab("summary");
         render();
       });
 

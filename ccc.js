@@ -167,6 +167,7 @@
   const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
   const LOCAL_THEME_KEY = "ccc_theme_v1";
+  const LOCAL_HIGHLIGHT_KEY = "ccc_row_highlight_v1";
   const LOCAL_ASOF_SEASON_KEY = "ccc_asof_season_v1";
 
   function loadLocalOverrides() {
@@ -254,6 +255,41 @@
     if (app) app.setAttribute("data-theme", t);
     const sel = $("#themeSelect");
     if (sel) sel.value = t;
+  }
+
+  function loadHighlightSettings() {
+    try {
+      const raw = localStorage.getItem(LOCAL_HIGHLIGHT_KEY);
+      if (!raw) return { enabled: true, mode: "position" };
+      const obj = JSON.parse(raw);
+      const enabled = obj && obj.enabled !== undefined ? !!obj.enabled : true;
+      const mode = safeStr(obj && obj.mode ? obj.mode : "position").toLowerCase();
+      return { enabled, mode: mode === "team" || mode === "position" ? mode : "position" };
+    } catch (e) {
+      return { enabled: true, mode: "position" };
+    }
+  }
+
+  function saveHighlightSettings(enabled, mode) {
+    try {
+      localStorage.setItem(
+        LOCAL_HIGHLIGHT_KEY,
+        JSON.stringify({ enabled: !!enabled, mode: mode || "position" })
+      );
+    } catch (e) {}
+  }
+
+  function applyHighlightSetting() {
+    const app = $("#cccApp");
+    const enabled = !!state.rowHighlightEnabled;
+    const mode = state.rowHighlightMode === "team" ? "team" : "position";
+    if (app) app.setAttribute("data-highlight", enabled ? mode : "none");
+    const chk = $("#rowHighlightChk");
+    if (chk) chk.checked = enabled;
+    const sel = $("#rowHighlightModeSelect");
+    if (sel) sel.value = mode;
+    const wrap = $("#rowHighlightModeWrap");
+    if (wrap) wrap.style.display = enabled ? "flex" : "none";
   }
 
   function loadAsOfSeasonOverride() {
@@ -860,6 +896,75 @@
     return p || "NA";
   }
 
+  function safeClassToken(token) {
+    return safeStr(token).replace(/[^a-zA-Z0-9_-]/g, "");
+  }
+
+  function buildRowClass(row, posOverride) {
+    const posVal = safeClassToken(posOverride || posKeyFromRow(row) || row.pos || "");
+    const fid = safeClassToken(pad4(row && row.franchise_id ? row.franchise_id : ""));
+    const classes = [];
+    if (posVal) classes.push(`pos-${posVal}`);
+    if (fid) classes.push(`team-${fid}`);
+    return classes.join(" ");
+  }
+
+  function hashToHue(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h * 31 + str.charCodeAt(i)) % 360;
+    }
+    return h;
+  }
+
+  function hslToRgb(h, s, l) {
+    const sat = s / 100;
+    const light = l / 100;
+    const c = (1 - Math.abs(2 * light - 1)) * sat;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = light - c / 2;
+    let r1 = 0;
+    let g1 = 0;
+    let b1 = 0;
+    if (h >= 0 && h < 60) {
+      r1 = c;
+      g1 = x;
+    } else if (h < 120) {
+      r1 = x;
+      g1 = c;
+    } else if (h < 180) {
+      g1 = c;
+      b1 = x;
+    } else if (h < 240) {
+      g1 = x;
+      b1 = c;
+    } else if (h < 300) {
+      r1 = x;
+      b1 = c;
+    } else {
+      r1 = c;
+      b1 = x;
+    }
+    return {
+      r: Math.round((r1 + m) * 255),
+      g: Math.round((g1 + m) * 255),
+      b: Math.round((b1 + m) * 255),
+    };
+  }
+
+  function getTeamRgb(franchiseId) {
+    const fid = safeStr(franchiseId);
+    if (!fid) return null;
+    const hue = hashToHue(fid);
+    return hslToRgb(hue, 60, 55);
+  }
+
+  function buildTeamStyle(franchiseId) {
+    const rgb = getTeamRgb(franchiseId);
+    if (!rgb) return "";
+    return `--team-rgb:${rgb.r},${rgb.g},${rgb.b};`;
+  }
+
   const sortState = {
     tab: "eligible",
     key: "acquired",
@@ -1076,6 +1181,9 @@
           const submitted = `${htmlEsc(submittedFmt.date)}${
             submittedFmt.time ? `<div class="cell-sub">${htmlEsc(submittedFmt.time)}</div>` : ""
           }`;
+          const posKey = posKeyFromRow(r);
+          const rowClass = buildRowClass(r, posKey);
+          const rowStyle = buildTeamStyle(r.franchise_id);
           const team = htmlEsc(r.franchise_name || r.franchise_id || "");
           const player = htmlEsc(r.player_name || r.player_id);
           const posDisp = htmlEsc(r.position || "");
@@ -1089,7 +1197,7 @@
             ? `<span class="pill" style="margin-left:6px;">Inferred</span>`
             : "";
           return `
-        <tr class="pos-${htmlEsc(posKeyFromRow(r))}">
+        <tr class="${rowClass}"${rowStyle ? ` style="${rowStyle}"` : ""}>
           <td>${submitted}${inferredTag}</td>
           <td>${team}</td>
           <td class="playerCell">${player}</td>
@@ -1111,7 +1219,10 @@
       .map((r) => {
         const player = htmlEsc(r.player_name);
         const posDisp = htmlEsc(r.positional_grouping || r.position);
-        const posKey = htmlEsc(posKeyFromRow(r));
+        const posKeyRaw = posKeyFromRow(r);
+        const posKey = htmlEsc(posKeyRaw);
+        const rowClass = buildRowClass(r, posKeyRaw);
+        const rowStyle = buildTeamStyle(r.franchise_id);
         const salaryNum = safeInt(r.salary);
         const salary = salaryNum.toLocaleString();
         const acqType = safeStr(r.mym_acq_type);
@@ -1155,7 +1266,7 @@
           : ``;
 
         return `
-        <tr class="pos-${posKey}">
+        <tr class="${rowClass}"${rowStyle ? ` style="${rowStyle}"` : ""}>
           ${isEligibleTab ? `<td>${actions}</td>` : ``}
           <td class="playerCell">${player}</td>
           <td class="muted">${posDisp}</td>
@@ -1318,17 +1429,18 @@
     }
 
     const body = rows
-      .map(
-        (r) => `
-      <tr class="pos-${htmlEsc(r.pos)}">
+      .map((r) => {
+        const rowClass = buildRowClass(r, r.pos);
+        return `
+      <tr class="${rowClass}">
         <td>${htmlEsc(r.team)}</td>
         <td>${htmlEsc(r.pos)}</td>
         <td>${safeInt(r.eligible_count)}</td>
         <td>${safeInt(r.eligible_salary).toLocaleString()}</td>
         <td>${safeInt(r.submitted_count)}</td>
         <td>${safeInt(r.submitted_salary).toLocaleString()}</td>
-      </tr>`
-      )
+      </tr>`;
+      })
       .join("");
 
     return `
@@ -1755,8 +1867,9 @@
           </tr>
         `;
         }
+        const rowClass = buildRowClass(r, r.pos);
         return `
-          <tr class="pos-${htmlEsc(r.pos)}">
+          <tr class="${rowClass}">
             <td>${htmlEsc(r.pos)}</td>
             <td>${r.count}</td>
             <td>${r.tier1}</td>
@@ -1901,6 +2014,8 @@
             ${isLocked ? `title="Tag already used for ${htmlEsc(side)}"` : ``}
           >${tagLabel}</button>
         `;
+        const posKeyRaw = posKeyFromRow(r);
+        const posKey = htmlEsc(posKeyRaw);
         const gamesPlayed = safeInt(r.games_played);
         const ppg = Number(r.points_per_game || 0);
         const ppgDisplay = gamesPlayed > 0 ? ppg.toFixed(1) : "—";
@@ -1916,8 +2031,10 @@
         } else {
           ppgRankCell = "N/A";
         }
+        const rowClass = buildRowClass(r, posKeyRaw);
+        const rowStyle = buildTeamStyle(r.franchise_id);
         return `
-          <tr class="pos-${posKey}">
+          <tr class="${rowClass}"${rowStyle ? ` style="${rowStyle}"` : ""}>
             <td>${tagBtn}${submittedTag}</td>
             <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
@@ -1968,6 +2085,7 @@
   // ======================================================
   const initialPpgSettings = loadPpgSettings();
   const initialThemeSetting = loadThemeSetting();
+  const initialHighlightSettings = loadHighlightSettings();
   const initialAsOfSeasonOverride = loadAsOfSeasonOverride();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
@@ -2005,6 +2123,8 @@
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
     theme: initialThemeSetting,
+    rowHighlightEnabled: initialHighlightSettings.enabled,
+    rowHighlightMode: initialHighlightSettings.mode,
     asOfSeasonOverride: initialAsOfSeasonOverride,
     asOfDraft: null,
     adminDebug: null,
@@ -3778,6 +3898,8 @@
       must("#commishConsoleBtn");
       must("#searchBox");
       must("#themeSelect");
+      must("#rowHighlightChk");
+      must("#rowHighlightModeSelect");
       must("#adminBadge");
       must("#adminControls");
       must("#asOfInput");
@@ -3788,6 +3910,7 @@
       must("#clearBtn");
 
       applyThemeSetting(state.theme);
+      applyHighlightSetting();
 
       // Modal required elements
       must("#mymModal");
@@ -4192,6 +4315,23 @@
         state.theme = v === "light" || v === "dark" || v === "auto" ? v : "auto";
         saveThemeSetting(state.theme);
         applyThemeSetting(state.theme);
+      });
+
+    const rowHighlightChk = $("#rowHighlightChk");
+    if (rowHighlightChk)
+      rowHighlightChk.addEventListener("change", (e) => {
+        state.rowHighlightEnabled = !!e.target.checked;
+        saveHighlightSettings(state.rowHighlightEnabled, state.rowHighlightMode);
+        applyHighlightSetting();
+      });
+
+    const rowHighlightModeSelect = $("#rowHighlightModeSelect");
+    if (rowHighlightModeSelect)
+      rowHighlightModeSelect.addEventListener("change", (e) => {
+        const v = safeStr(e.target.value || "position").toLowerCase();
+        state.rowHighlightMode = v === "team" ? "team" : "position";
+        saveHighlightSettings(state.rowHighlightEnabled, state.rowHighlightMode);
+        applyHighlightSetting();
       });
 
     // Tabs

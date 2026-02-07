@@ -144,22 +144,24 @@
     <div id="commishConsoleMsg" class="ccc-error" style="display:none;"></div>
   </div>
 
-  <div id="summary" class="ccc-summary"></div>
+  <div id="cccMain" class="ccc-main">
+    <div id="summary" class="ccc-summary"></div>
 
-  <div class="ccc-tabs">
-    <span class="ccc-navTitle">Options</span>
-    <button class="ccc-tab active" type="button" data-tab="summary">Summary</button>
-    <button class="ccc-tab" type="button" data-tab="costcalc">Cost Calc</button>
-    <button class="ccc-tab" type="button" data-tab="eligible">Player Tracking</button>
-    <button class="ccc-tab" type="button" data-tab="submitted">Finalized Submissions</button>
+    <div id="cccTabs" class="ccc-tabs">
+      <span class="ccc-navTitle">Options</span>
+      <button class="ccc-tab active" type="button" data-tab="summary">Summary</button>
+      <button class="ccc-tab" type="button" data-tab="costcalc">Cost Calc</button>
+      <button class="ccc-tab" type="button" data-tab="eligible">Player Tracking</button>
+      <button class="ccc-tab" type="button" data-tab="submitted">Finalized Submissions</button>
+    </div>
+
+    <div id="tabSummary"></div>
+    <div id="tabCostCalc" style="display:none;"></div>
+    <div id="tabEligible" style="display:none;"></div>
+    <div id="tabSubmitted" style="display:none;"></div>
+
+    <div id="cccError" class="ccc-error"></div>
   </div>
-
-  <div id="tabSummary"></div>
-  <div id="tabCostCalc" style="display:none;"></div>
-  <div id="tabEligible" style="display:none;"></div>
-  <div id="tabSubmitted" style="display:none;"></div>
-
-  <div id="cccError" class="ccc-error"></div>
 
   <!-- MYM MODAL -->
   <div id="mymModal" class="ccc-modal" aria-hidden="true">

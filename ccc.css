@@ -196,6 +196,15 @@
   box-shadow: var(--shadow);
 }
 
+.ccc-main{
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
 .ccc-topRow{
   display:flex;
   align-items:flex-start;

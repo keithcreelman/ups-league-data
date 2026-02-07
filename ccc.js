@@ -2616,7 +2616,7 @@
     commishMode: false,
     commishConsoleOpen: false,
     adminReason: "",
-    activeModule: "tag",
+    activeModule: "",
     selectedSeason: "",
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
@@ -3790,6 +3790,8 @@
     const { eligibility, submissions, meta } = state.payload;
 
     const cccError = $("#cccError");
+    const cccMain = $("#cccMain");
+    const cccTabs = $("#cccTabs");
     const cccMeta = $("#cccMeta");
     const summary = $("#summary");
     const tabSummary = $("#tabSummary");
@@ -3799,6 +3801,23 @@
     const tabSubmitted = $("#tabSubmitted");
 
     if (cccError) cccError.textContent = "";
+
+    if (!state.activeModule) {
+      if (summary) summary.innerHTML = "";
+      if (tabSummary) tabSummary.innerHTML = "";
+      if (tabCostCalc) tabCostCalc.innerHTML = "";
+      if (tabEligible) tabEligible.innerHTML = "";
+      if (tabIneligible) tabIneligible.innerHTML = "";
+      if (tabSubmitted) tabSubmitted.innerHTML = "";
+      if (cccTabs) cccTabs.style.display = "none";
+      if (cccMain) cccMain.style.display = "none";
+      syncModuleChipSelection();
+      updateModuleStatusChips();
+      return;
+    }
+
+    if (cccTabs) cccTabs.style.display = "";
+    if (cccMain) cccMain.style.display = "";
 
     const asOfDate =
       state.commishMode && state.asOfOverrideActive && state.asOfDate ? state.asOfDate : null;
@@ -4820,6 +4839,8 @@
   async function load() {
     try {
       must("#cccMeta");
+      must("#cccMain");
+      must("#cccTabs");
       must("#tabSummary");
       must("#tabCostCalc");
       must("#tabEligible");
@@ -5225,7 +5246,7 @@
     const moduleTagsChip = $("#moduleTagsChip");
     if (moduleTagsChip)
       moduleTagsChip.addEventListener("click", () => {
-        state.activeModule = "tag";
+        state.activeModule = state.activeModule === "tag" ? "" : "tag";
         sortState.tab = "eligible";
         sortState.key = "tagRank";
         sortState.dir = "asc";
@@ -5237,7 +5258,7 @@
     const moduleMymChip = $("#moduleMymChip");
     if (moduleMymChip)
       moduleMymChip.addEventListener("click", () => {
-        state.activeModule = "mym";
+        state.activeModule = state.activeModule === "mym" ? "" : "mym";
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5249,7 +5270,7 @@
     const moduleRestructuresChip = $("#moduleRestructuresChip");
     if (moduleRestructuresChip)
       moduleRestructuresChip.addEventListener("click", () => {
-        state.activeModule = "restructure";
+        state.activeModule = state.activeModule === "restructure" ? "" : "restructure";
         sortState.tab = "eligible";
         sortState.key = "salary";
         sortState.dir = "desc";
@@ -5261,7 +5282,7 @@
     const moduleExtensionsChip = $("#moduleExtensionsChip");
     if (moduleExtensionsChip)
       moduleExtensionsChip.addEventListener("click", () => {
-        state.activeModule = "extensions";
+        state.activeModule = state.activeModule === "extensions" ? "" : "extensions";
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5274,7 +5295,7 @@
     if (moduleCommishChip)
       moduleCommishChip.addEventListener("click", () => {
         if (!state.canCommishMode) return;
-        state.activeModule = "commish";
+        state.activeModule = state.activeModule === "commish" ? "" : "commish";
         resetAllTablePages();
         setTab("summary");
         render();

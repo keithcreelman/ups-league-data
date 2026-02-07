@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Fantasy Football: UPS Dynasty Cap  MFL Developers Program</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"  />
+<meta name="keywords" content="MFL Developers Program, fantasy football, keeper fantasy football league, dynasty fantasy football league, salary cap fantasy football league, IDP fantasy football league, MyFantasyLeague, MFL, ffl, league management"  />
+<meta name="description" content="The most customizable way to run your fantasy football league on the web today, MyFantasyLeague.com was voted 'Best Fantasy Commissioner Product' by the Fantasy Sports Trade Association, and has won several additional significant industry awards.  Our 31 years of experience means we do fantasy football right.  If you're ready to move beyond basic league settings, and onto fantasy football how the hard-core players play it, try MyFantasyLeague.com: Beyond League Management"  />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"  />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WZDGQ9CBF2"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-WZDGQ9CBF2');
+</script>
+<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Roboto+Condensed:400,700|Roboto:400,400i,700" rel="stylesheet">
+<link rel="stylesheet" id="default" href="https://www46.myfantasyleague.com/skins17/MFLBaseCSS.css" type="text/css"  />
+<link rel="stylesheet" id="skin" href="https://www46.myfantasyleague.com/skins17/MFL/MFL.css" type="text/css"  />
+<link rel="stylesheet" id="responsive" href="https://www46.myfantasyleague.com/skins17/MFL/responsive.css" type="text/css"  />
+<link rel="apple-touch-icon" href="https://www46.myfantasyleague.com/apple-touch-icon.png" />
+<link rel="shortcut icon" href="https://www46.myfantasyleague.com/favicon.ico" />
+<script type="text/javascript" src="https://www46.myfantasyleague.com/mfl_common.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+<!--
+var league_id = '42721';
+var year = 2013;
+var xmlBaseURL = 'https://www46.myfantasyleague.com/fflnetdynamic2013/';
+var baseURLStatic = 'https://www46.myfantasyleague.com';
+var baseURLDynamic = 'https://www46.myfantasyleague.com';
+var currentServerTime = 1770432813;
+var completedWeek = 21;
+var liveScoringWeek = 21;
+var startWeek = 1;
+var endWeek = 16;
+var standingsEndWeek = "13";
+var h2h_setting = "Doubleheaders";  
+var precision = 1;
+var thisProgram = "api_info";
+
+function Franchise (id, name, division, icon, logo, abbrev) {
+   this.id = id;
+   this.name = name;
+   this.division = division;
+   this.icon = icon;
+   this.logo = logo;
+   this.abbrev = abbrev;
+}
+var leagueAttributes = new Object();
+
+var franchiseDatabase = new Array();
+franchiseDatabase['fid_0000'] = new Franchise('0000', 'Commissioner', undefined, '', '');
+franchiseDatabase['fid_0010'] = new Franchise('0010', 'Blake Bombers', '00' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0010.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0010.png' ,'BB');
+franchiseDatabase['fid_0005'] = new Franchise('0005', 'BTNH', '03' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0002.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0002.png' ,'BTNH');
+franchiseDatabase['fid_0009'] = new Franchise('0009', 'C-Town Chivalry', '02' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0009.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0009.png' ,'CC');
+franchiseDatabase['fid_0002'] = new Franchise('0002', 'DBCA', '03' ,'https://www48.myfantasyleague.com/fflnetdynamic2022/74598_franchise_icon0002.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2022/74598_franchise_icon0002.png' ,'CK');
+franchiseDatabase['fid_0007'] = new Franchise('0007', 'Ebners\' Flow', '01' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0007.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0007.png' ,'EF');
+franchiseDatabase['fid_0006'] = new Franchise('0006', 'Good in Da Hood', '03' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0006.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0006.png' ,'GiDH');
+franchiseDatabase['fid_0004'] = new Franchise('0004', 'Pure Greatness', '01' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0005.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0005.png' ,'PG');
+franchiseDatabase['fid_0008'] = new Franchise('0008', 'Raining Bullets', '00' ,'https://www46.myfantasyleague.com/fflnetdynamic2013/42721_franchise_icon0008.png' ,'https://www46.myfantasyleague.com/fflnetdynamic2013/42721_franchise_logo0008.png' ,'RB');
+franchiseDatabase['fid_0011'] = new Franchise('0011', 'The Baster', '00' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0011.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2010/60671_franchise_icon0011.png' ,'TB');
+franchiseDatabase['fid_0003'] = new Franchise('0003', 'There Can Be Only One', '02' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0003.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0003.png' ,'TCBOO');
+franchiseDatabase['fid_0001'] = new Franchise('0001', 'Wetter than Dutch Dikes', '01' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0001.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0001.png' ,'WTDD');
+franchiseDatabase['fid_0012'] = new Franchise('0012', 'White Power', '02' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0012.png' ,'https://www45.myfantasyleague.com/fflnetdynamic2012/37227_franchise_icon0012.png' ,'WP');
+leagueAttributes['Auction'] = true;
+leagueAttributes['MinStarters'] = 14;
+leagueAttributes['MaxStarters'] = 14;
+leagueAttributes['Franchises'] = 12;
+leagueAttributes['Conferences'] = new Array('Primetime', 'Juice'); // This will be deprecated soon, use leagueConferences instead
+leagueAttributes['Divisions'] = new Array('Straight Cash Homey', 'The Ochocinco Show', 'Raytorious L52', 'Dog Pound 4 Life '); // This will be deprecated soon, use leagueDivisions instead
+leagueConferences = new Object();
+leagueConferences['00'] = { 'id' : '00', 'name' : 'Primetime' }
+leagueConferences['01'] = { 'id' : '01', 'name' : 'Juice' }
+leagueDivisions = new Object();
+leagueDivisions['00'] = { 'id' : '00', 'conf_id' : '00', 'name' : 'Straight Cash Homey' };
+leagueDivisions['01'] = { 'id' : '01', 'conf_id' : '00', 'name' : 'The Ochocinco Show' };
+leagueDivisions['02'] = { 'id' : '02', 'conf_id' : '01', 'name' : 'Raytorious L52' };
+leagueDivisions['03'] = { 'id' : '03', 'conf_id' : '01', 'name' : 'Dog Pound 4 Life ' };
+
+function chat_window (url) {
+    var chatWindow = window.open(url,"chat_window","height=600,width=450,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    chatWindow.focus();
+}
+
+function live_draft_window (url) {
+    var liveDraftWindow = window.open(url,"live_draft_window","height=800,width=1060,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    liveDraftWindow.focus();
+}
+
+function live_auction_window (url) {
+    var liveAuctionWindow = window.open(url,"live_auction_window","height=700,width=1060,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    liveAuctionWindow.focus();
+}
+
+
+//-->
+</script>
+<link rev="MADE" href="mailto:support@myfantasyleague.com"  />
+</head>
+<body id="body_api_info"><noscript>
+  <img src="http://b.scorecardresearch.com/b?c1=2&amp;c2=6035210&amp;c3=&amp;c4=www.myfantasyleague.com&amp;c5=&amp;c6=&amp;c15=&amp;cv=1.3&amp;cj=1" style="display:none" width="0" height="0" alt="" />
+</noscript>
+<div class="myfantasyleague_menu" onclick=""><span>LEAGUE MENU</span><input id="sub0" type="checkbox"><label for="sub0"><span></span></label><ul>
+<li class="mfl-icon"><a class="no-sub" href="http://home.myfantasyleague.com"><img src="/images/mfl-logo-2017.png" alt="MyFantasyLeague.com"><span>MyFantasyLeague.com</span></a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/home/42721">Home</a></li>
+<li class="has-sub sub-default mm-myacct"><a>My Account</a><b aria-haspopup="true" aria-controls="p1"></b><input id="sub1" type="checkbox"><label for="sub1"><span></span></label>
+<ul id="p1">
+<li><a class="no-sub" href="https://www42.myfantasyleague.com/2025/dash" target="">MFL&nbsp;Dashboard</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/login?L=42721" target="">Login</a></li>
+<li><a class="no-sub" href="https://www42.myfantasyleague.com/2025/index" target="">Find&nbsp;A&nbsp;League</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-scores"><a>Scores</a><b aria-haspopup="true" aria-controls="p2"></b><input id="sub2" type="checkbox"><label for="sub2"><span></span></label>
+<ul id="p2">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/ajax_ls?L=42721" target="">Live&nbsp;Scoring</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/standings?L=42721" target="">Standings</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=22" target="">Weekly&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=31" target="">Weekly&nbsp;Summary</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=101" target="">Power&nbsp;Rank</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=06" target="">Starting&nbsp;Lineups</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=15" target="">Fantasy&nbsp;Schedule</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=79" target="">Playoff&nbsp;Brackets</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/pro_schedule?L=42721" target="">NFL&nbsp;Schedule</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=207" target="">Fantasy&nbsp;Previews</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=177" target="">Fantasy&nbsp;Recaps</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-trans"><a>Transactions</a><b aria-haspopup="true" aria-controls="p3"></b><input id="sub3" type="checkbox"><label for="sub3"><span></span></label>
+<ul id="p3">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=07" target="">Rosters</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=03" target="">Transactions</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-player"><a>Player Research</a><b aria-haspopup="true" aria-controls="p4"></b><input id="sub4" type="checkbox"><label for="sub4"><span></span></label>
+<ul id="p4">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=08" target="">Top&nbsp;Performers/Player&nbsp;Stats</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=236" target="">Projected&nbsp;Stats</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/depth_chart?L=42721" target="">Fantasy&nbsp;Depth&nbsp;Charts</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=117" target="">Top&nbsp;Adds/Drops/Starters</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=81" target="">Points&nbsp;Allowed&nbsp;-&nbsp;By&nbsp;Position</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/reports?L=42721&R=FULLFA" target="">Complete&nbsp;Free&nbsp;Agent&nbsp;Listing</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/injury?L=42721" target="">NFL&nbsp;Injury&nbsp;Report</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/news_articles?L=42721&P=*" target="">Player&nbsp;News</a></li>
+<li><a class="no-sub" href="http://subscribe.myfantasyleague.com/" target="">Get&nbsp;Projection&nbsp;Sources</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/player_search?L=42721" target="">Player&nbsp;Search</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-draft"><a>Draft/Auction</a><b aria-haspopup="true" aria-controls="p5"></b><input id="sub5" type="checkbox"><label for="sub5"><span></span></label>
+<ul id="p5">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/reports?L=42721&R=ADP" target="">ADP&nbsp;Report</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=100" target="">Future&nbsp;Draft&nbsp;Picks</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=187" target="">Keepers</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=44" target="">Auction&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/reports?L=42721&R=AAV" target="">AAV&nbsp;Report</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-league"><a>League</a><b aria-haspopup="true" aria-controls="p6"></b><input id="sub6" type="checkbox"><label for="sub6"><span></span></label>
+<ul id="p6">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/all_reports?L=42721" target="">All&nbsp;Reports</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=123" target="">League&nbsp;Calendar</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=09" target="">League&nbsp;Rules</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/accounting_report?L=42721" target="">Accounting</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=01" target="">Franchise&nbsp;Information</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/reports?L=42721&R=FSUMMARY" target="">Franchise&nbsp;Summary</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=120" target="">Survivor&nbsp;Pool</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=194" target="">League&nbsp;Champions</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-social"><a>Social</a><b aria-haspopup="true" aria-controls="p7"></b><input id="sub7" type="checkbox"><label for="sub7"><span></span></label>
+<ul id="p7">
+<li><a class="no-sub" href="https://www.fantasysharks.com/forum/viewforum.php?f=501" target="">MFL&nbsp;Community&nbsp;Forums</a></li>
+<li><a class="no-sub" href="https://twitter.com/MyFantasyLeague" target="">Follow&nbsp;Us&nbsp;On&nbsp;Twitter</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/options?L=42721&O=167" target="">Refer&nbsp;A&nbsp;Friend&nbsp;And&nbsp;Save!</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-help"><a>Help</a><b aria-haspopup="true" aria-controls="p8"></b><input id="sub8" type="checkbox"><label for="sub8"><span></span></label>
+<ul id="p8">
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/support?L=42721" target="">Help&nbsp;Center</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/support?PROGRAM=api_info&L=42721" target="_blank">Help&nbsp;on&nbsp;this&nbsp;Page</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/site_news?L=42721" target="">What's&nbsp;New?</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/api_info?STATE=test&CCAT=export&TYPE=messageBoard&L=42721&PRINTER=1" target="">Printer&nbsp;Friendly&nbsp;Page</a></li>
+<li><a class="no-sub" href="https://www46.myfantasyleague.com/2013/api_info?L=42721" target="">Developer's&nbsp;API</a></li>
+</ul>
+</li>
+</ul></div>
+<table cellspacing="0" class="pageheader">
+<tr>
+<td rowspan="3" class="welcome"><b>Guest</b> (<a href="https://www46.myfantasyleague.com/2013/login?L=42721">Login</a>)</td>
+</tr>
+<tr>
+<td class="pagetitle">
+<h1>
+ <span>MFL Developers Program</span></h1></td></tr></table><div class="pagebody" id="api_info">
+<h3>MyFantasyLeague.com Developers Program API Test Area</h3>
+<p>Before you attempt to use this API, you should first read the <a href="https://www46.myfantasyleague.com/2013/api_info?L=42721">General Information Page</a>.
+You can also view the <a href="https://www46.myfantasyleague.com/2013/api_info?STATE=details&L=42721">Request Reference Page</a>, check out our <a href="https://www46.myfantasyleague.com/2013/api_info?STATE=example&L=42721">sample code</a> or return to
+the <a href="https://www46.myfantasyleague.com/2013/api_info?STATE=test&L=42721">main test request page</a>.</p>
+<h3>Export Test Form</h3>
+<form action="api_info" method="GET">
+Select a request type: 
+<input type="hidden" name="STATE" value="test">
+<input type="hidden" name="CCAT" value="export">
+<select name="TYPE" onchange="this.form.submit()">
+<option value="league">league </option>
+<option value="rules">rules </option>
+<option value="rosters">rosters </option>
+<option value="freeAgents">freeAgents </option>
+<option value="schedule">schedule </option>
+<option value="calendar">calendar </option>
+<option value="playoffBrackets">playoffBrackets </option>
+<option value="playoffBracket">playoffBracket </option>
+<option value="transactions">transactions </option>
+<option value="pendingWaivers">pendingWaivers </option>
+<option value="pendingTrades">pendingTrades </option>
+<option value="tradeBait">tradeBait </option>
+<option value="assets">assets </option>
+<option value="leagueStandings">leagueStandings </option>
+<option value="weeklyResults">weeklyResults </option>
+<option value="liveScoring">liveScoring </option>
+<option value="playerScores">playerScores </option>
+<option value="projectedScores">projectedScores </option>
+<option value="draftResults">draftResults </option>
+<option value="auctionResults">auctionResults </option>
+<option value="selectedKeepers">selectedKeepers </option>
+<option value="myDraftList">myDraftList </option>
+<option value="messageBoard" selected='selected'>messageBoard </option>
+<option value="messageBoardThread">messageBoardThread </option>
+<option value="polls">polls </option>
+<option value="device_tokens">device_tokens </option>
+<option value="playerRosterStatus">playerRosterStatus </option>
+<option value="contestPlayers">contestPlayers </option>
+<option value="myWatchList">myWatchList </option>
+<option value="salaries">salaries </option>
+<option value="salaryAdjustments">salaryAdjustments </option>
+<option value="futureDraftPicks">futureDraftPicks </option>
+<option value="accounting">accounting </option>
+<option value="pool">pool </option>
+<option value="survivorPool">survivorPool </option>
+<option value="abilities">abilities </option>
+<option value="appearance">appearance </option>
+<option value="rss">rss </option>
+<option value="ics">ics </option>
+<option value="myleagues">myleagues </option>
+<option value="leagueSearch">leagueSearch </option>
+<option value="players">players </option>
+<option value="playerProfile">playerProfile </option>
+<option value="allRules">allRules </option>
+<option value="playerRanks">playerRanks </option>
+<option value="adp">adp </option>
+<option value="aav">aav </option>
+<option value="topAdds">topAdds </option>
+<option value="topDrops">topDrops </option>
+<option value="topStarters">topStarters </option>
+<option value="topTrades">topTrades </option>
+<option value="topOwns">topOwns </option>
+<option value="siteNews">siteNews </option>
+<option value="whoShouldIStart">whoShouldIStart </option>
+<option value="injuries">injuries </option>
+<option value="nflSchedule">nflSchedule </option>
+<option value="nflByeWeeks">nflByeWeeks </option>
+<option value="pointsAllowed">pointsAllowed </option>
+</select>
+<input type="hidden" name="L" value="42721">
+</form><br/>
+<table cellspacing="1" cellpadding="1" border="0">
+<td valign="top"><b>messageBoard</b></td><td valign="top" width="50%">Display a summary of the recent message board posts to a league message board.<br/>Access restricted to league owners.</td>
+<td valign="top"><table cellspacing="1" cellpadding="1" border="0"><tr><td valign="top" width="40px">L</td><td>League Id(required)</td></tr><tr><td valign="top">COUNT</td><td valign="top">If specified, limit the number of threads to display to this value. Default is 10.</td></tr></table>
+</td>
+</table><br/>
+<form action="export" method="GET">
+<table cellspacing="1" cellpadding="1" border="0">
+<input type="hidden" name="TYPE" value="messageBoard"><tr><td>L:</td><td><input type="text" name="L" size="5" maxlength="5" value="42721" title="Enter a 5-digit league id here"  /></td><td>&nbsp;</td></tr>
+<tr><td>APIKEY:</td><td><input type="text" name="APIKEY" size="35" maxlength="99" value=""></td><td> This value is required only if you are not logged into the league specified via the L parameter.</td></tr>
+<tr><td>COUNT:</td><td><input type="text" name="COUNT" size="20" value=""></td><td>&nbsp;</td></tr>
+<tr><td>Format:</td><td><input type="radio" name="JSON" value="0" checked="checked"  /> XML or 
+<input type="radio" name="JSON" value="1"  /> JSON
+</td><td>&nbsp;</td></tr>
+<tr><td colspan="2" align="center">
+<input type="submit" value="Submit"/></td><td>&nbsp;</td></tr>
+</table></form><br/>
+</div></div><div class="pagefooter"><table border="0" cellpadding="1" cellspacing="1" align="center">
+<tr><td colspan="2" align="center"><a href="#body_api_info">Back To Top Of Page</a></td></tr>
+<tr><td colspan="2" align="center">Page Generated Fri Feb 6 9:53:33 p.m. ET 2026</td></tr>
+<tr><td colspan="2" align="center">Copyright &copy; 1995-2025 <a href="http://home.myfantasyleague.com/">First Pick Labs, Inc.</a> All Rights Reserved. <a href="http://home.myfantasyleague.com/privacy.html">Privacy Policy</a> - <a href="http://home.myfantasyleague.com/terms.html">Terms Of Service</a> 
+ - <a href="http://home.myfantasyleague.com/use.html">Acceptable Use Policy</a> - Powered by: <a href="https://www.geniussports.com/">Genius Sports</a>.
+- <button id="pmLink">Privacy Manager</button>
+</td></tr>
+<tr><td colspan="2" align="center"><b>Disclaimer:</b>  This site is not
+in any way affiliated with, endorsed or licensed by the
+National Football League, any NFL team or NFLPA member.
+</td></tr></table></div>
+</body></html>

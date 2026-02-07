@@ -1,0 +1,14 @@
+season,server,league_id,error
+2010,www45,60671,{'$t': 'API requires logged in user in league ID 60671 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2011,www46,40832,{'$t': 'API requires logged in user in league ID 40832 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2012,www45,37227,{'$t': 'API requires logged in user in league ID 37227 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2013,www46,42721,{'$t': 'API requires logged in user in league ID 42721 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2014,www45,30590,{'$t': 'API requires logged in user in league ID 30590 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2015,www44,29015,{'$t': 'API requires logged in user in league ID 29015 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2016,www48,27191,{'$t': 'API requires logged in user in league ID 27191 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2017,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2018,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2019,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2020,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2021,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}
+2022,www48,74598,{'$t': 'API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter'}

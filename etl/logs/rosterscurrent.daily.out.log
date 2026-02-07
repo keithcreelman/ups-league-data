@@ -1,0 +1,10 @@
+Building rosters_current from API for season 2025…
+Current local time: 2026-02-05 05:48:46 EST
+Not in daily refresh window 00:00; skipping rosters_current run.
+Done.
+Building rosters_current from API for season 2025…
+Current local time: 2026-02-07 00:05:06 EST
+2025: running scheduled rosters_current refresh.
+2025: API week 22 is outside metadata bounds (1-17); using week 17.
+2025: rosters_current built from API for week 17 (404 rows).
+Done.

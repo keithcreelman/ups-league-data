@@ -1,0 +1,271 @@
+UPS Salary Cap Dynasty Rule Book V2014.1 2014
+This is the 2014 UPS Salary Cap Dynasty League's Official Rulebook.
+This contains a breakdown of the league's general rules and philosophies. A more comprehensive Contract Guide will be provided to breakdown all of the nuances surrounding this Salary Cap Fantasy Football League
+
+Table of Contents
+Chapter 1 - League Information
+Chapter 2 - Changing Rules
+Chapter 3 - Roster Composition
+Chapter 4 - Starting Lineup
+Chapter 5 - Rookie Draft
+Chapter 6 - Free Agent Auction
+Chapter 7 - Schedule
+Chapter 8 - Standings and Tiebreakers
+Chapter 9 - Championship Playoffs
+Chapter 10 - Toilet Bowl Playoffs
+Chapter 11 - Transactions
+Chapter 12 - Miscellaneous
+
+Chapter 1 - League Information
+1. League hosted on MyFantasyLeague.com (MFL)
+2. 12 Team Salary Cap League
+3. League will be split into 2 Conferences with 2 Divisions of 3 teams each within the Conference.
+   a. Beginning with the completion of the 2013 season, the league will realign every 3 years based on Historical All-Play Record from Weeks 1 - 13.
+   b. Divisions will be realigned based on the following All-Play ranks
+      i. 1st, 8th, 9th
+      ii. 3rd, 6th, 11th
+      iii. 2nd, 7th, 10th
+      iv. 4th, 5th, 12th
+   c. Any new owner that joins during a realignment year will be assigned a .500 All-Play Record for ranking purposes.
+4. League Entry Fee is $50
+5. Regular Season runs from Week 1 - Week 13
+6. Playoffs run from Week 14 - Week 16
+7. League will be governed by 3 team Competition Committee (CC) comprised of:
+   a. Keith Creelman - Keith.Creelman@gmail.com
+   b. Ryan Bousquet - RyanPBousquet@yahoo.com
+   c. Eric Mannila - epm366@gmail.com
+
+Chapter 2 - Changing Rules
+1. All rule changes that occur in the off-season or that will impact future seasons will require approval from 51% league members
+2. Any in-season rule that would directly impact the current season that is proposed will require 90% owners' approval in order to be passed.
+3. Polls that are not responded to will not be factored into the results.
+4. The CC has the authority to make determination on changes to the League if they unanimously feel it is for the betterment of the league.
+   a. If there is not a unanimous decision they may put it up for a normal league vote.
+
+Chapter 3 - Roster Composition
+1. In-Season Active Roster (September 1st through Week 16)
+   a. Roster Maximum of 26
+      i. During Auction roster maximum is 31 players.
+      ii. Roster must be down to 26 by September 1st or players will be removed in reverse order of acquisition until their roster meets the 26 player maximum.
+      iii. If removal of a player would result in an owner being unable to field a starting lineup, that player will be skipped and the next player would be selected.
+   b. Roster Minimum of 23
+   c. Must be able to field a starting lineup at all times.
+      i. If an in-season transaction results in an owner not being able to put out a full starting lineup, that GM will have 24 hours to fulfill their roster requirements. If this does not occur within 24 hours the transaction will be reversed.
+   d. Must stay under the $300,000 cap at all times.
+2. Off-Season Active Roster (Day after Week 16 Completion - August 1st)
+   a. No Roster Limits
+   b. No Cap Limit
+3. Taxi Squad
+   a. Taxi Squad can consist of any player who was drafted in the 2nd round or later of the Rookie Draft.
+   b. Once a player has been activated from the Taxi Squad he can not return.
+      i. Deadline to demote players to Taxi Squad from recent Rookie Draft is September 1st. Any player left on Active Roster by this point will not be allowed to be demoted.
+   c. Taxi Squad players do not count against the team's salary cap or active roster limits.
+   d. Taxi Squad maximum is 9 players based on the following criteria
+      i. 5 players with 3 years remaining on contract
+      ii. 3 players with 2 years remaining on contract
+      iii. 1 player with 1 year remaining on contract
+   e. Deadline to ensure player limits are within rules is September 1st. If deadline is not met, players will be removed in reverse order from when they were added to the Taxi Squad in order to be in compliance.
+   f. Any Taxi Squad eligible player that gets traded will retain eligibility.
+4. Injured Reserve
+   a. No limit for player's on Injured Reserve (IR).
+   b. Must be listed as IR on MFL's website to be eligible.
+   c. All players on IR will have salary reduced by 50% once deactivated.
+   d. If a player has been designated for return by his NFL team, that player will need to be activated upon his return from IR status.
+      i. Owner will not be allowed to submit a lineup until he is activated
+      ii. Salary reduction is eliminated once player is activated.
+   e. During the off-season if a player under contract is no longer eligible for the IR spot they must be activated prior to the Free Agent Auction or they will be cut from the team.
+      i. Any applicable cap hits will be applied against the current season.
+
+Chapter 4 - Starting Lineup
+1. Basics
+   a. Lineups DO NOT carry over from prior week, owner must set lineup each week.
+   b. All players must be submitted into lineup prior to that player's game time.
+      i. Should a situation occur and an owner can not make a lineup submission they may submit a message to a member of the CC asking for assistance. Should the message be time stamped prior to the lineup deadline the commissioner will retroactively set that owner's lineup.
+   c. Any player who is on a bye can not be submitted into the starting lineup.
+   d. NFL Official Injury Reports are published on Friday every week. If a player is listed as Out and is entered into a starting lineup this will result in a warning to the team.
+   e. If a player is listed as Doubtful on Friday's report an owner may submit into lineup at their own risk. Should the player become deactivated on Sunday, that will result in a warning as well.
+   f. Should a team not submit a lineup by Thursday morning, MFL will automatically submit a lineup based off the site's projections. It is the owner's responsibility to make sure they submit their own lineup or run the risk of having MFL submit a player that they do not want starting.
+2. Starting Lineup Requirements
+   a. 1 Quarterback (QB)
+   b. 1 Running Back (RB)
+   c. 2 Wide Receiver (WR)
+   d. 1 Tight End (TE)
+   e. 2 Offensive Flex (RB, WR, TE)
+   f. 1 Defensive Linemen (DL)
+      i. Defensive End (DE) or Defensive Tackle (DT)
+   g. 1 Linebacker (LB)
+   h. 1 Defensive Back (DB)
+      i. Cornerback (CB) or Safety (S)
+   i. 3 Defensive Flex (DL, LB, DB)
+   j. 1 Kicker (K)
+   k. 1 Punter (P)
+
+Chapter 5 - Rookie Draft
+1. Basics
+   a. 5 Round NFL Style Draft (Non-Snake)
+   b. Takes place annually in June
+   c. Timer will be 3 minutes for each pick. If the timer runs out the pick will be made automatically using ADP data for determination.
+   d. Draft order will be determined based on finish to UPS Playoffs.
+      i. Toilet Bowl Playoffs will determine picks 1-6
+      ii. Championship Playoffs will determine picks 7-12
+2. Eligibility
+   a. Any player who is eligible for the NFL Draft would be eligible.
+   b. Generally, any players who are eligible for the NFL draft or who is a NFL free agent with no prior experience in the league is considered eligible.
+   c. Players remaining in college for the following season are not eligible.
+   d. If you have a question about a specific player's eligibility please present the question to the league prior to the rookie draft.
+   e. MFL is the authority on determining if a player belongs in the Rookie Draft.
+3. Supplemental Draft
+   a. If a player is selected in the NFL Supplemental Draft and this occurs after the conclusion of our Rookie Draft the league will conduct our own Supplemental Draft.
+   b. This will mirror the NFL in that each team can bid on what round draft pick they want to forfeit from the following season in order to obtain the player.
+   c. Bidding will be done in the form of a poll posted on the league's website with the results hidden from everyone until the close of the auction.
+   d. In the event of a tie, the tie breaker will be based on "Draft Order" as a result of the prior season's playoff results.
+   e. If there are no bids on the player, the player will be available in the upcoming Free Agent Auction.
+4. Contracts
+   a. Please refer to Contract section for breakdown of Rookie Salary Scale.
+
+Chapter 6 - Free Agent Auction
+1. Basics
+   a. eBay style auction draft.
+   b. Takes place annually at midnight on August 1st.
+   c. All Players not under contract at the time of the Auction will be available.
+   d. Once the auction begins, teams will NOT be allowed to make any player cuts until AFTER the action has been completed.
+2. The Draft
+   a. Each team will be allowed to nominate only 1 player per day.
+      i. After 10 days of nominations the CC may decide to increase the number of nominations up to two per day.
+   b. Each player will have a 24 hour timer attached to them. Anytime there is a new high bidder on the player this resets the 24 hour timer.
+   c. Bids must be made in increments of $1,000 with a minimum bid of $1,000.
+   d. Teams must have a minimum of 23 players at the completion of the Auction but no more than 31 players.
+   e. Teams must also be able to field a complete starting lineup.
+   f. Owners will not be allowed to retract a bid on a player with the exception being if they accidentally nominated the wrong player and notify the league via message board post immediately after the nomination.
+   g. Teams may not bid on a player if it puts them over the salary cap or if they don't have enough money remaining to fulfill the minimum roster requirements using the minimum bid for remaining open roster spots.
+3. Missing a Nomination
+   a. In order for the Auction to run smoothly it is imperative that each owner log in once per day and nominate one and only one player per day.
+   b. If an owner knows in advance that they will be out and will miss a day they should inform the league ahead of time.
+   c. If an owner accidentally misses a day for whatever reason this is OK but please do not make a habit of this it screws up the dynamics of the draft.
+   d. If an owner logs in on a day and does not nominate a player this will count as a warning against the player. (See Warnings)
+   e. Once an owner has the requisite number of players to field a team and has at least 23 players they can not miss one day of nominations. Any missed day will indicate to the league that the owner is done bidding.
+
+Chapter 7 - Schedule
+1. Regular Season
+   a. The regular season will run from Week 1 of the NFL through Week 13
+   b. Each team will play a double-header each week.
+   c. This will result in a 26 game regular season schedule.
+      i. Each team will play own division members 4 times
+      ii. Each team will play teams outside of their division twice.
+2. Playoffs
+   a. Playoffs will run from Week 14 - Week 16 of the NFL season.
+
+Chapter 8 - Standings and Tiebreakers
+1. Divisional Champs are determined in the following order. (2 Per Conference)
+   a. Overall Winning Percentage (Pct)
+   b. Divisional Winning Percentage (Div Pct)
+   c. Head-to-Head Record
+   d. Most Points For (PF)
+   e. All-Play Record
+   f. Power Rank (PWR)
+   g. Coin Flip
+2. Wild Card Standings (1 Wild Card per Conference)
+   a. All-Play Record
+   b. Most Points For (PF)
+   c. Head-to-Head Record
+   d. Power Rank (PWR)
+   e. Coin Flip
+3. 1 vs. 2 seed (Criteria)
+   a. Overall Winning Percentage (Pct)
+   b. Head-to-Head Record
+   c. All-Play Record
+   d. Most Points For (PF)
+   e. Power Rank (PWR)
+   f. Coin Flip
+
+Chapter 9 - Championship Playoffs
+1. Seeding - Conference Based
+   a. #1 Seed is the highest ranked Divisional winner for each conference. Earns 1st round bye.
+   b. #2 Seed will be the lower ranked of the 2 division winners.
+   c. #3 Seed will be the Wild Card Winner from the Conference.
+2. Schedule
+   a. Week 14 the 2 seed from each Conference will play the 3 seed from each Conference.
+   b. Week 15 the winners from Week 14 will play the 1 seed from their respective Conferences. Meanwhile the losers from Week 14 will play to determine the 7th (Winner) and 8th (Loser) picks in the following season's Rookie Draft.
+   c. Week 16 the winners from Week 15 will meet for the UPS Championship. The losers from Week 15 will play for the right to 3rd place prize money and the right to the 9th (Loser) and 10th (Winner) picks in the following season's Rookie Draft.
+   d. The League Champion will receive the 12th pick ad the runner-up will receive the 11th pick in the following season's Rookie Draft.
+
+Chapter 10 - Toilet Bowl Playoffs
+1. Seeding - Conference Based
+   a. #1 Seed Best All-Play Team from Conference not to make the playoffs.
+   b. #2 2nd Best All-Play Team from Conference not to make the playoffs.
+   c. #3 3rd Best All-Play Team from Conference not to make the playoffs.
+2. Schedule
+   a. Week 14 the 2 seed from each Conference will play the 3 seed from each Conference.
+   b. Week 15 the winners from Week 14 will play each other for the right for the 1st overall pick (winner) and 2nd overall pick (loser) in the following season's Rookie Draft. The losers from Week 14 will play the 1 seed from their respective Conferences.
+   c. Week 16 the winners from Week 15 will meet for the right to the 3rd overall pick (winner) and the 4th overall pick (loser) in the following season's Rookie Draft. The losers from Week 15 will play for the rights to 5th overall pick (winner) and the 6th (loser) pick in the following season's Rookie Draft.
+
+Chapter 11 - Transactions
+1. Dropping a Player
+   a. A player may be dropped at any point in season except if:
+      i. Transaction results in a player not having 23 Player Minimum
+      ii. During the Free Agent Auction Period
+      iii. Once a player's game has started for that week.
+   b. Any player that is cut will become available on the following Monday at 9:00 PM for Blind Bid Waivers.
+   c. Dropping a player may result in a Cap Penalty for the following season. (See Contracts for more details)
+2. Blind Bid Waivers
+   a. Waivers are processed at 9 AM on Wednesday, Thursday, Saturday and Sunday each week during the season.
+   b. Owners will bid on the services of players in the Free Agent Pools. Once the Waiver period has expired the system will award the player with the highest bid.
+   c. Minimum Bid is $1,000
+   d. Bid increments in $1,000 increments
+   e. Winning bid becomes that player's contract amount for a 1 year contract.
+   f. Tie-Breakers for bids will be based on reverse order of the following:
+      i. Overall Winning %
+      ii. All-Play Winning %
+      iii. Total Points Scored
+      iv. H2H record
+   g. For any tiebreakers on waivers that occur before the season begins, the waiver tie-breaker will be the draft order.
+   h. There will be no Blind Bid Waivers during the Off-Season.
+   i. The 1st Waiver Period will be ran the 1st Wednesday following the Free Agent Auction and will follow the normal weekly cycle.
+3. First Come First Serve Free Agents
+   a. Beginning at 9 AM on the Sunday of Week 1 and running every Sunday through Week 16 we will allow first come first serve free agents to be picked up.
+   b. Free Agents carry with them a 1 year $1,000 contract.
+   c. Free Agent pickups may occur up until that player's game time. But no player whose game has already started this week may be dropped to pick him up.
+4. Trades
+   a. Trades are allowed on MFL for two teams wishing to trade players that are under contract and Rookie Draft picks for the current year's draft plus the draft of one season ahead.
+      i. If multiple teams would like to pull off a trade such as a "3-way" they may do so by posting as such on the Message Board.
+   b. Once a trade has been agreed upon it will be processed by the league's commissioner.
+      i. If an owner feels as though a trade is fishy and might involve collusion they may address this in response to the email or via message board post as to why you feel there was collusion and how this trade jeopardizes the integrity of the league.
+      ii. If two owners respond in such a manner a poll will be conducted to determine whether the trade should be vetoed or not.
+      iii. This is an extremely complex and dynamic league so there are many trades where it may seem a player may not be getting equal value in return. Please make sure you consider why an owner might be making a move before accusing of collusion.
+   c. Any trade that would result in an owner exceeding the Cap, that owner will have 24 hours from the time the trade was processed to get under the cap
+   d. Any player, who has been submitted as a starter for that week, will require that the trade occur 4 hours before his scheduled kickoff for it to be automatically processed. If the trade is accepted within the 4 hour timeframe, the commissioner will reach out to each owner to ensure that they have ample time to resubmit a starting lineup.
+   e. Trading will begin March 1st every year and will run up until the kickoff of Week 12.
+
+Chapter 12 - Miscellaneous
+1. League Dues
+   a. $50 - For all returning players due by start of Free Agent Auction
+   b. $60 - For any new owners to cover art design of team icon.
+2. Payouts
+   a. Champion - $255
+   b. 2nd Place - $125
+   c. 3rd Place - $50
+   d. Divisional Champs (4) - $25 each
+3. Warnings
+   a. Please see section 3d, 4d and 4e for reference. If an owner receives a 2nd warning during the course of the year this will result in a $10 fine due payable with the following year's league dues.
+   b. If an owner receives a 3rd warning this will result in an ADDITIONAL $20 in fines due payable with next year's dues.
+   c. If an owner receives a 4th warning this will result an ADDITIONAL $30 in fines. At this point the owner will have amassed $60 in fines. At this point the owner will be locked out and will be required to pay all League Dues via PayPal in order to have ownership rights restored. If fines are not paid by the following week the league may decide to vote the owner out.
+      i. If this occurs the CC will run this team until a replacement has been found.
+   d. All fines collected will be used to help off-set the cost of the league site the following year, or if more has been collected, this will be distributed in accordance to how the CC rules for the following season.
+4. Trading Warnings
+   a. Owners that receive trade offers are required to respond to any and all trade offers they receive. Even if it is to at least acknowledge to the other owner that you received it and are thinking it over.
+   b. If no response has been received, the owner who sent the request has the ability to hand out a strike to the violating team by posting on the "League Message Board".
+      i. From the start of the FA Auction until the Week 12 kickoff (Trade Deadline) owners will have 4 days to respond to a trade.
+      ii. From March 1st until the Free Agent Auction, owners are given 2 weeks to respond. (Default trade offers are only 7 days)
+   c. 3 Strikes against an owner during the year will result in loss of trading privileges for the remainder of the year.
+   d. An owner will be given leniency for situations that obviously warrant them.
+5. Replacing Owners
+   a. In the event that a team needs to have a replacement owner found. The replacement owner will inherit the team as it was currently constructed but will have 2 options at their disposal in order to not be held victim for someone else's mistakes.
+      i. They may cut 1 player free of any cap penalties. This player will need to be posted on the League Message Board as the player that will be getting this exemption. This cut must occur before the Free Agent Auction. In the event that an owner takes over after the Free Agent Auction, he must do so in a reasonable time frame.
+      ii. They are relived of any Cap Hits incurred from the prior owner.
+   b. In the event that two or more owners need to be replaced, we will conduct a "New Owner's Disbursement Draft". This will include the pooling of all players and picks that reside on the teams being replaced and we will conduct a snake draft in which the new owners may select from players on active roster, taxi squad players, or rookie draft picks.
+      i. The new owner will be drafting the rights to not only the player but the contract as well
+      ii. The draft order will be determined randomly.
+      iii. Owners will draft players as well as draft picks until all players who are under contract from these teams is exhausted
+      iv. New owners may also select players with the idea to Franchise or Transitional Tag them.
+      v. They may cut 1 player free of any cap penalties. This player will need to be posted on the League Message Board as the player that will be getting this exemption. This cut must occur before the Free Agent Auction. In the event that an owner takes over after the Free Agent Auction, he must do so in a reasonable time frame.
+      vi. They are relived of any Cap Hits incurred from the prior owner.

@@ -80,6 +80,40 @@
     return `${y}-${m}-${da}`;
   }
 
+  function fmtYMDDate(d) {
+    if (!d || isNaN(d.getTime())) return "";
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${da}`;
+  }
+
+  function addDays(d, days) {
+    const out = new Date(d.getTime());
+    out.setDate(out.getDate() + days);
+    return out;
+  }
+
+  function getMemorialDay(year) {
+    if (!year) return null;
+    const d = new Date(year, 4, 31);
+    const day = d.getDay();
+    const offset = (day + 6) % 7;
+    d.setDate(d.getDate() - offset);
+    return d;
+  }
+
+  function getTagDeadlineInfo(season) {
+    const s = safeInt(normalizeSeasonValue(season));
+    if (!s) return null;
+    const year = s + 1;
+    const memorial = getMemorialDay(year);
+    if (!memorial) return null;
+    const rookieDraft = addDays(memorial, -1);
+    const tagDeadline = addDays(memorial, -4);
+    return { year, memorial, rookieDraft, tagDeadline };
+  }
+
   function fmtLocalYMDHM(d) {
     if (!d || isNaN(d.getTime())) return "";
     const y = d.getFullYear();
@@ -103,6 +137,7 @@
 
   const LOCAL_OVERRIDE_KEY = "ccc_mym_submit_overrides_v1";
   const LOCAL_ASOF_OVERRIDE_KEY = "ccc_asof_override_v1";
+  const LOCAL_TAG_SELECTIONS_KEY = "ccc_tag_selections_v1";
 
   function loadLocalOverrides() {
     try {
@@ -118,6 +153,23 @@
   function saveLocalOverrides(overrides) {
     try {
       localStorage.setItem(LOCAL_OVERRIDE_KEY, JSON.stringify(overrides || {}));
+    } catch (e) {}
+  }
+
+  function loadTagSelections() {
+    try {
+      const raw = localStorage.getItem(LOCAL_TAG_SELECTIONS_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveTagSelections(selections) {
+    try {
+      localStorage.setItem(LOCAL_TAG_SELECTIONS_KEY, JSON.stringify(selections || {}));
     } catch (e) {}
   }
 
@@ -1166,7 +1218,7 @@
     `;
   }
 
-  function renderTagSummary(teamName, rows) {
+  function renderTagSummary(teamName, rows, season, selectedTeamId, showAllTeams) {
     const count = rows.length;
     const avgTagSalary = count
       ? Math.round(rows.reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0) / count)
@@ -1174,6 +1226,32 @@
     const tier1 = rows.filter((r) => safeInt(r.tag_tier) === 1).length;
     const tier2 = rows.filter((r) => safeInt(r.tag_tier) === 2).length;
     const tier3 = rows.filter((r) => safeInt(r.tag_tier) === 3).length;
+    const deadlineInfo = getTagDeadlineInfo(season);
+
+    let selectionsHtml = "";
+    if (!showAllTeams && selectedTeamId) {
+      const selections = getTagSelectionsForTeam(season, selectedTeamId);
+      if (selections.length) {
+        const selectionItems = selections
+          .map(
+            (sel) => `
+              <span class="pill">${htmlEsc(sel.side)}: ${htmlEsc(sel.player_name)} (${htmlEsc(
+              sel.pos
+            )})</span>
+              <button type="button" class="ccc-pageBtn" data-tag-clear="1" data-tag-key="${htmlEsc(
+                sel.key
+              )}">Clear</button>
+            `
+          )
+          .join("");
+        selectionsHtml = `
+          <div class="muted" style="font-size:12px; margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            <span style="font-weight:900; color: rgba(233,238,249,.8);">Selected Tags</span>
+            ${selectionItems}
+          </div>
+        `;
+      }
+    }
 
     return `
       <div class="ccc-summaryTop">
@@ -1200,7 +1278,19 @@
           <div class="value">${tier2} / ${tier3}</div>
           <div class="hint">remaining tracked tiers</div>
         </div>
+        ${
+          deadlineInfo
+            ? `
+        <div class="kpi">
+          <div class="label">Tag Deadline</div>
+          <div class="value">${htmlEsc(fmtYMDDate(deadlineInfo.tagDeadline))}</div>
+          <div class="hint">Rookie draft: ${htmlEsc(fmtYMDDate(deadlineInfo.rookieDraft))}</div>
+        </div>
+        `
+            : ""
+        }
       </div>
+      ${selectionsHtml}
     `;
   }
 
@@ -1329,19 +1419,42 @@
     const body = pageRows
       .map((r) => {
         const posKey = htmlEsc(posKeyFromRow(r));
+        const season = normalizeSeasonValue(r.season || state.selectedSeason);
+        const side = safeStr(r.tag_side || "OFFENSE");
+        const limit = Math.max(1, safeInt(r.tag_limit_per_side || 1));
+        const key = buildTagSelectionKey(season, r.franchise_id, side);
+        const selected = state.tagSelections[key];
+        const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
+        const isLocked = !!selected && !isSelected && limit <= 1;
+        const tagLabel = isSelected ? "Untag" : isLocked ? "Locked" : "Tag";
+        const tagBtnClass = `ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}`;
+        const tagBtn = `
+          <button
+            type="button"
+            class="${tagBtnClass}"
+            data-tag-action="1"
+            data-tag-side="${htmlEsc(side)}"
+            data-tag-limit="${limit}"
+            data-season="${htmlEsc(season)}"
+            data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
+            data-player-id="${htmlEsc(r.player_id)}"
+            data-player-name="${htmlEsc(r.player_name)}"
+            data-pos="${htmlEsc(posKeyFromRow(r))}"
+            ${isLocked ? `disabled` : ``}
+            ${isLocked ? `title="Tag already used for ${htmlEsc(side)}"` : ``}
+          >${tagLabel}</button>
+        `;
         return `
           <tr class="pos-${posKey}">
+            <td>${tagBtn}</td>
+            <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
-            <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td>${htmlEsc(posKeyFromRow(r))}</td>
-            <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
+            <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
-            <td class="cell-num">${safeInt(r.prior_aav_week1 || r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
             <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
             <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
-            <td class="cell-num">${safeInt(r.tag_base_bid || r.tag_salary).toLocaleString()}</td>
-            <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
           </tr>
         `;
@@ -1354,17 +1467,15 @@
         <table class="ccc-table">
           <thead>
             <tr>
+              <th style="min-width:120px;">Tag</th>
+              ${sortTh("tagBid", "Cost to Tag (Projected Bid)", "min-width:190px;", "is-num")}
               ${sortTh("team", "Team")}
+              ${sortTh("pos", "Position")}
               ${sortTh("player", "Player")}
-              ${sortTh("pos", "Pos")}
-              ${sortTh("salary", "Salary", "", "is-num")}
               ${sortTh("aav", "AAV", "", "is-num")}
-              ${sortTh("priorAav", "Prior AAV (W1)", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
-              ${sortTh("tagRank", "Pos Rank", "", "is-num")}
+              ${sortTh("tagRank", "Positional Rank", "", "is-num")}
               ${sortTh("tagTier", "Tier", "", "is-num")}
-              ${sortTh("tagSalary", "Tier Bid", "", "is-num")}
-              ${sortTh("tagBid", "Projected Tag Bid", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}
             </tr>
           </thead>
@@ -1385,6 +1496,7 @@
     isAdmin: false,
     canCommishMode: false,
     commishMode: false,
+    commishConsoleOpen: false,
     adminReason: "",
     activeModule: "mym",
     selectedSeason: "",
@@ -1403,6 +1515,7 @@
     search: "",
     activeTab: "eligible",
     localOverrides: loadLocalOverrides(),
+    tagSelections: loadTagSelections(),
     adminDebug: null,
   };
 
@@ -1410,6 +1523,29 @@
     const s = safeStr(v);
     const m = s.match(/\d{4}/);
     return m ? m[0] : s;
+  }
+
+  function buildTagSelectionKey(season, franchiseId, side) {
+    const league = safeStr(getLeagueId() || DEFAULT_LEAGUE_ID);
+    const s = normalizeSeasonValue(season) || DEFAULT_YEAR;
+    const fid = pad4(franchiseId);
+    const tagSide = safeStr(side || "OFFENSE");
+    return `${league}|${s}|${fid}|${tagSide}`;
+  }
+
+  function getTagSelectionsForTeam(season, franchiseId) {
+    const league = safeStr(getLeagueId() || DEFAULT_LEAGUE_ID);
+    const s = normalizeSeasonValue(season) || DEFAULT_YEAR;
+    const fid = pad4(franchiseId);
+    const out = [];
+    Object.entries(state.tagSelections || {}).forEach(([key, sel]) => {
+      if (!sel) return;
+      if (safeStr(sel.league_id || league) !== league) return;
+      if (normalizeSeasonValue(sel.season) !== s) return;
+      if (pad4(sel.franchise_id) !== fid) return;
+      out.push({ key, ...sel });
+    });
+    return out;
   }
 
   function buildSeasonList(eligibilityRows, submissionRows, restructureRows, tagRows) {
@@ -1865,9 +2001,16 @@
   function syncCommishConsole(seasonRows) {
     const consoleEl = $("#commishConsole");
     const playerSelect = $("#commishPlayerSelect");
+    const toggleBtn = $("#commishConsoleBtn");
     if (!consoleEl || !playerSelect) return;
 
-    const isVisible = !!state.canCommishMode && !!state.commishMode;
+    const canShow = !!state.canCommishMode && !!state.commishMode;
+    if (toggleBtn) {
+      toggleBtn.style.display = canShow ? "" : "none";
+      toggleBtn.textContent = state.commishConsoleOpen ? "Hide Commish Console" : "Commish Console";
+    }
+
+    const isVisible = canShow && !!state.commishConsoleOpen;
     consoleEl.style.display = isVisible ? "" : "none";
     if (!isVisible) return;
 
@@ -2150,7 +2293,8 @@
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
 
-      if (summary) summary.innerHTML = renderTagSummary(teamName, tagRows);
+      if (summary)
+        summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
       if (tabSummary) tabSummary.innerHTML = renderTagSummaryPage(tagRows, teamName, selectedPosition);
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
@@ -2842,6 +2986,7 @@
       must("#commishConsoleMsg");
       must("#commishModeWrap");
       must("#commishModeChk");
+      must("#commishConsoleBtn");
       must("#searchBox");
       must("#adminBadge");
       must("#adminControls");
@@ -2934,6 +3079,7 @@
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;
       state.commishMode = state.canCommishMode ? true : false;
+      state.commishConsoleOpen = false;
       state.adminReason = adminReason;
       state.adminDebug = {
         canCommish: !!canCommish,
@@ -3349,11 +3495,20 @@
         submitCommishContractUpdate();
       });
 
+    const commishConsoleBtn = $("#commishConsoleBtn");
+    if (commishConsoleBtn)
+      commishConsoleBtn.addEventListener("click", () => {
+        if (!state.canCommishMode || !state.commishMode) return;
+        state.commishConsoleOpen = !state.commishConsoleOpen;
+        render();
+      });
+
     const commishModeChk = $("#commishModeChk");
     if (commishModeChk)
       commishModeChk.addEventListener("change", (e) => {
         if (!state.canCommishMode) return;
         state.commishMode = !!e.target.checked;
+        if (!state.commishMode) state.commishConsoleOpen = false;
         const adminBadge = $("#adminBadge");
         const adminControls = $("#adminControls");
         if (adminBadge) adminBadge.style.display = state.commishMode ? "" : "none";
@@ -3462,6 +3617,75 @@
       true
     );
 
+    // Tag selection buttons
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-action='1']") : null;
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const season = normalizeSeasonValue(btn.getAttribute("data-season") || state.selectedSeason);
+        const side = safeStr(btn.getAttribute("data-tag-side") || "OFFENSE");
+        const limit = Math.max(1, safeInt(btn.getAttribute("data-tag-limit") || 1));
+        const fid = pad4(btn.getAttribute("data-franchise-id"));
+        const pid = safeStr(btn.getAttribute("data-player-id"));
+        const playerName = safeStr(btn.getAttribute("data-player-name"));
+        const pos = safeStr(btn.getAttribute("data-pos"));
+        const key = buildTagSelectionKey(season, fid, side);
+        const existing = state.tagSelections[key];
+
+        if (existing && safeStr(existing.player_id) === pid) {
+          delete state.tagSelections[key];
+          saveTagSelections(state.tagSelections);
+          render();
+          return;
+        }
+
+        if (existing && limit <= 1) {
+          return;
+        }
+
+        state.tagSelections[key] = {
+          league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
+          season,
+          franchise_id: fid,
+          player_id: pid,
+          player_name: playerName,
+          pos,
+          side,
+          at: Date.now(),
+        };
+        saveTagSelections(state.tagSelections);
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-clear='1']") : null;
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const key = safeStr(btn.getAttribute("data-tag-key"));
+        if (!key) return;
+        delete state.tagSelections[key];
+        saveTagSelections(state.tagSelections);
+        render();
+      },
+      true
+    );
+
     // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
     document.addEventListener(
       "click",
@@ -3563,15 +3787,70 @@
   }
 
   // ======================================================
+  // IFRAME AUTO-HEIGHT (mobile scroll fix)
+  // ======================================================
+  function getDocHeight() {
+    const body = document.body;
+    const html = document.documentElement;
+    const app = document.getElementById("cccApp");
+    const appRect = app ? app.getBoundingClientRect() : null;
+    const appBottom = appRect ? appRect.top + appRect.height + window.scrollY : 0;
+    return Math.max(
+      body ? body.scrollHeight : 0,
+      body ? body.offsetHeight : 0,
+      html ? html.clientHeight : 0,
+      html ? html.scrollHeight : 0,
+      html ? html.offsetHeight : 0,
+      appBottom
+    );
+  }
+
+  function startAutoHeightMessaging() {
+    if (!window.parent || window.parent === window) return;
+
+    let lastHeight = 0;
+    let rafId = null;
+
+    const send = () => {
+      rafId = null;
+      const height = Math.ceil(getDocHeight());
+      if (!height || Math.abs(height - lastHeight) < 2) return;
+      lastHeight = height;
+      window.parent.postMessage({ type: "ccc-height", height }, "*");
+    };
+
+    const schedule = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(send);
+    };
+
+    schedule();
+    window.addEventListener("resize", schedule);
+    window.addEventListener("load", schedule);
+    document.addEventListener("visibilitychange", schedule);
+
+    if ("ResizeObserver" in window) {
+      const ro = new ResizeObserver(schedule);
+      if (document.body) ro.observe(document.body);
+      const app = document.getElementById("cccApp");
+      if (app) ro.observe(app);
+    } else {
+      window.setInterval(schedule, 500);
+    }
+  }
+
+  // ======================================================
   // START
   // ======================================================
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       wireEvents();
       load();
+      startAutoHeightMessaging();
     });
   } else {
     wireEvents();
     load();
+    startAutoHeightMessaging();
   }
 })();

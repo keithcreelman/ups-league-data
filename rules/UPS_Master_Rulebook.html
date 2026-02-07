@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UPS Master Rulebook (Consolidated)</title>
+  <style>
+    :root {
+      --bg: #f7f2ea;
+      --fg: #1f1a14;
+      --muted: #6b5d4b;
+      --accent: #7b2d1e;
+      --accent-2: #1e4b7b;
+      --card: #fffaf3;
+      --border: #e2d6c5;
+    }
+    body {
+      margin: 0;
+      font-family: "Charter", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+    }
+    header {
+      padding: 32px 24px 8px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #fff7eb 0%, #f7f2ea 100%);
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    .sub { color: var(--muted); margin: 0; }
+    main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+    nav { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin: 16px 0 24px; }
+    nav ul { list-style: none; padding: 0; margin: 0; columns: 2; }
+    nav li { margin: 6px 0; }
+    nav a { color: var(--accent-2); text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    section { margin: 28px 0; padding: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+    h2 { margin-top: 0; font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .changes, .flags { background: #fff2e6; border: 1px dashed #d7a98c; padding: 10px 12px; border-radius: 10px; margin: 12px 0; }
+    .flags { background: #ffecec; border-color: #e1a1a1; }
+    details { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin: 10px 0; background: #fffdf8; }
+    summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+    .current h4 { margin: 8px 0; color: var(--accent-2); }
+    .current p { margin: 6px 0; }
+    .meta { font-size: 14px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>UPS Master Rulebook (Consolidated)</h1>
+    <p class="sub">Consolidated from all available UPS rulebook iterations. Current source: <strong>UPS Rule Book.docx</strong> (Version 2024.2, Last Updated 8/31/2024).</p>
+    <p class="sub">Generated on February 06, 2026. Included legacy text from UPS FFL Bylaws V2014.1.</p>
+  </header>
+  <main>
+    <section id="front-matter">
+      <h2>Front Matter</h2>
+      <div class="current">
+        <h4>Current Rulebook Intro (UPS Rule Book 2024.2)</h4>
+        <p>UPS Salary Cap Dynasty League Rulebook</p>
+        <p>Welcome to the UPS Salary Cap Dynasty League</p>
+        <p>This rulebook is the official guide for all league operations, providing detailed rules, guidelines, and processes that govern our unique fantasy football league. Whether you are a veteran member or a newcomer, this document is your go-to resource for understanding the structure, transactions, and expectations within our league.</p>
+        <p>Commissioner: Keith Creelman</p>
+        <p>Version: 2024.2</p>
+        <p>Last Updated: 8/31/2024</p>
+        <p>Mission Statement:</p>
+        <p>Our mission is to provide a uniquely kick-ass fantasy football experience that frankly takes a massive dump on any other league ever created. Owners are hand-selected from an elite pool of individuals that have proven on an annual basis that they are dedicated to sacrificing their marriages, career advancement, and any other "life-obstacles" for the betterment of their fantasy football teams and the league itself.</p>
+        <p>Note: While we do encourage commitment, this is all in good fun. We don&#x27;t really want you to forsake your family... just make sure this is second. </p>
+        <p>Table of Contents</p>
+        <p>League Overview</p>
+        <p>1.1 Overview</p>
+        <p>1.2 League Structure</p>
+        <p>1.3 Expectation of Owners</p>
+        <p>1.4 League Membership</p>
+        <p>1.5 League Governance</p>
+        <p>League Calendar</p>
+        <p>Roster Management</p>
+        <p>3.1 Active Roster</p>
+        <p>3.2 Injured Reserve</p>
+        <p>3.3 Taxi Squad</p>
+        <p>3.4 Starting Lineup</p>
+        <p>3.5 Super Flex Rules</p>
+        <p>Rookie Draft</p>
+        <p>4.1 Overview</p>
+        <p>4.2 Draft Rules</p>
+        <p>4.3 Draft Order</p>
+        <p>4.4 Rookie Draft Salary &amp; Contracts</p>
+        <p>4.5 1ST Round Rookie Option</p>
+        <p>Free Agent Auction</p>
+        <p>5.1 Auction Overview</p>
+        <p>5.2 Auction Roster Lock Date</p>
+        <p>5.3 Auction Floor</p>
+        <p>Expired Rookie Auction</p>
+        <p>6.1 Eligibility &amp; Overview</p>
+        <p>6.2 Auction Rules</p>
+        <p>6.3 Auction Contracts</p>
+        <p>Waivers</p>
+        <p>7.1 Overview</p>
+        <p>7.2 Blind Bid Waivers</p>
+        <p>7.3 First-Come, First-Serve (FCFS) Free Agency</p>
+        <p>7.4 Waiver Compliance and Responsibilities</p>
+        <p>Trades</p>
+        <p>8.1 Overview</p>
+        <p>8.2 Eligibility</p>
+        <p>8.3 Additional Trade Rules</p>
+        <p>Contract Management</p>
+        <p>9.1 Glossary of Contract Terms</p>
+        <p>9.2 Contract Types</p>
+        <p>9.3 Contract Minimums and Maximums</p>
+        <p>9.4 Contract Transactions</p>
+        <p>9.5 Contract Guarantees &amp; Cap Penalties</p>
+        <p>League Financing</p>
+        <p>10.1 Overview</p>
+        <p>10.2 Payment Schedule</p>
+        <p>10.3 League Payout Structure</p>
+        <p>10.4 Miscellaneous Fees</p>
+        <p>10.5 Payment Methods</p>
+        <p>Penalties and Miscellaneous League Rules</p>
+        <p>11.1 Overview of Penalties</p>
+        <p>11.2 Placeholder for Penalties</p>
+        <p>11.3 Placeholder for Penalty Details</p>
+        <p>11.4 Miscellaneous League Rules</p>
+      </div>
+    </section>
+    <nav>
+      <strong>Table of Contents</strong>
+      <ul>
+        <li><a href="#section-1">1. League Overview</a></li>
+        <li><a href="#section-2">2. League Calendar</a></li>
+        <li><a href="#section-3">3. Roster Management</a></li>
+        <li><a href="#section-4">4. Rookie Draft</a></li>
+        <li><a href="#section-5">5. Free Agent Auction</a></li>
+        <li><a href="#section-6">6. Expired Rookie Auction</a></li>
+        <li><a href="#section-7">7. Waivers</a></li>
+        <li><a href="#section-8">8. Trades</a></li>
+        <li><a href="#section-9">9. Contract Management</a></li>
+        <li><a href="#section-10">10. League Financing</a></li>
+        <li><a href="#section-11">11. Penalties and Miscellaneous League Rules</a></li>
+      </ul>
+    </nav>
+    <section id="section-1">
+      <h2>1. League Overview</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>2014 rules define 2 conferences with 2 divisions of 3 teams; the current rulebook uses 4 divisions (no conferences).</li>
+        <li>2014 entry fee was $50 ($60 for new owners); current rulebook lists $200 dues.</li>
+        <li>Competition Committee (CC) was eliminated (during the season the Baldarellis were banned); current governance is commissioner-led.</li>
+        <li>Current rulebook adds admission quiz, two-season probation, and dispersal draft for new owners, which are not present in legacy versions.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether legacy voting thresholds (51% off-season, 90% in-season, 75% dues) still apply under commissioner-led governance.</li>
+        <li>Confirm whether conference-based standings/tiebreakers and double-header scheduling still apply (detailed in 2014 rulebook but not in current).</li>
+      </ul></div>
+      <details>
+        <summary>1. League Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+        </div>
+      </details>
+      <details>
+        <summary>1.1 Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>The UPS Salary Cap Dynasty League is designed to offer a dynamic and competitive fantasy football experience, combining the strategic depth of salary cap management with the long-term planning required in a dynasty format. This league fosters a community of dedicated owners who are committed to fair play, strategic thinking, and a relentless pursuit of championship glory.</p>
+        </div>
+      </details>
+      <details>
+        <summary>1.2 League Structure</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Teams and Divisions:</p>
+          <p>The league consists of 12 teams, divided into 4 divisions.</p>
+          <p>Divisions are realigned every 3 years based on each team&#x27;s historical all-play record.</p>
+          <p>Division Assignments:</p>
+          <p>Division 1: 1/8/9 All-Play</p>
+          <p>Division 2: 2/7/10 All-Play</p>
+          <p>Division 3: 3/6/11 All-Play</p>
+          <p>Division 4: 4/5/12 All-Play</p>
+          <p>New owners entering the league during a realignment year are assigned an All-Play record of .500 and then slotted accordingly. If multiple new owners enter the league simultaneously, a random generator will be used to determine the tiebreaker for All-Play assignment.</p>
+          <p>Owners taking over a roster mid-season or after the Free Agent Auction has begun will not have that season&#x27;s record count toward All-Play.</p>
+          <p>Future Realignment Years: 2026, 2029, 2032, 2035, etc.</p>
+          <p>Playoff Format:</p>
+          <p>The league features two sets of playoffs: the UPS Championship and the Hawktuah Bowl (Toilet Bowl).</p>
+          <p>Playoff seeding is determined by regular-season performance, with division winners guaranteed a top seed.</p>
+          <p>Scoring System:</p>
+          <p>The league utilizes a custom scoring system tailored to reward strategic depth and player performance. Details of the scoring system are outlined in [Insert Section Number].</p>
+        </div>
+      </details>
+      <details>
+        <summary>1.3 Expectation of owners</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Owner Expectations:</p>
+          <p>All league members are expected to be active participants throughout the season and the off-season. This includes:</p>
+          <p>Regular communication via the Discord App.</p>
+          <p>Timely responses to trade offers.</p>
+          <p>Participation in league events, including the Rookie Draft and Free Agent Auction.</p>
+          <p>Maintaining awareness of league rules and important league matters.</p>
+          <p>Active Participation:</p>
+          <p>Owners are required to field a competitive team for the entire fantasy season, regardless of their standing.</p>
+          <p>Actions that attempt to circumvent the competitive balance of the league, such as collusion or other maneuvers, will be grounds for league dismissal.</p>
+        </div>
+      </details>
+      <details>
+        <summary>1.4 League Membership</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Admission Process:</p>
+          <p>New members must complete an admission process, including a baseline quiz to ensure a solid understanding of the league&#x27;s unique structure and value system. This league differs significantly from standard redraft and dynasty formats, requiring time and effort to grasp fully.</p>
+          <p>The commissioner will subjectively review the results and present them to the league for approval.</p>
+          <p>Probation Period:</p>
+          <p>New members are on probation for their first two full seasons.</p>
+          <p>The league will assess the new member's progress in understanding the rules and value. At the end of the probation period, the league will vote on granting full membership.</p>
+          <p>Early Termination:</p>
+          <p>During probation, the league can vote to remove a new member if they fail to demonstrate sufficient growth in understanding or if their participation jeopardizes league balance.</p>
+          <p>Repeated penalties can also result in early termination of membership.</p>
+          <p>Dispersal Draft for New Owners:</p>
+          <p>When a new owner joins the league, existing teams may choose to throw all of their assets (players and future eligible draft picks, excluding 6th round picks) into a player pool to be combined with the new owner's assets.</p>
+          <p>A random generator will determine the snake draft order, and a draft will take place within Discord for all assets in the pool.</p>
+          <p>Once a team commits to the dispersal draft, they cannot withdraw.</p>
+          <p>It is crucial that new owners fully understand the league rules before committing, as they will immediately compete with other owners.</p>
+        </div>
+      </details>
+      <details>
+        <summary>1.5 Commissioner&#x27;s Authority</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Decision-Making:</p>
+          <p>The commissioner has full authority on decisions that fall outside the rulebook. In cases where league precedent has been set, this will guide the decision-making process.</p>
+          <p>The commissioner may confer with senior league members or expand discussions to the entire league as deemed necessary.</p>
+          <p>Best Interest of the League:</p>
+          <p>The commissioner always acts in the best interest of the league, ensuring fair play and maintaining competitive balance.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: League hosted on MFL; 12-team salary cap league.</p>
+          <p>2014: 2 conferences with 2 divisions of 3 teams each; realignment every 3 years based on all-play record Weeks 1-13, with specific division groupings and .500 all-play assigned to new owners in realignment years.</p>
+          <p>2014: Regular season Weeks 1-13; playoffs Weeks 14-16.</p>
+          <p>2014: Competition Committee (Keith Creelman, Ryan Bousquet, Eric Mannila).</p>
+          <p>2014: Schedule uses double-headers each week (26-game regular season).</p>
+          <p>2014: Standings/tiebreakers defined for divisional champs, wild cards, and 1 vs 2 seeds (Pct, Div Pct, H2H, PF, All-Play, PWR, coin flip order).</p>
+          <p>2014: Championship/Toilet Bowl seeding and draft-pick implications are conference-based (details in 2014 rulebook).</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-2">
+      <h2>2. League Calendar</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Season rollover moved from Feb 1 (2013/2014) to March 1-15 (2018 and current).</li>
+        <li>Rookie Draft timing shifted from June (2014) to mid-June (2018) to Memorial Day weekend (current).</li>
+        <li>Free Agent Auction timing shifted from Aug 1 (2014/2018) to the last weekend of July with a 3-day prior roster lock (current).</li>
+        <li>Trade deadline moved from Week 12 (2014) and Week 11 (2013/2014 by-laws) to Thanksgiving kickoff (2018/current).</li>
+        <li>Playoffs moved from Weeks 14-16 (2014/2018) to starting Week 15 for 3 weeks (current).</li>
+        <li>2018 explicitly abolished the rule that playoff-period acquisitions are ineligible to be retained; current rulebook does not mention that rule.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Tagging period and deadlines are not listed in the current calendar; confirm if franchise/transition tagging still exists and when it occurs.</li>
+        <li>Confirm the April 30 expired-rookie extension deadline supersedes older June/July dates.</li>
+      </ul></div>
+      <details>
+        <summary>2. League Calendar</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>January:</p>
+          <p>Off-Season after completion of the Fantasy Playoffs.</p>
+          <p>February:</p>
+          <p>Off-Season.</p>
+          <p>March:</p>
+          <p>New League Season Begins.</p>
+          <p>Contracts are rolled forward and updated for the upcoming season.</p>
+          <p>The goal is to have the league up and running by March 1st, but this may extend to March 15th depending on the commissioner's ability to finalize preparations.</p>
+          <p>April 30:</p>
+          <p>Final Day for Expiring Rookie Extensions.</p>
+          <p>May:</p>
+          <p>Annual Rookie Draft on the Sunday of Memorial Day Weekend.</p>
+          <p>The draft is conducted live and broadcast on Discord.</p>
+          <p>It is the single most important event of the league year, with the draft typically starting around 6:00-6:30 PM and lasting approximately 4 hours. Expect 10-15 trades during the event.</p>
+          <p>Mandatory League Event.</p>
+          <p>July:</p>
+          <p>Last Weekend of July marks the start of the Free Agent Auction.</p>
+          <p>Minimum of 7 Days of Nominations</p>
+          <p>Mandatory League Event.</p>
+          <p>3 Days Prior to FA Auction:</p>
+          <p>Auction Roster Lock Date, the deadline for cutting players before the auction.</p>
+          <p>August:</p>
+          <p>Waivers are available at the completion of the FA Auction.</p>
+          <p>September:</p>
+          <p>Last Sunday before Week 1 is the deadline for Contract Finalization.</p>
+          <p>Start of the Fantasy Season.</p>
+          <p>November:</p>
+          <p>Kickoff Thanksgiving Trade Deadline.</p>
+          <p>December:</p>
+          <p>Week 15 of the NFL Season marks the start of the Fantasy Playoffs, lasting 3 weeks.</p>
+          <p>Section 3: Roster Management</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Off-season rule-change voting thresholds: 51% for future changes; 90% for in-season changes; non-responses excluded; CC may act unanimously.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-3">
+      <h2>3. Roster Management</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Roster size increased from 23-26 (2014) to min 27 and max 30 after the contract deadline (max 35 during auction) in the current rulebook.</li>
+        <li>Taxi rules changed: 2014 allowed max 9 with 5/3/1 contract-year tiers (forum vote 2014-02-11, 7–5); current uses a 10-player taxi with 1 IDP minimum and 2nd-round+ eligibility.</li>
+        <li>Starting lineup shifted from the 2014 fixed structure to the current flex/superflex format with expanded IDP slots and a 3-starting-QB roster cap.</li>
+        <li>Holdout/suspension handling moved from special-circumstance 25% relief options (2013/2014) to current IR rules (50% relief, rollover rules).</li>
+        <li>2014 forum vote (Feb 11, 2014) clarified taxi-squad cuts: players not on the active roster incur no cap charge when cut; 2nd+ round rookies cut before the contract deadline are penalty-free if never promoted; once promoted, cuts incur cap hits.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether the 2014 taxi squad limits by contract years still apply or are fully replaced by the current taxi rules.</li>
+        <li>Confirm whether holdout relief is 50% (current) or legacy 25% with Week-8 options.</li>
+        <li>Confirm whether the 2014 taxi-squad cut/guarantee rule (no cap hit unless promoted) remains the governing standard.</li>
+        <li>2014 forum proposal discussed adding a mandatory second RB (lineup 1QB/2RB/2WR/1TE/2Flex) potentially effective 2015; confirm if any version was adopted.</li>
+      </ul></div>
+      <details>
+        <summary>3.1 Active Roster Size</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Minimum Active Roster Size:</p>
+          <p>During the fantasy season, the minimum roster size is 27 players.</p>
+          <p>After the Free Agent Auction, the minimum roster size is 27 players for the rest of the fantasy season.</p>
+          <p>Maximum Active Roster Size:</p>
+          <p>During the Free Agent Auction, the maximum roster size expands to 35 players.</p>
+          <p>After the Contract Deadline Date, the maximum roster size is 30 players.</p>
+        </div>
+      </details>
+      <details>
+        <summary>3.2 Injured Reserve (IR)</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Following player designations are eligible placed on the to be placed on the league&#x27;s IR with 50% automatic cap relief.</p>
+          <p>NFL&#x27;s Injured Reserve (IR or other forms of IR as designated by MFL),</p>
+          <p>COVID-19 IR,</p>
+          <p>Holdouts</p>
+          <p>Suspended Players:</p>
+          <p>For season-long or remainder of season suspensions occurring in the off-season, the contracts will not roll forward (owner choice). If they occur in-season, then the contract would roll forward, preserving the original process.</p>
+          <p>Owner must decide if they'd like the contract to not roll forward prior to the contract deadline date.  In this case it will be as though the contract does not exist.  Salary will = o for that year and will reset back to it's original salary prior to suspension after the fact.</p>
+          <p>Important Notes:</p>
+          <p>Players on IR do not count towards the active roster limit.</p>
+          <p>Cap penalties may apply for non-compliance with IR rules. Refer to the Penalties section for more details.</p>
+        </div>
+      </details>
+      <details>
+        <summary>3.3 Taxi Squad</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Eligibility:</p>
+          <p>Maximum of 10 players, with a minimum of 1 IDP (Individual Defensive Player).</p>
+          <p>Only players selected in the league's Rookie Draft, in the 2nd round or later, are eligible for the Taxi Squad for their first three years in the NFL.</p>
+          <p>Demotion Deadline:</p>
+          <p>Eligible players drafted in the Rookie Draft must be demoted to the Taxi Squad no later than the contract deadline date.  Trades occurring within the season, the player must be demoted prior to that player's NFL Team kicking off that week. (Caveat trade occurring just before kickoff, it may not be feasible for the demotion to occur on time.  As such, any trade occurring on the day of kickoff we will grant leniency in demotion to the following week.)</p>
+        </div>
+      </details>
+      <details>
+        <summary>3.4 Starting Lineup Requirements</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Minimum Starting Lineup:</p>
+          <p>Each team must field a valid starting lineup each week, consisting of the following positions:</p>
+          <p>1 QB</p>
+          <p>2 RBs</p>
+          <p>2 WRs</p>
+          <p>1 TE</p>
+          <p>2 Flex (RB/WR/TE)</p>
+          <p>1 SuperFlex (QB/RB/WR/TE)</p>
+          <p>1 Kicker</p>
+          <p>1 Punter</p>
+          <p>2 DL (DE or DT)</p>
+          <p>2 LB</p>
+          <p>2 DB (CB or S)</p>
+          <p>1 Defensive Flex</p>
+          <p>Lineup Submission:</p>
+          <p>Lineups must be submitted before the kickoff of the first game each week. The platform (MyFantasyLeague) will automatically lock players in starting positions once their respective games begin.</p>
+          <p>Lineup changes can be submitted up until the start of a player's game.  A player may not be substituted in or a player may not be substituted out once his game occurs.</p>
+          <p>Non-Compliance:</p>
+          <p>Failure to submit a valid starting lineup by the deadline will result in penalties, as outlined in the Penalties &amp; Other Miscellaneous League Rules section.</p>
+        </div>
+      </details>
+      <details>
+        <summary>3.5 Super Flex Rules</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Maximum Number of Starting QBs:</p>
+          <p>Beginning with the contract deadline date, all teams are only allowed to carry three (3) starting QBs on their roster at any time.</p>
+          <p>This limit includes any QB on the active roster, as well as those promoted from the taxi squad who become starters.</p>
+          <p>Exceptions:</p>
+          <p>If a QB on the taxi squad becomes a starter after Week 1, they do not count against the 3 QB maximum.</p>
+          <p>If a QB is promoted from the taxi squad during the season and becomes a starter, they will count against the 3 QB maximum, regardless of their Week 1 status.</p>
+          <p>Monitoring Compliance:</p>
+          <p>The league will monitor compliance using depth charts from sources like FantasyPros Depth Charts.</p>
+          <p>If a team has more than 3 starting QBs on their roster, they must get in compliance by the kickoff of the following Thursday's game. Non-compliance will result in the commissioner dropping the player that created the 4th QB on the roster.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: In-season roster max 26 (auction max 31), min 23; 24 hours to fix invalid lineup after transactions; must stay under $300,000 cap.</p>
+          <p>2014: Off-season (post-Week 16 through Aug 1) had no roster or cap limits.</p>
+          <p>2014 (forum vote 2014-02-11, 7–5): Taxi squad max 9 with contract-year tiers (5 with 3 years, 3 with 2 years, 1 with 1 year), 2nd-round+ eligibility, no return once activated, Sept 1 demotion deadline.</p>
+          <p>2014: IR had no limit; 50% salary reduction; activation required upon return; off-season IR eligibility enforced before auction.</p>
+          <p>2014 (forum vote 2014-02-11): No player cut while not on the active roster incurs a cap charge. Rookies drafted in Round 2+ cut before the contract deadline are penalty-free if never promoted; any player promoted from taxi and later cut incurs a cap hit.</p>
+          <p>2014: Starting lineup requirements were fixed (QB, RB, 2 WR, TE, 2 Flex, DL, LB, DB, 3 Def Flex, K, P).</p>
+          <p>2014: Lineup warnings for bye/out/doubtful starters; MFL auto-submits if lineup not set by Thursday.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-4">
+      <h2>4. Rookie Draft</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Rookie contract length changed from 2 years (2014) to 3 years (2018/current).</li>
+        <li>Rookie salary schedule evolved: legacy docs specify 3rd+ round salaries ($2K or $1K); current rulebook only lists 1st/2nd round salaries in the table.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Current rulebook does not specify rookie salaries for rounds 3+; confirm whether legacy $2K/$1K rules still apply.</li>
+      </ul></div>
+      <details>
+        <summary>4. Rookie Draft</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+        </div>
+      </details>
+      <details>
+        <summary>4.1 Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>The Rookie Draft is the biggest event of the year and is mandatory for all owners.</p>
+          <p>Any player who would be considered an NFL rookie is eligible for the draft.</p>
+          <p>The draft is conducted live, and participation is expected either in person or via Discord.</p>
+        </div>
+      </details>
+      <details>
+        <summary>4.2 Draft Rules</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Round 1 Picks:</p>
+          <p>Must be kept on the active roster.</p>
+          <p>Rounds 2-6 Picks:</p>
+          <p>Taxi squad eligible.</p>
+          <p>Round 6 Picks:</p>
+          <p>Cannot be traded and must be used to select an IDP player (including kickers and punters).</p>
+        </div>
+      </details>
+      <details>
+        <summary>4.3 Draft Order</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Rounds 1-5:</p>
+          <p>The draft order for Rounds 1-5 is determined by the prior season&#x27;s playoff results. Higher finishers in the playoffs will pick later, while lower finishers will pick earlier.</p>
+          <p>Round 6:</p>
+          <p>The draft order for Round 6 is determined via a random generator prior to the draft.</p>
+        </div>
+      </details>
+      <details>
+        <summary>4.5 Rookie Draft Salary &amp; Contracts</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Contract Details:</p>
+          <p>All rookies drafted in the league are initially signed to a 3-year contract.</p>
+          <p>Salary in table above represents their yearly salary</p>
+        </div>
+      </details>
+      <details>
+        <summary>4.4 1st Round Rookie Option (Effective 2025 Draft)</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Introduction of the 1st Round Rookie Option:</p>
+          <p>Starting with the 2025 Draft Picks, all first-round picks will receive an &quot;Option Year&quot; in addition to the standard 3-year deal.</p>
+          <p>Eligibility:</p>
+          <p>The Option Year applies only to players selected in the first round of the Rookie Draft, starting with the 2025 draft class.</p>
+          <p>Exercising the Option Year:</p>
+          <p>The Option Year must be exercised before the contract deadline date of the player&#x27;s final season under their rookie contract.</p>
+          <p>Details:</p>
+          <p>Full details, including salary increases and specific conditions, can be found in the Contract Transactions section [link to section].</p>
+          <h4>Current Rookie Salary Table</h4>
+<table style="width:100%; border-collapse: collapse; margin: 8px 0;">
+  <tr>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Round\Pick</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 1</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 2</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 3</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 4</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 5</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 6</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 7</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 8</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 9</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 10</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 11</th>
+    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Pick 12</th>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">1st Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$15K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$14K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$13K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$12K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$11K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$10K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$9K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$8K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$7K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$6K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">2nd Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$5K</td>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">3rd Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">4th Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">5th Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$2K</td>
+  </tr>
+  <tr>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">6th Round</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+    <td style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">$1K</td>
+  </tr>
+</table>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Rookie draft is 5 rounds, non-snake, 3-minute clock with ADP auto-pick.</p>
+          <p>2014: Draft order determined by playoff finish (toilet bowl picks 1-6; championship picks 7-12).</p>
+          <p>2014: Supplemental draft uses blind bids with forfeited future picks; ties resolved by draft order.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-5">
+      <h2>5. Free Agent Auction</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Auction format shifted from daily nominations (2014) and a 2-week auction (2018) to a 7-day minimum nomination window in late July (current).</li>
+        <li>Legacy docs list explicit warnings/fines for missed nominations; current rulebook does not define those penalties.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether missed-nomination warnings/fines from 2014 still apply.</li>
+      </ul></div>
+      <details>
+        <summary>5. Free Agent Auction</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+        </div>
+      </details>
+      <details>
+        <summary>5.1 Auction Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Auction Timing:</p>
+          <p>The Free Agent Auction typically begins on the last weekend of July and lasts approximately one week.</p>
+          <p>This is a mandatory league event, and compliance with auction rules is strictly monitored.</p>
+          <p>Roster and Cap Requirements:</p>
+          <p>Maximum Roster Size During Auction: 35 players.</p>
+          <p>Minimum Roster Size by Completion of Auction: 27 players.</p>
+          <p>Valid Lineup Requirement: You must be able to submit a valid starting lineup by the completion of the auction.</p>
+          <p>Spending Flexibility:</p>
+          <p>The auction system provides a dashboard indicating the maximum amount you can spend to fill your roster.</p>
+          <p>For example, the system might show &quot;Max you can spend to fill your roster is $20K,&quot; assuming you are filling all 35 roster spots. However, if you only need the minimum of 27 players, you may have additional spending flexibility, potentially increasing this amount (e.g., to $28K).</p>
+          <p>It is the owner's responsibility to avoid overbidding during the auction. The system prevents you from spending more than $300K, but it will not account for the minimum roster requirement.</p>
+          <p>Bidding Process:</p>
+          <p>The auction follows an &quot;Ebay Proxy Style,&quot; where each bid needs to remain the highest for 36 hours to win the player.</p>
+          <p>Owners are expected to nominate players within a 24-hour period. Missing a nomination incurs escalating penalties, starting at $3K and increasing with each offense.</p>
+        </div>
+      </details>
+      <details>
+        <summary>5.2 Auction Roster Lock Date</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>3 Days Prior to Free Agent Auction Start:</p>
+          <p>This is the deadline for cutting players before the auction begins. After this date, rosters are locked until the auction is complete.</p>
+        </div>
+      </details>
+      <details>
+        <summary>5.3 Auction Floor</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Salary Cap Floor:</p>
+          <p>The salary cap floor is set at $260K, which must be met by the completion of the auction or by the Contract Deadline Date.</p>
+          <p>Maintaining the Cap Floor:</p>
+          <p>Once the floor is reached, if a trade or IR designation occurs that results in a lower salary, the team is still considered compliant.</p>
+          <p>Owners if eligible may restructure a contract and front-load it to meet this minimum.</p>
+          <p>Objective:</p>
+          <p>The goal is to ensure owners are engaged during the auction and not simply &quot;sleepwalking&quot; through it. Providing the option to front-load a contract offers an alternative to forcing teams to bid on players they don&#x27;t want, while still requiring active roster management. Failing to adhere to this rule indicates a general failure by the owner to put their team in a position to succeed.</p>
+          <p>Refer to the Penalties section of the rulebook for non-compliance issues.</p>
+          <p>6: Expired Rookie Auction</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Auction begins at midnight on Aug 1; no cuts allowed during auction.</p>
+          <p>2014: 1 nomination per day (CC may increase after 10 days); 24-hour timer resets on new bids.</p>
+          <p>2014: Bids in $1K increments, $1K min; roster must end 23-31 with full lineup; cap compliance required.</p>
+          <p>2014: Missed nomination warnings; once roster is full, missed nominations indicate owner is done bidding.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-6">
+      <h2>6. Expired Rookie Auction</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Expired rookie extension deadlines shifted from June 1 (2013/2014) and July 1 (2018) to April 30 (current).</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether the expired-rookie auction and extension deadlines are aligned with April 30 in the current doc.</li>
+      </ul></div>
+      <details>
+        <summary>6.1 Eligibility and Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Eligibility:</p>
+          <p>Any player with an expired rookie contract that is not extended prior to the deadline will become available via the "Expired Rookie Auction."</p>
+          <p>Auction Timing:</p>
+          <p>The Expired Rookie Auction occurs during the first week in May.</p>
+        </div>
+      </details>
+      <details>
+        <summary>6.2 Auction Rules</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Nomination Process:</p>
+          <p>There is a 2-3 day window to nominate a player for the auction.</p>
+          <p>The starting bid must be $1K more than the player's prior year salary.</p>
+          <p>A link will be provided with the valid minimum salary for each player.</p>
+          <p>Bidding Process:</p>
+          <p>The bidding process mirrors the Free Agent Auction, with the exception that the high bidder must remain the highest for 36 hours to win the player, rather than 24 hours.</p>
+          <p>If there is a change in the high bidder, the 36-hour timer resets.</p>
+        </div>
+      </details>
+      <details>
+        <summary>6.3 Contract Rules for Auction Winners</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Auction Contract Eligibility:</p>
+          <p>Auction contracts follow the same rules as the Free Agent Auction, with contracts ranging from 1 to 3 years.</p>
+          <p>If the contract is more than 1 year, it must be submitted no later than the contract deadline date in September.</p>
+          <p>Player Retention:</p>
+          <p>Players won in this auction are not eligible to be cut by any team prior to the Free Agent Auction.</p>
+          <p>7: Waivers</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Expired rookie extensions handled before June 1; see legacy contract docs.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-7">
+      <h2>7. Waivers</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Blind-bid waiver run days changed from Wed/Thu/Sat/Sun (2014) to Thu/Fri/Sat/Sun (current).</li>
+        <li>Tie-breaker order changed from record-based (2014) to All-Play/Overall/Points/H2H (current).</li>
+        <li>FCFS window expanded from Sunday 9 AM-1 PM (2014) to post-Sunday waiver run until kickoff (current).</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether any rolling-waiver order or waiver-claim limits still exist alongside blind-bid waivers.</li>
+      </ul></div>
+      <details>
+        <summary>7.1 Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Waiver System:</p>
+          <p>The waiver system allows teams to acquire players who are not currently on any roster. There are two primary types of waivers used in the league: Blind Bid Waivers and First-Come, First-Serve (FCFS) Free Agency.</p>
+        </div>
+      </details>
+      <details>
+        <summary>7.2 Blind Bid Waivers</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Waiver Runs:</p>
+          <p>Blind Bid Waivers run on Thursday, Friday, Saturday, and Sunday at 9 AM during the NFL season.</p>
+          <p>Players are locked after each run until the next waiver period begins.</p>
+          <p>Submitting Bids:</p>
+          <p>Teams submit conditional blind bids where they can prioritize multiple waiver claims. The highest bid for each player wins the waiver claim.</p>
+          <p>The blind bid winning amount becomes the player's salary for the current season.</p>
+          <p>Tiebreakers:</p>
+          <p>If two teams submit identical bids for the same player, the tiebreaker process is as follows:</p>
+          <p>All Play Record</p>
+          <p>Overall Record</p>
+          <p>Total Points</p>
+          <p>Head-to-Head Record</p>
+          <p>During the preseason and up until the completion of Week 1, a custom order based on the prior season's final draft slot finish is used for tiebreakers.</p>
+          <p>Bid Processing:</p>
+          <p>The system processes bids top to bottom within each group and accepts the first valid bid, ignoring the rest in that group.</p>
+          <p>The groups are processed without priority over one another, ensuring all bids are evaluated equally.</p>
+        </div>
+      </details>
+      <details>
+        <summary>7.3 First-Come, First-Serve (FCFS) Free Agency</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>FCFS Availability:</p>
+          <p>After the Sunday morning waiver run, free agency opens on a first-come, first-serve basis.</p>
+          <p>Players can be picked up freely until the kickoff of their respective games.</p>
+          <p>Player Salary:</p>
+          <p>Any player acquired via FCFS will have a $1K salary amount for the current season.</p>
+          <p>The default contract length for FCFS acquisitions is 1 year.</p>
+          <p>Purpose:</p>
+          <p>FCFS ensures that teams can always field a starting lineup, even if they missed a player during the waiver runs.</p>
+        </div>
+      </details>
+      <details>
+        <summary>7.4 Waiver Compliance and Responsibilities</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Roster Compliance:</p>
+          <p>Owners are responsible for ensuring their roster complies with league rules after making waiver acquisitions.</p>
+          <p>Teams must have enough roster space and cap room to accommodate players acquired through waivers.</p>
+          <p>Contract Terms:</p>
+          <p>The default number of years for a waiver and FCFS acquisition is 1 year unless otherwise stated.</p>
+          <p>8: Trades</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Dropped players hit waivers Monday 9:00 PM; no waivers in off-season.</p>
+          <p>2014: Blind bid waivers run Wed/Thu/Sat/Sun at 9 AM; $1K min and $1K increments; tie-breaker order based on record/All-Play/points/H2H; pre-season tie-breaker is draft order.</p>
+          <p>2014: First waiver run is first Wednesday after auction; FCFS runs Sundays Week 1-16 from 9 AM (contract $1K).</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-8">
+      <h2>8. Trades</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Trade processing moved from commissioner with potential veto poll (2014) to immediate processing with post-review (current).</li>
+        <li>Current rulebook adds an asset-required rule (salary-only trades prohibited) and disallows trading Round 6 picks.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether 2014 veto-poll mechanics are fully replaced by immediate processing with review.</li>
+      </ul></div>
+      <details>
+        <summary>8.1 Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Trading Period:</p>
+          <p>Trading is allowed during the entire offseason and up until the NFL&#x27;s Thanksgiving week, which marks the league&#x27;s trade deadline.</p>
+          <p>After the trade deadline, no trades are permitted until the start of the offseason.</p>
+        </div>
+      </details>
+      <details>
+        <summary>8.2 Eligibility</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Eligible Players:</p>
+          <p>Any player with 1 or more years remaining on their contract is eligible to be traded.</p>
+          <p>Expired rookies can be traded up until the extension deadline. Other expired contracts are not eligible to be traded.</p>
+          <p>Draft Picks:</p>
+          <p>All draft picks for the current draft year, as well as picks for 1 year into the future, are available for trade.</p>
+          <p>Exception: Round 6 picks are not eligible for trade.</p>
+          <p>Salary:</p>
+          <p>Salary can also be included in trades. Please refer to the Cap Adjustments section for detailed rules on trading salary [link to Cap Adjustments section].</p>
+        </div>
+      </details>
+      <details>
+        <summary>8.3 Additional Trade Rules</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Compliance:</p>
+          <p>All trades require both teams to immediately comply with roster standards. If a trade results in a team having fewer than the minimum required players for a valid starting lineup or total roster, the team must take immediate action to get back into compliance.</p>
+          <p>If a team is out of compliance, the system will prevent them from submitting a valid lineup, which carries its own penalty.</p>
+          <p>If a trade results in any contracts being out of compliance (such as exceeding contract limits or requiring adjustments), those changes must be made within 24 hours. Failure to correct contract discrepancies within this timeframe could result in penalties.</p>
+          <p>Trade Assets Requirement:</p>
+          <p>Teams are required to include at least some asset (not salary) in every trade. This rule was implemented to avoid asset-less trades, which caused dissatisfaction among league members.</p>
+          <p>This rule ensures that even during the auction, trades include tangible assets, preventing awkward transactions where players are simply dumped due to roster or budget constraints.</p>
+          <p>Trade Review Process:</p>
+          <p>All trades are processed immediately to ensure timely processing.</p>
+          <p>All trades are subject to review to ensure they fall within guidelines and may be  subject to reversal.</p>
+          <p>Extensions and Salary Compliance:</p>
+          <p>If a player involved in a trade is eligible for an extension, the team trading the player away can agree to apply the extension as part of the trade. This must be stated in the trade comments, or proof of discussion must be provided before the trade is approved.</p>
+          <p>All teams involved in the trade must ensure salary compliance according to the league&#x27;s salary cap rules.</p>
+          <p>9: Contracts</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Trades processed by commissioner; veto poll triggered if two owners raise collusion concerns.</p>
+          <p>2014: Trades allowed for current and one-year-ahead picks; trade window March 1 through Week 12 kickoff.</p>
+          <p>2014: Trades involving starters required 4-hour pre-kickoff processing; 24 hours to get under cap after trade.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-9">
+      <h2>9. Contract Management</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Rookie contracts moved from 2 years (2014) to 3 years (2018/current).</li>
+        <li>MYM (Mid-Year Multi) limit increased from 2 per season (2018) to 3 per season (current).</li>
+        <li>Legacy docs include franchise/transition tag systems with compensation rules; current rulebook does not mention tags.</li>
+        <li>Legacy docs use 20% cap-penalty on remaining salary; current uses 75% guarantee with monthly earning schedule.</li>
+        <li>Legacy docs allow contract restructures (often capped at 2 per season); current mentions restructures but not limits.</li>
+        <li>2014 forum vote (Feb 11, 2014; passed 7–5) allowed restructures only when an extension is granted; extension cost can be incorporated into the current year and split evenly or front/back loaded.</li>
+        <li>2014 forum clarification (Jun 9, 2013) and vote outcome (Feb 11, 2014 tie) reaffirmed cap of six 3-year contracts, excluding rookie contracts.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether franchise/transition tags and compensation rules are still in effect (missing from current).</li>
+        <li>Confirm restructure limits (e.g., max per season) and whether mid-season acquisitions can still be restructured.</li>
+        <li>Confirm whether the 2014 extension-based restructure rule (passed 7–5 on Feb 11, 2014) is still the governing standard and whether any per-team limit applies.</li>
+        <li>Confirm whether the six 3-year contract cap (rookies excluded) remains active and if any contract-year cap was ever adopted.</li>
+        <li>2013 forum debate questioned whether owners who acquire back-loaded contracts should face the same cap penalty when cutting (vs. relief for secondary owners); confirm the intended rule and whether any exceptions exist.</li>
+      </ul></div>
+      <details>
+        <summary>9.1 Glossary of Contract Terms</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Contract Length:</p>
+          <p>The length of a contract in years from the time the contract was submitted.</p>
+          <p>Salary:</p>
+          <p>The current year&#x27;s salary for a player.</p>
+          <p>Total Contract Value (TCV):</p>
+          <p>The total value of a contract, calculated by multiplying the contract length by the Average Annual Value (AAV).</p>
+          <p>Average Annual Value (AAV):</p>
+          <p>The average salary per year if the total contract value is evenly distributed across the contract length. This is used as the baseline for all contract extensions.</p>
+          <p>Years Remaining:</p>
+          <p>The number of seasons remaining for a player under contract.</p>
+        </div>
+      </details>
+      <details>
+        <summary>9.2 Contract Types</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Contract Types:</p>
+          <p>Veteran Contracts:</p>
+          <p>Default contract type for players acquired in the Expired Rookie Auction, Free Agent Auction, or Waivers before the contract deadline date.</p>
+          <p>Contracts are evenly distributed across all contract years.</p>
+          <p>Default Contract Length is 1</p>
+          <p>Waiver Wire (WW) Contracts:</p>
+          <p>Default contract type for players picked up off waivers after the contract deadline date.</p>
+          <p>Contract length is always 1 year.</p>
+          <p>Rookie Contracts:</p>
+          <p>Applies to NFL rookies acquired via the Rookie Draft, Free Agent Auction, or waivers.</p>
+          <p>Waiver wire pickups will take on rookie status at the completion of the season if still on the roster or at the time of any in-season contract submission.</p>
+          <p>Contract Length is always set at 3 for players selected in the Rookie Draft otherwise the default is .</p>
+          <p>Front-Loaded Contracts:</p>
+          <p>Contracts where the first year's salary is more than the AAV (Average Annual Value).</p>
+          <p>Can only be applied to players acquired in the Free Agent Auction, Expired Rookie Auction, or submitted as part of an offseason contract restructure.</p>
+          <p>The contract split must equal the TCV at the completion of the split.</p>
+          <p>Example: A 3-year contract with a TCV of $90K could be split as $40K in Year 1, $30K in Year 2, and $20K in Year 3.</p>
+          <p>Back-Loaded Contracts:</p>
+          <p>Contracts where the first year's salary is less than the AAV.</p>
+          <p>Can only be given to players acquired in the Free Agent Auction or Expired Rookie Auction as part of a multi-year contract, or as part of an offseason contract restructure.</p>
+          <p>A minimum of 20% of the TCV must be allocated to Year 1.</p>
+          <p>Example: A 3-year contract with a TCV of $90K must have at least $18K allocated to Year 1 (20% of $90K). The remaining amount can be split across the remaining years.</p>
+        </div>
+      </details>
+      <details>
+        <summary>9.3 Contract Minimums and Maximums</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Maximum Salary:</p>
+          <p>$300,000 (No maximum in the off-season up until Roster Cut Date).</p>
+          <p>Maximum 3-Year Contracts:</p>
+          <p>6 contracts (Excludes 3-Year Rookie Contracts).</p>
+          <p>Maximum Loaded Contracts:</p>
+          <p>5 contracts (includes Front or Back Loaded contracts).</p>
+        </div>
+      </details>
+      <details>
+        <summary>9.4 Contract Transactions</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Auction Contracts:</p>
+          <p>Any player acquired in the Free Agent Auction, Expired Rookie Auction, or via waivers before the Contract Deadline Date is eligible for a Multi-Year Auction Contract.</p>
+          <p>Contract Options:</p>
+          <p>The contract may be given as a 2-year or 3-year deal.</p>
+          <p>It can be structured as a Veteran Contract with even distribution or as a Loaded Contract.</p>
+          <p>Default Contract:</p>
+          <p>If no Multi-Year Auction Contract is submitted, the default contract length is 1 year.</p>
+          <p>Contract Type Default: Veteran or Rookie (if the player is given a MYM in their rookie year).</p>
+          <p>Mid-Year Multi (MYM):</p>
+          <p>Converts 1-Year Contracts into a Multi-Year Contract at the same salary.</p>
+          <p>Teams are allowed a maximum of 3 MYMs per season.</p>
+          <p>If the contract is a WW contract, it converts into a Veteran Contract.</p>
+          <p>MYMs are not eligible to be loaded.</p>
+          <p>Eligibility:</p>
+          <p>Players acquired via the Auction or Pre-Season Waivers that were not given a contract before the contract deadline date.</p>
+          <p>The deadline for this is before the final game ends on Week 2 of the NFL Season.</p>
+          <p>Players acquired via Waivers during the season, either from their own pickup or after trading for said player. The deadline is 2 weeks from the date the player was acquired from Waivers.</p>
+          <p>Contract Extensions:</p>
+          <p>Eligibility:</p>
+          <p>Players entering the final year of their contract are eligible for an extension up until the contract deadline date.</p>
+          <p>Players acquired via the Rookie Draft or Preseason Waivers that were not given a contract by the deadline date nor given a MYM by NFL Week 2 may be extended by the end of Week 4.</p>
+          <p>Players acquired via trade during the season in the final year of their contract must be extended within 4 weeks of acquisition.</p>
+          <p>Extension Terms:</p>
+          <p>Extensions may be for 1 or 2 years.</p>
+          <p>Extensions reset the contract&#x27;s Total Contract Value (TCV) and guarantees.</p>
+          <p>Future AAV is increased based on the extension schedule:</p>
+          <p>Schedule 1 (QB/RB/WR/TE):</p>
+          <p>1 Year: +$10,000</p>
+          <p>2 Years: +$20,000</p>
+          <p>Schedule 2 (DB/LB/DL/Kickers - IDP &amp; Special Teams):</p>
+          <p>1 Year: +$3,000</p>
+          <p>2 Years: +$5,000</p>
+          <p>Examples:</p>
+          <p>Schedule 1 Example:</p>
+          <p>A player with a 1-year contract remaining at a $17K AAV extends for 1 year. The new AAV for the extended year would be $27K, resulting in a Total Contract Value (TCV) of $44K.</p>
+          <p>Schedule 2 Example:</p>
+          <p>A player with a 1-year contract remaining at a $10K AAV extends for 2 years. The new AAV for the extended years would be $20K, resulting in a Total Contract Value (TCV) of $50K.</p>
+        </div>
+      </details>
+      <details>
+        <summary>9.5 Contract Guarantees &amp; Cap Penalties</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Contract Guarantees:</p>
+          <p>The majority of contracts come with a 75% TCV Guarantee Requirement.</p>
+          <p>Contracts earn on a pro-rata basis over time, with 25% earned each month from October to December. Once the fantasy season is completed and the new season has been rolled over, the player will have earned 100% of that prior year&#x27;s salary.</p>
+          <p>This schedule does not apply to:</p>
+          <p>Veteran &amp; WW Contracts: where the original contract length is 1 year and the salary is less than $5K. These contracts have a 0% guarantee, representing a cap-free cut eligible player.</p>
+          <p>Taxi Squad Eligible Players: No guarantee on their contract until promoted to the active roster.</p>
+          <p>WW Contracts with a Salary of $5K or more: These contracts are 65% earned, resulting in a 35% cap penalty if dropped before the rollover to the next season.</p>
+          <p>Cap Penalties:</p>
+          <p>Calculated as (TCV * 75%) - Salary Earned.</p>
+          <p>Cap penalties that occur after the start of the auction are accrued and applied to the following season. Penalties occurring during the offseason up until the Roster Lock Date are applied to the current season.</p>
+          <p>Example of Cap Penalties:</p>
+          <p>Year 1 Example:</p>
+          <p>A contract with a TCV of $100K ($75K guaranteed) that is cut in September incurs a $75K cap penalty. If cut in October, the player would have earned 25% of Year 1 Salary (18.75K), resulting in a total cap penalty of $56.25K.</p>
+          <p>Year 2 Example:</p>
+          <p>If the same player is not cut in Year 1 but is cut in October of Year 2, the cap penalty would be calculated based on the guaranteed amount remaining from Year 1 plus any additional guarantees from Year 2.</p>
+          <p>10: League Financing</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Contract details were maintained in a separate Contract Guide (not included in the 2014 PDF).</p>
+          <p>2014 (forum vote 7–5 on 2014-02-11): Restructures allowed only when an extension is granted. Owners may incorporate the extension cost into the current year and may split the total charge evenly across remaining years or front/back load it; payout timing can change but total owed remains the same.</p>
+          <p>2014 (forum clarification 2013-06-09; vote tie on 2014-02-11): Max of six 3-year contracts on a roster; rookie contracts do not count toward the six.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-10">
+      <h2>10. League Financing</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Dues timing changed from Aug 1 deadline in 2014 to split payments due by auction and Thanksgiving (current).</li>
+        <li>Payout structure appears updated for 2024 (current) versus 2014 amounts.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Confirm whether any legacy dues deadlines (e.g., Aug 1) still apply.</li>
+      </ul></div>
+      <details>
+        <summary>10.1 Overview</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>League Dues:</p>
+          <p>Each team is required to pay an annual league fee of $200. This fee covers the league&#x27;s operating expenses, including the MFL hosting fee in addition to what is entered into the payout pool.</p>
+        </div>
+      </details>
+      <details>
+        <summary>10.2 Payment Schedule</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Dues Payment Deadlines:</p>
+          <p>Half of the league dues are owed by the start of the Free Agent Auction.</p>
+          <p>The remaining balance is due by the trading deadline, which falls on Thanksgiving.</p>
+          <p>Late Payments:</p>
+          <p>Teams that fail to make payments on time will incur a $3,000 cap penalty for each week the payment is late.</p>
+          <p>All penalties accrued up until the contract deadline date apply to the current season. Any penalties accrued after this date are applied to the following season.</p>
+        </div>
+      </details>
+      <details>
+        <summary>10.3 League Payout Structure</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Payouts for the Season:</p>
+          <p>MFL Fee: $100 (covers league hosting)</p>
+          <p>League Champion: $900</p>
+          <p>League Runner-Up: $450</p>
+          <p>3rd Place: $150</p>
+          <p>Division Winners: $50 each (Total: $200)</p>
+          <p>Weekly High Score (Weeks 1-17): $30 per week (Total: $510)</p>
+          <p>Hawktuah Bowl Winner: $90</p>
+          <p>Adjustments:</p>
+          <p>'2024 MFL Fee has been increased from $90 to $100, with $10 subtracted from the Top Points Scorer in the Hawktuah Bowl.</p>
+        </div>
+      </details>
+      <details>
+        <summary>10.4 Miscellaneous Fees</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Logo Changes:</p>
+          <p>Teams wishing to change their team logo will incur a $15 charge to cover the cost of a new owner banner.</p>
+        </div>
+      </details>
+      <details>
+        <summary>10.5 Payment Methods</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Payment Platform:</p>
+          <p>All league dues and fees are to be paid via Venmo to @Keith-Creelman.</p>
+          <p>11: Penalties and Miscellaneous League Rules</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: League dues $50 (returning) and $60 (new owners); payouts: Champion $255, 2nd $125, 3rd $50, Divisional champs $25 each.</p>
+        </div>
+      </details>
+    </section>
+    <section id="section-11">
+      <h2>11. Penalties and Miscellaneous League Rules</h2>
+      <div class="changes"><strong>Change Notes:</strong><ul>
+        <li>Current penalties section is marked as under review with placeholders; legacy docs provide concrete warning and fine structures.</li>
+        <li>Legacy special-circumstance rules (holdouts, suspensions, jail, retirements) are more detailed than the current placeholders.</li>
+      </ul></div>
+      <div class="flags"><strong>Flags / Needs Confirmation:</strong><ul>
+        <li>Penalty amounts and appeal process are placeholders; requires authoritative update.</li>
+        <li>2014 forum proposal to run MFL pools (Survivor/Confidence/Pick Em) with a draft-pick prize (e.g., 1.13/2.13) was deferred on 2014-09-03; confirm whether any pool prize rules were later adopted.</li>
+      </ul></div>
+      <details>
+        <summary>11.1 Overview of Penalties</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Penalties are applied to maintain the competitive balance and integrity of the league. All owners are expected to adhere to the league rules and deadlines to avoid incurring penalties.</p>
+          <p>CURRENTLY THIS SECTION WILL BE UNDER REVIEW BY THE COMMISH FOR AN OVERHAUL TO MAKE THIS MORE CONSISTENT ACROSS THE LEAGUE.</p>
+        </div>
+      </details>
+      <details>
+        <summary>11.2 Placeholder for Penalties</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Late Payment Penalties:</p>
+          <p>Teams that fail to make dues payments on time will incur a $3,000 cap penalty for each week the payment is late. All penalties accrued up until the contract deadline date apply to the current season. Penalties accrued after this date are applied to the following season.</p>
+          <p>Failure to Meet Salary Cap Floor:</p>
+          <p>If a team fails to meet the salary cap floor by the completion of the auction or by the Contract Deadline Date, an immediate cap hit will be applied to bring the team into compliance. Additional penalties may be assessed as specified in the penalty section.</p>
+          <p>Overbidding During the Auction:</p>
+          <p>If a team overbids during the Free Agent Auction, and the system prevents them from submitting a valid lineup, the team will be required to restructure contracts to regain compliance. If the owner has already used their maximum allotment of restructures, further penalties will apply. Details will be provided in this section.</p>
+          <p>Roster and Contract Compliance Post-Trade:</p>
+          <p>If a trade results in contracts being out of compliance, adjustments must be made within 24 hours to avoid penalties.</p>
+          <p>Waiver Wire Cap Penalties:</p>
+          <p>Penalties may apply if a player acquired via waivers is later dropped before the Contract Deadline Date. The specific penalties related to waiver wire drops will be detailed here.</p>
+          <p>Non-Compliance with Roster Requirements:</p>
+          <p>Teams failing to maintain the minimum or maximum roster size by specified deadlines will face cap penalties. The specifics will be detailed here.</p>
+          <p>Miscellaneous Penalties:</p>
+          <p>Any other penalties that may be applied for various infractions will be captured here. This could include penalties for failing to meet other league requirements, such as participation in mandatory events.</p>
+        </div>
+      </details>
+      <details>
+        <summary>11.3 Placeholder for Penalty Details</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Penalty Amounts and Application:</p>
+          <p>This section will detail the specific amounts for each type of penalty and how they are applied.</p>
+          <p>Appeal Process:</p>
+          <p>This section will outline the process for appealing penalties, including the timeline for submitting an appeal and how the commissioner and league members will review it.</p>
+        </div>
+      </details>
+      <details>
+        <summary>11.4 Miscellaneous League Rules</summary>
+        <div class="current">
+          <h4>Current Rule (UPS Rule Book 2024.2)</h4>
+          <p>Jail Bird Rule:</p>
+          <p>Players whose playing careers are derailed due to legal cases resulting in release from their NFL teams are eligible for cap-free cuts.</p>
+          <p>Retired Players Rule:</p>
+          <p>Retired players can also be released cap-free. However, if a manager chooses to keep a retired player on their roster, the player's contract will remain unchanged with no cap relief.</p>
+          <p>Compensation for Retired "Tier 1" Players (Calvin Johnson Rule):</p>
+          <p>Specific compensation rules apply to retired players who were categorized as "Tier 1" based on their performance and contribution to their teams. This section will detail the rules and compensation structure.</p>
+          <p>Miscellaneous Adjustments:</p>
+          <p>Any other rules that don't fit into traditional categories or that are unique to certain situations will be captured here</p>
+        </div>
+      </details>
+      <details>
+        <summary>Legacy Rules Not In Current Rulebook (Needs Confirmation)</summary>
+        <div class="current">
+          <h4>Legacy Additions</h4>
+          <p>2014: Warning/fine structure for lineup and nomination issues (2nd warning $10, 3rd +$20, 4th +$30 with lockout).</p>
+          <p>2014: Trade response strikes (4 days in-season, 2 weeks off-season); 3 strikes removes trading privileges.</p>
+          <p>2014: Replacement owners may cut 1 player penalty-free and are relieved of prior cap hits; multi-owner replacement uses dispersal draft rules.</p>
+        </div>
+      </details>
+    </section>
+            <section id="history">
+      <h2>League History & Records (In Progress)</h2>
+      <div class="current">
+        <h4>Years in Existence</h4>
+        <p>2010-2025 (16 seasons recorded in the database).</p>
+      </div>
+      <div class="changes"><strong>League Settings Changes (from DB):</strong><ul><li>Salary cap changes: 2010: 210; 2011: 300000; 2019: 300000.49</li><li>Roster size changes: 2010: 17; 2011: 23; 2012: 31; 2013: 26; 2018: 30</li><li>Taxi squad size changes: 2010: 0; 2012: 5; 2014: 9; 2018: 10; 2020: 25; 2021: 10</li><li>Starters count changes: 2010: 9; 2011: 14; 2015: 15; 2018: 17; 2022: 18</li><li>IDP starters changes: 2011: 5; 2018: 7</li><li>Last regular season week changes: 2010: 16; 2011: 13; 2021: 14</li></ul></div>
+      <details>
+        <summary>Division Names by Season</summary>
+        <div class="current">
+          <h4>Division History</h4>
+          <table style="width:100%; border-collapse: collapse; margin: 8px 0;">  <tr>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">season</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">division_id</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">division_name</th>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2010</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Adam Pacman Jones Smack my Bitchup Division</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2010</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Brandon Spikes Nob Job Division</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Straight Cash Homey</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">The Ochocinco Show</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Raytorious L52</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Dog Pound 4 Life</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Straight Cash Homey</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">The Ochocinco Show</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Raytorious L52</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Dog Pound 4 Life</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Straight Cash Homey</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">The Ochocinco Show</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Raytorious L52</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Dog Pound 4 Life</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">00</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">ICE UP SON!</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">01</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">LEGION OF BOOM</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">02</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">MAKE IT RAIN</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">03</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">DOG POUND 4 LIFE</td>  </tr></table>
+        </div>
+      </details>
+      <details>
+        <summary>League Settings by Season (DB)</summary>
+        <div class="current">
+          <h4>League Settings Snapshot</h4>
+          <table style="width:100%; border-collapse: collapse; margin: 8px 0;">  <tr>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">season</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">league_id</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">league_name</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">salary_cap_amount</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">roster_size</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">taxi_squad</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">injured_reserve</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">start_week</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">end_week</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">last_regular_season_week</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">starters_count</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">idp_starters_count</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">divisions_count</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">conferences_count</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">h2h</th>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2010</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">60671</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS WCBDFY Salary Cap League</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">210</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">0</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">9</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">40832</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Dynasty Cap</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">23</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">0</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">37227</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Dynasty Cap</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">31</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">42721</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Dynasty Cap</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">26</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30590</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">26</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">9</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">29015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">26</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">9</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">27191</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">26</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">9</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">26</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">9</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">Doubleheaders</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">25</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">16</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">13</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">18</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">18</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">18</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">74598</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">UPS Salary Cap Dynasty</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">300000.49</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">30</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">10</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">15</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">17</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">14</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">18</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">7</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">YES</td>  </tr></table>
+        </div>
+      
+      <details>
+        <summary>Starters Ranges by Season (DB)</summary>
+        <div class="current">
+          <h4>Starters Metadata</h4>
+          <table style="width:100%; border-collapse: collapse; margin: 8px 0;">  <tr>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">season</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">QB</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">RB</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">WR</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">TE</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">PK</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">PN</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">Def</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">DT+DE</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">LB</th>    <th style="border:1px solid #e2d6c5; padding:6px 8px; text-align:left;">CB+S</th>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2010</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2011</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2012</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2013</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2014</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2015</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2016</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2017</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2018</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2019</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2020</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2021</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2022</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2023</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2024</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr>  <tr>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2025</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-2</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-5</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1-4</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">1</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;"></td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>    <td style="border:1px solid #e2d6c5; padding:6px 8px;">2-3</td>  </tr></table>
+          <h4>Starter Rules Changes (from DB)</h4>
+          <ul>
+            <li>2010: QB:1, RB:2-3, WR:2-3, TE:1-2, PK:1, Def:1</li><li>2011: QB:1, RB:1-3, WR:2-4, TE:1-3, PK:1, PN:1, DT+DE:1-3, LB:1-3, CB+S:1-3</li><li>2015: QB:1, RB:2-4, WR:2-4, TE:1-3, PK:1, PN:1, DT+DE:1-3, LB:1-3, CB+S:1-3</li><li>2018: QB:1, RB:2-4, WR:2-4, TE:1-3, PK:1, PN:1, DT+DE:2-3, LB:2-3, CB+S:2-3</li><li>2022: QB:1-2, RB:2-5, WR:2-5, TE:1-4, PK:1, PN:1, DT+DE:2-3, LB:2-3, CB+S:2-3</li>
+          </ul>
+        </div>
+      </details>
+</details>
+      <details>
+        <summary>Current Owners</summary>
+        <div class="current">
+          <h4>Pending Data</h4>
+          <p>Provide current owner roster (name, team, start year).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Former Owners</summary>
+        <div class="current">
+          <h4>Pending Data</h4>
+          <p>Provide former owners with years active and exit notes.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Historical All-Play Records</summary>
+        <div class="current">
+          <h4>Pending Data</h4>
+          <p>Provide all-play records (by season and/or all-time).</p>
+        </div>
+      </details>
+      <details>
+        <summary>Disciplinary Actions / Removals</summary>
+        <div class="current">
+          <h4>Known</h4>
+          <p>Baldarellis removed from league (season/year TBD). CC eliminated during that season.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Notable League History</summary>
+        <div class="current">
+          <h4>Pending Data</h4>
+          <p>Provide notable events from forum/email/message board archives.</p>
+        </div>
+      </details>
+    </section>
+
+<section id="open-items">
+      <h2>Open Items & Missing Inputs</h2>
+      <ul>
+        <li>Legacy Table of Contents references a League Scoring section that is missing from the current rulebook. Provide the scoring rules if they still apply.</li>
+        <li>Current Penalties section is marked as under review with placeholders. Provide the finalized penalties and appeal process to replace legacy assumptions.</li>
+        <li>UPS Rule Book - Table of Contents references linked special rules (e.g., COVID protocols, incarceration, etc.). Provide those linked documents if you want them merged.</li>
+        <li>Database/API enrichment pending. Provide DB connection details or exports, and any MFL API responses you want incorporated.</li>
+        <li>Provide current playoff seeding and tiebreaker rules; these are marked as "circle back".</li>
+        <li>Provide forum/email/message board exports or notes for league history compilation.</li>
+      </ul>
+    </section>
+    <section id="sources">
+      <h2>Sources & Archive</h2>
+      <p>Extracted text snapshots are stored in <code>rules/archive</code>. See <code>rules/archive/source_index.md</code> for details.</p>
+    </section>
+  </main>
+</body>
+</html>

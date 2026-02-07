@@ -1,4 +1,5 @@
-<link rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260204ay">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link id="cccCss" rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -24,6 +25,9 @@
           <input id="commishModeChk" type="checkbox" />
           Commish Mode
         </label>
+        <button id="commishConsoleBtn" class="ccc-btn" type="button" style="display:none;">
+          Commish Console
+        </button>
 
         <div class="ccc-field">
           League Yr
@@ -259,4 +263,16 @@
   </div>
 </div>
 
-<script src="https://keithcreelman.github.io/ups-league-data/ccc.js?v=20260204ay"></script>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search || "");
+    var v = params.get("cache") || params.get("v") || "";
+    var qs = v ? "?v=" + encodeURIComponent(v) : "";
+    var css = document.getElementById("cccCss");
+    if (css) css.href = "https://keithcreelman.github.io/ups-league-data/ccc.css" + qs;
+    var s = document.createElement("script");
+    s.src = "https://keithcreelman.github.io/ups-league-data/ccc.js" + qs;
+    s.defer = true;
+    document.body.appendChild(s);
+  })();
+</script>

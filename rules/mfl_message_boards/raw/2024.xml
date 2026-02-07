@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<error>API requires logged in user in league ID 74598 - Please be sure to pass the proper MFL_USER_ID cookie or APIKEY parameter</error>

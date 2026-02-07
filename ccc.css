@@ -280,6 +280,15 @@
   box-shadow: 0 12px 22px rgba(5,10,20,.36), inset 0 1px 0 rgba(255,255,255,.22);
 }
 .ccc-btn:active{ transform: translateY(1px); }
+.ccc-btn:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.ccc-btn.is-selected{
+  background: linear-gradient(135deg, rgba(78,161,255,.62), rgba(146,102,255,.5));
+  border-color: rgba(230,240,255,.7);
+}
 
 .ccc-btn-offer{
   background: linear-gradient(180deg, rgba(20,34,58,.97), rgba(11,24,44,.97));
@@ -808,7 +817,16 @@ body.ccc-modalOpen #restructureModal *{
     flex-direction: column;
     align-items: flex-start;
   }
-  .ccc-tableWrap{ margin-left: -10px; margin-right: -10px; padding: 0 10px; max-height: none; }
+  .ccc-tableWrap{
+    margin-left: -10px;
+    margin-right: -10px;
+    padding: 0 10px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    overscroll-behavior: auto;
+    touch-action: pan-x;
+  }
 }
 @media (max-width: 720px){
   .kpi{ min-width: 46%; }

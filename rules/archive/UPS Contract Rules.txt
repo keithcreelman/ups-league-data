@@ -1,0 +1,42 @@
+Contract Rules
+Maximum years any player can have on a contract at any time is 3.
+There are 4 types of Contracts a player may have:
+Rookie - Contracts that are given to player during rookie year at any point.
+Veteran - Contracts that are given to player in any year except their rookie year.
+Loaded - Contracts that are given to any Veteran that are not equally distributed across all years of contract.  The contract may be Front Loaded where more money than the equal distribution is allocated in year 1 of the contract.  Or it may be Back Loaded where less money than the equal distribution is allocated to year 1 of the contract.
+WW - This is the default contract assigned to a player that is picked up via BB Waivers or via the 1st come 1st Serve FA Pickups on Sunday AM.
+Rookie Contract Specifics:
+Rookies selected in the Rookie Draft are assigned 3 Contract Years by default and may not be modified.
+Players picked up during the season will be automatically assigned a “WW” contract, however the Commissioner will adjust to a “Rookie Contract” no later than the time the season rolls over.
+Rookies picked up via WW or FA are default given a 1 year contract.  The contract may be extended either via a Mid-Season Multi or an Extension.
+For the duration of the Rookie Contract, the contract must be equally distributed throughout and it may not be restructured until it expires and reaches “Veteran Status”.
+Extensions maybe given out to players at the following times:
+Teams may carry no more than 6 (Non-Rookie Contracts) on their roster at any time from Contract Deadline - End of Season.
+Veteran & Rookie Contracts - Pre-Season prior to Contract Deadline Date if entering final year of contract
+Veteran & Rookie Contracts - In-Season
+All Non-Waiver Contracts are guaranteed at 75%.
+During the current season salaries are “earned” based on the following schedule:
+Mar 1 - Sep 30 -  0% Earned
+Oct 1 - 25% Earned
+Nov 1 - 50% Earned
+Dec 1 - 75% Earned
+Non-Waiver Contracts that are cut prior to earning 75% of the Total Contract’s Value will be subject to a cap penalty in the amount of the Total Guarantee less the amount the contract has earned.
+Total Contract Value is determined at the time the contract is handed out.  This is calculated as the amount of contract multiplied by the number of years.
+With any contract extension or restructure the Total Contract Value will be reset and include only the remaining years and total salary value.
+The first year of any contract must have a salary as a minimum of 20% of the TCV.
+Any contract given a multiple year deal either in the auction or via a mid-season multi will be subject to a minimum cap penalty of 1K if player is cut and if years remaining is greater than one, and the TCV less than $5K.
+Contracts that are in the final year of the deal and with a Total Contract Value of less than 5K are not subject to a cap penalty
+Players picked up during the season that are not given an extension or a mid-season multi year contract are subjected to a cap penalty rate of 35%.
+Any player picked up during the season may be given a mid-season multi year contract (just as though the player was selected in the auction) if posted on the league’s contract form prior to that player’s NFL Team’s first game.
+There is a limit of 3 per season
+Front or Back Loads are allowed however the current season's salary may not be modified.
+Any player picked up in-season may also be given an extension and receive a contract raise commensurate with their position.
+Beginning in 2019 there will no longer be any allowances for restructuring of mid-season acquisitions.
+Players picked up in-season and given an extension or a mid-season multi will be subject to the same terms as all other non waiver contracts.
+Players that are cut that have not been activated (ie. players on the taxi squad or taxi squad eligible that were cut prior to the contract deadline date) are not subjected to any cap penalty.
+Any contracts handed out prior to the cap rule change have been voted as “Grand-Fathered” into the old rule.  These contracts will remain in this status until they are next “touched” either via extension, restructure, or if they are released.
+Grandfathered in contracts will show “GF” in the salary type.
+All new contracts from this point will be automatically subjected to the new cap penalty rate.  The Commish will provide Total Contract Value as well as Total Guarantees to all players under contract prior to the start of the 2019 NFL Season (Time permitting).
+Teams are only allowed to have 5 players on their roster at any time with a FL or BL designation this includes grand-fathered in contracts.
+Restructuring of contracts will be limited to 3 will only be allowed prior to the Contract Deadline Date.
+Beginning in 2019 restructures will be allowed in the pre-season for any contract with multiple years remaining.

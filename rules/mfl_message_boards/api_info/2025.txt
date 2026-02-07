@@ -1,0 +1,831 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Fantasy Football: UPS Salary Cap Dynasty MFL Developers Program</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"  />
+<meta name="keywords" content="MFL Developers Program, fantasy football, keeper fantasy football league, dynasty fantasy football league, salary cap fantasy football league, IDP fantasy football league, MyFantasyLeague, MFL, ffl, league management"  />
+<meta name="description" content="The most customizable way to run your fantasy football league on the web today, MyFantasyLeague.com was voted 'Best Fantasy Commissioner Product' by the Fantasy Sports Trade Association, and has won several additional significant industry awards.  Our 31 years of experience means we do fantasy football right.  If you're ready to move beyond basic league settings, and onto fantasy football how the hard-core players play it, try MyFantasyLeague.com: Beyond League Management"  />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"  />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WZDGQ9CBF2"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-WZDGQ9CBF2');
+</script>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Roboto+Condensed:400,700|Roboto:400,400i,700" rel="stylesheet">
+<link rel="stylesheet" id="default" href="https://www48.myfantasyleague.com/skins17/MFLBaseCSS.css" type="text/css"  />
+<link rel="stylesheet" id="custom" href="https://www.mflscripts.com/mfl-apps/global/css/light.css" type="text/css"  />
+<link rel="apple-touch-icon" href="https://www48.myfantasyleague.com/apple-touch-icon.png" />
+<link rel="shortcut icon" href="https://www48.myfantasyleague.com/favicon.ico" />
+<script type="text/javascript" src="https://www48.myfantasyleague.com/mfl_common.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+<!--
+var league_id = '74598';
+var year = 2025;
+var xmlBaseURL = 'https://www48.myfantasyleague.com/fflnetdynamic2025/';
+var baseURLStatic = 'https://www48.myfantasyleague.com';
+var baseURLDynamic = 'https://www48.myfantasyleague.com';
+var currentServerTime = 1770432819;
+var completedWeek = 21;
+var liveScoringWeek = 21;
+var startWeek = 1;
+var endWeek = 17;
+var standingsEndWeek = "14";
+var h2h_setting = "YES";  
+var precision = 1;
+var thisProgram = "api_info";
+
+function Franchise (id, name, division, icon, logo, abbrev) {
+   this.id = id;
+   this.name = name;
+   this.division = division;
+   this.icon = icon;
+   this.logo = logo;
+   this.abbrev = abbrev;
+}
+var leagueAttributes = new Object();
+
+var franchiseDatabase = new Array();
+franchiseDatabase['fid_0000'] = new Franchise('0000', 'Commissioner', undefined, '', '');
+franchiseDatabase['fid_0001'] = new Franchise('0001', 'L.A. Looks', '03' ,'https://www48.myfantasyleague.com/fflnetdynamic2025/74598_franchise_icon0001.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2025/74598_franchise_logo0001.png' ,'L.A.');
+franchiseDatabase['fid_0002'] = new Franchise('0002', 'CBP', '00' ,'https://www48.myfantasyleague.com/fflnetdynamic2023/74598_franchise_icon0002.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2023/74598_franchise_logo0002.png' ,'DBCA');
+franchiseDatabase['fid_0003'] = new Franchise('0003', 'Gride', '01' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0003.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0003.png' ,'GRID');
+franchiseDatabase['fid_0004'] = new Franchise('0004', 'Pure Greatness', '01' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0004.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0004.png' ,'PG');
+franchiseDatabase['fid_0005'] = new Franchise('0005', 'HammerTime 🔨 ⏰', '00' ,'https://www48.myfantasyleague.com/fflnetdynamic2025/74598_franchise_icon0005.jpg' ,'https://www48.myfantasyleague.com/fflnetdynamic2025/74598_franchise_logo0005.jpg' ,'🔨 ⏰');
+franchiseDatabase['fid_0006'] = new Franchise('0006', 'The Long Haulers', '00' ,'https://www48.myfantasyleague.com/fflnetdynamic2024/74598_franchise_icon0006.jpg' ,'https://www48.myfantasyleague.com/fflnetdynamic2024/74598_franchise_icon0006.jpg' ,'LH');
+franchiseDatabase['fid_0007'] = new Franchise('0007', 'Sex Manther', '01' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0007.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0007.png' ,'SEX');
+franchiseDatabase['fid_0008'] = new Franchise('0008', 'Real Deal Creel', '02' ,'https://www48.myfantasyleague.com/fflnetdynamic2023/74598_franchise_icon0008.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2023/74598_franchise_logo0008.png' ,'RealDeal');
+franchiseDatabase['fid_0009'] = new Franchise('0009', 'C-Town Chivalry', '03' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0009.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0009.png' ,'CTwn');
+franchiseDatabase['fid_0010'] = new Franchise('0010', 'Blake Bombers', '02' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0010.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0010.png' ,'Bomb');
+franchiseDatabase['fid_0011'] = new Franchise('0011', 'Cleon Ca$h', '03' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0011.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0011.png' ,'Cash');
+franchiseDatabase['fid_0012'] = new Franchise('0012', 'Hawks', '02' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_icon0012.png' ,'https://www48.myfantasyleague.com/fflnetdynamic2019/74598_franchise_logo0012.png' ,'Hawk');
+leagueAttributes['Draft'] = true;
+leagueAttributes['Auction'] = true;
+leagueAttributes['IR'] = true;
+leagueAttributes['TS'] = true;
+leagueAttributes['Trade'] = true;
+leagueAttributes['MinStarters'] = 18;
+leagueAttributes['MaxStarters'] = 18;
+leagueAttributes['Franchises'] = 12;
+leagueAttributes['Divisions'] = new Array('ICE UP SON!', 'LEGION OF BOOM', 'MAKE IT RAIN', 'DOG POUND 4 LIFE'); // This will be deprecated soon, use leagueDivisions instead
+leagueDivisions = new Object();
+leagueDivisions['00'] = { 'id' : '00', 'name' : 'ICE UP SON!' };
+leagueDivisions['01'] = { 'id' : '01', 'name' : 'LEGION OF BOOM' };
+leagueDivisions['02'] = { 'id' : '02', 'name' : 'MAKE IT RAIN' };
+leagueDivisions['03'] = { 'id' : '03', 'name' : 'DOG POUND 4 LIFE' };
+
+function chat_window (url) {
+    var chatWindow = window.open(url,"chat_window","height=600,width=450,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    chatWindow.focus();
+}
+
+function live_draft_window (url) {
+    var liveDraftWindow = window.open(url,"live_draft_window","height=800,width=1060,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    liveDraftWindow.focus();
+}
+
+function live_auction_window (url) {
+    var liveAuctionWindow = window.open(url,"live_auction_window","height=700,width=1060,scrollbars=yes,toolbar=no,status=no,resizable=yes,menubar=no");
+    liveAuctionWindow.focus();
+}
+
+
+//-->
+</script>
+<link rev="MADE" href="mailto:support@myfantasyleague.com"  />
+</head>
+<body id="body_api_info"><noscript>
+  <img src="http://b.scorecardresearch.com/b?c1=2&amp;c2=6035210&amp;c3=&amp;c4=www.myfantasyleague.com&amp;c5=&amp;c6=&amp;c15=&amp;cv=1.3&amp;cj=1" style="display:none" width="0" height="0" alt="" />
+</noscript>
+<div class="myfantasyleague_menu" onclick=""><span>LEAGUE MENU</span><input id="sub0" type="checkbox"><label for="sub0"><span></span></label><ul>
+<li class="mfl-icon"><a class="no-sub" href="http://home.myfantasyleague.com"><img src="/images/mfl-logo-2017.png" alt="MyFantasyLeague.com"><span>MyFantasyLeague.com</span></a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/home/74598">Home</a></li>
+<li class="has-sub sub-default mm-myacct"><a>My Account</a><b aria-haspopup="true" aria-controls="p1"></b><input id="sub1" type="checkbox"><label for="sub1"><span></span></label>
+<ul id="p1">
+<li><a class="no-sub" href="https://www42.myfantasyleague.com/2025/dash" target="">MFL&nbsp;Dashboard</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/login?L=74598" target="">Login</a></li>
+<li><a class="no-sub" href="https://www42.myfantasyleague.com/2025/index" target="">Find&nbsp;A&nbsp;League</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-scores"><a>Scores</a><b aria-haspopup="true" aria-controls="p2"></b><input id="sub2" type="checkbox"><label for="sub2"><span></span></label>
+<ul id="p2">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/ajax_ls?L=74598" target="">Live&nbsp;Scoring</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/standings?L=74598" target="">Standings</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=22" target="">Weekly&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=31" target="">Weekly&nbsp;Summary</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=101" target="">Power&nbsp;Rank</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=06" target="">Starting&nbsp;Lineups</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=15" target="">Fantasy&nbsp;Schedule</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=79" target="">Playoff&nbsp;Brackets</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/pro_schedule?L=74598" target="">NFL&nbsp;Schedule</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=207" target="">Fantasy&nbsp;Previews</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=177" target="">Fantasy&nbsp;Recaps</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-trans"><a>Transactions</a><b aria-haspopup="true" aria-controls="p3"></b><input id="sub3" type="checkbox"><label for="sub3"><span></span></label>
+<ul id="p3">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=07" target="">Rosters</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=03" target="">Transactions</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=76" target="">Processed&nbsp;Waivers</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/locked_players?L=74598" target="">Locked&nbsp;Players</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-player"><a>Player Research</a><b aria-haspopup="true" aria-controls="p4"></b><input id="sub4" type="checkbox"><label for="sub4"><span></span></label>
+<ul id="p4">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=08" target="">Top&nbsp;Performers/Player&nbsp;Stats</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=236" target="">Projected&nbsp;Stats</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/reports?L=74598&R=RANKS" target="">Player&nbsp;Ranks</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/depth_chart?L=74598" target="">Fantasy&nbsp;Depth&nbsp;Charts</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=117" target="">Top&nbsp;Adds/Drops/Starters</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=81" target="">Points&nbsp;Allowed&nbsp;-&nbsp;By&nbsp;Position</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/reports?L=74598&R=FULLFA" target="">Complete&nbsp;Free&nbsp;Agent&nbsp;Listing</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/injury?L=74598" target="">NFL&nbsp;Injury&nbsp;Report</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/news_articles?L=74598&P=*" target="">Player&nbsp;News</a></li>
+<li><a class="no-sub" href="http://subscribe.myfantasyleague.com/" target="">Get&nbsp;Projection&nbsp;Sources</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/player_search?L=74598" target="">Player&nbsp;Search</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-draft"><a>Draft/Auction</a><b aria-haspopup="true" aria-controls="p5"></b><input id="sub5" type="checkbox"><label for="sub5"><span></span></label>
+<ul id="p5">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=17" target="">Draft&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/reports?L=74598&R=ADP" target="">ADP&nbsp;Report</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=100" target="">Future&nbsp;Draft&nbsp;Picks</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=44" target="">Auction&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/reports?L=74598&R=AAV" target="">AAV&nbsp;Report</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-league"><a>League</a><b aria-haspopup="true" aria-controls="p6"></b><input id="sub6" type="checkbox"><label for="sub6"><span></span></label>
+<ul id="p6">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/all_reports?L=74598" target="">All&nbsp;Reports</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=123" target="">League&nbsp;Calendar</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=09" target="">League&nbsp;Rules</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/accounting_report?L=74598" target="">Accounting</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=01" target="">Franchise&nbsp;Information</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/reports?L=74598&R=FSUMMARY" target="">Franchise&nbsp;Summary</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=122" target="">NFL&nbsp;Pool&nbsp;Results</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=194" target="">League&nbsp;Champions</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-social"><a>Social</a><b aria-haspopup="true" aria-controls="p7"></b><input id="sub7" type="checkbox"><label for="sub7"><span></span></label>
+<ul id="p7">
+<li><a class="no-sub" href="https://www.fantasysharks.com/forum/viewforum.php?f=501" target="">MFL&nbsp;Community&nbsp;Forums</a></li>
+<li><a class="no-sub" href="https://twitter.com/MyFantasyLeague" target="">Follow&nbsp;Us&nbsp;On&nbsp;Twitter</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/options?L=74598&O=167" target="">Refer&nbsp;A&nbsp;Friend&nbsp;And&nbsp;Save!</a></li>
+</ul>
+</li>
+<li class="has-sub sub-default mm-help"><a>Help</a><b aria-haspopup="true" aria-controls="p8"></b><input id="sub8" type="checkbox"><label for="sub8"><span></span></label>
+<ul id="p8">
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/support?L=74598" target="">Help&nbsp;Center</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/support?PROGRAM=api_info&L=74598" target="_blank">Help&nbsp;on&nbsp;this&nbsp;Page</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/site_news?L=74598" target="">What's&nbsp;New?</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/api_info?STATE=test&CCAT=export&TYPE=messageBoard&L=74598&APIKEY=aRBv1sCXvuWqx0SmP13EaDoeHbox&PRINTER=1" target="">Printer&nbsp;Friendly&nbsp;Page</a></li>
+<li><a class="no-sub" href="https://www48.myfantasyleague.com/2025/api_info?L=74598" target="">Developer's&nbsp;API</a></li>
+</ul>
+</li>
+</ul></div>
+<table cellspacing="0" class="pageheader">
+<tr>
+<td rowspan="3" class="brandlogo">
+<a href="http://www.myfantasyleague.com/"><img src="https://www48.myfantasyleague.com/images/new_mfl_logo.png" alt="http://www.myfantasyleague.com/" width="80" height="80" border="0"  /></a></td><td align="center" class="bannerimage">
+</td>
+<td rowspan="3" class="welcome"><b>Guest</b> (<a href="https://www48.myfantasyleague.com/2025/login?L=74598">Login</a>)</td>
+</tr>
+<tr>
+<td class="pagetitle">
+<h1>
+ <span>MFL Developers Program</span></h1></td></tr></table><div class="pagebody" id="api_info">
+<!------------------------------------------------------>
+<!----------------- Start #1 - Header ------------------>
+<!------------------------------------------------------>
+
+<!-- Pre-resolve DNS and preconnect -->
+<link rel="dns-prefetch" href="https://www.mflscripts.com">
+<link rel="preconnect" href="https://www.mflscripts.com" crossorigin>
+
+<style>
+  /* Fix tab icon */
+  #tabmenu-wrap li#tab7 a:before,
+  #tabmenu-wrap #tab_title.tab7:before {
+    content:"\f155";
+  }
+
+  /* UPS HOTLINKS banner */
+  .ccc-banner {
+    margin: 0.75rem auto 0.5rem auto;
+    padding: 1rem 1.35rem;
+    border-radius: 12px;
+    background: linear-gradient(115deg, #0f172a, #1d4ed8, #0ea5e9);
+    color: #f8fafc;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    max-width: 1200px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .ccc-banner-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem 1rem;
+    align-items: center;
+  }
+
+  .ccc-text {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 240px;
+  }
+
+  .ccc-title-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .ccc-title-hotlinks {
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* UPS logo */
+  .ups-logo-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+  }
+  .ups-logo-icon {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* GOLD CTA PILL - ALWAYS GOLD */
+  .ccc-cta {
+    margin-left: auto;
+    background: #fbbf24 !important;
+    color: #111827 !important;
+    border: 2px solid #fbbf24 !important;
+    padding: 0.62rem 1.05rem;
+    border-radius: 10px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    box-shadow: none !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .ccc-cta:hover,
+  .ccc-cta:focus,
+  .ccc-cta:active {
+    background: #fbbf24 !important;
+    color: #111827 !important;
+    border-color: #fbbf24 !important;
+    box-shadow: none !important;
+  }
+
+  .ccc-cta i {
+    font-size: 1.05rem;
+  }
+
+  .ccc-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .ccc-pill {
+    background: linear-gradient(135deg, #122037, #1f3f87);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: #f8fafc !important;
+    padding: 0.55rem 1rem;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.98rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  }
+
+  .ccc-pill:hover {
+    background: linear-gradient(135deg, #1f3f87, #2b6cb0);
+    color: #ffffff !important;
+  }
+
+  @media (max-width: 820px) {
+    .ccc-banner-inner {
+      grid-template-columns: 1fr;
+    }
+    .ccc-cta {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script>
+/* ===========================
+   HEADER SECTION 1 – FONT SIZE + THEME
+   =========================== */
+
+// TEMPLATE INCREASE-DECREASE FONT SIZE - MENU>HELP>CUSTOMIZE PAGE SIZE
+increaseFont = true;
+if (localStorage.hasOwnProperty("fontSize_" + year + "_" + league_id)) {
+  var SetStyle = localStorage.getItem("fontSize_" + year + "_" + league_id);
+  if (SetStyle !== "undefined") {
+    document.querySelector('html').setAttribute('style', SetStyle);
+  }
+}
+
+// TEMPLATE THEME FUNCTION TO SET SKIN COLORS
+function setTheme(year, league_id, themeName) {
+  if (typeof themeName !== 'string') {
+    throw new Error('Invalid themeName parameter');
+  }
+  localStorage.setItem(`theme_${year}_${league_id}`, themeName);
+  applyTheme(themeName);
+}
+function applyTheme(themeName) {
+  document.documentElement.className = themeName;
+}
+function getStoredTheme(year, league_id, defaultTheme) {
+  const storedTheme = localStorage.getItem(`theme_${year}_${league_id}`);
+  return storedTheme || defaultTheme;
+}
+(function() {
+  const defaultTheme = 'theme-light-blue';
+  const storedTheme = getStoredTheme(year, league_id, defaultTheme);
+  applyTheme(storedTheme);
+})();
+</script>
+
+<!-------------------------------------->
+<!---------- HEADER SECTION 2 ---------->
+<!-------------------------------------->
+
+<link rel="shortcut icon" href="https://www.mflscripts.com/ImageDirectory/script-images/favicon.ico" type="image/x-icon" />
+<script>
+  document.title = 'UPS Salary Cap Dynasty League';
+  const linkRelIco = document.createElement('link');
+  linkRelIco.setAttribute('href', 'https://www.mflscripts.com/ImageDirectory/script-images/favicon.ico');
+  linkRelIco.setAttribute('rel', 'shortcut icon');
+  linkRelIco.setAttribute('type', 'image/x-icon');
+  document.head.appendChild(linkRelIco);
+</script>
+
+<!-------------------------------------->
+<!---------- SKIN SELECTOR (optional) -->
+<!-------------------------------------->
+
+<div class="MFLSkinSelection">
+  <i class="fa-regular fa-paintbrush MFLSkinSelectionbtn" aria-hidden="true" title="Select Skin Color"></i>
+  <div class="ThemeSwith_overlay" style="display:none"></div>
+  <div id="myMFLSkinSelection" class="MFLSkinSelection-content" style="display:none">
+    <div id="popup-selectLeagues-caption" style="position:relative">
+      Select Skin
+      <span id="MFLPlayerPopupClose" class="as_close_btn" style="transform:none;top:0;right:0;font-size:0.813rem;font-family:'Open Sans',sans-serif">X</span>
+    </div>
+    <!-- keep all the team/skin options from your original header -->
+    <!-- ... (you can leave them as-is from the original) ... -->
+  </div>
+</div>
+
+<!-------------------------------------->
+<!---------- LEAGUE BANNER ------------->
+<!-------------------------------------->
+
+<div class="banner-container-full">
+  <div class="banner-container-wrap-full">
+    <a class="full_height_banner" href="//www48.myfantasyleague.com/2025/home/74598" title="Return to home page">
+      <img src="https://i.ibb.co/Lz5d5Bb4/Chat-GPT-Image-Oct-12-2025-at-08-33-28-AM.png">
+    </a>
+  </div>
+</div>
+
+<!-------------------------------------->
+<!------- UPS HOTLINKS SECTION --------->
+<!-------------------------------------->
+
+<div class="ccc-banner">
+  <div class="ccc-banner-inner">
+
+    <div class="ccc-text">
+      <div class="ccc-title-row">
+        <span class="ups-logo-wrap">
+          <img class="ups-logo-icon" src="https://i.ibb.co/Kp2L4ZM6/images-2.png" alt="UPS">
+        </span>
+        <span class="ccc-title-hotlinks">UPS HOTLINKS</span>
+      </div>
+    </div>
+
+<div class="ccc-cta-group">
+  <!-- Existing Contract Command Center CTA -->
+  <a class="ccc-cta" href="//www48.myfantasyleague.com/2025/home/74598?MODULE=MESSAGE16">
+    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    Contract Command Center
+  </a>
+
+  <!-- New Playoff Command Center CTA (MESSAGE13) -->
+  <a class="ccc-cta ccc-cta-playoffs" href="//www48.myfantasyleague.com/2025/home/74598?MODULE=MESSAGE13">
+    <i class="fa-solid fa-trophy"></i>
+    Season Wrap Up & Playoff Preview 
+  </a>
+</div>
+
+    <div class="ccc-actions">
+      <a class="ccc-pill" href="//www48.myfantasyleague.com/2025/lineup?L=74598">
+        <i class="fa-solid fa-clipboard-list"></i>
+        Submit Lineup
+      </a>
+
+      <a class="ccc-pill" href="//www48.myfantasyleague.com/2025/add_drop?L=74598">
+        <i class="fa-solid fa-plus-minus"></i>
+        Add/Drop
+      </a>
+
+      <a class="ccc-pill" href="//www48.myfantasyleague.com/2025/options?L=74598&O=07">
+        <i class="fa-solid fa-users"></i>
+        Rosters
+      </a>
+
+      <a class="ccc-pill" href="//www48.myfantasyleague.com/2025/ajax_ls?L=74598">
+        <i class="fa-solid fa-gauge-high"></i>
+        Scoreboard
+      </a>
+
+      <a class="ccc-pill" href="//www48.myfantasyleague.com/2025/options?L=74598&O=05">
+        <i class="fa-solid fa-handshake"></i>
+        Trades
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-------------------------------------->
+<!---------- FUNCTIONAL CONFIG --------->
+<!-------------------------------------->
+
+<script>
+/* redirect old scoreboard links to your HPM mini-scoreboard */
+var lsmHPM = '8';
+const lsmHPMurl = `${baseURLDynamic}/${year}/options?L=${league_id}&O=247&SEQNO=${lsmHPM}`;
+$(document).ready(function () {
+  $('a[href*="ajax_ls?L"]').each(function () {
+    $(this).removeClass('scoringLinkDisable');
+    $(this).attr('href', lsmHPMurl);
+  });
+});
+
+/* ==== GLOBAL SETTINGS (from original HEADER SECTION 5) ==== */
+
+// DEFINE TO USE "REM" OR "PX" VALUES TO ALL MFL SCRIPT VARIABLES
+var useREM = true;
+// ADD COMMISSIONER ABILITIES LINK TO MENU
+var add_abilities_link = true;
+var add_seedings_link = true;
+var SetHPMability = 18;
+var SetHPMseeding = 11;
+
+// MFL MOBILE MENU
+var menuPositionY = '0.313';
+var menuPositionIsLeft = false;
+var showMenuIcons = true;
+
+// MFL MODULE EXPAND AND COLLAPSE
+var MFLEnableMedia = true;
+var MFLRememberModuleStates = true;
+
+// MFL ENHANCED CHAT
+var chatAddonInsertImage = true;
+var chatAddonInsertLink = true;
+var chatAddonCustomEmoji = true;
+var chatHideVideoLink = true;
+var chatBottomUp = true;
+var chatShowLapsedTime = true;
+var chatShowMore = true;
+var chatDefaultDisplayMessages = 8;
+var chatUseFranchiseIcons = true;
+var chatFranchiseIconHeight = 1.25;
+var chatImageMaxHeight = 3.125;
+var chatImageMaxWidth = 12.5;
+
+// ENABLE PLAYER/ARTICLE/SCORE POPUPS
+var MFLPopupEnablePlayerNews = true;
+var MFLPopupEnableArticle = true;
+var MFLScoreDetailsPopup = true;
+
+//ENABLE FRANCHISE POPUP
+var MFLFranchisePopup = true;
+var includeBiologo = false;
+var includeBiologoAsset = false;
+
+// COMMISH FRANCHISE ID
+var commishTeam = "0004";
+
+// ALL PLAY OR BEST BALL OPTIONS
+var removeSchedule = false;
+var removeWatchlist = false;
+var removeLineup = false;
+var hideLinks = false;
+
+// LIGHT SKIN SCORES POPUP CSS
+var detailsOverlay = "rgba(0,0,0,.7)";
+var detailsWrapBG = "var(--mobile-wrap-bg,#fff)";
+var detailsWrapBorder = "#000";
+var detailsWrapBorWidh = "0";
+var detailsWrapBoxShdw = "0 0 1.563rem #000";
+var detailsWrapPadding = "0.625rem";
+var detailsWrapRadius = "0.188rem";
+
+// ENABLE NOTIFICATIONS
+var MFLPopupEnableAutoNotification = true;
+var MFLPopupEnableTrade = true;
+var MFLPopupEnableTradePoll = true;
+var MFLPopupEnableReminders = true;
+var MFLPopupEnableMessages = true;
+var MFLPopupEnableCommishMessage = false;
+var MFLPopupCommishMessage = "TEST";
+var MFLPlayerPopupIncludeNFLLogo = true;
+
+// ENABLE MENU POPUP SEARCH
+var ShowMFLsearch = true;
+
+// CUSTOM SUBMIT LINEUP VAR
+var lu_includeValidation = true;
+var hideFantasySharks = false;
+var hideOptionalMsg = true;
+var hideLineupHint = true;
+var lu_useDefaultAsPrimary = false;
+var showWeatherPop = true;
+
+// BOX SCORES SETTINGS
+var mflBoxHomePageOnly = true;
+var mflBoxShowNonStarter = true;
+var mflBoxUseIcon = true;
+var mflBoxUseLogo = false;
+var mflBoxUseAbbrev = false;
+var mflBoxHideFantasyMatchups = false;
+var mflBoxHideNFLMatchups = false;
+var mflBoxHidePaceScores = false;
+
+// CUSTOM TAB SCRIPT (THIS IS YOUR “TAB REPORTS” PIECE)
+var load_tabs_versionTwo = true;
+var showTabsAllPages = false;
+var changeMainTabName = "Home";
+var changeAllTabName = true;
+var MFL_customTabs_FakeTabs = new Array();
+var swipeHPM = false;
+var swipePosition = "content";
+
+// HEADER JS FILE OPTIONS – which scripts header.js will load
+var load_mobileMenu_script = true;
+var load_chat_enhanced = true;
+var load_popup = true;
+var load_mini_boxscore = true;
+var load_marquee = true;
+var load_lineups_submit_script = true;
+var load_tabs_script = true;   // <-- critical for tab functionality
+
+// TICKER DISPLAY SETTINGS
+var tickerHomePageOnly = false;
+var tickerName = "Headlines";
+var responsiveTicker = true;
+var isLeagueIDP = false;
+var tickerSize = "medium";
+var tickerLastPlayoffWeek = 17;
+var tickerSpeedDefault = 2;
+var tickerDelay = 3;
+
+// CUSTOM MESSAGES
+var tickerContent = new Array();
+
+// STANDARD DISPLAY SETTINGS
+var includeFranchiseIcons = true;
+var includeLatestArticles = 5;
+var includeTopPlayerStats = 5;
+var includeTopPlayerStatsIDP = false;
+var includeTopPlayerPts = 5;
+var includePowerRank = false;
+var includeAltPowerRank = false;
+var includePointScoredTeam = false;
+var includeAllplayRecord = false;
+var includeLastWeekResults = true;
+var includeNextWeekMatchups = true;
+var includeLastWeekNflResults = true;
+var includeNextWeekNflMatchups = true;
+var includeWaiverOrder = true;
+var includeDraft = false;
+var draftShowEntire = false;
+var draftTopPicksOnly = 0;
+var draftShowPicksMade = 5;
+var draftShowPicksPending = 5;
+
+// LIVE DISPLAY SETTINGS
+var includeLiveLeaders = 5;
+var includeLiveLeadersIDP = false;
+var includeNflMatchups = true;
+var includeNflMatchupLeaders = true;
+var includeFantasyMatchups = true;
+
+// TICKER COLORING
+var tickerWidth = "calc(71.75rem - 0.375rem)";
+var tickerMargin = "0.625rem auto 0 auto";
+var tickerFont = "Roboto Condensed";
+var tickerBorder = "var(--accent, #B82601)";
+var bigHeadingBG = "var(--accent, #B82601)";
+var bigHeadingClr = "#fff";
+var tickerHeadBG = "#fff";
+var tickerCogWheel = "var(--accent, #B82601)";
+var tickerTxtShdw = "transparent";
+var tickerHeadClr = "var(--accent, #B82601)";
+var tickerTxtBG = "#eee";
+var tickerTxtClr = "#000";
+var tickerTxtWgt = "300";
+var tickerTxtTrans = "none";
+var tickerLinkClr = "#000";
+var tickerLinkHvr = "var(--accent, #B82601)";
+var tickerBoxShdw = "0 0 0.063rem 0.063rem rgba(0,0,0,0.1)";
+var controlsGreen = "green";
+var controlsRed = "red";
+</script>
+
+<!-------------------------------------->
+<!---------- HEADER SECTION 6 ---------->
+<!-------------------------------------->
+
+<!-- TICKER HTML -->
+<div class="ticker-wrapper"></div>
+
+<!-- MINI SCOREBOARD HTML -->
+<div id="MFLBoxWrapper"></div>
+
+<!-- HIDE IN OFFSEASON -->
+<script>
+  var deactivate_all_offseason = false;
+  // var setCustomDates = true;
+  // var nflStartWk = "08/02/2023";
+  // var nflEndWk = "02/12/2024";
+  // var hide_extra = ".offseason-hide,#tab7,#tab8,#playoffTable,#tab306,#tab307,#tab301";
+</script>
+
+<script src="https://www.mflscripts.com/mfl-apps/global/header.js?v=1.60"></script>
+<link rel="stylesheet" type="text/css" href="https://www.mflscripts.com/mfl-apps/global/css/300x50-icons.css">
+
+<!-- WRAP ALL CONTENT -->
+<div id="container-wrap"><!-- ENTER ALL HPMS AFTER THIS AND CLOSE IN FOOTER -->
+<!------------------------------------------------------>
+<!------------------ End #1 - Header ------------------->
+<!------------------------------------------------------>
+<script>
+let historyHPMupdateNotloadedV2 = false;
+let updateHistoryTime;
+const HScurrentDate = new Date();
+const HScurrentMonth = HScurrentDate.getMonth();
+if ([0, 1, 7, 8, 9, 10, 11].includes(HScurrentMonth)) {
+	fetch('https://mflscripts.com/mfl-apps/history/integrated/' + year + '/leagues/' + league_id + '/hsTime.json')
+		.then(response => response.json())
+		.then(data => {
+			updateHistoryTime = data.updateHistoryTime;
+			const historyTimeDiff = (currentHistoryTime - updateHistoryTime) / (1000 * 60);
+			console.log("History Update Time Countdown to 1440 minutes: " + historyTimeDiff + " min. have passed");
+			if (historyTimeDiff >= 1440) {
+				const HSiframe = document.createElement("iframe");
+				HSiframe.src = 'https://mflscripts.com/mfl-apps/history/integrated/createPlayerHistory.php?year=' + year + '&league_id=' + league_id + '&full_history=false';
+				HSiframe.style.display = "none";
+				document.body.appendChild(HSiframe);
+				const HSiframe2 = document.createElement("iframe");
+				HSiframe2.src = 'https://mflscripts.com/mfl-apps/history/integrated/createHistory.php?year=' + year + '&league_id=' + league_id + '&full_history=false';
+				HSiframe2.style.display = "none";
+				document.body.appendChild(HSiframe2);
+				if (typeof hsSetTimestamp === 'function') {
+					hsSetTimestamp();
+				} else {
+					window.addEventListener("load", () => {
+						if (typeof hsSetTimestamp === 'function') hsSetTimestamp();
+					});
+				}
+			}
+		})
+		.catch(error => {
+			console.log("Error retrieving updateHistoryTime:", error);
+			if (typeof hsSetTimestamp === 'function') {
+				hsSetTimestamp();
+			} else {
+				window.addEventListener("load", () => {
+					if (typeof hsSetTimestamp === 'function') hsSetTimestamp();
+				});
+			}
+		});
+}
+</script><h3>MyFantasyLeague.com Developers Program API Test Area</h3>
+<p>Before you attempt to use this API, you should first read the <a href="https://www48.myfantasyleague.com/2025/api_info?L=74598">General Information Page</a>.
+You can also view the <a href="https://www48.myfantasyleague.com/2025/api_info?STATE=details&L=74598">Request Reference Page</a>, check out our <a href="https://www48.myfantasyleague.com/2025/api_info?STATE=example&L=74598">sample code</a> or return to
+the <a href="https://www48.myfantasyleague.com/2025/api_info?STATE=test&L=74598">main test request page</a>.</p>
+<h3>Export Test Form</h3>
+<form action="api_info" method="GET">
+Select a request type: 
+<input type="hidden" name="STATE" value="test">
+<input type="hidden" name="CCAT" value="export">
+<select name="TYPE" onchange="this.form.submit()">
+<option value="league">league </option>
+<option value="rules">rules </option>
+<option value="rosters">rosters </option>
+<option value="freeAgents">freeAgents </option>
+<option value="schedule">schedule </option>
+<option value="calendar">calendar </option>
+<option value="playoffBrackets">playoffBrackets </option>
+<option value="playoffBracket">playoffBracket </option>
+<option value="transactions">transactions </option>
+<option value="pendingWaivers">pendingWaivers </option>
+<option value="pendingTrades">pendingTrades </option>
+<option value="tradeBait">tradeBait </option>
+<option value="assets">assets </option>
+<option value="leagueStandings">leagueStandings </option>
+<option value="weeklyResults">weeklyResults </option>
+<option value="liveScoring">liveScoring </option>
+<option value="playerScores">playerScores </option>
+<option value="projectedScores">projectedScores </option>
+<option value="draftResults">draftResults </option>
+<option value="auctionResults">auctionResults </option>
+<option value="selectedKeepers">selectedKeepers </option>
+<option value="myDraftList">myDraftList </option>
+<option value="messageBoard" selected='selected'>messageBoard </option>
+<option value="messageBoardThread">messageBoardThread </option>
+<option value="polls">polls </option>
+<option value="device_tokens">device_tokens </option>
+<option value="playerRosterStatus">playerRosterStatus </option>
+<option value="contestPlayers">contestPlayers </option>
+<option value="myWatchList">myWatchList </option>
+<option value="salaries">salaries </option>
+<option value="salaryAdjustments">salaryAdjustments </option>
+<option value="futureDraftPicks">futureDraftPicks </option>
+<option value="accounting">accounting </option>
+<option value="pool">pool </option>
+<option value="survivorPool">survivorPool </option>
+<option value="abilities">abilities </option>
+<option value="appearance">appearance </option>
+<option value="rss">rss </option>
+<option value="ics">ics </option>
+<option value="myleagues">myleagues </option>
+<option value="leagueSearch">leagueSearch </option>
+<option value="players">players </option>
+<option value="playerProfile">playerProfile </option>
+<option value="allRules">allRules </option>
+<option value="playerRanks">playerRanks </option>
+<option value="adp">adp </option>
+<option value="aav">aav </option>
+<option value="topAdds">topAdds </option>
+<option value="topDrops">topDrops </option>
+<option value="topStarters">topStarters </option>
+<option value="topTrades">topTrades </option>
+<option value="topOwns">topOwns </option>
+<option value="siteNews">siteNews </option>
+<option value="whoShouldIStart">whoShouldIStart </option>
+<option value="injuries">injuries </option>
+<option value="nflSchedule">nflSchedule </option>
+<option value="nflByeWeeks">nflByeWeeks </option>
+<option value="pointsAllowed">pointsAllowed </option>
+</select>
+<input type="hidden" name="L" value="74598">
+</form><br/>
+<table cellspacing="1" cellpadding="1" border="0">
+<td valign="top"><b>messageBoard</b></td><td valign="top" width="50%">Display a summary of the recent message board posts to a league message board.<br/>Access restricted to league owners.</td>
+<td valign="top"><table cellspacing="1" cellpadding="1" border="0"><tr><td valign="top" width="40px">L</td><td>League Id(required)</td></tr><tr><td valign="top">COUNT</td><td valign="top">If specified, limit the number of threads to display to this value. Default is 10.</td></tr></table>
+</td>
+</table><br/>
+<form action="export" method="GET">
+<table cellspacing="1" cellpadding="1" border="0">
+<input type="hidden" name="TYPE" value="messageBoard"><tr><td>L:</td><td><input type="text" name="L" size="5" maxlength="5" value="74598" title="Enter a 5-digit league id here"  /></td><td>&nbsp;</td></tr>
+<tr><td>APIKEY:</td><td><input type="text" name="APIKEY" size="35" maxlength="99" value=""></td><td> This value is required only if you are not logged into the league specified via the L parameter.</td></tr>
+<tr><td>COUNT:</td><td><input type="text" name="COUNT" size="20" value=""></td><td>&nbsp;</td></tr>
+<tr><td>Format:</td><td><input type="radio" name="JSON" value="0" checked="checked"  /> XML or 
+<input type="radio" name="JSON" value="1"  /> JSON
+</td><td>&nbsp;</td></tr>
+<tr><td colspan="2" align="center">
+<input type="submit" value="Submit"/></td><td>&nbsp;</td></tr>
+</table></form><br/>
+</div></div><div class="pagefooter"><table border="0" cellpadding="1" cellspacing="1" align="center">
+<tr><td colspan="2" align="center"><a href="#body_api_info">Back To Top Of Page</a></td></tr>
+<tr><td colspan="2" align="center">Page Generated Fri Feb 6 9:53:39 p.m. ET 2026</td></tr>
+<tr><td colspan="2" align="center">Copyright &copy; 1995-2025 <a href="http://home.myfantasyleague.com/">First Pick Labs, Inc.</a> All Rights Reserved. <a href="http://home.myfantasyleague.com/privacy.html">Privacy Policy</a> - <a href="http://home.myfantasyleague.com/terms.html">Terms Of Service</a> 
+ - <a href="http://home.myfantasyleague.com/use.html">Acceptable Use Policy</a> - Powered by: <a href="https://www.geniussports.com/">Genius Sports</a>.
+- <button id="pmLink">Privacy Manager</button>
+</td></tr>
+<tr><td colspan="2" align="center"><b>Disclaimer:</b>  This site is not
+in any way affiliated with, endorsed or licensed by the
+National Football League, any NFL team or NFLPA member.
+</td></tr></table></div>
+</body></html>

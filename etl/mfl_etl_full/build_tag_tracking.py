@@ -328,9 +328,6 @@ def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
         roster_status = safe_str(row[2]).upper()
         if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
             continue
-        contract_status = safe_str(row[3]).upper()
-        if "WW" in contract_status or "WAIVER" in contract_status:
-            continue
         salary = safe_int(row[4], 0)
         info = safe_str(row[5])
         aav = effective_aav(0, salary, info)
@@ -369,9 +366,6 @@ def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
             continue
         roster_status = safe_str(row[2]).upper()
         if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
-            continue
-        contract_status = safe_str(row[3]).upper()
-        if "WW" in contract_status or "WAIVER" in contract_status:
             continue
         salary = safe_int(row[4], 0)
         info = safe_str(row[5])

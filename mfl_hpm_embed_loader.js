@@ -63,16 +63,9 @@
   const DEBUG_ADMIN =
     (u && (u.searchParams.get("DEBUG_ADMIN") || u.searchParams.get("DEBUG"))) || "";
 
-  const src =
-    "https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html" +
-    "?cache=20260204ay" +
-    "&L=" +
-    encodeURIComponent(L) +
-    "&YEAR=" +
-    encodeURIComponent(YEAR) +
-    "&FRANCHISE_ID=" +
-    encodeURIComponent(FRANCHISE_ID) +
-    (DEBUG_ADMIN ? "&DEBUG_ADMIN=" + encodeURIComponent(DEBUG_ADMIN) : "");
+  const LATEST_JSON_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.json";
+  const LATEST_JS_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.js";
+  const DEFAULT_CACHE = "20260207e";
 
   let mount = document.getElementById("cccMount");
   if (!mount) {
@@ -81,8 +74,78 @@
     document.body.appendChild(mount);
   }
 
-  mount.innerHTML =
-    '<iframe src="' +
-    src +
-    '" style="width:100%; height:1400px; border:0;" loading="lazy"></iframe>';
+  function buildSrc(cacheKey) {
+    const cache = cacheKey || DEFAULT_CACHE;
+    return (
+      "https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html" +
+      "?cache=" +
+      encodeURIComponent(cache) +
+      "&L=" +
+      encodeURIComponent(L) +
+      "&YEAR=" +
+      encodeURIComponent(YEAR) +
+      "&FRANCHISE_ID=" +
+      encodeURIComponent(FRANCHISE_ID) +
+      (DEBUG_ADMIN ? "&DEBUG_ADMIN=" + encodeURIComponent(DEBUG_ADMIN) : "")
+    );
+  }
+
+  function resolveLatestCache(cb) {
+    let done = false;
+    const finish = (cacheKey) => {
+      if (done) return;
+      done = true;
+      cb(cacheKey || DEFAULT_CACHE);
+    };
+
+    try {
+      fetch(LATEST_JSON_URL, { cache: "no-store" })
+        .then((res) => (res && res.ok ? res.json() : null))
+        .then((data) => {
+          const v = data && (data.cache || data.version || data.v);
+          if (v) finish(String(v));
+          else throw new Error("Missing version");
+        })
+        .catch(() => {
+          const s = document.createElement("script");
+          s.src = LATEST_JS_URL + "?v=" + Date.now();
+          s.onload = () => {
+            const v = window.CCC_LATEST_VERSION || window.CCC_CACHE || "";
+            finish(v);
+          };
+          s.onerror = () => finish(DEFAULT_CACHE);
+          (document.head || document.documentElement).appendChild(s);
+        });
+    } catch (e) {
+      finish(DEFAULT_CACHE);
+    }
+
+    setTimeout(() => finish(DEFAULT_CACHE), 3000);
+  }
+
+  mount.innerHTML = "";
+  const iframe = document.createElement("iframe");
+  iframe.style.width = "100%";
+  iframe.style.height = "1400px";
+  iframe.style.border = "0";
+  iframe.setAttribute("loading", "lazy");
+  iframe.setAttribute("scrolling", "no");
+  mount.appendChild(iframe);
+
+  resolveLatestCache((cacheKey) => {
+    iframe.src = buildSrc(cacheKey);
+  });
+
+  function onMessage(e) {
+    if (!iframe.contentWindow || e.source !== iframe.contentWindow) return;
+    if (e.origin !== "https://keithcreelman.github.io") return;
+    const data = e.data || {};
+    if (!data || data.type !== "ccc-height") return;
+    const next = Number(data.height);
+    if (!Number.isFinite(next) || next <= 0) return;
+    const clamped = Math.max(600, Math.min(20000, Math.ceil(next)));
+    iframe.style.height = String(clamped) + "px";
+  }
+
+  window.addEventListener("message", onMessage, false);
 })();

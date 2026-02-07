@@ -1,0 +1,325 @@
+{
+  "Article I  League Framework": [
+    {
+      "title": "Section A - Welcome",
+      "content": [
+        "This is the official rulebook of the \"UPS Dynasty Cap Fantasy Football League\" It is the ultimate authority and final word on all disputes as interpreted by the Competition Committee. All league members are expected to read it and have a firm understanding of the rules and how the league operates."
+      ]
+    },
+    {
+      "title": "Section B - Disclaimer",
+      "content": [
+        "Please read these rules in their entirety. If you have any questions please contact the Competition Committee (CC). Finally, before you proceed please understand that on a yearly basis there are always situations that can fall between the cracks of our documented rules. In such cases, the Competition Committee will make a ruling based on three fundamentals; the betterment of the league, consistency, and historical precedence. Remember, all team owners are strongly encouraged to provide suggestions that may improve the league during and after the season."
+      ]
+    },
+    {
+      "title": "Section C - Governing Body",
+      "content": [
+        "The league is governed by a 3 person Competition Committee hereinafter referred to as \u201cCC\u201d.",
+        "The CC is comprised of the following:",
+        "Keith Creelman - keith.creelman@gmail.com",
+        "Ryan Bousquet - ryanpbousquet@yahoo.com",
+        "Eric Mannila - epm366@gmail.com",
+        "At times where warranted the CC may unanimously vote in favor of a rule change that they feel is in the best interest of the league. These rulings should be considered minor changes and the CC should not consider a rule change simply for the betterment of their own team.",
+        "Should the CC discuss a rule change and it not be unanimously ruled in favor, they will open the discussion up to the rest of the league for a vote",
+        "The CC will meet annually in April to discuss all league matters that came up of the past season and to address any potential rule/format changes.",
+        "Members of the league may submit league change proposals prior to April 1st to ensure the proposal will be considered for the upcoming season.  Any proposal after that time may be considered for the current season but there is no guarantee.",
+        "Occasionally there may come a time where a rule may not be clearly defined and the CC needs to make a judgement on a ruling.",
+        "CC will need to consider consequences of item being ruled on",
+        "Consider any league prior precedent.",
+        "Issue a temporary ruling and reconvene in the off-season to discuss a formal league ruling.",
+        "League Wide Voting requires 51% league approval to pass",
+        "If the CC can not come to a unanimous decision",
+        "If there is a conflict of interest involving a member of the CC",
+        "Major Rule Changes",
+        "Rules involving league dues require at least 75% approval to pass"
+      ]
+    },
+    {
+      "title": "Section D - League Setup/GM Responsibilities",
+      "content": [
+        "This is a 12 team league divided into 4 divisions with 3 teams in each division",
+        "Divisions are realigned every 3 seasons based off a Weighted Historical All-Play Calculation where the most recent three year run is weighted more heavily then previous seasons.",
+        "Realignment by weighted rankings is as follows (1,8,9) - (2,7,10) - (3,6,11) - (4,5,12)",
+        "All interested members from the previous season have the right to retain their\nfranchise, as long as they are in good standing with the league.",
+        "Any new members must submit a request to the CC providing them with their fantasy football experience",
+        "Preference will be given to GMs with prior dynasty experience, more than 3 years redraft experience, or new GMs that have been \u201cvouched\u201d for by existing GMs.",
+        "In the event there is a change in membership, the new GM will keep the same players that were on the roster from the previous GM, as well as any draft positioning or draft picks belonging to the team in question",
+        "If more than 1 owner changes in the off-season we will hold a New Owner\u2019s Only Draft",
+        "Any Cap Penalties associated with the prior GM will NOT be transferred to the new GM.",
+        "Any new team may be allowed to cut one player from their roster without a cap penalty.",
+        "New Team must submit request to cut player prior to the start of their 1st auction.",
+        "GMs are expected to remain active and engaged at all times, including during the off-season. GMs should respect their fellow GMs and return emails, Private Messages, and trade offers in a timely manner. During the season this should be within 48-72 hours and in the off-season this should be within a week.",
+        "GM\u2019s required to respond to trade requests within 96 hours during the season and within 2 weeks in the off-season.  Failure to do so could result in a trade strike.",
+        "3 Trade Strikes issued during course of the season will result in that team\u2019s trading privileges being revoked.",
+        "GMs must attend or participate in ALL league-sponsored activities (calendar), or inform the commissioner ahead of time if they will not be able to attend.  If a previously scheduled event needs to be rescheduled, the CC will attempt to find a suitable time for all league members, with a goal being to complete activities in a timely and efficient manner"
+      ]
+    }
+  ],
+  "Article II  League Calendar": [
+    {
+      "title": "Section A - Off-Season (March - July)",
+      "content": [
+        "Off-Season begins on or around March 1st but no later than March 15th of each year.",
+        "Off-Season marks the beginning of when owners can begin dropping players from their roster and making trades",
+        "Franchise/Transition Tag Process takes place April/May.",
+        "Rookie Draft - Middle of June",
+        "Expired Rookie Contracts must be extended prior to July 1st.",
+        "July 31st is final day to make off-season cuts for the upcoming season."
+      ]
+    },
+    {
+      "title": "Section B - Pre-Season (August - 1st Week of September)",
+      "content": [
+        "Free Agent Auction (1st week in August last 2 weeks)",
+        "Waivers begin 1st Wednesday following completion of auction.",
+        "Players picked up via WW may not be freely given a multi-year contract.",
+        "Team must choose between using one of Mid-Season Multi-Year Contracts",
+        "Extending the player",
+        "Keeping player on 1 year deal",
+        "Roster Lock Day (Day after NFL Cuts roster to Final 53 Man Roster)",
+        "Announced by Commish at completion of Auction.",
+        "Within 1st few days of September",
+        "All FA Auction Contracts for multiple yeas or that are \u201cspecial\u201d in nature must be posted by this deadline.",
+        "All Non-Rookie Contracts extensions must be posted by this deadline.",
+        "Taxi Squad must be in compliance"
+      ]
+    },
+    {
+      "title": "Section C - In-Season (Roster Cut Day - Week 13 of NFL Season)",
+      "content": [
+        "Trade Deadline - Kickoff of Opening Thanksgiving Day Game"
+      ]
+    },
+    {
+      "title": "Section D - Postseason (Week 14 - Week 16 NFL Regular Season)",
+      "content": [
+        "UPS Championship & Toilet Bowl Runs Weeks 14-16",
+        "Determines Rookie Draft Order",
+        "Players acquired during this period are not eligible to be retained the following season.",
+        "Rule abolished in 2018"
+      ]
+    }
+  ],
+  "Article III  Rosters/Starting Lineups": [
+    {
+      "title": "Section A - Active Roster",
+      "content": [
+        "Rosters from the start of the season through the end of the season must be a minimum of 27 players and a maximum of 30 players",
+        "Rosters during the preseason may not exceed 35 players",
+        "There are no limits on roster size during the off-season.",
+        "From the completion of the auction until the end of the postseason, teams have the minimum eligible players at each position in order to field a complete starting lineup.",
+        "Any transaction from this period through the postseason that puts a team out of compliance will require that team to get in compliance within 24 hours or the previous transaction will be reversed."
+      ]
+    },
+    {
+      "title": "Section B - Taxi Squad",
+      "content": [
+        "Any player that was selected in the annual Rookie Draft in the second round or later is eligible for the Taxi Squad.",
+        "Teams are eligible to carry 10 players on their Taxi Squad",
+        "No more than 5 players with 3 years on contract",
+        "No more than 3 players with 2 years on contract",
+        "No more than 1 player with 1 year on contract",
+        "If carrying an IDP Player this will allow you to exceed Max in any given year by 1",
+        "Players on Taxi Squad do not count against the salary cap.",
+        "Once promoted from Taxi Squad a player can not be demoted."
+      ]
+    },
+    {
+      "title": "Section C - Injured Reserve",
+      "content": [
+        "Only players placed on NFL IR (including players with return designation) are eligible to be placed on IR",
+        "Players on NFL PUP List are NOT ELIGIBLE.",
+        "MFL is the authority on when a player can be placed on IR.",
+        "There is no limit to the amount of players who are placed on IR.",
+        "Salaries count as 50% of their normal cost while the player is on IR.",
+        "Any player on the IR from the prior season who is no longer eligible for IR and not promoted by 7/31 will be cut by the Commish and any and all cap penalties will apply."
+      ]
+    },
+    {
+      "title": "Section B - Starting Lineup Construction",
+      "content": [
+        "Offense",
+        "1 QB",
+        "2 RB",
+        "2 WR",
+        "1 TE",
+        "2 Flex",
+        "Defense",
+        "2 DL",
+        "2 LB",
+        "2 DB",
+        "1 Flex",
+        "Special Teams",
+        "1 Kicker",
+        "1 Punter"
+      ]
+    },
+    {
+      "title": "Section C - Starting Lineup Rules",
+      "content": [
+        "No player listed on a bye may be submitted into a starting lineup",
+        "Lineups lock at the start of a player\u2019s game",
+        "The commish may make a late change for an owner if that owner has a time stamped email or text indicating they requested assistance prior to kickoff of that players game.",
+        "Partial Lineups may be submitted early in the week to allow teams to have a submission for the TNF contest.  Lineups must be fully submitted before the end of the week.",
+        "Incomplete Lineup Submissions will result in a violation.  Incomplete Lineups include the following:",
+        "Lineups with missing starters.",
+        "Lineups with players declared \u201cOut\u201d on the official NFL Injury Report",
+        "Sunday & Monday Games - Injury Report is Friday PM",
+        "Thursday - Injury Report is Wednesday PM",
+        "Lineups with players declared \u201cDoubtful\u201d on the official NFL Injury Report who end up not playing",
+        "Penalties may be abated if owner makes CC aware of an unforeseen event which resulted in the owner becoming unable to submit a valid lineup.",
+        "NOTE - In today\u2019s world technologically advanced world, family emergencies are truly the only acceptable reason for failing to submit a lineup",
+        "Penalties for Incomplete Lineup Submissions are as follows:",
+        "Violation 1 - Warning no penalty",
+        "Violation 2 - Loss of 4th rounder plus a $5000 cap hit for the next season.",
+        "In the event the owner does not have the required pick for stripping, it will be taken the next time one becomes available, either via trade or once the league year renews and everyone is given their future picks",
+        "Violation 3 - Loss of 2nd rounder plus an additional $5000 cap hit for next season.",
+        "In the event the owner does not have the required pick for stripping, it will be taken the next time one becomes available, either via trade or once the league year renews and everyone is given their future picks",
+        "Violation 4 - League Vote on if you retain membership.  If you are retained there will be an additional $10K cap penalty.",
+        "In the event the owner does not have the required pick for stripping, it will be taken the next time one becomes available, either via trade or once the league year renews and everyone is given their future picks",
+        "Violation 5 - Automatically banned from league.",
+        "Failure to submit a lineup for the week is an abomination to the league.  Team owner will be required to explain why they were unable to submit a lineup that week.  Owner will need to explain why their league membership should not be revoked.  Team will have until Tuesday of the following week to explain why they failed to submit a lineup.  League will vote on whether or not owner will be retained.",
+        "If retained owner will be stripped",
+        "A second violation will result in automatic league expulsion",
+        "NOTE - In today\u2019s technologically advanced world, family emergencies are truly the only acceptable reason for failing to submit a lineup"
+      ]
+    }
+  ],
+  "Article IV  Contracts": [
+    {
+      "title": "Section A - Basics",
+      "content": [
+        "Types of Contracts",
+        "Rookie - Issued to players selected in the Annual Rookie Draft.",
+        "Veteran - Standard Contract assigned for following events",
+        "Via Free Agent Auction",
+        "Via Free Agent/ Waiver Wire Pickups",
+        "Offered a Contract Extension",
+        "Front Loaded/Back Loaded - Special Contract offered to players acquired:",
+        "Via Free Agency",
+        "Via Free Agent/ Waiver Wire Pickups",
+        "Offered a Contract Extension",
+        "Restructured - Special Contract offered to players acquired:",
+        "Offered a Contract Extension",
+        "From Preseason through the Postseason there is a Hard Salary Cap of $300,000.",
+        "There is no Salary Cap in effect during the off-season.",
+        "Cap is calculated by adding up each player\u2019s current year\u2019s salary.  Calculation formulas:",
+        "Active Players (100%)",
+        "Injured Reserve (50%)",
+        "Special Circumstance (25%)",
+        "Taxi Squad (0%)",
+        "Only players who are on the Active Roster, Injured Reserve (50%), Special Circumstance Players (25%), or Cap Penalties count against the salary cap.",
+        "Any team that makes a transaction that puts them over the cap will have 24 hours from the time that the transaction was processed to get under the cap.",
+        "Failure to do so will result in the prior transaction being reversed.",
+        "Waiver Wire Bids that puts a team over the cap will not be allowed.",
+        "With Exception if the reason the team is over is over the cap is due to the auto Cap Penalty or due to Cap Penalty that was not already off-set.",
+        "Maximum Contract Length for any player is 3 years.",
+        "Maximum of 6 Non-Rookie Contracts allowed per team at the 3 year maximum.",
+        "Contract Years subtract each year at the start of the off-season."
+      ]
+    },
+    {
+      "title": "Section B - Rookie Contracts",
+      "content": [
+        "Rookie Contracts are only issued to players selected in the Annual Rookie Draft.",
+        "All Salaries issued are 3 years in length.",
+        "Contract can not be restructured.",
+        "Salaries are calculated as follows:",
+        "Pick 1.1 is $15,000 and each player selected after is $1,000 less until the salary gets to $5,000 (Pick 1.11).",
+        "Picks 1.11 through 2.12 are $5,000",
+        "Picks 3.1 - 5.12 are $2,000",
+        "Picks 6.1 - 6.12 are $1,000",
+        "Rookie Contracts may be allowed to expire prior to an owner needing to decide on extension."
+      ]
+    },
+    {
+      "title": "Section C - Veteran Contracts",
+      "content": [
+        "This is the standard contract that is given out to players selected in the Free Agent Auction or via Waiver Wire/Free Agent Acquisitions (WW/FA).",
+        "Players won in auction are given a 1 year contract at the price won in Auction by default.",
+        "Teams may decide to give a player a multiple year contracts for players won in auction by completing the form on the League\u2019s Contract Page https://goo.gl/zaL3MA by the contract deadline.",
+        "Players may be given a 2 year contract or a 3 year contract.",
+        "Players acquired via WW/FA are given a 1 year contract at the price acquired by default.",
+        "Teams may decide to give a player a multiple year contract for players acquired via  WW/FA by completing the form on the League\u2019s Contract Page https://goo.gl/zaL3MA  prior to that player\u2019s team\u2019s first game.",
+        "Teams are only allowed to hand out two of these \u2018Mid-Season Multis\u2019 per year.",
+        "Players selected after the auction but before the start of the NFL Regular Season via WW/FA are also subject to this rule."
+      ]
+    },
+    {
+      "title": "Section D - Front/Back Loaded Contracts",
+      "content": [
+        "Contracts may be Front or Back Loaded during the following events:",
+        "After acquiring player via FA Auction",
+        "After handing out a \u2018Mid-Season Multi\u2019.",
+        "After giving a player a contract extension.",
+        "Maximum of 5 Front or Back Loaded Contracts on Roster during the Pre-Season - Post Season Periods.",
+        "To calculate the contract, take total contract value over remaining years and apply the following formula:",
+        "Front Loads:",
+        "2 Year ( 65% of Total Year 1, 35% Year 2)",
+        "3 Year (50% of Total Year 1, 35% Year 2, 15% Year 3)",
+        "Back Loads",
+        "2 Year ( 35% of Total Year 1, 65% Year 2)",
+        "3 Year (15% of Total Year 1, 35% Year 2, 50% Year 3)",
+        "Contracts get rounded up or down as needed.  The final year of the contract is always the remaining amount applied.",
+        "Ex. $99K Total Salary 3 yr Front Load would be:",
+        "50K Year 1",
+        "35K Year 2",
+        "14K Year 3"
+      ]
+    },
+    {
+      "title": "Section E - Contract Extensions",
+      "content": [
+        "Each team is only allowed to extend a player one time.",
+        "A player MUST go back into the player pool for either Waivers/FA Auction before the team is eligible to offer another extension.",
+        "Extensions may be given out at following times:",
+        "Players entering final year of contract.  Extension must be posted prior to the Contract Deadline Date.",
+        "Players acquired with only 1 year on contract during the season (WW/FA or Traded).  Extension must be posted within 2 weeks from the time of acquisition.",
+        "Rookie Contracts are granted ability to extend the contract after contract has expired.  The deadline for extension is end of June.",
+        "Extensions may only be 1 or 2 years in length.",
+        "Extensions require that the salary of the player receive a raise for the years that are added onto the contract.",
+        "Raises are structured as follows:",
+        "Tier 1 - WR/RB ($10K for 1 year, $20K per yr for 2 years)",
+        "Tier 2 - QB/TE ($6K for 1 year, 12K per yr for 2 years)",
+        "Tier 3 - Everyone else ($3K for 1 year, $5K per yr for 2 years)"
+      ]
+    },
+    {
+      "title": "Section F - Restructured Contract Extensions",
+      "content": [
+        "Only 2 per season per team are allowed.",
+        "Restructured Contracts are only allowed when issuing a Contract Extension.",
+        "Restructured contracts allows the owner to modify when the impact of the extension is felt.  There are 3 options available:",
+        "On a 1 year extension owners may flip the extension so that the current year becomes the raise and next year would be the current season\u2019s price.",
+        "Ex) WR is picked up on WW for $1K but is given a 1 year extension.  The contract is flipped so current year is $11K and next season is $1K",
+        "On a 2 year extension owners may decide flip the contract so that the current year\u2019s contract gets moved to either year 2 or year 3.",
+        "Ex) WR is picked up on WW for $1K but is given a 2 year extension.  The contract can be flipped so current year is $21K and next season is $1K and final season is $21K.  Or Contract can be flipped so the current year is $21K the next season is $21K and the final year is $1K.",
+        "The final option allows the owner to total up the contract extension plus current year and average the contract out over the remaining period.",
+        "Ex WR picked up for $1K and is given a 2 year contract extension.  The contract is 1K, plus 21K plus 21K for a total of 43K.  Averaged out over 3 years the contract would be 14K, 14K, 15K."
+      ]
+    },
+    {
+      "title": "Section G - Franchise/Transition Tagged Contracts",
+      "content": [
+        "Expired Non-Rookie Contracts may be tendered a \u201cFranchise\u201d or \u201cTransition\u201d Tag Contract during the  \u201cTagging Period\u201d.",
+        "Initial Bids",
+        "Franchise Tagged Players must receive a minimum initial bid of $1K more than prior seasons AAV or the average of the Top 5 players at the position (whichever is higher).",
+        "Transition Tagged Players must receive a minimum initial bid of $1K more than prior seasons AAV or the average of the Top 10 players at the position (whichever is higher).",
+        "Tagging Period consists of the following:",
+        "Window from start of New Season (March 1st) until the announced deadline (within 2 weeks of the NFL Draft.) from which players may be tendered a Franchise/ Transition Tag by completing the form on the League\u2019s Contract Page https://goo.gl/zaL3MA by the deadline.",
+        "Commissioner will at a pre-defined time nominate all players on behalf of the team issuing the tagged player via the league\u2019s Auction Page at that player\u2019s initial bid.",
+        "Teams will then have 72 hours in which they can raise the bid via the league\u2019s auction page.",
+        "Note Bids are not proxy bids.  A bid on a player represents the amount you\u2019re willing to spend on the player.",
+        "At the end of the 72 hours bidding will be complete.  If player is NOT BID on.",
+        "Player will go back to original team on a one year contract for the cost of the initial bid.",
+        "Player may be cut at any point in the off-season leading up to the auction without a Cap Penalty.",
+        "At the end of the 72 hours bidding will be complete.  If player is BID on.",
+        "Team that initially gave the Tag needs to decide if he wants to retain the player on a one year contract at the price player was bid to or receive compensation from the team that bid the player up.",
+        "The negotiations will last no more than 2 full days after the completion of the initial bidding.",
+        "In order for teams to bid on a \u201cTagged Player\u201d they must be able to compensate the team that tagged the player.  Minimum Compensation to bid on a player:",
+        "Franchise Tag: 2 First Round Picks in"
+      ]
+    }
+  ]
+}

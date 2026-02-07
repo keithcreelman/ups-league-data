@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-05 08:39:57",
+    "generated_at": "2026-02-07 07:58:42",
     "season": 2025,
     "count": 78,
     "source": "tag-tracking-v1",
@@ -16,7 +16,7 @@
       "QB": 10,
       "DL": 10
     },
-    "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1)."
+    "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the prior season."
   },
   "rows": [
     {
@@ -46,6 +46,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -77,6 +78,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -108,6 +110,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -139,6 +142,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-3 TE AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -170,6 +174,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -193,15 +198,16 @@
       "pos_rank": 12,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
+      "tag_base_bid": 3000,
       "tag_bid": 3000,
       "tag_salary": 3000,
-      "tag_bid_bump_applied": 1,
+      "tag_bid_bump_applied": 0,
       "tag_side": "IDP_K",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
-      "tag_formula": "Avg Top 7-12 LB AAV | 10% prior AAV bump (rounded up)",
+      "tag_prev_season": 0,
+      "tag_formula": "Avg Top 7-12 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -224,14 +230,15 @@
       "pos_rank": 35,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
-      "tag_bid": 2000,
-      "tag_salary": 2000,
+      "tag_base_bid": 3000,
+      "tag_bid": 3000,
+      "tag_salary": 3000,
       "tag_bid_bump_applied": 0,
       "tag_side": "IDP_K",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -263,6 +270,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "K/P rule: prior AAV + 1,000",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -294,6 +302,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-5 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -317,7 +326,7 @@
       "pos_rank": 22,
       "tag_tier": 3,
       "tag_rank_band": "16+",
-      "tag_base_bid": 10000,
+      "tag_base_bid": 8000,
       "tag_bid": 51000,
       "tag_salary": 51000,
       "tag_bid_bump_applied": 1,
@@ -325,6 +334,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -356,6 +366,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 0,
       "eligibility_reason": "No positional rank yet (insufficient scoring sample).",
+      "tag_prev_season": 0,
       "tag_formula": "",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -387,6 +398,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -418,6 +430,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -441,14 +454,15 @@
       "pos_rank": 16,
       "tag_tier": 3,
       "tag_rank_band": "16+",
-      "tag_base_bid": 10000,
-      "tag_bid": 10000,
-      "tag_salary": 10000,
+      "tag_base_bid": 8000,
+      "tag_bid": 8000,
+      "tag_salary": 8000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 16+ QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -480,6 +494,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -511,6 +526,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -534,7 +550,7 @@
       "pos_rank": 45,
       "tag_tier": 3,
       "tag_rank_band": "7+",
-      "tag_base_bid": 9000,
+      "tag_base_bid": 10000,
       "tag_bid": 14000,
       "tag_salary": 14000,
       "tag_bid_bump_applied": 1,
@@ -542,6 +558,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-13 TE AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -573,6 +590,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -604,6 +622,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -635,6 +654,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -658,14 +678,15 @@
       "pos_rank": 10,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
-      "tag_bid": 2000,
-      "tag_salary": 2000,
+      "tag_base_bid": 3000,
+      "tag_bid": 3000,
+      "tag_salary": 3000,
       "tag_bid_bump_applied": 0,
       "tag_side": "IDP_K",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -689,7 +710,7 @@
       "pos_rank": 13,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
+      "tag_base_bid": 3000,
       "tag_bid": 5000,
       "tag_salary": 5000,
       "tag_bid_bump_applied": 1,
@@ -697,6 +718,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 LB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -720,7 +742,7 @@
       "pos_rank": 45,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
+      "tag_base_bid": 3000,
       "tag_bid": 5000,
       "tag_salary": 5000,
       "tag_bid_bump_applied": 1,
@@ -728,6 +750,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 LB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -759,6 +782,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -790,6 +814,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -813,14 +838,15 @@
       "pos_rank": 11,
       "tag_tier": 3,
       "tag_rank_band": "7+",
-      "tag_base_bid": 9000,
-      "tag_bid": 9000,
-      "tag_salary": 9000,
+      "tag_base_bid": 10000,
+      "tag_bid": 10000,
+      "tag_salary": 10000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-13 TE AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -852,6 +878,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -883,6 +910,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -906,14 +934,15 @@
       "pos_rank": 9,
       "tag_tier": 3,
       "tag_rank_band": "7+",
-      "tag_base_bid": 9000,
-      "tag_bid": 9000,
-      "tag_salary": 9000,
+      "tag_base_bid": 10000,
+      "tag_bid": 10000,
+      "tag_salary": 10000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-13 TE AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -945,6 +974,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -976,6 +1006,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1007,6 +1038,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1038,6 +1070,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1069,6 +1102,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1098,8 +1132,9 @@
       "tag_bid_bump_applied": 1,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
-      "is_tag_eligible": 1,
-      "eligibility_reason": "",
+      "is_tag_eligible": 0,
+      "eligibility_reason": "Tagged in prior season (ineligible).",
+      "tag_prev_season": 1,
       "tag_formula": "Avg Top 9-31 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1131,6 +1166,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1162,6 +1198,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "K/P rule: prior AAV + 1,000",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1193,6 +1230,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-5 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1224,6 +1262,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1255,6 +1294,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1286,6 +1326,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 DB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1317,6 +1358,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1348,6 +1390,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DL AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1371,15 +1414,16 @@
       "pos_rank": 32,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
+      "tag_base_bid": 3000,
       "tag_bid": 3000,
       "tag_salary": 3000,
-      "tag_bid_bump_applied": 1,
+      "tag_bid_bump_applied": 0,
       "tag_side": "IDP_K",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
-      "tag_formula": "Avg Top 7-12 LB AAV | 10% prior AAV bump (rounded up)",
+      "tag_prev_season": 0,
+      "tag_formula": "Avg Top 7-12 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -1410,6 +1454,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-5 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1433,7 +1478,7 @@
       "pos_rank": 32,
       "tag_tier": 3,
       "tag_rank_band": "16+",
-      "tag_base_bid": 10000,
+      "tag_base_bid": 8000,
       "tag_bid": 51000,
       "tag_salary": 51000,
       "tag_bid_bump_applied": 1,
@@ -1441,6 +1486,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1472,6 +1518,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-4 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1503,6 +1550,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1534,6 +1582,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1557,7 +1606,7 @@
       "pos_rank": 17,
       "tag_tier": 3,
       "tag_rank_band": "7+",
-      "tag_base_bid": 9000,
+      "tag_base_bid": 10000,
       "tag_bid": 30000,
       "tag_salary": 30000,
       "tag_bid_bump_applied": 1,
@@ -1565,6 +1614,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-13 TE AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1596,6 +1646,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1627,6 +1678,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-14 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1658,6 +1710,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1689,6 +1742,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1720,6 +1774,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1751,6 +1806,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 DL AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1782,6 +1838,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1813,6 +1870,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1836,7 +1894,7 @@
       "pos_rank": 9,
       "tag_tier": 2,
       "tag_rank_band": "7+",
-      "tag_base_bid": 2000,
+      "tag_base_bid": 3000,
       "tag_bid": 6000,
       "tag_salary": 6000,
       "tag_bid_bump_applied": 1,
@@ -1844,6 +1902,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 LB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1875,6 +1934,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1906,6 +1966,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1937,6 +1998,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-3 TE AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1968,6 +2030,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-6 LB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -1991,14 +2054,15 @@
       "pos_rank": 26,
       "tag_tier": 3,
       "tag_rank_band": "16+",
-      "tag_base_bid": 10000,
-      "tag_bid": 10000,
-      "tag_salary": 10000,
+      "tag_base_bid": 8000,
+      "tag_bid": 8000,
+      "tag_salary": 8000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 16+ QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2030,6 +2094,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2061,6 +2126,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2090,8 +2156,9 @@
       "tag_bid_bump_applied": 1,
       "tag_side": "IDP_K",
       "tag_limit_per_side": 1,
-      "is_tag_eligible": 1,
-      "eligibility_reason": "",
+      "is_tag_eligible": 0,
+      "eligibility_reason": "Tagged in prior season (ineligible).",
+      "tag_prev_season": 1,
       "tag_formula": "Avg Top 1-6 DL AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2123,6 +2190,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2154,6 +2222,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DL AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2185,6 +2254,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 1-4 RB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2216,6 +2286,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2247,6 +2318,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-14 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2278,6 +2350,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 7-12 DL AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2301,14 +2374,15 @@
       "pos_rank": 6,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 34000,
-      "tag_bid": 34000,
-      "tag_salary": 34000,
+      "tag_base_bid": 36000,
+      "tag_bid": 36000,
+      "tag_salary": 36000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 6-15 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2332,7 +2406,7 @@
       "pos_rank": 15,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 34000,
+      "tag_base_bid": 36000,
       "tag_bid": 40000,
       "tag_salary": 40000,
       "tag_bid_bump_applied": 1,
@@ -2340,6 +2414,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 6-15 QB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2363,7 +2438,7 @@
       "pos_rank": 29,
       "tag_tier": 3,
       "tag_rank_band": "16+",
-      "tag_base_bid": 10000,
+      "tag_base_bid": 8000,
       "tag_bid": 28000,
       "tag_salary": 28000,
       "tag_bid_bump_applied": 1,
@@ -2371,6 +2446,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2402,6 +2478,7 @@
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
+      "tag_prev_season": 0,
       "tag_formula": "Avg Top 9-31 RB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
@@ -2431,8 +2508,9 @@
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
-      "is_tag_eligible": 1,
-      "eligibility_reason": "",
+      "is_tag_eligible": 0,
+      "eligibility_reason": "Tagged in prior season (ineligible).",
+      "tag_prev_season": 1,
       "tag_formula": "Avg Top 15-40 WR AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"

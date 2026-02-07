@@ -1,0 +1,217 @@
+{
+  "generated_at": "2026-02-07 07:56:40",
+  "notes": [
+    "Expired rookie auction players from May 2025 (not tag designations).",
+    "Tagged players are ineligible for tagging in 2026 and must be dropped to start the new year."
+  ],
+  "expired_rookie_highlighted": [
+    "Pierce, Alec",
+    "White, Rachaad",
+    "Karlaftis, George",
+    "Otton, Cade"
+  ],
+  "expired_rookie_auction_may_2025": [
+    {
+      "player_name": "Whittington, Jordan",
+      "nfl_team": "LAR",
+      "position": "WR",
+      "bid": 1000,
+      "bid_secondary": null,
+      "franchise": "L.A. Looks",
+      "auction_open": "Mon May 26 10:30 a.m.",
+      "auction_close": "Mon May 26 10:30 a.m."
+    },
+    {
+      "player_name": "Pierce, Alec",
+      "nfl_team": "IND",
+      "position": "WR",
+      "bid": 2000,
+      "bid_secondary": null,
+      "franchise": "L.A. Looks",
+      "auction_open": "Mon May 26 7:13 a.m.",
+      "auction_close": "Mon May 26 10:29 a.m."
+    },
+    {
+      "player_name": "Watson, Christian",
+      "nfl_team": "GBP",
+      "position": "WR",
+      "bid": 3000,
+      "bid_secondary": null,
+      "franchise": "Pure Greatness",
+      "auction_open": "Mon May 26 7:14 a.m.",
+      "auction_close": "Mon May 26 7:19 a.m."
+    },
+    {
+      "player_name": "Pierce, Dameon",
+      "nfl_team": "KCC",
+      "position": "RB",
+      "bid": 1000,
+      "bid_secondary": 1000,
+      "franchise": "Real Deal Creel",
+      "auction_open": "Mon May 26 7:16 a.m.",
+      "auction_close": "Mon May 26 7:16 a.m."
+    },
+    {
+      "player_name": "Hayball, Matthew",
+      "nfl_team": "FA",
+      "position": "PN",
+      "bid": 1000,
+      "bid_secondary": null,
+      "franchise": "The Long Haulers",
+      "auction_open": "Mon May 26 6:54 a.m.",
+      "auction_close": "Mon May 26 6:54 a.m."
+    },
+    {
+      "player_name": "Davis, Isaiah",
+      "nfl_team": "NYJ",
+      "position": "RB",
+      "bid": 1000,
+      "bid_secondary": 2000,
+      "franchise": "Real Deal Creel",
+      "auction_open": "Sun May 25 12:19 p.m.",
+      "auction_close": "Sun May 25 12:19 p.m."
+    },
+    {
+      "player_name": "Otton, Cade",
+      "nfl_team": "TBB",
+      "position": "TE",
+      "bid": 5000,
+      "bid_secondary": null,
+      "franchise": "The Long Haulers",
+      "auction_open": "Sat May 24 3:19 p.m.",
+      "auction_close": "Sun May 25 12:14 p.m."
+    },
+    {
+      "player_name": "Shakir, Khalil",
+      "nfl_team": "BUF",
+      "position": "WR",
+      "bid": 19000,
+      "bid_secondary": null,
+      "franchise": "Blake Bombers",
+      "auction_open": "Sat May 24 12:00 p.m.",
+      "auction_close": "Sun May 25 9:13 a.m."
+    },
+    {
+      "player_name": "DeJean, Cooper",
+      "nfl_team": "PHI",
+      "position": "CB",
+      "bid": 1000,
+      "bid_secondary": null,
+      "franchise": "Gride",
+      "auction_open": "Sat May 24 3:09 p.m.",
+      "auction_close": "Sat May 24 3:09 p.m."
+    },
+    {
+      "player_name": "White, Rachaad",
+      "nfl_team": "TBB",
+      "position": "RB",
+      "bid": 9000,
+      "bid_secondary": null,
+      "franchise": "Pure Greatness",
+      "auction_open": "Sat May 24 2:33 p.m.",
+      "auction_close": "Sat May 24 3:05 p.m."
+    },
+    {
+      "player_name": "Doubs, Romeo",
+      "nfl_team": "GBP",
+      "position": "WR",
+      "bid": 4000,
+      "bid_secondary": null,
+      "franchise": "Blake Bombers",
+      "auction_open": "Sat May 24 12:27 p.m.",
+      "auction_close": "Sat May 24 1:35 p.m."
+    },
+    {
+      "player_name": "Shaheed, Rashid",
+      "nfl_team": "SEA",
+      "position": "WR",
+      "bid": 7000,
+      "bid_secondary": null,
+      "franchise": "The Long Haulers",
+      "auction_open": "Sat May 24 12:09 p.m.",
+      "auction_close": "Sat May 24 12:09 p.m."
+    },
+    {
+      "player_name": "Karlaftis, George",
+      "nfl_team": "KCC",
+      "position": "DE",
+      "bid": 1000,
+      "bid_secondary": 1000,
+      "franchise": "Real Deal Creel",
+      "auction_open": "Sat May 24 12:01 p.m.",
+      "auction_close": "Sat May 24 12:01 p.m."
+    }
+  ],
+  "tagged_ineligible_2026": [
+    {
+      "player_name": "Barkley, Saquon",
+      "player_id": "13604",
+      "team": "Blake Bombers",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Allen, Josh",
+      "player_id": "13589",
+      "team": "C-Town Chivalry",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Jackson, Lamar",
+      "player_id": "13593",
+      "team": "C-Town Chivalry",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Jacobs, Josh",
+      "player_id": "14073",
+      "team": "HammerTime",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Burrow, Joe",
+      "player_id": "14777",
+      "team": "L.A. Looks",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Moehrig, Trevon",
+      "player_id": "15365",
+      "team": "L.A. Looks",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Taylor, Jonathan",
+      "player_id": "14802",
+      "team": "L.A. Looks",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Baun, Zack",
+      "player_id": "14893",
+      "team": "Pure Greatness",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Van Ginkel, Andrew",
+      "player_id": "14249",
+      "team": "Sex Manther",
+      "season": 2025,
+      "contract_status": "Tag"
+    },
+    {
+      "player_name": "Landry, Harold",
+      "player_id": "13700",
+      "team": "The Long Haulers",
+      "season": 2025,
+      "contract_status": "Tag"
+    }
+  ]
+}

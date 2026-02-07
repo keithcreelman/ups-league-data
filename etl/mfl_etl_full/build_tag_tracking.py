@@ -383,6 +383,34 @@ def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
     return by_pos
 
 
+def fetch_tagged_previous_season_ids(conn, season: int) -> set[str]:
+    prev = season - 1
+    if prev <= 0:
+        return set()
+    tagged: set[str] = set()
+    sql_weekly = """
+    SELECT DISTINCT CAST(player_id AS TEXT) AS player_id
+    FROM rosters_weekly
+    WHERE season = ?
+      AND UPPER(COALESCE(contract_status, '')) LIKE '%TAG%'
+    """
+    for row in conn.execute(sql_weekly, (prev,)).fetchall():
+        pid = safe_str(row[0])
+        if pid:
+            tagged.add(pid)
+    sql_current = """
+    SELECT DISTINCT CAST(player_id AS TEXT) AS player_id
+    FROM rosters_current
+    WHERE season = ?
+      AND UPPER(COALESCE(contract_status, '')) LIKE '%TAG%'
+    """
+    for row in conn.execute(sql_current, (prev,)).fetchall():
+        pid = safe_str(row[0])
+        if pid:
+            tagged.add(pid)
+    return tagged
+
+
 def build_tier_bid_map(week1_aav_by_pos: Dict[str, List[int]]) -> Dict[Tuple[str, int], int]:
     out: Dict[Tuple[str, int], int] = {}
     for pos_group, rules in TAG_RULES.items():
@@ -419,6 +447,7 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
     league_id = fetch_league_id(conn, season)
     last_regular_week = fetch_regular_season_week(conn, season)
     candidates = fetch_candidates(conn, season)
+    tagged_prev = fetch_tagged_previous_season_ids(conn, season)
     scoring_map = fetch_scoring_rank_map(conn, season, last_regular_week)
     prior_aav_map = fetch_week1_aav_map(conn, season)
     week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
@@ -468,6 +497,7 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
                     bump_applied = 1
                     formula += " | 10% prior AAV bump (rounded up)"
 
+        was_tagged_prev = pid in tagged_prev
         is_eligible = 1 if (rule is not None and tier > 0 and tag_bid > 0) else 0
         eligibility_reason = ""
         if not is_eligible:
@@ -481,6 +511,9 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
                 eligibility_reason = "Could not compute tag bid."
             else:
                 eligibility_reason = "Not eligible."
+        if was_tagged_prev:
+            is_eligible = 0
+            eligibility_reason = "Tagged in prior season (ineligible)."
 
         row = {
             "league_id": league_id,
@@ -509,6 +542,7 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
             "tag_limit_per_side": 1,
             "is_tag_eligible": is_eligible,
             "eligibility_reason": eligibility_reason,
+            "tag_prev_season": 1 if was_tagged_prev else 0,
             "tag_formula": formula,
             "tracking_context": "in-season",
             "scoring_weeks_used": f"1-{last_regular_week}",
@@ -539,7 +573,7 @@ def build_meta(rows: List[Dict[str, Any]], season: int, scoring_last_week: int) 
         "scoring_weeks_used": f"1-{scoring_last_week}",
         "aav_snapshot_week": 1,
         "by_position": by_pos,
-        "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1).",
+        "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the prior season.",
     }
 
 

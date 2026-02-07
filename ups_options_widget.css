@@ -18,17 +18,17 @@
 
 
 body[data-theme="dark"] {
-  --ink: #e2e8f0;
-  --ink-soft: #94a3b8;
+  --ink: #f8fafc;
+  --ink-soft: #cbd5e1;
   --bg: #0b1220;
   --card: #0f172a;
-  --card-2: #0f1b2d;
-  --accent: #22d3ee;
-  --accent-strong: #06b6d4;
+  --card-2: #121c34;
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
   --accent-warm: #f59e0b;
-  --line: rgba(148, 163, 184, 0.2);
-  --shadow: 0 18px 38px rgba(15, 23, 42, 0.45);
-  --glow: 0 0 0 4px rgba(34, 211, 238, 0.15);
+  --line: rgba(148, 163, 184, 0.28);
+  --shadow: 0 14px 28px rgba(4, 10, 20, 0.6);
+  --glow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 body {
@@ -44,20 +44,20 @@ body {
 #uowApp {
   max-width: 860px;
   margin: 0 auto;
-  padding: 24px 20px 40px;
+  padding: 16px 16px 24px;
 }
 
 .uow-hero {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .uow-title {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -72,21 +72,21 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: rgba(14, 165, 164, 0.12);
   color: var(--accent-strong);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .uow-card {
-  background: linear-gradient(135deg, #ffffff, #f8fafc 70%);
+  background: linear-gradient(135deg, var(--card), var(--card-2) 70%);
   border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 18px 18px 20px;
+  border-radius: 14px;
+  padding: 14px 14px 16px;
   box-shadow: var(--shadow);
   animation: riseIn 0.6s ease both;
 }
@@ -97,14 +97,14 @@ body {
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .uow-card-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   color: var(--ink-soft);
 }
 
@@ -118,9 +118,9 @@ body {
   border: 1px solid var(--line);
   background: var(--card);
   color: var(--ink);
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -136,7 +136,7 @@ body {
 .uow-card-body {
   display: flex;
   align-items: flex-end;
-  gap: 18px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -144,10 +144,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--ink-soft);
-  min-width: 240px;
+  min-width: 200px;
 }
 
 .uow-select {
@@ -155,9 +155,9 @@ body {
   -webkit-appearance: none;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 36px 10px 12px;
-  font-size: 13px;
+  border-radius: 10px;
+  padding: 8px 32px 8px 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--ink);
   background-image:
@@ -167,8 +167,8 @@ body {
   background-position:
     calc(100% - 18px) calc(50% - 3px),
     calc(100% - 12px) calc(50% - 3px),
-    calc(100% - 42px) 50%;
-  background-size: 6px 6px, 6px 6px, 1px 18px;
+    calc(100% - 40px) 50%;
+  background-size: 6px 6px, 6px 6px, 1px 16px;
   background-repeat: no-repeat;
 }
 
@@ -186,22 +186,23 @@ body {
 }
 
 .uow-display-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
 
 .uow-display-value {
-  font-size: 24px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--ink);
+  line-height: 1.1;
   animation: pulseIn 0.6s ease both;
 }
 
 .uow-display-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--ink-soft);
 }
 
@@ -216,7 +217,7 @@ body {
 }
 
 @media (max-width: 720px) {
-  #uowApp { padding: 20px 16px 32px; }
+  #uowApp { padding: 14px 14px 22px; }
   .uow-card-body { align-items: flex-start; }
   .uow-field { width: 100%; }
 }
@@ -229,7 +230,7 @@ body {
 .uow-hero-actions{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
   flex-wrap:wrap;
 }
 
@@ -237,4 +238,9 @@ body {
   flex-direction: row;
   align-items: center;
   gap: 8px;
+}
+
+
+body[data-theme="dark"] .uow-display-value {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }

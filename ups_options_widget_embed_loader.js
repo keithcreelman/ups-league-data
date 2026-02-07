@@ -31,7 +31,7 @@
 
   const LATEST_JSON_URL = "https://keithcreelman.github.io/ups-league-data/ups_options_widget_latest.json";
   const LATEST_JS_URL = "https://keithcreelman.github.io/ups-league-data/ups_options_widget_latest.js";
-  const DEFAULT_CACHE = "20260207ax";
+  const DEFAULT_CACHE = "20260207ay";
 
   let mount = document.getElementById("uowMount");
   if (!mount) {
@@ -89,7 +89,7 @@
   mount.innerHTML = "";
   const iframe = document.createElement("iframe");
   iframe.style.width = "100%";
-  iframe.style.height = "900px";
+  iframe.style.height = "480px";
   iframe.style.border = "0";
   iframe.setAttribute("loading", "lazy");
   iframe.setAttribute("scrolling", "no");
@@ -106,7 +106,7 @@
     if (!data || data.type !== "uow-height") return;
     const next = Number(data.height);
     if (!Number.isFinite(next) || next <= 0) return;
-    const clamped = Math.max(400, Math.min(20000, Math.ceil(next)));
+    const clamped = Math.max(280, Math.min(20000, Math.ceil(next)));
     iframe.style.height = String(clamped) + "px";
   }
 

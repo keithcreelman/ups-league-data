@@ -1268,6 +1268,16 @@
   function sortRows(rows, key, dir) {
     const copy = rows.slice();
     copy.sort((ra, rb) => {
+      if (state.activeModule === "tag" && key === "player") {
+        const nameA = safeStr(ra.player_name).toLowerCase();
+        const nameB = safeStr(rb.player_name).toLowerCase();
+        const nameCmp = compareVals(nameA, nameB, dir);
+        if (nameCmp !== 0) return nameCmp;
+        const bidA = safeInt(ra.tag_bid || ra.tag_salary || 0);
+        const bidB = safeInt(rb.tag_bid || rb.tag_salary || 0);
+        const bidCmp = compareVals(bidA, bidB, dir);
+        if (bidCmp !== 0) return bidCmp;
+      }
       const a = getSortValue(ra, key);
       const b = getSortValue(rb, key);
       return compareVals(a, b, dir);
@@ -2524,6 +2534,7 @@
             <td class="playerCell">${htmlEsc(r.player_name || "")}</td>
             <td class="muted">${htmlEsc(r.pos || "")}</td>
             <td>${htmlEsc(r.side || "")}</td>
+            <td class="cell-num">${safeInt(r.tag_salary || r.tag_bid || r.salary || 0).toLocaleString()}</td>
           </tr>
         `;
       })
@@ -2540,6 +2551,7 @@
               <th>Player</th>
               <th>Pos</th>
               <th>Side</th>
+              <th>Salary</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -2549,7 +2561,6 @@
   }
 
   function renderCommishModulePage() {
-    const mode = safeStr(state.commishViewMode || "A").toUpperCase();
     const canCommish = !!state.canCommishMode;
     const season = normalizeSeasonValue(state.selectedSeason);
     const seasonRows = state.payload.eligibility.filter(
@@ -2603,7 +2614,7 @@
       .join("");
 
     const adminPanel = `
-      <div class="ccc-adminPanel" style="display:block;">
+      <div class="ccc-adminPanel ccc-adminPanel--hero" style="display:block;">
         <div class="ccc-adminTitle">Admin Controls</div>
         <div class="ccc-adminGrid">
           <button id="refreshBtn" class="ccc-btn" type="button" data-admin-action="refresh">Refresh (use if rosters are not refreshed)</button>
@@ -2631,65 +2642,23 @@
       </div>
     `;
 
-    const opts = `
-      <div class="ccc-summaryControls">
-        <span class="ccc-navTitle">Admin Views</span>
-        <button type="button" class="ccc-pageBtn ${mode === "A" ? "is-active" : ""}" data-commish-view="A" aria-pressed="${mode === "A" ? "true" : "false"}">Option A</button>
-        <button type="button" class="ccc-pageBtn ${mode === "B" ? "is-active" : ""}" data-commish-view="B" aria-pressed="${mode === "B" ? "true" : "false"}">Option B</button>
-        <button type="button" class="ccc-pageBtn ${mode === "C" ? "is-active" : ""}" data-commish-view="C" aria-pressed="${mode === "C" ? "true" : "false"}">Option C</button>
-      </div>
-    `;
-
     const toggleAttrs = canCommish
       ? ""
       : "disabled title='Admin console is commissioner-only'";
-    const toggleBtn = `
-      <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1" ${toggleAttrs}>
-        ${state.commishConsoleOpen ? "Hide" : "Show"} Admin Console
-      </button>
+    const consoleBlock = `
+      <div class="ccc-adminConsoleCard">
+        <div class="ccc-adminConsoleTitle">Admin Console</div>
+        <div class="muted" style="margin-bottom:10px;">Manual contract update tool (commissioner-only).</div>
+        <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1" ${toggleAttrs}>
+          ${state.commishConsoleOpen ? "Hide" : "Show"} Admin Console
+        </button>
+      </div>
     `;
-
-    let body = "";
-    if (mode === "A") {
-      body = `
-        <div class="ccc-landing">
-          <div>
-            <div class="ccc-landingTitle">Option A</div>
-            <div class="muted" style="margin-top:6px;">Toggle the existing Admin Console panel.</div>
-            <div style="margin-top:12px;">${toggleBtn}</div>
-            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
-          </div>
-        </div>
-      `;
-    } else if (mode === "B") {
-      body = `
-        <div class="ccc-landing">
-          <div>
-            <div class="ccc-landingTitle">Option B</div>
-            <div class="muted" style="margin-top:6px;">Full Admin Module view (layout placeholder).</div>
-            <div style="margin-top:12px;">${toggleBtn}</div>
-            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
-          </div>
-        </div>
-      `;
-    } else {
-      body = `
-        <div class="ccc-landing">
-          <div>
-            <div class="ccc-landingTitle">Option C</div>
-            <div class="muted" style="margin-top:6px;">Quick shortcut to the Admin Console.</div>
-            <div style="margin-top:12px;">${toggleBtn}</div>
-            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
-          </div>
-        </div>
-      `;
-    }
 
     return `
       <div class="ccc-summaryPage">
         ${adminPanel}
-        ${opts}
-        ${body}
+        ${consoleBlock}
       </div>
     `;
   }
@@ -3875,6 +3844,8 @@
     if (cccMain) cccMain.style.display = "";
     const teamFilterWrap = $("#teamFilterWrap");
     if (teamFilterWrap) teamFilterWrap.style.display = state.commishMode ? "none" : "";
+    const moduleFilters = $("#moduleFilters");
+    if (moduleFilters) moduleFilters.style.display = state.activeModule === "commish" ? "none" : "";
 
 
     const asOfDate =
@@ -4290,6 +4261,41 @@
     }
   }
 
+  function findTagRowForSelection(selection) {
+    if (!selection) return null;
+    const pid = safeStr(selection.player_id);
+    const season = normalizeSeasonValue(selection.season || state.selectedSeason);
+    if (!pid) return null;
+    return (state.tagTrackingRows || []).find(
+      (r) => safeStr(r.player_id) === pid && normalizeSeasonValue(r.season) === season
+    ) || null;
+  }
+
+  function buildTagSubmissionPayload(selection, row) {
+    const refRow = row || findTagRowForSelection(selection) || {};
+    const salary = safeInt(refRow.tag_bid || refRow.tag_salary || 0);
+    const tier = safeInt(refRow.tag_tier || 0);
+    const formula = safeStr(refRow.tag_formula || "");
+    const infoParts = ["Tag"];
+    if (tier) infoParts.push(`Tier ${tier}`);
+    if (formula) infoParts.push(`Formula: ${formula}`);
+    const contractInfo = infoParts.join(" | ");
+    return {
+      league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
+      season: normalizeSeasonValue(selection && selection.season ? selection.season : state.selectedSeason),
+      franchise_id: safeStr(selection && selection.franchise_id),
+      franchise_name: safeStr(selection && selection.franchise_name),
+      player_id: safeStr(selection && selection.player_id),
+      player_name: safeStr(selection && selection.player_name),
+      pos: safeStr(selection && selection.pos),
+      salary,
+      contract_year: 1,
+      contract_status: "Tag",
+      contract_info: contractInfo,
+      tag_formula: formula,
+    };
+  }
+
   function openTagModal(selectionKey) {
     const modal = $("#tagModal");
     if (!modal) return;
@@ -4323,6 +4329,12 @@
     const submission = state.tagSubmissions[selectionKey];
     const isSubmitted =
       submission && safeStr(submission.player_id) === safeStr(sel.player_id);
+
+    const preview = $("#tagModalPreview");
+    if (preview) {
+      const payload = buildTagSubmissionPayload(sel);
+      preview.textContent = JSON.stringify(payload, null, 2);
+    }
 
     const err = $("#tagModalErr");
     if (err) {
@@ -4388,18 +4400,12 @@
     if (!key) return;
     const sel = state.tagSelections[key];
     if (!sel) return;
-    if (!state.commishMode) {
-      const err = $("#tagModalErr");
-      if (err) {
-        err.style.display = "";
-        err.textContent = "Submissions are disabled while the app is still under development.";
-        err.classList.remove("ok");
-      }
-      return;
-    }
+    const payload = buildTagSubmissionPayload(sel);
     state.tagSubmissions[key] = {
       ...sel,
       submitted_at_utc: new Date().toISOString(),
+      tag_salary: payload.salary,
+      payload,
     };
     saveTagSubmissions(state.tagSubmissions);
     closeTagModal();
@@ -5198,7 +5204,7 @@
 
       // default sort per tab
       sortState.tab = "eligible";
-      sortState.key = state.activeModule === "tag" ? "tagRank" : "acquired";
+      sortState.key = state.activeModule === "tag" ? "player" : "acquired";
       sortState.dir = state.activeModule === "tag" ? "asc" : "desc";
 
       render();
@@ -5376,7 +5382,7 @@
         state.activeModule = state.activeModule === "tag" ? "" : "tag";
         setHighlightForModule(state.activeModule || "default");
         sortState.tab = "eligible";
-        sortState.key = "tagRank";
+        sortState.key = "player";
         sortState.dir = "asc";
         resetAllTablePages();
         setTab("summary");

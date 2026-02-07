@@ -1391,3 +1391,46 @@ body.ccc-modalOpen #tagModal *{
   .ccc-adminGrid{ flex-direction: column; align-items: stretch; }
   .ccc-summaryRow{ grid-template-columns: 1fr 1fr; }
 }
+
+/* Admin module hero panel */
+.ccc-adminPanel--hero{
+  border: 2px solid var(--accent-border);
+  background: linear-gradient(120deg, rgba(37,99,235,.08), rgba(20,184,166,.06)) , var(--surface-2);
+  padding: 18px;
+}
+
+.ccc-adminPanel--hero .ccc-adminTitle{
+  font-size: 18px;
+  letter-spacing: .4px;
+}
+
+.ccc-adminPanel--hero .ccc-adminGrid{
+  gap: 12px;
+}
+
+.ccc-adminPanel--hero .ccc-btn{
+  min-height: 46px;
+  font-size: 14px;
+  padding: 12px 16px;
+}
+
+.ccc-adminPanel--hero .ccc-select,
+.ccc-adminPanel--hero .ccc-input{
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.ccc-adminConsoleCard{
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-soft);
+}
+
+.ccc-adminConsoleTitle{
+  font-weight: 900;
+  font-size: 14px;
+  margin-bottom: 6px;
+}

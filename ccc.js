@@ -211,6 +211,7 @@
   const LOCAL_THEME_KEY = "ccc_theme_v1";
   const LOCAL_HIGHLIGHT_KEY = "ccc_row_highlight_v1";
   const LOCAL_DEFAULT_FILTERS_KEY = "ccc_default_filters_v1";
+  const SESSION_DEV_NOTICE_KEY = "ccc_dev_notice_seen_v1";
   const LOCAL_ASOF_SEASON_KEY = "ccc_asof_season_v1";
 
   function loadLocalOverrides() {
@@ -2534,7 +2535,7 @@
             <td class="playerCell">${htmlEsc(r.player_name || "")}</td>
             <td class="muted">${htmlEsc(r.pos || "")}</td>
             <td>${htmlEsc(r.side || "")}</td>
-            <td class="cell-num">${safeInt(r.tag_salary || r.tag_bid || r.salary || 0).toLocaleString()}</td>
+            <td class="cell-num">${getTagSalaryForSubmission(r).toLocaleString()}</td>
           </tr>
         `;
       })
@@ -4296,6 +4297,49 @@
     };
   }
 
+  function getTagSalaryForSubmission(sub) {
+    if (!sub) return 0;
+    const payload = sub.payload || null;
+    const payloadSalary = safeInt(payload && payload.salary);
+    if (payloadSalary > 0) return payloadSalary;
+    const direct = safeInt(sub.tag_salary || sub.tag_bid || sub.salary);
+    if (direct > 0) return direct;
+    const row = findTagRowForSelection(sub);
+    if (row) return safeInt(row.tag_bid || row.tag_salary || 0);
+    return 0;
+  }
+
+  function openDevNotice() {
+    const modal = $("#devNoticeModal");
+    if (!modal) return;
+    modal.classList.add("is-open");
+    document.body.classList.add("ccc-modalOpen");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDevNotice() {
+    const modal = $("#devNoticeModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    const mym = $("#mymModal");
+    const rs = $("#restructureModal");
+    const tag = $("#tagModal");
+    const anyOpen =
+      (mym && mym.classList.contains("is-open")) ||
+      (rs && rs.classList.contains("is-open")) ||
+      (tag && tag.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
+  }
+
+  function maybeShowDevNotice() {
+    try {
+      if (sessionStorage.getItem(SESSION_DEV_NOTICE_KEY)) return;
+      sessionStorage.setItem(SESSION_DEV_NOTICE_KEY, "1");
+    } catch (e) {}
+    openDevNotice();
+  }
+
   function openTagModal(selectionKey) {
     const modal = $("#tagModal");
     if (!modal) return;
@@ -5990,15 +6034,25 @@
       });
     }
 
+    const devNoticeModal = $("#devNoticeModal");
+    if (devNoticeModal) {
+      devNoticeModal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeDevNotice();
+      });
+    }
+
     // Escape closes modal
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         const modalElMym = $("#mymModal");
         const modalElRes = $("#restructureModal");
         const modalElTag = $("#tagModal");
+        const modalElDev = $("#devNoticeModal");
         if (modalElMym && modalElMym.classList.contains("is-open")) closeMYMModal();
         if (modalElRes && modalElRes.classList.contains("is-open")) closeRestructureModal();
         if (modalElTag && modalElTag.classList.contains("is-open")) closeTagModal();
+        if (modalElDev && modalElDev.classList.contains("is-open")) closeDevNotice();
       }
     });
 
@@ -6088,10 +6142,12 @@
       wireEvents();
       load();
       startAutoHeightMessaging();
+      maybeShowDevNotice();
     });
   } else {
     wireEvents();
     load();
     startAutoHeightMessaging();
+    maybeShowDevNotice();
   }
 })();

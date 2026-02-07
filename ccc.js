@@ -16,8 +16,6 @@
     "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
     "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
   };
-  const PLAYOFF_START_WEEK = 15;
-  const FINAL_WEEK_OF_SEASON = 17;
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const TEAM_COLOR_OVERRIDES = {
     "0001": { h: 48, s: 88, l: 50 }, // L.A. Looks
@@ -199,70 +197,6 @@
     return d ? fmtLocalYMDHM(d) : "";
   }
 
-  function getCountdownNow() {
-    if (state && state.commishMode && state.asOfOverrideActive && state.asOfDate) {
-      return new Date(state.asOfDate.getTime());
-    }
-    return new Date();
-  }
-
-  function atLocalNoon(year, monthIndex, day) {
-    return new Date(year, monthIndex, day, 12, 0, 0, 0);
-  }
-
-  function sameYMD(a, b) {
-    if (!a || !b) return false;
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate()
-    );
-  }
-
-  function getNextAnnualDate(baseYear, monthIndex, day, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    let year = safeInt(baseYear) || ref.getFullYear();
-    let candidate = atLocalNoon(year, monthIndex, day);
-    while (candidate.getTime() < ref.getTime()) {
-      year += 1;
-      candidate = atLocalNoon(year, monthIndex, day);
-    }
-    return candidate;
-  }
-
-  function getFirstWeekdayOfMonth(year, monthIndex, weekday) {
-    const d = new Date(year, monthIndex, 1, 12, 0, 0, 0);
-    const day = d.getDay();
-    const offset = (weekday - day + 7) % 7;
-    d.setDate(d.getDate() + offset);
-    return d;
-  }
-
-  function getLastWeekdayOfMonth(year, monthIndex, weekday) {
-    const d = new Date(year, monthIndex + 1, 0, 12, 0, 0, 0);
-    const day = d.getDay();
-    const offset = (day - weekday + 7) % 7;
-    d.setDate(d.getDate() - offset);
-    return d;
-  }
-
-  function getThanksgivingDate(year) {
-    // Fourth Thursday in November.
-    const firstThursday = getFirstWeekdayOfMonth(year, 10, 4);
-    return addDays(firstThursday, 21);
-  }
-
-  function formatCountdown(diffMs) {
-    if (diffMs <= 0) return "Now";
-    const totalSeconds = Math.floor(diffMs / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const mins = Math.floor((totalSeconds % 3600) / 60);
-    if (days > 0) return `${days}d ${hours}h ${mins}m`;
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins}m`;
-  }
-
   function must(sel) {
     const el = $(sel);
     if (!el) throw new Error(`Missing required element: ${sel}`);
@@ -365,32 +299,89 @@
     if (sel) sel.value = t;
   }
 
+  function normalizeHighlightMode(mode) {
+    const v = safeStr(mode).toLowerCase();
+    return v === "team" ? "team" : "position";
+  }
+
   function loadHighlightSettings() {
     try {
       const raw = localStorage.getItem(LOCAL_HIGHLIGHT_KEY);
-      if (!raw) return { enabled: true, mode: "position" };
+      if (!raw) return { enabled: true, mode: "position", byModule: {} };
       const obj = JSON.parse(raw);
       const enabled = obj && obj.enabled !== undefined ? !!obj.enabled : true;
-      const mode = safeStr(obj && obj.mode ? obj.mode : "position").toLowerCase();
-      return { enabled, mode: mode === "team" || mode === "position" ? mode : "position" };
+      const mode = normalizeHighlightMode(obj && obj.mode ? obj.mode : "position");
+      const byModuleRaw = obj && typeof obj.byModule === "object" ? obj.byModule : {};
+      const byModule = {};
+      Object.keys(byModuleRaw || {}).forEach((key) => {
+        const entry = byModuleRaw[key];
+        if (!entry || typeof entry !== "object") return;
+        byModule[key] = {
+          enabled: entry.enabled !== undefined ? !!entry.enabled : enabled,
+          mode: normalizeHighlightMode(entry.mode || mode),
+        };
+      });
+      return { enabled, mode, byModule };
     } catch (e) {
-      return { enabled: true, mode: "position" };
+      return { enabled: true, mode: "position", byModule: {} };
     }
   }
 
-  function saveHighlightSettings(enabled, mode) {
+  function saveHighlightSettings(enabled, mode, byModule) {
     try {
       localStorage.setItem(
         LOCAL_HIGHLIGHT_KEY,
-        JSON.stringify({ enabled: !!enabled, mode: mode || "position" })
+        JSON.stringify({
+          enabled: !!enabled,
+          mode: normalizeHighlightMode(mode || "position"),
+          byModule: byModule || {},
+        })
       );
     } catch (e) {}
+  }
+
+  function getHighlightSettingsForModule(moduleKey) {
+    const key = safeStr(moduleKey || "").toLowerCase();
+    const defEnabled =
+      state && state.highlightDefault ? !!state.highlightDefault.enabled : true;
+    const defMode = normalizeHighlightMode(
+      state && state.highlightDefault ? state.highlightDefault.mode : "position"
+    );
+    if (!key || !state || !state.highlightByModule) {
+      return { enabled: defEnabled, mode: defMode };
+    }
+    const entry = state.highlightByModule[key];
+    if (!entry) return { enabled: defEnabled, mode: defMode };
+    return {
+      enabled: entry.enabled !== undefined ? !!entry.enabled : defEnabled,
+      mode: normalizeHighlightMode(entry.mode || defMode),
+    };
+  }
+
+  function rememberHighlightForModule(moduleKey) {
+    const key = safeStr(moduleKey || "").toLowerCase();
+    if (!key) return;
+    if (!state.highlightByModule) state.highlightByModule = {};
+    const entry = {
+      enabled: !!state.rowHighlightEnabled,
+      mode: normalizeHighlightMode(state.rowHighlightMode),
+    };
+    state.highlightByModule[key] = entry;
+    state.highlightDefault = entry;
+    saveHighlightSettings(state.highlightDefault.enabled, state.highlightDefault.mode, state.highlightByModule);
+  }
+
+  function setHighlightForModule(moduleKey) {
+    const settings = getHighlightSettingsForModule(moduleKey);
+    state.rowHighlightEnabled = settings.enabled;
+    state.rowHighlightMode = settings.mode;
+    applyHighlightSetting();
   }
 
   function applyHighlightSetting() {
     const app = $("#cccApp");
     const enabled = !!state.rowHighlightEnabled;
-    const mode = state.rowHighlightMode === "team" ? "team" : "position";
+    const mode = normalizeHighlightMode(state.rowHighlightMode);
     if (app) app.setAttribute("data-highlight", enabled ? mode : "none");
     const chk = $("#rowHighlightChk");
     if (chk) chk.checked = enabled;
@@ -1569,111 +1560,6 @@
     `;
   }
 
-  function renderLeagueEventModule() {
-    const payload = buildLeagueEvents();
-    const events = payload.events || [];
-    const now = payload.now || new Date();
-    syncLeagueEventSelection(events, now);
-    const selectedId = state.leagueEventSelectedId || (events[0] && events[0].id) || "";
-    const selected = events.find((e) => e && e.id === selectedId) || events[0] || null;
-    const mode = state.leagueEventMode === "date" ? "date" : "countdown";
-    const dateText =
-      selected && selected.date && !isNaN(selected.date.getTime()) ? fmtYMDDate(selected.date) : "TBD";
-    const countdownText =
-      selected && selected.date && !isNaN(selected.date.getTime())
-        ? formatCountdown(selected.date.getTime() - now.getTime())
-        : "TBD";
-    const primaryText = mode === "date" ? dateText : countdownText;
-    const secondaryLabel = mode === "date" ? "Countdown" : "Date";
-    const secondaryValue = mode === "date" ? countdownText : dateText;
-    const hintParts = [];
-    if (secondaryValue) hintParts.push(`${secondaryLabel}: ${secondaryValue}`);
-    if (selected && selected.hint) hintParts.push(selected.hint);
-    const hintText = hintParts.join(" | ");
-    const labelText = selected ? selected.label : "Event";
-
-    const options = events
-      .map(
-        (e) =>
-          `<option value="${htmlEsc(e.id)}" ${e.id === selectedId ? "selected" : ""}>${htmlEsc(
-            e.label
-          )}</option>`
-      )
-      .join("");
-
-    return `
-      <div id="leagueEventModule" class="ccc-eventCard">
-        <div class="ccc-eventHead">
-          <div class="ccc-summaryTitle">League Calendar</div>
-          <div class="ccc-eventToggle" role="group" aria-label="League event display mode">
-            <button type="button" class="ccc-chipBtn ${mode === "countdown" ? "primary" : ""}" data-league-event-mode="countdown">Countdown</button>
-            <button type="button" class="ccc-chipBtn ${mode === "date" ? "primary" : ""}" data-league-event-mode="date">Date</button>
-          </div>
-        </div>
-        <div class="ccc-eventBody">
-          <label class="ccc-field ccc-field-col ccc-eventField">
-            Event
-            <select id="leagueEventSelect" class="ccc-select">
-              ${options}
-            </select>
-          </label>
-          <div class="ccc-eventDisplay">
-            <div class="ccc-eventLabel" id="leagueEventLabel">${htmlEsc(labelText)}</div>
-            <div class="ccc-eventValue" id="leagueEventValue">${htmlEsc(primaryText)}</div>
-            <div class="ccc-eventHint" id="leagueEventHint">${htmlEsc(hintText)}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderSummaryWithEvents(bodyHtml) {
-    return `${renderLeagueEventModule()}${bodyHtml || ""}`;
-  }
-
-  function updateLeagueEventModule() {
-    const module = $("#leagueEventModule");
-    if (!module) return;
-    const payload = buildLeagueEvents();
-    const events = payload.events || [];
-    const now = payload.now || new Date();
-    syncLeagueEventSelection(events, now);
-    const selectedId = state.leagueEventSelectedId || (events[0] && events[0].id) || "";
-    const selected = events.find((e) => e && e.id === selectedId) || events[0] || null;
-    if (!selected) return;
-
-    const mode = state.leagueEventMode === "date" ? "date" : "countdown";
-    const dateText =
-      selected.date && !isNaN(selected.date.getTime()) ? fmtYMDDate(selected.date) : "TBD";
-    const countdownText =
-      selected.date && !isNaN(selected.date.getTime())
-        ? formatCountdown(selected.date.getTime() - now.getTime())
-        : "TBD";
-    const primaryText = mode === "date" ? dateText : countdownText;
-    const secondaryLabel = mode === "date" ? "Countdown" : "Date";
-    const secondaryValue = mode === "date" ? countdownText : dateText;
-    const hintParts = [];
-    if (secondaryValue) hintParts.push(`${secondaryLabel}: ${secondaryValue}`);
-    if (selected.hint) hintParts.push(selected.hint);
-    const hintText = hintParts.join(" | ");
-
-    const labelEl = $("#leagueEventLabel");
-    const valueEl = $("#leagueEventValue");
-    const hintEl = $("#leagueEventHint");
-    if (labelEl) labelEl.textContent = selected.label;
-    if (valueEl) valueEl.textContent = primaryText;
-    if (hintEl) hintEl.textContent = hintText;
-
-    const selectEl = $("#leagueEventSelect");
-    if (selectEl && selectEl.value !== selectedId) {
-      selectEl.value = selectedId;
-    }
-    if (selectEl) {
-      const option = selectEl.querySelector(`option[value="${selectedId}"]`);
-      if (option && option.textContent !== selected.label) option.textContent = selected.label;
-    }
-  }
-
   function buildTeamPositionBreakdown(eligibleRows, submittedRows) {
     const posOrder = ["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"];
     const map = new Map();
@@ -2245,21 +2131,110 @@
       return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No tag tracking rows.</div></div>`;
     }
 
-    const rowsOut =
-      view === "team" ? buildTagBreakdownByTeam(filteredRows) : buildTagBreakdownByPos(filteredRows);
+    if (view === "team") {
+      const groupMap = new Map();
+      filteredRows.forEach((r) => {
+        const team = safeStr(r.franchise_name || r.franchise_id || "Team");
+        const teamId = pad4(r.franchise_id);
+        const key = teamId || team;
+        let group = groupMap.get(key);
+        if (!group) {
+          group = {
+            team,
+            team_id: teamId,
+            rows: new Map(),
+            count: 0,
+            tier1: 0,
+            tier2: 0,
+            tier3: 0,
+          };
+          groupMap.set(key, group);
+        }
+        const pos = safeStr(r.positional_grouping || r.position || "NA").toUpperCase();
+        let rec = group.rows.get(pos);
+        if (!rec) {
+          rec = { pos, count: 0, tier1: 0, tier2: 0, tier3: 0 };
+          group.rows.set(pos, rec);
+        }
+        rec.count += 1;
+        const t = safeInt(r.tag_tier);
+        if (t === 1) rec.tier1 += 1;
+        else if (t === 2) rec.tier2 += 1;
+        else if (t === 3) rec.tier3 += 1;
+
+        group.count += 1;
+        if (t === 1) group.tier1 += 1;
+        else if (t === 2) group.tier2 += 1;
+        else if (t === 3) group.tier3 += 1;
+      });
+
+      const groups = Array.from(groupMap.values()).sort((a, b) =>
+        safeStr(a.team).localeCompare(safeStr(b.team))
+      );
+
+      const body = groups
+        .map((g) => {
+          const rowStyle = buildTeamStyle(g.team_id, g.team);
+          const summaryStyle = rowStyle ? ` style="${rowStyle}"` : "";
+          const positions = orderPositions(Array.from(g.rows.keys()));
+          const detailRows = positions
+            .map((pos) => {
+              const r = g.rows.get(pos);
+              if (!r) return "";
+              const rowClass = buildRowClass({ franchise_id: g.team_id }, r.pos);
+              const styleAttr = rowStyle ? ` style="${rowStyle}"` : "";
+              return `
+            <tr class="${rowClass}"${styleAttr}>
+              <td>${htmlEsc(r.pos)}</td>
+              <td>${r.count}</td>
+              <td>${r.tier1}</td>
+              <td>${r.tier2}</td>
+              <td>${r.tier3}</td>
+            </tr>`;
+            })
+            .join("");
+
+          return `
+        <details class="ccc-summaryGroup">
+          <summary>
+            <div class="ccc-summaryRow"${summaryStyle}>
+              <div class="ccc-summaryTeam">${htmlEsc(g.team)}</div>
+              <div class="ccc-summaryStat"><span class="label">Tracked</span><span class="value">${g.count}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Tier 1</span><span class="value">${g.tier1}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Tier 2</span><span class="value">${g.tier2}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Tier 3</span><span class="value">${g.tier3}</span></div>
+            </div>
+          </summary>
+          <div class="ccc-tableWrap">
+            <table class="ccc-table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Tracked</th>
+                  <th>Tier 1</th>
+                  <th>Tier 2</th>
+                  <th>Tier 3</th>
+                </tr>
+              </thead>
+              <tbody>${detailRows}</tbody>
+            </table>
+          </div>
+        </details>
+        `;
+        })
+        .join("");
+
+      return `
+      <div class="ccc-summaryPage">
+        ${top}
+        ${body}
+      </div>
+    `;
+    }
+
+    const rowsOut = buildTagBreakdownByPos(filteredRows);
     const body = rowsOut
       .map((r) => {
-        if (view === "team") {
-          return `
-          <tr>
-            <td>${htmlEsc(r.team)}</td>
-            <td>${r.count}</td>
-            <td>${r.tier1}</td>
-            <td>${r.tier2}</td>
-            <td>${r.tier3}</td>
-          </tr>
-        `;
-        }
         const rowClass = buildRowClass(r, r.pos);
         return `
           <tr class="${rowClass}">
@@ -2273,8 +2248,7 @@
       })
       .join("");
 
-    const headerLabel = view === "team" ? "Team" : "Position";
-    const calcHtml = "";
+    const headerLabel = "Position";
 
     return `
       <div class="ccc-summaryPage">
@@ -2293,7 +2267,6 @@
             <tbody>${body}</tbody>
           </table>
         </div>
-        ${calcHtml}
       </div>
     `;
   }
@@ -2684,6 +2657,11 @@
   const initialPpgSettings = loadPpgSettings();
   const initialThemeSetting = loadThemeSetting();
   const initialHighlightSettings = loadHighlightSettings();
+  const initialHighlightDefault = {
+    enabled: initialHighlightSettings.enabled,
+    mode: normalizeHighlightMode(initialHighlightSettings.mode),
+  };
+  const initialHighlightByModule = initialHighlightSettings.byModule || {};
   const initialAsOfSeasonOverride = loadAsOfSeasonOverride();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
@@ -2726,17 +2704,15 @@
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
     theme: initialThemeSetting,
-    rowHighlightEnabled: initialHighlightSettings.enabled,
-    rowHighlightMode: initialHighlightSettings.mode,
+    highlightDefault: initialHighlightDefault,
+    highlightByModule: initialHighlightByModule,
+    rowHighlightEnabled: initialHighlightDefault.enabled,
+    rowHighlightMode: initialHighlightDefault.mode,
     asOfSeasonOverride: initialAsOfSeasonOverride,
     asOfDraft: null,
     adminDebug: null,
     mymDeadlineBySeason: {},
     mymDeadlineFetch: {},
-    nflScheduleBySeason: {},
-    nflScheduleFetch: {},
-    leagueEventMode: "countdown",
-    leagueEventSelectedId: "",
     commishViewMode: "A",
     adminPanelOpen: false,
     lastOwnerTeam: "",
@@ -3027,62 +3003,6 @@
     return dates[0] || null;
   }
 
-  function extractWeekKickoffs(scheduleData) {
-    const entries = [];
-    collectKickoffEntries(scheduleData, entries);
-    if (!entries.length) return [];
-    const map = new Map();
-    entries.forEach((entry) => {
-      const week = safeInt(entry && entry.week);
-      const kickoff = parseKickoffToDate(entry && entry.kickoff);
-      if (!week || !kickoff || isNaN(kickoff.getTime())) return;
-      const existing = map.get(week);
-      if (!existing || kickoff.getTime() < existing.getTime()) {
-        map.set(week, kickoff);
-      }
-    });
-    const out = Array.from(map.entries()).map(([week, kickoff]) => ({ week, kickoff }));
-    out.sort((a, b) => a.week - b.week);
-    return out;
-  }
-
-  function getScheduleWeekKickoffs(season) {
-    const s = normalizeSeasonValue(season);
-    if (!s || !state) return null;
-    const cached = state.nflScheduleBySeason ? state.nflScheduleBySeason[s] : null;
-    if (cached && Array.isArray(cached.weekKickoffs)) return cached.weekKickoffs;
-    if (state.nflScheduleFetch && !state.nflScheduleFetch[s]) {
-      requestNflSchedule(s);
-    }
-    return null;
-  }
-
-  async function requestNflSchedule(season) {
-    const s = normalizeSeasonValue(season);
-    if (!s || !state) return;
-    if (!state.nflScheduleBySeason) state.nflScheduleBySeason = {};
-    if (!state.nflScheduleFetch) state.nflScheduleFetch = {};
-    if (state.nflScheduleFetch[s]) return;
-    state.nflScheduleFetch[s] = true;
-
-    try {
-      const url = buildMflScheduleUrl(s);
-      if (!url) return;
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error(`MFL schedule HTTP ${res.status}`);
-      const data = await res.json();
-      const weekKickoffs = extractWeekKickoffs(data);
-      state.nflScheduleBySeason[s] = { weekKickoffs };
-    } catch (e) {
-      state.nflScheduleBySeason[s] = {
-        weekKickoffs: [],
-        error: e && e.message ? e.message : String(e),
-      };
-    } finally {
-      render();
-    }
-  }
-
   function computePriorSunday(kickoffDate) {
     if (!kickoffDate || isNaN(kickoffDate.getTime())) return null;
     const base = new Date(
@@ -3212,213 +3132,6 @@
     if (!win) return false;
     const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
     return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
-  }
-
-  function resolveSeasonYear(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    const year = safeInt(seasonYear);
-    return year || ref.getFullYear();
-  }
-
-  function resolveRookieDraftDate(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    let year = resolveSeasonYear(seasonYear, ref);
-    let memorial = getMemorialDay(year);
-    let draft = memorial ? addDays(memorial, -1) : null;
-    while (draft && draft.getTime() < ref.getTime()) {
-      year += 1;
-      memorial = getMemorialDay(year);
-      draft = memorial ? addDays(memorial, -1) : null;
-    }
-    return draft;
-  }
-
-  function resolveLastSaturdayOfJuly(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    let year = resolveSeasonYear(seasonYear, ref);
-    let date = getLastWeekdayOfMonth(year, 6, 6);
-    while (date && date.getTime() < ref.getTime()) {
-      year += 1;
-      date = getLastWeekdayOfMonth(year, 6, 6);
-    }
-    return date;
-  }
-
-  function resolveFirstWeekOfMay(seasonYear, now) {
-    return getNextAnnualDate(resolveSeasonYear(seasonYear, now), 4, 1, now);
-  }
-
-  function resolveContractDeadlineDate(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    let year = resolveSeasonYear(seasonYear, ref);
-    let deadline = getContractDeadlineDate(String(year));
-    if (!deadline || deadline.getTime() < ref.getTime()) {
-      year += 1;
-      const next = getContractDeadlineDate(String(year));
-      if (next) return next;
-    }
-    return deadline || null;
-  }
-
-  function resolveWeekKickoffInfo(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    const tryYear = (year) => {
-      const weeks = getScheduleWeekKickoffs(String(year));
-      if (!weeks || !weeks.length) return null;
-      let next = null;
-      weeks.forEach((w) => {
-        if (!w || !w.kickoff || isNaN(w.kickoff.getTime())) return;
-        if (w.kickoff.getTime() < ref.getTime()) return;
-        if (!next || w.kickoff.getTime() < next.kickoff.getTime()) next = w;
-      });
-      if (next) return { week: next.week, kickoff: next.kickoff, season: year };
-      return { week: null, kickoff: null, season: year };
-    };
-
-    let info = tryYear(resolveSeasonYear(seasonYear, ref));
-    if (info && info.kickoff) return info;
-    if (!info) return null;
-    const nextYear = resolveSeasonYear(seasonYear, ref) + 1;
-    info = tryYear(nextYear);
-    if (info && info.kickoff) return info;
-    return null;
-  }
-
-  function resolveWeekKickoffForWeek(seasonYear, week, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    const tryYear = (year) => {
-      const weeks = getScheduleWeekKickoffs(String(year));
-      if (!weeks || !weeks.length) return null;
-      const entry = weeks.find((w) => safeInt(w.week) === safeInt(week));
-      return entry && entry.kickoff ? { kickoff: entry.kickoff, season: year } : null;
-    };
-
-    let info = tryYear(resolveSeasonYear(seasonYear, ref));
-    if (info && info.kickoff && info.kickoff.getTime() >= ref.getTime()) return info.kickoff;
-    const nextYear = resolveSeasonYear(seasonYear, ref) + 1;
-    info = tryYear(nextYear);
-    return info && info.kickoff ? info.kickoff : null;
-  }
-
-  function resolveThanksgivingKickoff(seasonYear, now) {
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    const tryYear = (year) => {
-      const thanksgiving = getThanksgivingDate(year);
-      const weeks = getScheduleWeekKickoffs(String(year));
-      if (weeks && weeks.length) {
-        let kickoff = null;
-        weeks.forEach((w) => {
-          if (!w || !w.kickoff || isNaN(w.kickoff.getTime())) return;
-          if (!sameYMD(w.kickoff, thanksgiving)) return;
-          if (!kickoff || w.kickoff.getTime() < kickoff.getTime()) kickoff = w.kickoff;
-        });
-        if (kickoff) return kickoff;
-      }
-      return thanksgiving;
-    };
-
-    let date = tryYear(resolveSeasonYear(seasonYear, ref));
-    if (date && date.getTime() >= ref.getTime()) return date;
-    return tryYear(resolveSeasonYear(seasonYear, ref) + 1);
-  }
-
-  function buildLeagueEvents() {
-    const now = getCountdownNow();
-    const seasonYear = resolveSeasonYear(
-      state && state.calendarContractSeason ? state.calendarContractSeason : state && state.selectedSeason,
-      now
-    );
-
-    const events = [];
-    events.push({
-      id: "seasonStart",
-      label: "Start of new season",
-      date: getNextAnnualDate(seasonYear, 2, 1, now),
-      hint: "March 1",
-    });
-    events.push({
-      id: "tagExtensionDeadline",
-      label: "Tag & Expired Rookie Extension Deadline",
-      date: getNextAnnualDate(seasonYear, 3, 30, now),
-      hint: "April 30",
-    });
-    events.push({
-      id: "expiredRookieAuction",
-      label: "Expired Rookie Contract Auction",
-      date: resolveFirstWeekOfMay(seasonYear, now),
-      hint: "First week of May",
-    });
-    events.push({
-      id: "rookieDraft",
-      label: "Rookie Draft",
-      date: resolveRookieDraftDate(seasonYear, now),
-      hint: "Memorial Day weekend",
-    });
-    events.push({
-      id: "freeAgentAuction",
-      label: "Free Agent Auction",
-      date: resolveLastSaturdayOfJuly(seasonYear, now),
-      hint: "Last weekend of July",
-    });
-    events.push({
-      id: "contractDeadline",
-      label: "Contract Deadline",
-      date: resolveContractDeadlineDate(seasonYear, now),
-      hint: "Last Sunday before Week 1",
-    });
-
-    const weekKickoffInfo = resolveWeekKickoffInfo(seasonYear, now);
-    const weekLabel = weekKickoffInfo && weekKickoffInfo.week
-      ? `Week ${weekKickoffInfo.week} of NFL`
-      : "Week 1 of NFL";
-    events.push({
-      id: "weekKickoff",
-      label: weekLabel,
-      date: weekKickoffInfo ? weekKickoffInfo.kickoff : null,
-      hint: "Next kickoff (auto-advances weekly)",
-    });
-
-    events.push({
-      id: "tradeDeadline",
-      label: "Trade Deadline",
-      date: resolveThanksgivingKickoff(seasonYear, now),
-      hint: "Thanksgiving kickoff",
-    });
-    events.push({
-      id: "regularSeasonEnd",
-      label: "Regular Season End",
-      date: resolveWeekKickoffForWeek(seasonYear, PLAYOFF_START_WEEK, now),
-      hint: `Week ${PLAYOFF_START_WEEK} kickoff`,
-    });
-    events.push({
-      id: "finalWeek",
-      label: "Final Week of season",
-      date: resolveWeekKickoffForWeek(seasonYear, FINAL_WEEK_OF_SEASON, now),
-      hint: `Week ${FINAL_WEEK_OF_SEASON} kickoff`,
-    });
-
-    return { events, now };
-  }
-
-  function pickNextLeagueEventId(events, now) {
-    if (!events || !events.length) return "";
-    const ref = now && !isNaN(now.getTime()) ? now : new Date();
-    const candidates = events.filter((e) => e && e.date && !isNaN(e.date.getTime()));
-    candidates.sort((a, b) => a.date.getTime() - b.date.getTime());
-    const next = candidates.find((e) => e.date.getTime() >= ref.getTime());
-    return (next || candidates[0] || events[0]).id || "";
-  }
-
-  function syncLeagueEventSelection(events, now) {
-    const ids = new Set((events || []).map((e) => e && e.id).filter(Boolean));
-    const selected = events.find((e) => e && e.id === state.leagueEventSelectedId) || null;
-    const selectedDate = selected && selected.date && !isNaN(selected.date.getTime())
-      ? selected.date
-      : null;
-    const expired = selectedDate && now && selectedDate.getTime() < now.getTime();
-    if (!state.leagueEventSelectedId || !ids.has(state.leagueEventSelectedId) || expired) {
-      state.leagueEventSelectedId = pickNextLeagueEventId(events, now);
-    }
   }
 
   function updateModuleStatusChips() {
@@ -3931,11 +3644,10 @@
     const adminPanel = $("#adminPanel");
     const teamFilterWrap = $("#teamFilterWrap");
     if (adminBtn) {
-      adminBtn.style.display = state.commishMode ? "" : "none";
+      adminBtn.style.display = "";
       adminBtn.classList.toggle("is-selected", !!state.adminPanelOpen);
     }
-    if (adminPanel)
-      adminPanel.style.display = state.commishMode && state.adminPanelOpen ? "" : "none";
+    if (adminPanel) adminPanel.style.display = state.adminPanelOpen ? "" : "none";
     if (teamFilterWrap) teamFilterWrap.style.display = state.commishMode ? "none" : "";
 
 
@@ -4122,9 +3834,7 @@
       syncCommishConsole(scopedEligibility);
 
       if (summary)
-        summary.innerHTML = renderSummaryWithEvents(
-          renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams)
-        );
+        summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
       if (tabSummary)
         tabSummary.innerHTML = renderTagSummaryPage(
           tagEligibleAll,
@@ -4153,7 +3863,7 @@
       syncTabLabels();
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
-      if (summary) summary.innerHTML = renderSummaryWithEvents(landing);
+      if (summary) summary.innerHTML = landing;
       if (tabSummary) tabSummary.innerHTML = landing;
       if (tabCostCalc) tabCostCalc.innerHTML = "";
       if (tabEligible) tabEligible.innerHTML = landing;
@@ -4172,7 +3882,7 @@
       syncTabLabels();
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
-      if (summary) summary.innerHTML = renderSummaryWithEvents(landing);
+      if (summary) summary.innerHTML = landing;
       if (tabSummary) tabSummary.innerHTML = landing;
       if (tabCostCalc) tabCostCalc.innerHTML = "";
       if (tabEligible) tabEligible.innerHTML = landing;
@@ -4184,6 +3894,7 @@
 
     const restructureActiveNow =
       state.commishMode || isRestructureActiveForSeason(baseSeason, nowRef);
+    const mymActionsOpen = state.commishMode || isMymActiveForSeason(baseSeason, nowRef);
     const restructureUsageByTeam = computeSubmissionUsageByTeam(seasonRestructureSubmissions);
     const eligibleRowsRaw =
       state.activeModule === "restructure"
@@ -4193,6 +3904,8 @@
             const fid = pad4(r.franchise_id);
             return (restructureUsageByTeam.get(fid) || 0) < RESTRUCTURE_CAP_PER_TEAM;
           })
+        : state.activeModule === "mym" && !mymActionsOpen
+        ? []
         : scopedEligibility.filter((r) => safeInt(r._eligibleEffective) === 1);
 
     const eligibleRows = sortRows(
@@ -4237,16 +3950,14 @@
     // Keep commish console list aligned with current team/position/search filters.
     syncCommishConsole(scopedEligibility);
     if (summary) {
-      summary.innerHTML = renderSummaryWithEvents(
-        renderSummary(
-          teamName,
-          positionFilteredEligibility,
-          eligibleRows,
-          usedCount,
-          remainingCount,
-          asOfDate,
-          !!asOfDate
-        )
+      summary.innerHTML = renderSummary(
+        teamName,
+        positionFilteredEligibility,
+        eligibleRows,
+        usedCount,
+        remainingCount,
+        asOfDate,
+        !!asOfDate
       );
     }
     if (tabSummary) {
@@ -5411,7 +5122,9 @@
     const moduleTagsChip = $("#moduleTagsChip");
     if (moduleTagsChip)
       moduleTagsChip.addEventListener("click", () => {
+        rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "tag" ? "" : "tag";
+        setHighlightForModule(state.activeModule || "default");
         sortState.tab = "eligible";
         sortState.key = "tagRank";
         sortState.dir = "asc";
@@ -5423,7 +5136,9 @@
     const moduleMymChip = $("#moduleMymChip");
     if (moduleMymChip)
       moduleMymChip.addEventListener("click", () => {
+        rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "mym" ? "" : "mym";
+        setHighlightForModule(state.activeModule || "default");
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5435,7 +5150,9 @@
     const moduleRestructuresChip = $("#moduleRestructuresChip");
     if (moduleRestructuresChip)
       moduleRestructuresChip.addEventListener("click", () => {
+        rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "restructure" ? "" : "restructure";
+        setHighlightForModule(state.activeModule || "default");
         sortState.tab = "eligible";
         sortState.key = "salary";
         sortState.dir = "desc";
@@ -5447,7 +5164,9 @@
     const moduleExtensionsChip = $("#moduleExtensionsChip");
     if (moduleExtensionsChip)
       moduleExtensionsChip.addEventListener("click", () => {
+        rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "extensions" ? "" : "extensions";
+        setHighlightForModule(state.activeModule || "default");
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5460,7 +5179,9 @@
     if (moduleCommishChip)
       moduleCommishChip.addEventListener("click", () => {
         if (!state.canCommishMode) return;
+        rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "commish" ? "" : "commish";
+        setHighlightForModule(state.activeModule || "default");
         resetAllTablePages();
         setTab("summary");
         render();
@@ -5479,7 +5200,7 @@
     if (rowHighlightChk)
       rowHighlightChk.addEventListener("change", (e) => {
         state.rowHighlightEnabled = !!e.target.checked;
-        saveHighlightSettings(state.rowHighlightEnabled, state.rowHighlightMode);
+        rememberHighlightForModule(state.activeModule || "default");
         applyHighlightSetting();
       });
 
@@ -5488,7 +5209,7 @@
       rowHighlightModeSelect.addEventListener("change", (e) => {
         const v = safeStr(e.target.value || "position").toLowerCase();
         state.rowHighlightMode = v === "team" ? "team" : "position";
-        saveHighlightSettings(state.rowHighlightEnabled, state.rowHighlightMode);
+        rememberHighlightForModule(state.activeModule || "default");
         applyHighlightSetting();
       });
 
@@ -5605,7 +5326,6 @@
     const adminBtn = $("#adminBtn");
     if (adminBtn)
       adminBtn.addEventListener("click", () => {
-        if (!state.commishMode) return;
         state.adminPanelOpen = !state.adminPanelOpen;
         render();
       });
@@ -5853,11 +5573,6 @@
     document.addEventListener("change", (e) => {
       const target = e.target;
       if (!target || !target.getAttribute) return;
-      if (target.id === "leagueEventSelect") {
-        state.leagueEventSelectedId = safeStr(target.value);
-        updateLeagueEventModule();
-        return;
-      }
       if (target.getAttribute("data-ppg-enabled") === "1") {
         state.ppgMinGamesEnabled = !!target.checked;
         savePpgSettings({
@@ -6077,18 +5792,6 @@
     }
   }
 
-  let leagueEventTimerId = null;
-  function startLeagueEventTicker() {
-    if (leagueEventTimerId) return;
-    updateLeagueEventModule();
-    leagueEventTimerId = window.setInterval(() => {
-      updateLeagueEventModule();
-    }, 60000);
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) updateLeagueEventModule();
-    });
-  }
-
   // ======================================================
   // START
   // ======================================================
@@ -6097,12 +5800,10 @@
       wireEvents();
       load();
       startAutoHeightMessaging();
-      startLeagueEventTicker();
     });
   } else {
     wireEvents();
     load();
     startAutoHeightMessaging();
-    startLeagueEventTicker();
   }
 })();

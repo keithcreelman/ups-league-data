@@ -31,7 +31,7 @@
 
   const LATEST_JSON_URL = "https://keithcreelman.github.io/ups-league-data/ups_options_widget_latest.json";
   const LATEST_JS_URL = "https://keithcreelman.github.io/ups-league-data/ups_options_widget_latest.js";
-  const DEFAULT_CACHE = "20260207aw";
+  const DEFAULT_CACHE = "20260207ax";
 
   let mount = document.getElementById("uowMount");
   if (!mount) {

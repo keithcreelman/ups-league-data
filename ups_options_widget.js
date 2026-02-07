@@ -5,6 +5,7 @@
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const PLAYOFF_START_WEEK = 15;
   const PLAYOFF_END_WEEK = 18;
+  const THEME_KEY = "uow_theme_v1";
 
   const EVENT_OVERRIDES = {
     "2026": {
@@ -21,10 +22,55 @@
     mode: "countdown",
     selectedId: "",
     scheduleByYear: {},
-    scheduleFetch: {}
+    scheduleFetch: {},
+    leagueDetailsByYear: {},
+    leagueDetailsFetch: {},
+    theme: loadThemeSetting()
   };
 
   const $ = (sel) => document.querySelector(sel);
+
+  function parseLeagueId() {
+    const params = new URLSearchParams(window.location.search || "");
+    const raw = params.get("L") || "";
+    return raw || "74598";
+  }
+
+  function loadThemeSetting() {
+    try {
+      const raw = localStorage.getItem(THEME_KEY);
+      if (!raw) return "auto";
+      const v = String(raw).toLowerCase();
+      return v === "light" || v === "dark" ? v : "auto";
+    } catch (e) {
+      return "auto";
+    }
+  }
+
+  function saveThemeSetting(theme) {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (e) {}
+  }
+
+  function applyThemeSetting(theme) {
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next = theme === "auto" ? (prefersDark ? "dark" : "light") : theme;
+    document.body.setAttribute("data-theme", next);
+  }
+
+  function wireThemeListener() {
+    if (!window.matchMedia) return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => {
+      if (state.theme === "auto") applyThemeSetting("auto");
+    };
+    if (media.addEventListener) {
+      media.addEventListener("change", handler);
+    } else if (media.addListener) {
+      media.addListener(handler);
+    }
+  }
 
   function safeInt(x) {
     const n = parseInt(String(x).replace(/[^\d-]/g, ""), 10);
@@ -48,6 +94,11 @@
     const asTz = new Date(utc.toLocaleString("en-US", { timeZone: TIMEZONE }));
     const offset = utc.getTime() - asTz.getTime();
     return new Date(utc.getTime() + offset);
+  }
+
+  function toTimeZoneDate(d) {
+    if (!d || Number.isNaN(d.getTime())) return null;
+    return new Date(d.toLocaleString("en-US", { timeZone: TIMEZONE }));
   }
 
   function addDays(d, days) {
@@ -144,6 +195,48 @@
     return `${MFL_API_BASE}/${encodeURIComponent(year)}/export?TYPE=nflSchedule&W=ALL&JSON=1`;
   }
 
+  function buildLeagueDetailsUrl(year, leagueId) {
+    return `${MFL_API_BASE}/${encodeURIComponent(year)}/export?TYPE=league&L=${encodeURIComponent(leagueId)}&JSON=1`;
+  }
+
+  function extractLeagueWeeks(data) {
+    if (!data) return null;
+    const league = data.league || data.leagueDetails || data;
+    if (!league || typeof league !== "object") return null;
+    const endWeek = safeInt(league.end_week || league.endWeek || league.end_week_id || league.endWeekId);
+    const lastRegular = safeInt(
+      league.last_regular_season_week ||
+        league.lastRegularSeasonWeek ||
+        league.regular_season_end_week ||
+        league.regularSeasonEndWeek
+    );
+    return { endWeek, lastRegularWeek: lastRegular };
+  }
+
+  async function fetchLeagueDetails(year, leagueId) {
+    const y = String(year);
+    if (state.leagueDetailsFetch[y]) return;
+    state.leagueDetailsFetch[y] = true;
+    try {
+      const res = await fetch(buildLeagueDetailsUrl(y, leagueId), { cache: "no-store" });
+      if (!res.ok) throw new Error(`League HTTP ${res.status}`);
+      const data = await res.json();
+      const info = extractLeagueWeeks(data);
+      state.leagueDetailsByYear[y] = info || {};
+    } catch (e) {
+      state.leagueDetailsByYear[y] = { error: e && e.message ? e.message : String(e) };
+    } finally {
+      updateDisplay();
+    }
+  }
+
+  function getLeagueWeekConfig(year, leagueId) {
+    const y = String(year);
+    const cached = state.leagueDetailsByYear[y];
+    if (!cached && !state.leagueDetailsFetch[y]) fetchLeagueDetails(y, leagueId);
+    return cached || null;
+  }
+
   function parseKickoffToDate(val) {
     if (val === null || val === undefined) return null;
     const raw = String(val).trim();
@@ -216,18 +309,32 @@
     return cached ? cached.weekKickoffs : null;
   }
 
+  function computeWeekStart(kickoffDate) {
+    const local = toTimeZoneDate(kickoffDate);
+    if (!local) return null;
+    const day = local.getDay();
+    const daysBack = (day - 2 + 7) % 7;
+    local.setDate(local.getDate() - daysBack);
+    local.setHours(0, 0, 0, 0);
+    return local;
+  }
+
   function resolveNextKickoffInfo(year, now) {
     const y = safeInt(year);
+    const nowTz = toTimeZoneDate(now) || now;
     const tryYear = (yy) => {
       const weeks = getWeekKickoffs(yy);
       if (!weeks || !weeks.length) return null;
-      let next = null;
-      weeks.forEach((w) => {
+      const sorted = weeks.slice().sort((a, b) => a.kickoff.getTime() - b.kickoff.getTime());
+      let candidate = null;
+      sorted.forEach((w) => {
         if (!w || !w.kickoff || Number.isNaN(w.kickoff.getTime())) return;
-        if (w.kickoff.getTime() < now.getTime()) return;
-        if (!next || w.kickoff.getTime() < next.kickoff.getTime()) next = w;
+        const start = computeWeekStart(w.kickoff);
+        if (!start) return;
+        if (start.getTime() <= nowTz.getTime()) candidate = w;
       });
-      return next ? { week: next.week, kickoff: next.kickoff, season: yy } : null;
+      if (candidate) return { week: candidate.week, kickoff: candidate.kickoff, season: yy };
+      return sorted[0] ? { week: sorted[0].week, kickoff: sorted[0].kickoff, season: yy } : null;
     };
 
     return tryYear(y) || tryYear(y + 1);
@@ -274,6 +381,8 @@
   function buildEvents() {
     const now = getNow();
     const baseYear = parseSeasonYear();
+    const leagueId = parseLeagueId();
+    const leagueConfig = getLeagueWeekConfig(baseYear, leagueId) || {};
 
     const faFallback = (year) => makeZonedDate(year, 7, getLastWeekdayOfMonth(year, 6, 6).getDate(), 12, 0);
 
@@ -346,21 +455,22 @@
       hint: "Thanksgiving kickoff"
     });
 
+    const regularWeek = leagueConfig.lastRegularWeek || PLAYOFF_START_WEEK;
     events.push({
       id: "regularSeasonEnd",
       label: "End of UPS Regular Season",
-      date: resolveWeekKickoff(baseYear, PLAYOFF_START_WEEK),
-      hint: `Week ${PLAYOFF_START_WEEK} kickoff`
+      date: resolveWeekKickoff(baseYear, regularWeek),
+      hint: `Week ${regularWeek} kickoff`
     });
 
-    const playoffEndKickoff =
-      resolveWeekKickoff(baseYear, PLAYOFF_END_WEEK) || resolveWeekKickoff(baseYear, PLAYOFF_END_WEEK - 1);
+    const endWeek = leagueConfig.endWeek || regularWeek || PLAYOFF_END_WEEK;
+    const playoffEndKickoff = resolveWeekKickoff(baseYear, endWeek);
 
     events.push({
       id: "playoffsEnd",
       label: "End of UPS Playoffs",
       date: playoffEndKickoff,
-      hint: `Week ${PLAYOFF_END_WEEK} kickoff`
+      hint: `Week ${endWeek} kickoff`
     });
 
     return { events, now };
@@ -434,6 +544,17 @@
   }
 
   function wireEvents() {
+    const themeSelect = $("#themeSelect");
+    if (themeSelect) {
+      themeSelect.value = state.theme;
+      themeSelect.addEventListener("change", (e) => {
+        const v = String(e.target.value || "auto");
+        state.theme = v === "light" || v === "dark" ? v : "auto";
+        saveThemeSetting(state.theme);
+        applyThemeSetting(state.theme);
+      });
+    }
+
     const selectEl = $("#eventSelect");
     if (selectEl) {
       selectEl.addEventListener("change", (e) => {
@@ -509,8 +630,13 @@
 
   function init() {
     const year = parseSeasonYear();
+    const leagueId = parseLeagueId();
+    applyThemeSetting(state.theme);
+    wireThemeListener();
     fetchSchedule(year);
     fetchSchedule(year + 1);
+    fetchLeagueDetails(year, leagueId);
+    fetchLeagueDetails(year + 1, leagueId);
     wireEvents();
     startTicker();
     startAutoHeightMessaging();

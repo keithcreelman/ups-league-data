@@ -16,6 +16,21 @@
 
 * { box-sizing: border-box; }
 
+
+body[data-theme="dark"] {
+  --ink: #e2e8f0;
+  --ink-soft: #94a3b8;
+  --bg: #0b1220;
+  --card: #0f172a;
+  --card-2: #0f1b2d;
+  --accent: #22d3ee;
+  --accent-strong: #06b6d4;
+  --accent-warm: #f59e0b;
+  --line: rgba(148, 163, 184, 0.2);
+  --shadow: 0 18px 38px rgba(15, 23, 42, 0.45);
+  --glow: 0 0 0 4px rgba(34, 211, 238, 0.15);
+}
+
 body {
   margin: 0;
   font-family: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -208,4 +223,18 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+
+.uow-hero-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.uow-field-inline{
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }

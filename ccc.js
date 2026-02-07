@@ -4271,6 +4271,15 @@
     if (!key) return;
     const sel = state.tagSelections[key];
     if (!sel) return;
+    if (!state.commishMode) {
+      const err = $("#tagModalErr");
+      if (err) {
+        err.style.display = "";
+        err.textContent = "Submissions are disabled while the app is still under development.";
+        err.classList.remove("ok");
+      }
+      return;
+    }
     state.tagSubmissions[key] = {
       ...sel,
       submitted_at_utc: new Date().toISOString(),
@@ -4347,6 +4356,14 @@
   async function submitMYMContract() {
   const row = mymModalState.row;
   if (!row) return;
+  if (!state.commishMode) {
+    const err = $("#mymModalErr");
+    if (err) {
+      err.style.display = "";
+      err.textContent = "Submissions are disabled while the app is still under development.";
+    }
+    return;
+  }
 
   const L = getLeagueId() || DEFAULT_LEAGUE_ID;
   const YEAR = getYear() || DEFAULT_YEAR;
@@ -4668,6 +4685,14 @@
     const row = restructureModalState.row;
     const calc = renderRestructureModalSummary();
     if (!row || !calc) return;
+    if (!state.commishMode) {
+      const err = $("#rsModalErr");
+      if (err) {
+        err.style.display = "";
+        err.textContent = "Submissions are disabled while the app is still under development.";
+      }
+      return;
+    }
 
     const season = normalizeSeasonValue(state.selectedSeason || getYear() || DEFAULT_YEAR);
     const fid = pad4(row.franchise_id);

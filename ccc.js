@@ -3335,6 +3335,14 @@
     if (!modal) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    const key = safeStr(tagModalState.key);
+    if (key) {
+      const submission = state.tagSubmissions[key];
+      if (!submission) {
+        delete state.tagSelections[key];
+        saveTagSelections(state.tagSelections);
+      }
+    }
     tagModalState.open = false;
     tagModalState.key = "";
     const mym = $("#mymModal");
@@ -3343,6 +3351,7 @@
       (mym && mym.classList.contains("is-open")) ||
       (rs && rs.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
+    render();
   }
 
   function submitTagSelection() {
@@ -3356,7 +3365,6 @@
     };
     saveTagSubmissions(state.tagSubmissions);
     closeTagModal();
-    render();
   }
 
   function removeTagSelection() {
@@ -3367,7 +3375,6 @@
     saveTagSelections(state.tagSelections);
     saveTagSubmissions(state.tagSubmissions);
     closeTagModal();
-    render();
   }
 
   function setModalOption(years) {

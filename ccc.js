@@ -2143,7 +2143,6 @@
     const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
-    const restructureChip = $("#moduleRestructuresChip");
 
     if (tagChip) {
       tagChip.classList.remove("disabled");
@@ -2153,21 +2152,24 @@
       mymChip.classList.toggle("disabled", !mymActive);
       mymChip.classList.toggle("primary", mymActive);
     }
-    if (restructureChip) {
-      restructureChip.classList.toggle("disabled", !restructureActive);
-      restructureChip.classList.toggle("primary", restructureActive);
-    }
-
-    const setModuleState = (id, active) => {
+    const setModuleState = (id, active, lockForOwners) => {
       const el = $(id);
       if (!el) return;
+      if (lockForOwners && !state.commishMode) {
+        el.classList.add("disabled");
+        el.classList.remove("primary");
+        el.disabled = true;
+        return;
+      }
+      el.disabled = false;
       el.classList.toggle("disabled", !active);
       el.classList.toggle("primary", !!active);
     };
 
     // Placeholder scheduling statuses for upcoming modules.
-    setModuleState("#moduleExtensionsChip", true);
-    setModuleState("#moduleAuctionChip", restructureActive);
+    setModuleState("#moduleRestructuresChip", restructureActive, true);
+    setModuleState("#moduleExtensionsChip", true, true);
+    setModuleState("#moduleAuctionChip", true, true);
   }
 
   function renderEligibleAvailabilityNotice(season) {

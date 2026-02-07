@@ -2639,6 +2639,7 @@
             Default Rows
             <select class="ccc-select" data-admin-default="rows">${rowOptions}</select>
           </div>
+          <button class="ccc-btn" type="button" data-admin-action="bug" disabled title="Coming soon">Report a Bug (coming soon)</button>
         </div>
       </div>
     `;
@@ -6037,8 +6038,8 @@
     const devNoticeModal = $("#devNoticeModal");
     if (devNoticeModal) {
       devNoticeModal.addEventListener("click", (e) => {
-        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
-        if (close === "1") closeDevNotice();
+        const close = e.target && e.target.closest ? e.target.closest("[data-close]") : null;
+        if (close) closeDevNotice();
       });
     }
 

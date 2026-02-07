@@ -1441,10 +1441,10 @@ body.ccc-modalOpen #tagModal *{
 }
 
 #cccApp[data-theme="dark"] .ccc-adminPanel--hero .ccc-btn{
-  background: linear-gradient(135deg, #6CB6FF, #3DD6C9);
+  background: linear-gradient(135deg, #78C3FF, #52E1D3);
   color: #0B0F16;
   border: none;
-  box-shadow: 0 10px 18px rgba(0,0,0,.35);
+  box-shadow: 0 12px 20px rgba(0,0,0,.4);
 }
 
 .ccc-adminPanel--hero .ccc-adminGrid{
@@ -1471,6 +1471,10 @@ body.ccc-modalOpen #tagModal *{
   min-height: 52px;
   font-size: 15px;
   font-weight: 900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
 
 .ccc-adminPanel--hero .ccc-select,

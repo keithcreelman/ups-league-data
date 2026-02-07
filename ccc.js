@@ -66,6 +66,31 @@
     return override || safeStr(baseSeason);
   }
 
+  function getBaseSeasonValue(baseSeason) {
+    const override =
+      state && state.commishMode ? safeStr(state.asOfSeasonOverride || "") : "";
+    const season =
+      override || safeStr(baseSeason || (state && state.selectedSeason) || DEFAULT_YEAR);
+    return normalizeSeasonValue(season || DEFAULT_YEAR);
+  }
+
+  function getContractSeasonValue(baseSeason) {
+    const override =
+      state && state.commishMode ? safeStr(state.asOfSeasonOverride || "") : "";
+    if (override) return normalizeSeasonValue(override);
+    const base = normalizeSeasonValue(
+      baseSeason || (state && state.selectedSeason) || DEFAULT_YEAR
+    );
+    const meta = state && state.tagTrackingMeta ? state.tagTrackingMeta : null;
+    const metaSeason = safeInt(meta && meta.season);
+    const trackSeason = safeInt(meta && meta.tracking_for_season);
+    const baseInt = safeInt(base);
+    if (metaSeason && trackSeason && baseInt && metaSeason === baseInt) {
+      return String(trackSeason);
+    }
+    return base;
+  }
+
   function pad4(fid) {
     const d = safeStr(fid).replace(/\D/g, "");
     return d ? d.padStart(4, "0").slice(-4) : "";
@@ -109,6 +134,13 @@
   function addDays(d, days) {
     const out = new Date(d.getTime());
     out.setDate(out.getDate() + days);
+    return out;
+  }
+
+  function endOfDay(d) {
+    if (!d || isNaN(d.getTime())) return null;
+    const out = new Date(d.getTime());
+    out.setHours(23, 59, 59, 999);
     return out;
   }
 
@@ -1084,13 +1116,12 @@
     const isSubmittedTab = tabMode === "submitted";
     const isRestructureMode = state.activeModule === "restructure";
     const showOverrideCols = !!state.commishMode;
-    const availabilitySeason = getAvailabilitySeason(
-      normalizeSeasonValue(state.availabilitySeason || state.selectedSeason)
-    );
+    const baseSeason = state.calendarBaseSeason || getBaseSeasonValue(state.selectedSeason);
+    const nowRef = state.calendarNow || getEffectiveNow(baseSeason);
     const mymActionsOpen =
       state.activeModule !== "mym"
         ? true
-        : state.commishMode || isMymActiveForSeason(availabilitySeason, getEffectiveNow(availabilitySeason));
+        : state.commishMode || isMymActiveForSeason(baseSeason, nowRef);
     const pageSize = clampInt(state.pageSize || 50, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
@@ -1302,7 +1333,9 @@
           .filter((x) => x.d)
           .sort((a, b) => a.d - b.d)[0];
 
-    const seasonWindow = getRestructureSeasonWindow(state.selectedSeason);
+    const seasonWindow = getRestructureSeasonWindow(
+      state.calendarBaseSeason || state.selectedSeason
+    );
     const soonestTxt = isRestructureMode
       ? seasonWindow
         ? seasonWindow.endYmd
@@ -1928,6 +1961,9 @@
     const pageRows = rows.slice(start, start + pageSize);
     const startLabel = totalRows ? start + 1 : 0;
     const endLabel = totalRows ? Math.min(start + pageSize, totalRows) : 0;
+    const baseSeason = state.calendarBaseSeason || getBaseSeasonValue(state.selectedSeason);
+    const nowRef = state.calendarNow || getEffectiveNow(baseSeason);
+    const tagWindowOpen = state.commishMode || isTagActiveForSeason(baseSeason, nowRef);
 
     const sortTh = (key, label, minWidthStyle, extraClass) => {
       const isSorted = sortState.tab === tabMode && sortState.key === key;
@@ -1988,14 +2024,30 @@
         const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
         const lockEnforced = !state.commishMode;
         const isLocked = lockEnforced && !!selected && !isSelected && limit <= 1;
-        const tagLabel = isSelected ? "Selected" : isLocked ? "Locked" : "Tag";
-        const tagBtnClass = `ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}`;
         const submission = state.tagSubmissions[key];
         const isSubmitted =
           !!submission && safeStr(submission.player_id) === safeStr(r.player_id);
+        const tagClosed = !tagWindowOpen && !state.commishMode;
+        const tagLabel = tagClosed
+          ? isSubmitted
+            ? "Submitted"
+            : "Tag Closed"
+          : isSelected
+          ? "Selected"
+          : isLocked
+          ? "Locked"
+          : "Tag";
+        const tagBtnClass = `ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}`;
         const submittedTag = isSubmitted
           ? `<div class="cell-sub">Submitted</div>`
           : ``;
+        const tagDisabled = tagClosed || isLocked;
+        const tagTitle = tagClosed
+          ? "Tagging window is closed"
+          : isLocked
+          ? `Tag already used for ${side}`
+          : "";
+        const tagTitleEsc = tagTitle ? htmlEsc(tagTitle) : "";
         const tagBtn = `
           <button
             type="button"
@@ -2009,8 +2061,8 @@
             data-player-id="${htmlEsc(r.player_id)}"
             data-player-name="${htmlEsc(r.player_name)}"
             data-pos="${htmlEsc(posKeyFromRow(r))}"
-            ${isLocked ? `disabled` : ``}
-            ${isLocked ? `title="Tag already used for ${htmlEsc(side)}"` : ``}
+            ${tagDisabled ? `disabled` : ``}
+            ${tagTitleEsc ? `title="${tagTitleEsc}"` : ``}
           >${tagLabel}</button>
         `;
         const posKeyRaw = posKeyFromRow(r);
@@ -2113,6 +2165,9 @@
     search: "",
     activeTab: "eligible",
     availabilitySeason: "",
+    calendarBaseSeason: "",
+    calendarContractSeason: "",
+    calendarNow: null,
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
@@ -2325,6 +2380,21 @@
     return isNaN(d.getTime()) ? null : d;
   }
 
+  function getContractDeadlineDate(season) {
+    const ymd = resolveMymDeadlineYmd(season);
+    if (!ymd) return null;
+    return parseYMDDate(ymd);
+  }
+
+  function getTagSeasonWindow(baseSeason) {
+    const info = getTagDeadlineInfo(baseSeason);
+    if (!info || !info.tagDeadline) return null;
+    const start = new Date(info.year, 1, 1);
+    const end = endOfDay(info.tagDeadline);
+    if (!start || !end) return null;
+    return { start, end, deadline: info.tagDeadline, year: info.year };
+  }
+
   function buildMflScheduleUrl(season) {
     const s = normalizeSeasonValue(season);
     if (!s) return "";
@@ -2439,70 +2509,85 @@
   }
 
   function getMymSeasonWindow(season) {
-    const s = normalizeSeasonValue(season);
-    if (!s) return null;
-    const deadlineYmd = resolveMymDeadlineYmd(s);
+    const contractSeason = getContractSeasonValue(season);
+    if (!contractSeason) return null;
+    const deadlineYmd = resolveMymDeadlineYmd(contractSeason);
     if (!deadlineYmd) return null;
-    const start = parseYMDDate(deadlineYmd);
-    // League year rolls on March 1, so keep the current season active through end of February.
-    const endExclusive = parseYMDDate(`${safeInt(s) + 1}-03-01`);
-    if (!start || !endExclusive) return null;
-    return { season: s, start, endExclusive, deadlineYmd };
+    const deadline = getContractDeadlineDate(contractSeason);
+    if (!deadline) return null;
+    const start = addDays(endOfDay(deadline), 1);
+    const end = endOfDay(new Date(safeInt(contractSeason) + 1, 0, 31));
+    if (!start || !end) return null;
+    return { season: contractSeason, start, end, deadlineYmd };
   }
 
   function isMymActiveForSeason(season, nowDate) {
     const win = getMymSeasonWindow(season);
     if (!win) return false;
     const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
-    return now.getTime() >= win.start.getTime() && now.getTime() < win.endExclusive.getTime();
+    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
   }
 
   function getRestructureSeasonWindow(season) {
-    const s = normalizeSeasonValue(season);
-    if (!s) return null;
-    const start = parseYMDDate(`${s}-02-01`);
-    const endYmd = resolveMymDeadlineYmd(s);
+    const baseSeason = getBaseSeasonValue(season);
+    const contractSeason = getContractSeasonValue(baseSeason);
+    if (!baseSeason || !contractSeason) return null;
+    const tagWindow = getTagSeasonWindow(baseSeason);
+    if (!tagWindow) return null;
+    const start = new Date(tagWindow.year, 1, 1);
+    const endYmd = resolveMymDeadlineYmd(contractSeason);
     if (!endYmd) return null;
-    const end = parseYMDDate(endYmd);
+    const end = getContractDeadlineDate(contractSeason);
     if (!start || !end) return null;
-    // Include contract deadline day.
-    const dayAfterEnd = new Date(end.getTime() + 24 * 60 * 60 * 1000);
-    return { season: s, start, endExclusive: dayAfterEnd, endYmd };
+    return { season: contractSeason, start, end, endYmd };
   }
 
   function isRestructureActiveForSeason(season, nowDate) {
     const win = getRestructureSeasonWindow(season);
     if (!win) return false;
     const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
-    return now.getTime() >= win.start.getTime() && now.getTime() < win.endExclusive.getTime();
+    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
   }
 
   function getAuctionSeasonWindow(season) {
-    const info = getTagDeadlineInfo(season);
-    if (!info || !info.rookieDraft) return null;
-    const start = new Date(info.rookieDraft.getTime());
-    return { season: normalizeSeasonValue(season), start };
+    const baseSeason = getBaseSeasonValue(season);
+    const contractSeason = getContractSeasonValue(baseSeason);
+    const info = getTagDeadlineInfo(baseSeason);
+    if (!info || !info.tagDeadline) return null;
+    const contractEnd = getContractDeadlineDate(contractSeason);
+    if (!contractEnd) return null;
+    const start = addDays(endOfDay(info.tagDeadline), 1);
+    const end = endOfDay(contractEnd);
+    return { season: contractSeason, start, end };
   }
 
   function isAuctionActiveForSeason(season, nowDate) {
     const win = getAuctionSeasonWindow(season);
     if (!win) return false;
     const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
-    return now.getTime() >= win.start.getTime();
+    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
+  }
+
+  function isTagActiveForSeason(season, nowDate) {
+    const win = getTagSeasonWindow(season);
+    if (!win) return false;
+    const now = nowDate && !isNaN(nowDate.getTime()) ? nowDate : new Date();
+    return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
   }
 
   function updateModuleStatusChips() {
-    const season = getAvailabilitySeason(normalizeSeasonValue(state.selectedSeason));
-    const nowRef = getEffectiveNow(season);
-    const mymActive = isMymActiveForSeason(season, nowRef);
-    const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
-    const auctionActive = isAuctionActiveForSeason(season, nowRef);
+    const baseSeason = getBaseSeasonValue(normalizeSeasonValue(state.selectedSeason));
+    const nowRef = getEffectiveNow(baseSeason);
+    const tagActive = state.commishMode || isTagActiveForSeason(baseSeason, nowRef);
+    const mymActive = isMymActiveForSeason(baseSeason, nowRef);
+    const restructureActive = state.commishMode || isRestructureActiveForSeason(baseSeason, nowRef);
+    const auctionActive = isAuctionActiveForSeason(baseSeason, nowRef);
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
 
     if (tagChip) {
       tagChip.classList.remove("disabled");
-      tagChip.classList.add("primary");
+      tagChip.classList.toggle("primary", tagActive);
     }
     if (mymChip) {
       mymChip.classList.remove("disabled");
@@ -2533,20 +2618,24 @@
 
     if (state.activeModule === "restructure") {
       if (state.commishMode) return "";
-      const availSeason = getAvailabilitySeason(season);
-      if (isRestructureActiveForSeason(availSeason, getEffectiveNow(availSeason))) return "";
-      const win = getRestructureSeasonWindow(availSeason);
-      const endTxt = win ? win.endYmd : resolveMymDeadlineYmd(availSeason) || "TBD";
+      const baseSeason = getBaseSeasonValue(season);
+      const nowRef = getEffectiveNow(baseSeason);
+      if (isRestructureActiveForSeason(baseSeason, nowRef)) return "";
+      const win = getRestructureSeasonWindow(baseSeason);
+      const endTxt =
+        win ? win.endYmd : resolveMymDeadlineYmd(getContractSeasonValue(baseSeason)) || "TBD";
       return `<div class="ccc-eligWarn">Restructures Available Feb 1 Through ${htmlEsc(
         endTxt
       )}</div>`;
     }
 
-    const s = getAvailabilitySeason(normalizeSeasonValue(season));
-    if (!s) return "";
-    if (isMymActiveForSeason(s, getEffectiveNow(s))) return "";
-    const win = getMymSeasonWindow(s);
-    const deadlineTxt = win ? win.deadlineYmd : resolveMymDeadlineYmd(s) || "TBD";
+    const base = getBaseSeasonValue(normalizeSeasonValue(season));
+    if (!base) return "";
+    const nowRef = getEffectiveNow(base);
+    if (isMymActiveForSeason(base, nowRef)) return "";
+    const win = getMymSeasonWindow(base);
+    const deadlineTxt =
+      win ? win.deadlineYmd : resolveMymDeadlineYmd(getContractSeasonValue(base)) || "TBD";
     return `<div class="ccc-eligWarn">MYM Not Available Until After Contract Deadline Date (${htmlEsc(
       deadlineTxt
     )})</div>`;
@@ -2951,8 +3040,13 @@
 
     const searchLower = safeStr(state.search).trim().toLowerCase();
     const season = normalizeSeasonValue(state.selectedSeason);
-    const availabilitySeason = getAvailabilitySeason(season);
-    state.availabilitySeason = availabilitySeason;
+    const baseSeason = getBaseSeasonValue(season);
+    const contractSeason = getContractSeasonValue(baseSeason);
+    const nowRef = getEffectiveNow(baseSeason);
+    state.availabilitySeason = contractSeason;
+    state.calendarBaseSeason = baseSeason;
+    state.calendarContractSeason = contractSeason;
+    state.calendarNow = nowRef;
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
     const selectedTeamId = pad4(state.selectedTeam);
@@ -3101,8 +3195,7 @@
     }
 
     const restructureActiveNow =
-      state.commishMode ||
-      isRestructureActiveForSeason(availabilitySeason, getEffectiveNow(availabilitySeason));
+      state.commishMode || isRestructureActiveForSeason(baseSeason, nowRef);
     const restructureUsageByTeam = computeSubmissionUsageByTeam(seasonRestructureSubmissions);
     const eligibleRowsRaw =
       state.activeModule === "restructure"
@@ -3271,7 +3364,8 @@
     const title = $("#tagModalTitle");
     if (title) title.textContent = "Submit Tag Selection";
 
-    const deadlineInfo = getTagDeadlineInfo(state.selectedSeason);
+    const baseSeason = state.calendarBaseSeason || getBaseSeasonValue(state.selectedSeason);
+    const deadlineInfo = getTagDeadlineInfo(baseSeason);
     const deadlineTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.tagDeadline) : "TBD";
     const rookieTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.rookieDraft) : "TBD";
 
@@ -3312,7 +3406,7 @@
 
     const removeBtn = $("#tagRemoveBtn");
     if (removeBtn) {
-      const pastDeadline = isTagDeadlinePassed(state.selectedSeason);
+      const pastDeadline = isTagDeadlinePassed(baseSeason);
       const canRemoveAfterDeadline = !!state.commishMode;
       const showRemove = isSubmitted && (!pastDeadline || canRemoveAfterDeadline);
       removeBtn.style.display = showRemove ? "" : "none";

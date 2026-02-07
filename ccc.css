@@ -491,6 +491,94 @@
   margin-top: 4px;
 }
 
+.ccc-adminPanel{
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.ccc-adminTitle{
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-strong);
+  margin-bottom: 8px;
+}
+
+.ccc-adminGrid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+
+.ccc-adminGrid .ccc-field{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.ccc-summaryGroup{
+  margin-top: 10px;
+}
+
+.ccc-summaryGroup summary{
+  list-style: none;
+  cursor: pointer;
+}
+
+.ccc-summaryGroup summary::-webkit-details-marker{
+  display: none;
+}
+
+.ccc-summaryRow{
+  display:grid;
+  grid-template-columns: minmax(140px, 1.4fr) repeat(4, minmax(90px, 1fr));
+  gap:8px;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .16), var(--surface-2));
+}
+
+#cccApp[data-theme="dark"] .ccc-summaryRow{
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .28), var(--surface-3));
+}
+
+.ccc-summaryGroup[open] summary .ccc-summaryRow{
+  border-color: var(--accent-border);
+  box-shadow: 0 10px 20px rgba(15,23,42,.12);
+}
+
+.ccc-summaryTeam{
+  font-weight: 900;
+  color: var(--text);
+}
+
+.ccc-summaryStat{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.ccc-summaryStat .label{
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.ccc-summaryStat .value{
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text);
+}
+
 .ccc-adminControls{
   margin-left:auto;
   gap:10px;
@@ -1375,4 +1463,9 @@ body.ccc-modalOpen #tagModal *{
   .ccc-inputGrid{
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 720px){
+  .ccc-adminGrid{ flex-direction: column; align-items: stretch; }
+  .ccc-summaryRow{ grid-template-columns: 1fr 1fr; }
 }

@@ -92,7 +92,7 @@
     <div id="moduleFilters" class="ccc-filterWrap">
       <div class="ccc-filterSection" data-section="filters">
         <div class="ccc-filterTitle">Filters</div>
-        <div class="ccc-field">
+        <div id="teamFilterWrap" class="ccc-field">
           Team
           <select id="teamSelect" class="ccc-select"></select>
         </div>
@@ -115,14 +115,6 @@
 
       <div class="ccc-filterSection" data-section="display">
         <div class="ccc-filterTitle">Display</div>
-        <div class="ccc-field">
-          Theme
-          <select id="themeSelect" class="ccc-select">
-            <option value="auto">Auto</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
         <label class="ccc-check">
           <input id="rowHighlightChk" type="checkbox" />
           Highlight rows
@@ -139,7 +131,23 @@
       <div class="ccc-filterSection" data-section="actions">
         <div class="ccc-filterTitle">Actions</div>
         <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
-        <button id="refreshBtn" class="ccc-btn" type="button">Roster Refresh</button>
+        <button id="adminBtn" class="ccc-btn" type="button" style="display:none;">Admin</button>
+      </div>
+    </div>
+    <div id="adminPanel" class="ccc-adminPanel" style="display:none;">
+      <div class="ccc-adminTitle">Admin Controls</div>
+      <div class="ccc-adminGrid">
+        <button id="refreshBtn" class="ccc-btn" type="button">
+          Refresh (use if rosters are not refreshed)
+        </button>
+        <div class="ccc-field">
+          Theme
+          <select id="themeSelect" class="ccc-select">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
       </div>
     </div>
     <div id="summary" class="ccc-summary"></div>

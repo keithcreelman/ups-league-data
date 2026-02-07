@@ -1677,13 +1677,15 @@
   function buildTeamPositionBreakdown(eligibleRows, submittedRows) {
     const posOrder = ["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"];
     const map = new Map();
-    const upsert = (team, pos) => {
-      const t = safeStr(team || "Unknown Team");
+    const upsert = (teamId, teamName, pos) => {
+      const id = pad4(teamId);
+      const name = safeStr(teamName || teamId || "Unknown Team");
       const p = pos || "NA";
-      const key = `${t}||${p}`;
+      const key = `${id || name}||${p}`;
       if (!map.has(key)) {
         map.set(key, {
-          team: t,
+          team: name,
+          team_id: id,
           pos: p,
           eligible_count: 0,
           eligible_salary: 0,
@@ -1693,14 +1695,13 @@
       }
       return map.get(key);
     };
-
     (eligibleRows || []).forEach((r) => {
-      const row = upsert(r.franchise_name || r.franchise_id, posKeyFromRow(r));
+      const row = upsert(r.franchise_id, r.franchise_name || r.franchise_id, posKeyFromRow(r));
       row.eligible_count += 1;
       row.eligible_salary += safeInt(r.salary);
     });
     (submittedRows || []).forEach((r) => {
-      const row = upsert(r.franchise_name || r.franchise_id, posKeyFromRow(r));
+      const row = upsert(r.franchise_id, r.franchise_name || r.franchise_id, posKeyFromRow(r));
       row.submitted_count += 1;
       row.submitted_salary += safeInt(r.salary);
     });
@@ -1748,39 +1749,113 @@
       return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No summary rows.</div></div>`;
     }
 
-    const body = rows
-      .map((r) => {
-        const rowClass = buildRowClass(r, r.pos);
+    const groupMap = new Map();
+    rows.forEach((r) => {
+      const key = r.team_id || r.team;
+      let group = groupMap.get(key);
+      if (!group) {
+        group = {
+          team: r.team,
+          team_id: r.team_id,
+          rows: [],
+          eligible_count: 0,
+          eligible_salary: 0,
+          submitted_count: 0,
+          submitted_salary: 0,
+        };
+        groupMap.set(key, group);
+      }
+      group.rows.push(r);
+      group.eligible_count += safeInt(r.eligible_count);
+      group.eligible_salary += safeInt(r.eligible_salary);
+      group.submitted_count += safeInt(r.submitted_count);
+      group.submitted_salary += safeInt(r.submitted_salary);
+    });
+
+    const groups = Array.from(groupMap.values()).sort((a, b) =>
+      safeStr(a.team).localeCompare(safeStr(b.team))
+    );
+
+    const body = groups
+      .map((g) => {
+        const rowStyle = buildTeamStyle(g.team_id, g.team);
+        const detailRows = g.rows
+          .map((r) => {
+            const rowClass = buildRowClass({ franchise_id: g.team_id }, r.pos);
+            const styleAttr = rowStyle ? ` style="${rowStyle}"` : "";
+            return `
+            <tr class="${rowClass}"${styleAttr}>
+              <td>${htmlEsc(r.pos)}</td>
+              <td>${safeInt(r.eligible_count)}</td>
+              <td>${safeInt(r.eligible_salary).toLocaleString()}</td>
+              <td>${safeInt(r.submitted_count)}</td>
+              <td>${safeInt(r.submitted_salary).toLocaleString()}</td>
+            </tr>`;
+          })
+          .join("");
+
+        const summaryStyle = rowStyle ? ` style="${rowStyle}"` : "";
         return `
-      <tr class="${rowClass}">
-        <td>${htmlEsc(r.team)}</td>
-        <td>${htmlEsc(r.pos)}</td>
-        <td>${safeInt(r.eligible_count)}</td>
-        <td>${safeInt(r.eligible_salary).toLocaleString()}</td>
-        <td>${safeInt(r.submitted_count)}</td>
-        <td>${safeInt(r.submitted_salary).toLocaleString()}</td>
-      </tr>`;
+        <details class="ccc-summaryGroup">
+          <summary>
+            <div class="ccc-summaryRow"${summaryStyle}>
+              <div class="ccc-summaryTeam">${htmlEsc(g.team)}</div>
+              <div class="ccc-summaryStat"><span class="label">Eligible</span><span class="value">${safeInt(
+          g.eligible_count
+        )}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Eligible $</span><span class="value">${safeInt(
+          g.eligible_salary
+        ).toLocaleString()}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Submitted</span><span class="value">${safeInt(
+          g.submitted_count
+        )}</span></div>
+              <div class="ccc-summaryStat"><span class="label">Submitted $</span><span class="value">${safeInt(
+          g.submitted_salary
+        ).toLocaleString()}</span></div>
+            </div>
+          </summary>
+          <div class="ccc-tableWrap">
+            <table class="ccc-table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Eligible</th>
+                  <th>Eligible Salary</th>
+                  <th>Submitted</th>
+                  <th>Submitted Salary</th>
+                </tr>
+              </thead>
+              <tbody>${detailRows}</tbody>
+            </table>
+          </div>
+        </details>
+        `;
       })
       .join("");
 
     return `
       <div class="ccc-summaryPage">
         ${top}
-        <div class="ccc-tableWrap">
-          <table class="ccc-table">
-            <thead>
-              <tr>
-                <th>Team</th>
-                <th>Position</th>
-                <th>Eligible</th>
-                <th>Eligible Salary</th>
-                <th>Submitted</th>
-                <th>Submitted Salary</th>
-              </tr>
-            </thead>
-            <tbody>${body}</tbody>
-          </table>
-        </div>
+        ${body}
+      </div>
+    `;
+  }
+
+  function renderMymSubmissionSeasonControls(options, selected) {
+    const list = Array.isArray(options) ? options.filter(Boolean) : [];
+    if (!list.length) return "";
+    const opts = list
+      .map((s) => {
+        const val = htmlEsc(s);
+        const isSel = normalizeSeasonValue(s) === normalizeSeasonValue(selected);
+        return `<option value="${val}"${isSel ? " selected" : ""}>${val}</option>`;
+      })
+      .join("");
+
+    return `
+      <div class="ccc-summaryControls">
+        <span class="ccc-navTitle">Submission Season</span>
+        <select class="ccc-select" data-mym-submission-season="1">${opts}</select>
       </div>
     `;
   }
@@ -2663,6 +2738,9 @@
     leagueEventMode: "countdown",
     leagueEventSelectedId: "",
     commishViewMode: "A",
+    adminPanelOpen: false,
+    lastOwnerTeam: "",
+    mymSubmissionSeason: "",
   };
 
   function normalizeSeasonValue(v) {
@@ -2709,6 +2787,15 @@
       if (s) set.add(s);
     });
     (tagRows || []).forEach((r) => {
+      const s = normalizeSeasonValue(r.season);
+      if (s) set.add(s);
+    });
+    return Array.from(set).sort((a, b) => safeInt(b) - safeInt(a));
+  }
+
+  function buildSubmissionSeasonList(rows) {
+    const set = new Set();
+    (rows || []).forEach((r) => {
       const s = normalizeSeasonValue(r.season);
       if (s) set.add(s);
     });
@@ -3840,6 +3927,17 @@
 
     if (cccTabs) cccTabs.style.display = "";
     if (cccMain) cccMain.style.display = "";
+    const adminBtn = $("#adminBtn");
+    const adminPanel = $("#adminPanel");
+    const teamFilterWrap = $("#teamFilterWrap");
+    if (adminBtn) {
+      adminBtn.style.display = state.commishMode ? "" : "none";
+      adminBtn.classList.toggle("is-selected", !!state.adminPanelOpen);
+    }
+    if (adminPanel)
+      adminPanel.style.display = state.commishMode && state.adminPanelOpen ? "" : "none";
+    if (teamFilterWrap) teamFilterWrap.style.display = state.commishMode ? "none" : "";
+
 
     const asOfDate =
       state.commishMode && state.asOfOverrideActive && state.asOfDate ? state.asOfDate : null;
@@ -3854,6 +3952,13 @@
     state.calendarBaseSeason = baseSeason;
     state.calendarContractSeason = contractSeason;
     state.calendarNow = nowRef;
+    if (state.commishMode) {
+      if (state.selectedTeam !== "__ALL__") {
+        state.lastOwnerTeam = state.lastOwnerTeam || state.selectedTeam;
+        state.selectedTeam = "__ALL__";
+      }
+      state.showAllTeams = true;
+    }
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
     const selectedTeamId = pad4(state.selectedTeam);
@@ -3861,7 +3966,8 @@
     const seasonEligibility = eligibility.filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
     );
-    const seasonMymSubmissions = buildSubmittedRows(eligibility, submissions, meta).filter(
+    const allMymSubmissions = buildSubmittedRows(eligibility, submissions, meta);
+    const seasonMymSubmissions = allMymSubmissions.filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
     );
     const seasonRestructureSubmissions = (state.restructureSubmissions || [])
@@ -3870,6 +3976,20 @@
     const seasonTagTracking = (state.tagTrackingRows || []).filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
     );
+    const mymSubmissionSeasons = buildSubmissionSeasonList(allMymSubmissions);
+    if (state.activeModule === "mym") {
+      if (
+        !state.mymSubmissionSeason ||
+        (state.mymSubmissionSeason && !mymSubmissionSeasons.includes(state.mymSubmissionSeason))
+      ) {
+        state.mymSubmissionSeason = mymSubmissionSeasons[0] || "";
+      }
+    }
+    const mymSubmissionSeason = state.mymSubmissionSeason;
+    const mymSubmissionRows = mymSubmissionSeason
+      ? allMymSubmissions.filter((r) => normalizeSeasonValue(r.season) === mymSubmissionSeason)
+      : allMymSubmissions.slice();
+
 
     state.teamColorMap = buildTeamColorMap(
       seasonEligibility,
@@ -3887,6 +4007,9 @@
     const teamFilteredRestructureSubmissions = showAllTeams
       ? seasonRestructureSubmissions
       : seasonRestructureSubmissions.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    const teamFilteredMymSubmissionsForTab = showAllTeams
+      ? mymSubmissionRows
+      : mymSubmissionRows.filter((r) => pad4(r.franchise_id) === selectedTeamId);
     const teamFilteredTagTracking = showAllTeams
       ? seasonTagTracking
       : seasonTagTracking.filter((r) => pad4(r.franchise_id) === selectedTeamId);
@@ -3899,6 +4022,10 @@
       selectedPosition === "__ALL_POS__"
         ? teamFilteredMymSubmissions
         : teamFilteredMymSubmissions.filter((r) => posKeyFromRow(r) === selectedPosition);
+    const positionFilteredMymSubmissionsForTab =
+      selectedPosition === "__ALL_POS__"
+        ? teamFilteredMymSubmissionsForTab
+        : teamFilteredMymSubmissionsForTab.filter((r) => posKeyFromRow(r) === selectedPosition);
     const positionFilteredRestructureSubmissions =
       selectedPosition === "__ALL_POS__"
         ? teamFilteredRestructureSubmissions
@@ -3917,6 +4044,8 @@
       state.activeModule === "restructure"
         ? positionFilteredRestructureSubmissions
         : positionFilteredMymSubmissions;
+    const moduleSubmittedForTab =
+      state.activeModule === "mym" ? positionFilteredMymSubmissionsForTab : moduleSubmittedBase;
     const scopedTagTracking = searchLower
       ? positionFilteredTagTracking.filter((r) =>
           safeStr(r.player_name).toLowerCase().includes(searchLower)
@@ -4077,8 +4206,8 @@
     );
 
     const submittedRowsRaw = searchLower
-      ? moduleSubmittedBase.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower))
-      : moduleSubmittedBase.slice();
+      ? moduleSubmittedForTab.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower))
+      : moduleSubmittedForTab.slice();
 
     const submittedRows = sortRows(
       submittedRowsRaw,
@@ -4133,7 +4262,14 @@
       tabEligible.innerHTML = renderEligibleAvailabilityNotice(season) + renderTable(eligibleRows, "eligible");
     }
     if (tabIneligible) tabIneligible.innerHTML = "";
-    if (tabSubmitted) tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
+    if (tabSubmitted) {
+      if (state.activeModule === "mym") {
+        const header = renderMymSubmissionSeasonControls(mymSubmissionSeasons, mymSubmissionSeason);
+        tabSubmitted.innerHTML = header + renderTable(submittedRows, "submitted");
+      } else {
+        tabSubmitted.innerHTML = renderTable(submittedRows, "submitted");
+      }
+    }
     updateModuleStatusChips();
   }
 
@@ -4893,6 +5029,9 @@
       must("#asOfSeasonSelect");
       must("#refreshBtn");
       must("#clearBtn");
+      must("#adminBtn");
+      must("#adminPanel");
+      must("#teamFilterWrap");
 
       applyThemeSetting(state.theme);
       applyHighlightSetting();
@@ -4988,6 +5127,7 @@
       state.canCommishMode = canCommish;
       state.commishMode = state.canCommishMode ? true : false;
       state.commishConsoleOpen = false;
+      state.adminPanelOpen = false;
       state.adminReason = adminReason;
       state.adminDebug = {
         canCommish: !!canCommish,
@@ -5066,12 +5206,19 @@
         ? teams[0].id
         : "";
       state.selectedTeam = detected;
+      state.lastOwnerTeam = detected;
       populateTeamSelect(teams, state.selectedTeam);
       const teamSelect = $("#teamSelect");
       if (teamSelect) {
-        const v = safeStr(teamSelect.value);
-        state.selectedTeam = v;
-        state.showAllTeams = v === "__ALL__";
+        if (state.commishMode) {
+          teamSelect.value = "__ALL__";
+          state.selectedTeam = "__ALL__";
+          state.showAllTeams = true;
+        } else {
+          const v = safeStr(teamSelect.value);
+          state.selectedTeam = v;
+          state.showAllTeams = v === "__ALL__";
+        }
       }
       const positions = buildPositionList(seasonRows, mergedSubmissionRows);
       state.selectedPosition = "__ALL_POS__";
@@ -5410,11 +5557,31 @@
       commishModeChk.addEventListener("change", (e) => {
         if (!state.canCommishMode) return;
         state.commishMode = !!e.target.checked;
-        if (!state.commishMode) state.commishConsoleOpen = false;
+        if (!state.commishMode) {
+          state.commishConsoleOpen = false;
+          state.adminPanelOpen = false;
+        }
         const adminBadge = $("#adminBadge");
         const adminControls = $("#adminControls");
         if (adminBadge) adminBadge.style.display = state.commishMode ? "" : "none";
         if (adminControls) adminControls.style.display = state.commishMode ? "flex" : "none";
+
+        const teamSelect = $("#teamSelect");
+        if (state.commishMode) {
+          state.lastOwnerTeam = state.lastOwnerTeam || state.selectedTeam;
+          state.selectedTeam = "__ALL__";
+          state.showAllTeams = true;
+          if (teamSelect) teamSelect.value = "__ALL__";
+        } else {
+          const fallback =
+            state.lastOwnerTeam ||
+            state.detectedFranchiseId ||
+            (teamSelect && teamSelect.options[0] ? teamSelect.options[0].value : "");
+          state.selectedTeam = fallback;
+          state.showAllTeams = fallback === "__ALL__";
+          if (teamSelect && fallback) teamSelect.value = fallback;
+        }
+
         render();
       });
 
@@ -5435,6 +5602,14 @@
         render();
       });
 
+    const adminBtn = $("#adminBtn");
+    if (adminBtn)
+      adminBtn.addEventListener("click", () => {
+        if (!state.commishMode) return;
+        state.adminPanelOpen = !state.adminPanelOpen;
+        render();
+      });
+
     const pageSizeSelect = $("#pageSizeSelect");
     if (pageSizeSelect)
       pageSizeSelect.addEventListener("change", (e) => {
@@ -5446,7 +5621,7 @@
 
     const refreshBtn = $("#refreshBtn");
     if (refreshBtn) {
-      refreshBtn.textContent = "Roster Refresh";
+      refreshBtn.textContent = "Refresh (use if rosters are not refreshed)";
       refreshBtn.addEventListener("click", () => handleRosterRefreshClick());
     }
 
@@ -5698,6 +5873,10 @@
           minGames: state.ppgMinGames,
           enabled: state.ppgMinGamesEnabled,
         });
+        render();
+      }
+      if (target.getAttribute("data-mym-submission-season") === "1") {
+        state.mymSubmissionSeason = normalizeSeasonValue(target.value);
         render();
       }
       if (target.getAttribute("data-tag-submission-season") === "1") {

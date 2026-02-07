@@ -397,7 +397,10 @@ def fetch_contract_history_week1_map(conn, season: int) -> Dict[str, Dict[str, A
       COALESCE(contract_status, '') AS contract_status,
       COALESCE(aav, 0) AS aav,
       COALESCE(contract_info, '') AS contract_info,
-      COALESCE(prior_aav, 0) AS prior_aav
+      COALESCE(prior_aav, 0) AS prior_aav,
+      COALESCE(extension_flag, 0) AS extension_flag,
+      COALESCE(multi_aav_flag, 0) AS multi_aav_flag,
+      COALESCE(extension_inferred_flag, 0) AS extension_inferred_flag
     FROM contract_history_snapshots
     WHERE season = ?
       AND snapshot_week = 1
@@ -416,17 +419,32 @@ def fetch_contract_history_week1_map(conn, season: int) -> Dict[str, Dict[str, A
             "aav": safe_int(row[5], 0),
             "contract_info": safe_str(row[6]),
             "prior_aav": safe_int(row[7], 0),
+            "extension_flag": safe_int(row[8], 0),
+            "multi_aav_flag": safe_int(row[9], 0),
+            "extension_inferred_flag": safe_int(row[10], 0),
         }
     return out
 
 
-def should_use_prior_aav(contract_status: str, prior_aav: int) -> bool:
+def should_use_prior_aav(
+    contract_status: str,
+    prior_aav: int,
+    contract_info: str,
+    extension_flag: int,
+    multi_aav_flag: int,
+    extension_inferred_flag: int,
+) -> bool:
     if prior_aav <= 0:
         return False
     s = safe_str(contract_status).upper()
     if not s:
         return False
     if "ROOKIE" in s:
+        return False
+    info = safe_str(contract_info).upper()
+    if extension_flag or multi_aav_flag or extension_inferred_flag:
+        return False
+    if "EXT:" in info or "EXTENSION" in info:
         return False
     blocked = ("WW", "WAIVER", "FA", "FREE", "BL")
     return any(tok in s for tok in blocked)
@@ -467,7 +485,14 @@ def fetch_week1_contract_pool(conn, season: int) -> List[Dict[str, Any]]:
             ch_aav = safe_int(ch.get("aav"), 0)
             if ch_aav > 0:
                 aav = ch_aav
-            if should_use_prior_aav(ch.get("contract_status", ""), safe_int(ch.get("prior_aav"), 0)):
+            if should_use_prior_aav(
+                ch.get("contract_status", ""),
+                safe_int(ch.get("prior_aav"), 0),
+                ch.get("contract_info", ""),
+                safe_int(ch.get("extension_flag"), 0),
+                safe_int(ch.get("multi_aav_flag"), 0),
+                safe_int(ch.get("extension_inferred_flag"), 0),
+            ):
                 aav = safe_int(ch.get("prior_aav"), 0)
             if not name:
                 name = safe_str(ch.get("player_name"))

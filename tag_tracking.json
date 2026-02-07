@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-07 09:54:46",
+    "generated_at": "2026-02-07 09:56:00",
     "season": 2025,
     "tracking_for_season": 2026,
     "count": 78,
@@ -65,7 +65,7 @@
             "label": "Avg Top 6-15 QB AAV",
             "rank_min": 6,
             "rank_max": 15,
-            "base_bid": 35000,
+            "base_bid": 37000,
             "players": [
               {
                 "rank": 6,
@@ -87,45 +87,45 @@
               },
               {
                 "rank": 9,
+                "player_id": "14783",
+                "player_name": "Hurts, Jalen",
+                "aav": 42000
+              },
+              {
+                "rank": 10,
                 "player_id": "14059",
                 "player_name": "Jones, Daniel",
                 "aav": 36000
               },
               {
-                "rank": 10,
+                "rank": 11,
                 "player_id": "12611",
                 "player_name": "Goff, Jared",
                 "aav": 35000
               },
               {
-                "rank": 11,
+                "rank": 12,
                 "player_id": "13590",
                 "player_name": "Mayfield, Baker",
                 "aav": 31000
               },
               {
-                "rank": 12,
+                "rank": 13,
                 "player_id": "15237",
                 "player_name": "Lawrence, Trevor",
                 "aav": 29000
               },
               {
-                "rank": 13,
+                "rank": 14,
                 "player_id": "15698",
                 "player_name": "Purdy, Brock",
                 "aav": 28000
               },
               {
-                "rank": 14,
+                "rank": 15,
                 "player_id": "15238",
                 "player_name": "Fields, Justin",
                 "aav": 25000
-              },
-              {
-                "rank": 15,
-                "player_id": "14783",
-                "player_name": "Hurts, Jalen",
-                "aav": 22000
               }
             ]
           },
@@ -19638,9 +19638,9 @@
       "pos_rank": 6,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 35000,
-      "tag_bid": 35000,
-      "tag_salary": 35000,
+      "tag_base_bid": 37000,
+      "tag_bid": 37000,
+      "tag_salary": 37000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
@@ -19675,17 +19675,17 @@
       "pos_rank": 15,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 35000,
-      "tag_bid": 40000,
-      "tag_salary": 40000,
-      "tag_bid_bump_applied": 1,
+      "tag_base_bid": 37000,
+      "tag_bid": 37000,
+      "tag_salary": 37000,
+      "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 1,
       "eligibility_reason": "",
       "tag_prev_season": 0,
       "tag_prev_season_year": 0,
-      "tag_formula": "Avg Top 6-15 QB AAV | 10% prior AAV bump (rounded up)",
+      "tag_formula": "Avg Top 6-15 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },

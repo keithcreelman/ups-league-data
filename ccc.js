@@ -1388,7 +1388,38 @@
     PK: [{ tier: 1, avg_min: null, avg_max: null, label: "K/P rule: prior AAV + 1,000" }],
   };
 
-  const TAG_POS_ORDER = ["QB", "RB", "WR", "TE", "DL", "LB", "DB", "PK"];
+  const TAG_POS_ORDER = ["QB", "RB", "WR", "TE", "DL", "DB", "LB", "P", "PK"];
+  const TAG_OFFENSE_POS = new Set(["QB", "RB", "WR", "TE"]);
+
+  function normalizeTagSummarySide(value) {
+    const v = safeStr(value).toUpperCase();
+    if (v === "OFFENSE" || v === "OFF") return "OFFENSE";
+    if (v === "DEFENSE" || v === "DEF" || v === "IDP" || v === "IDP_K") return "DEFENSE";
+    return "ALL";
+  }
+
+  function tagRowMatchesSide(row, side) {
+    const normalized = normalizeTagSummarySide(side);
+    if (normalized === "ALL") return true;
+    const rowSide = safeStr(row.tag_side).toUpperCase();
+    if (normalized === "OFFENSE") return rowSide === "OFFENSE";
+    return rowSide !== "OFFENSE";
+  }
+
+  function posMatchesSide(pos, side) {
+    const normalized = normalizeTagSummarySide(side);
+    if (normalized === "ALL") return true;
+    const key = safeStr(pos).toUpperCase();
+    const isOffense = TAG_OFFENSE_POS.has(key);
+    return normalized === "OFFENSE" ? isOffense : !isOffense;
+  }
+
+  function orderPositions(list) {
+    const unique = Array.from(new Set((list || []).map((p) => safeStr(p).toUpperCase()).filter(Boolean)));
+    const ordered = TAG_POS_ORDER.filter((p) => unique.includes(p));
+    const rest = unique.filter((p) => !TAG_POS_ORDER.includes(p)).sort();
+    return ordered.concat(rest);
+  }
 
   function computePpgRanks(rows, minGamesEnabled, minGames) {
     const byPos = new Map();
@@ -1430,7 +1461,7 @@
   function buildTagBreakdownByPos(rows) {
     const byPos = new Map();
     (rows || []).forEach((r) => {
-      const pos = safeStr(r.positional_grouping || r.position || "NA");
+      const pos = safeStr(r.positional_grouping || r.position || "NA").toUpperCase();
       const rec = byPos.get(pos) || { pos, count: 0, total: 0, tier1: 0, tier2: 0, tier3: 0 };
       rec.count += 1;
       rec.total += safeInt(r.tag_bid || r.tag_salary);
@@ -1440,10 +1471,8 @@
       else if (t === 3) rec.tier3 += 1;
       byPos.set(pos, rec);
     });
-    return Array.from(byPos.values()).sort((a, b) => {
-      if (a.count !== b.count) return b.count - a.count;
-      return safeStr(a.pos).localeCompare(safeStr(b.pos));
-    });
+    const ordered = orderPositions(Array.from(byPos.keys()));
+    return ordered.map((pos) => byPos.get(pos)).filter(Boolean);
   }
 
   function buildTagBreakdownByTeam(rows) {
@@ -1462,10 +1491,68 @@
     return Array.from(byTeam.values()).sort((a, b) => safeStr(a.team).localeCompare(safeStr(b.team)));
   }
 
-  function renderTagCalcBreakdown(rows) {
+  function renderTagCalcBreakdown(calcBreakdown, sideFilter, fallbackRows) {
+    const normalizedSide = normalizeTagSummarySide(sideFilter);
+    const breakdown =
+      calcBreakdown && typeof calcBreakdown === "object"
+        ? calcBreakdown.positions || calcBreakdown
+        : null;
+
+    if (breakdown && typeof breakdown === "object" && Object.keys(breakdown).length) {
+      const positions = orderPositions(Object.keys(breakdown)).filter((p) =>
+        posMatchesSide(p, normalizedSide)
+      );
+      if (!positions.length) return "";
+
+      const posBlocks = positions
+        .map((pos) => {
+          const posData = breakdown[pos] || {};
+          const tiers = (posData.tiers || []).map((tier) => {
+            const tierNum = safeInt(tier.tier || tier.tier_num);
+            const label = safeStr(tier.label || tier.rule_label || tier.ruleLabel);
+            const baseBid = safeInt(tier.base_bid || tier.baseBid);
+            const players = Array.isArray(tier.players) ? tier.players : [];
+            const playerLines = players.length
+              ? players
+                  .map((p) => {
+                    const rank = safeInt(p.rank);
+                    const name = htmlEsc(p.player_name || p.playerName || "");
+                    const aav = safeInt(p.aav).toLocaleString();
+                    const rankTxt = rank ? `#${rank} ` : "";
+                    return `<div class="ccc-calcRow">${rankTxt}${name} — AAV ${aav}</div>`;
+                  })
+                  .join("")
+              : `<div class="ccc-calcRow">No players in range.</div>`;
+            const baseTxt = baseBid ? ` | Base ${baseBid.toLocaleString()}` : "";
+            const labelTxt = label ? ` — ${htmlEsc(label)}` : "";
+            return `
+              <details class="ccc-calcTier">
+                <summary>Tier ${tierNum || ""}${labelTxt}${baseTxt}</summary>
+                <div class="ccc-calcPlayers">${playerLines}</div>
+              </details>
+            `;
+          });
+
+          return `
+            <details class="ccc-calcPos">
+              <summary>${htmlEsc(pos)}</summary>
+              ${tiers.join("")}
+            </details>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="ccc-calcBreakdown">
+          ${posBlocks}
+        </div>
+      `;
+    }
+
+    const rows = (fallbackRows || []).filter((r) => tagRowMatchesSide(r, normalizedSide));
     const byPos = new Map();
-    (rows || []).forEach((r) => {
-      const pos = posKeyFromRow(r);
+    rows.forEach((r) => {
+      const pos = safeStr(r.positional_grouping || r.position).toUpperCase();
       if (!TAG_TIER_RULES[pos]) return;
       const list = byPos.get(pos) || [];
       list.push(r);
@@ -1473,9 +1560,7 @@
     });
     if (!byPos.size) return "";
 
-    const positions = TAG_POS_ORDER.filter((p) => byPos.has(p)).concat(
-      Array.from(byPos.keys()).filter((p) => !TAG_POS_ORDER.includes(p)).sort()
-    );
+    const positions = orderPositions(Array.from(byPos.keys()));
 
     const posBlocks = positions
       .map((pos) => {
@@ -1485,7 +1570,11 @@
             row: r,
             calcAav: safeInt(r.prior_aav_week1 || r.aav),
           }))
-          .sort((a, b) => b.calcAav - a.calcAav || safeStr(a.row.player_name).localeCompare(safeStr(b.row.player_name)))
+          .sort(
+            (a, b) =>
+              b.calcAav - a.calcAav ||
+              safeStr(a.row.player_name).localeCompare(safeStr(b.row.player_name))
+          )
           .map((rec, idx) => ({ ...rec, rank: idx + 1 }));
 
         const tiers = (TAG_TIER_RULES[pos] || []).map((rule) => {
@@ -1533,42 +1622,51 @@
     `;
   }
 
-  function renderTagSummaryPage(rows, teamName, positionLabel, view, calcOpen, calcRows) {
-    const totalTagSalary = (rows || []).reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0);
+  function renderTagSummaryPage(rows, teamName, view, calcOpen, meta, sideFilter, calcRows) {
+    const normalizedSide = normalizeTagSummarySide(sideFilter);
+    const filteredRows = (rows || []).filter((r) => tagRowMatchesSide(r, normalizedSide));
+    const totalTagSalary = filteredRows.reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0);
     const viewLabel = view === "team" ? "By Team" : "By Position";
+    const sideLabel =
+      normalizedSide === "OFFENSE"
+        ? "Offense"
+        : normalizedSide === "DEFENSE"
+        ? "Defense/ST"
+        : "All Players";
     const controls = `
       <div class="ccc-summaryControls">
         <span class="ccc-navTitle">Summary View</span>
         <button type="button" class="ccc-pageBtn" data-tag-summary-view="pos" ${view === "pos" ? "disabled" : ""}>By Position</button>
         <button type="button" class="ccc-pageBtn" data-tag-summary-view="team" ${view === "team" ? "disabled" : ""}>By Team</button>
+        <span class="ccc-navTitle" style="margin-left:6px;">Scope</span>
+        <button type="button" class="ccc-pageBtn" data-tag-summary-side="all" ${normalizedSide === "ALL" ? "disabled" : ""}>All</button>
+        <button type="button" class="ccc-pageBtn" data-tag-summary-side="offense" ${normalizedSide === "OFFENSE" ? "disabled" : ""}>Offense</button>
+        <button type="button" class="ccc-pageBtn" data-tag-summary-side="defense" ${normalizedSide === "DEFENSE" ? "disabled" : ""}>Defense/ST</button>
         <button type="button" class="ccc-pageBtn" data-tag-calc-toggle="1">${calcOpen ? "Hide" : "Show"} Calc Breakdown</button>
-        <label class="ccc-check" style="margin-left:6px;">
-          <input type="checkbox" data-ppg-enabled="1" ${state.ppgMinGamesEnabled ? "checked" : ""} />
-          PPG Min Games
-        </label>
-        <label class="ccc-field">
-          Min
-          <input type="number" class="ccc-input" data-ppg-min="1" min="1" max="18" value="${clampInt(state.ppgMinGames || 8, 1, 18)}" ${
-  state.ppgMinGamesEnabled ? "" : "disabled"
-} />
-        </label>
       </div>
     `;
 
     const top = `
-      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Tag Summary ${htmlEsc(viewLabel)}</div>
+      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(
+        teamName
+      )} Tag Summary ${htmlEsc(viewLabel)} (${htmlEsc(sideLabel)})</div>
       ${controls}
       <div class="ccc-miniGrid">
-        <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${rows.length}</div></div>
-        <div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${totalTagSalary.toLocaleString()}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${filteredRows.length}</div></div>
+        ${
+          view === "team"
+            ? ""
+            : `<div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${totalTagSalary.toLocaleString()}</div></div>`
+        }
       </div>
     `;
 
-    if (!rows || !rows.length) {
+    if (!filteredRows.length) {
       return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No tag tracking rows.</div></div>`;
     }
 
-    const rowsOut = view === "team" ? buildTagBreakdownByTeam(rows) : buildTagBreakdownByPos(rows);
+    const rowsOut =
+      view === "team" ? buildTagBreakdownByTeam(filteredRows) : buildTagBreakdownByPos(filteredRows);
     const body = rowsOut
       .map((r) => {
         if (view === "team") {
@@ -1576,7 +1674,6 @@
           <tr>
             <td>${htmlEsc(r.team)}</td>
             <td>${r.count}</td>
-            <td>${r.total.toLocaleString()}</td>
             <td>${r.tier1}</td>
             <td>${r.tier2}</td>
             <td>${r.tier3}</td>
@@ -1597,7 +1694,11 @@
       .join("");
 
     const headerLabel = view === "team" ? "Team" : "Position";
-    const calcHtml = calcOpen ? renderTagCalcBreakdown(calcRows || []) : "";
+    const calcData =
+      meta && typeof meta === "object"
+        ? meta.calc_breakdown || meta.calcBreakdown || null
+        : null;
+    const calcHtml = calcOpen ? renderTagCalcBreakdown(calcData, normalizedSide, calcRows || []) : "";
 
     return `
       <div class="ccc-summaryPage">
@@ -1608,7 +1709,7 @@
               <tr>
                 <th>${headerLabel}</th>
                 <th>Tracked</th>
-                <th>Total Tag Salary</th>
+                ${view === "team" ? "" : "<th>Total Tag Salary</th>"}
                 <th>Tier 1</th>
                 <th>Tier 2</th>
                 <th>Tier 3</th>
@@ -1654,6 +1755,27 @@
         key
       )}</span></th>`;
     };
+
+    const ppgControls =
+      tabMode === "eligible"
+        ? `
+      <div class="ccc-summaryControls">
+        <span class="ccc-navTitle">PPG Rank Settings</span>
+        <label class="ccc-check">
+          <input type="checkbox" data-ppg-enabled="1" ${state.ppgMinGamesEnabled ? "checked" : ""} />
+          PPG Min Games
+        </label>
+        <label class="ccc-field">
+          Min
+          <input type="number" class="ccc-input" data-ppg-min="1" min="1" max="18" value="${clampInt(
+            state.ppgMinGames || 8,
+            1,
+            18
+          )}" ${state.ppgMinGamesEnabled ? "" : "disabled"} />
+        </label>
+      </div>
+    `
+        : "";
 
     const pager = `
       <div class="ccc-tableMeta">
@@ -1731,9 +1853,9 @@
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
             <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
+            <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="cell-num">${ppgDisplay}</td>
             <td class="cell-num">${ppgRankCell}</td>
-            <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
           </tr>
         `;
@@ -1741,6 +1863,7 @@
       .join("");
 
     return `
+      ${ppgControls}
       ${pager}
       <div class="ccc-tableWrap ccc-density-${htmlEsc(state.tableDensity || "regular")}" data-table="${tabMode}">
         <table class="ccc-table">
@@ -1754,9 +1877,9 @@
               ${sortTh("aav", "AAV", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
               ${sortTh("tagRank", "Positional Rank", "", "is-num")}
+              ${sortTh("tagTier", "Tier (Based on Total Points)", "", "is-num")}
               ${sortTh("ppg", "PPG", "", "is-num")}
               ${sortTh("ppgRank", "PPG Rank", "", "is-num")}
-              ${sortTh("tagTier", "Tier", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}
             </tr>
           </thead>
@@ -1775,6 +1898,7 @@
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     restructureSubmissions: [],
     tagTrackingRows: [],
+    tagTrackingMeta: {},
     isAdmin: false,
     canCommishMode: false,
     commishMode: false,
@@ -1800,6 +1924,7 @@
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
     tagSummaryView: "pos",
+    tagSummarySide: "ALL",
     tagCalcOpen: false,
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
@@ -2591,9 +2716,10 @@
         tabSummary.innerHTML = renderTagSummaryPage(
           tagEligibleAll,
           "League",
-          selectedPosition,
           state.tagSummaryView || "pos",
           !!state.tagCalcOpen,
+          state.tagTrackingMeta || {},
+          state.tagSummarySide || "ALL",
           seasonTagTracking || []
         );
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
@@ -3458,13 +3584,16 @@
       }
       state.restructureSubmissions = restructureRows;
       let tagRows = [];
+      let tagMeta = {};
       if (tagRes && tagRes.ok) {
         try {
           const tagRaw = await tagRes.json();
           tagRows = normalizeTagRows(tagRaw);
+          tagMeta = (tagRaw && typeof tagRaw === "object" && tagRaw.meta) || {};
         } catch (e) {}
       }
       state.tagTrackingRows = tagRows;
+      state.tagTrackingMeta = tagMeta;
       applyLocalOverrides(state.payload.eligibility);
 
       state.detectedFranchiseId = detectFranchiseId();
@@ -4132,6 +4261,19 @@
         if (!btn) return;
         const view = safeStr(btn.getAttribute("data-tag-summary-view"));
         state.tagSummaryView = view === "team" ? "team" : "pos";
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-summary-side]") : null;
+        if (!btn) return;
+        const side = safeStr(btn.getAttribute("data-tag-summary-side"));
+        state.tagSummarySide = normalizeTagSummarySide(side);
         render();
       },
       true

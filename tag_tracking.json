@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-07 08:14:12",
+    "generated_at": "2026-02-07 09:26:02",
     "season": 2025,
     "tracking_for_season": 2026,
     "count": 78,
@@ -18,6 +18,1333 @@
       "DL": 10
     },
     "exclude_tagged_season": 2025,
+    "calc_breakdown": {
+      "QB": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-5 QB AAV",
+            "rank_min": 1,
+            "rank_max": 5,
+            "base_bid": 50000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "13116",
+                "player_name": "Mahomes, Patrick",
+                "aav": 54000
+              },
+              {
+                "rank": 2,
+                "player_id": "14779",
+                "player_name": "Herbert, Justin",
+                "aav": 51000
+              },
+              {
+                "rank": 3,
+                "player_id": "14778",
+                "player_name": "Tagovailoa, Tua",
+                "aav": 49000
+              },
+              {
+                "rank": 4,
+                "player_id": "13589",
+                "player_name": "Allen, Josh",
+                "aav": 46000
+              },
+              {
+                "rank": 5,
+                "player_id": "14777",
+                "player_name": "Burrow, Joe",
+                "aav": 46000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 6-15 QB AAV",
+            "rank_min": 6,
+            "rank_max": 15,
+            "base_bid": 36000,
+            "players": [
+              {
+                "rank": 6,
+                "player_id": "13593",
+                "player_name": "Jackson, Lamar",
+                "aav": 46000
+              },
+              {
+                "rank": 7,
+                "player_id": "12620",
+                "player_name": "Prescott, Dak",
+                "aav": 45000
+              },
+              {
+                "rank": 8,
+                "player_id": "14783",
+                "player_name": "Hurts, Jalen",
+                "aav": 42000
+              },
+              {
+                "rank": 9,
+                "player_id": "15694",
+                "player_name": "Willis, Malik",
+                "aav": 37000
+              },
+              {
+                "rank": 10,
+                "player_id": "14059",
+                "player_name": "Jones, Daniel",
+                "aav": 36000
+              },
+              {
+                "rank": 11,
+                "player_id": "12611",
+                "player_name": "Goff, Jared",
+                "aav": 35000
+              },
+              {
+                "rank": 12,
+                "player_id": "13590",
+                "player_name": "Mayfield, Baker",
+                "aav": 31000
+              },
+              {
+                "rank": 13,
+                "player_id": "15237",
+                "player_name": "Lawrence, Trevor",
+                "aav": 29000
+              },
+              {
+                "rank": 14,
+                "player_id": "15698",
+                "player_name": "Purdy, Brock",
+                "aav": 28000
+              },
+              {
+                "rank": 15,
+                "player_id": "15238",
+                "player_name": "Fields, Justin",
+                "aav": 25000
+              }
+            ]
+          },
+          {
+            "tier": 3,
+            "label": "Avg Top 16+ QB AAV",
+            "rank_min": 16,
+            "rank_max": null,
+            "base_bid": 8000,
+            "players": [
+              {
+                "rank": 16,
+                "player_id": "14782",
+                "player_name": "Love, Jordan",
+                "aav": 21000
+              },
+              {
+                "rank": 17,
+                "player_id": "13592",
+                "player_name": "Darnold, Sam",
+                "aav": 18000
+              },
+              {
+                "rank": 18,
+                "player_id": "9431",
+                "player_name": "Stafford, Matthew",
+                "aav": 18000
+              },
+              {
+                "rank": 19,
+                "player_id": "11150",
+                "player_name": "Smith, Geno",
+                "aav": 15000
+              },
+              {
+                "rank": 20,
+                "player_id": "16579",
+                "player_name": "Williams, Caleb",
+                "aav": 15000
+              },
+              {
+                "rank": 21,
+                "player_id": "16148",
+                "player_name": "Young, Bryce",
+                "aav": 13000
+              },
+              {
+                "rank": 22,
+                "player_id": "16581",
+                "player_name": "Daniels, Jayden",
+                "aav": 12000
+              },
+              {
+                "rank": 23,
+                "player_id": "16150",
+                "player_name": "Stroud, C.J.",
+                "aav": 12000
+              },
+              {
+                "rank": 24,
+                "player_id": "16584",
+                "player_name": "McCarthy, J.J.",
+                "aav": 11000
+              },
+              {
+                "rank": 25,
+                "player_id": "16152",
+                "player_name": "Richardson, Anthony",
+                "aav": 11000
+              },
+              {
+                "rank": 26,
+                "player_id": "17030",
+                "player_name": "Ward, Cam",
+                "aav": 10000
+              },
+              {
+                "rank": 27,
+                "player_id": "17032",
+                "player_name": "Dart, Jaxson",
+                "aav": 9000
+              },
+              {
+                "rank": 28,
+                "player_id": "16580",
+                "player_name": "Maye, Drake",
+                "aav": 8000
+              },
+              {
+                "rank": 29,
+                "player_id": "14056",
+                "player_name": "Murray, Kyler",
+                "aav": 8000
+              },
+              {
+                "rank": 30,
+                "player_id": "7836",
+                "player_name": "Rodgers, Aaron",
+                "aav": 7000
+              },
+              {
+                "rank": 31,
+                "player_id": "9064",
+                "player_name": "Flacco, Joe",
+                "aav": 6000
+              },
+              {
+                "rank": 32,
+                "player_id": "16149",
+                "player_name": "Levis, Will",
+                "aav": 6000
+              },
+              {
+                "rank": 33,
+                "player_id": "16582",
+                "player_name": "Nix, Bo",
+                "aav": 5000
+              },
+              {
+                "rank": 34,
+                "player_id": "16583",
+                "player_name": "Penix Jr., Michael",
+                "aav": 5000
+              },
+              {
+                "rank": 35,
+                "player_id": "13879",
+                "player_name": "Allen, Kyle",
+                "aav": 1000
+              },
+              {
+                "rank": 36,
+                "player_id": "16384",
+                "player_name": "Bagent, Tyson",
+                "aav": 1000
+              },
+              {
+                "rank": 37,
+                "player_id": "12141",
+                "player_name": "Mariota, Marcus",
+                "aav": 1000
+              },
+              {
+                "rank": 38,
+                "player_id": "15702",
+                "player_name": "McKee, Tanner",
+                "aav": 1000
+              },
+              {
+                "rank": 39,
+                "player_id": "17240",
+                "player_name": "Miller, Cam",
+                "aav": 1000
+              },
+              {
+                "rank": 40,
+                "player_id": "16585",
+                "player_name": "Milton, Joe",
+                "aav": 1000
+              },
+              {
+                "rank": 41,
+                "player_id": "13115",
+                "player_name": "Trubisky, Mitchell",
+                "aav": 1000
+              },
+              {
+                "rank": 42,
+                "player_id": "13113",
+                "player_name": "Watson, Deshaun",
+                "aav": 1000
+              },
+              {
+                "rank": 43,
+                "player_id": "10703",
+                "player_name": "Wilson, Russell",
+                "aav": 1000
+              }
+            ]
+          }
+        ]
+      },
+      "RB": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-4 RB AAV",
+            "rank_min": 1,
+            "rank_max": 4,
+            "base_bid": 52000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "13604",
+                "player_name": "Barkley, Saquon",
+                "aav": 61000
+              },
+              {
+                "rank": 2,
+                "player_id": "13130",
+                "player_name": "McCaffrey, Christian",
+                "aav": 56000
+              },
+              {
+                "rank": 3,
+                "player_id": "14073",
+                "player_name": "Jacobs, Josh",
+                "aav": 50000
+              },
+              {
+                "rank": 4,
+                "player_id": "14802",
+                "player_name": "Taylor, Jonathan",
+                "aav": 38000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 5-8 RB AAV",
+            "rank_min": 5,
+            "rank_max": 8,
+            "base_bid": 32000,
+            "players": [
+              {
+                "rank": 5,
+                "player_id": "15708",
+                "player_name": "Hall, Breece",
+                "aav": 35000
+              },
+              {
+                "rank": 6,
+                "player_id": "12626",
+                "player_name": "Henry, Derrick",
+                "aav": 34000
+              },
+              {
+                "rank": 7,
+                "player_id": "15711",
+                "player_name": "Walker III, Kenneth",
+                "aav": 32000
+              },
+              {
+                "rank": 8,
+                "player_id": "15715",
+                "player_name": "Cook, James",
+                "aav": 27000
+              }
+            ]
+          },
+          {
+            "tier": 3,
+            "label": "Avg Top 9-31 RB AAV",
+            "rank_min": 9,
+            "rank_max": 31,
+            "base_bid": 17000,
+            "players": [
+              {
+                "rank": 9,
+                "player_id": "13132",
+                "player_name": "Kamara, Alvin",
+                "aav": 27000
+              },
+              {
+                "rank": 10,
+                "player_id": "15256",
+                "player_name": "Williams, Javonte",
+                "aav": 27000
+              },
+              {
+                "rank": 11,
+                "player_id": "15259",
+                "player_name": "Stevenson, Rhamondre",
+                "aav": 25000
+              },
+              {
+                "rank": 12,
+                "player_id": "14797",
+                "player_name": "Swift, D'Andre",
+                "aav": 23000
+              },
+              {
+                "rank": 13,
+                "player_id": "15710",
+                "player_name": "Williams, Kyren",
+                "aav": 22000
+              },
+              {
+                "rank": 14,
+                "player_id": "13146",
+                "player_name": "Conner, James",
+                "aav": 20000
+              },
+              {
+                "rank": 15,
+                "player_id": "14071",
+                "player_name": "Montgomery, David",
+                "aav": 20000
+              },
+              {
+                "rank": 16,
+                "player_id": "13131",
+                "player_name": "Mixon, Joe",
+                "aav": 19000
+              },
+              {
+                "rank": 17,
+                "player_id": "15253",
+                "player_name": "Etienne, Travis",
+                "aav": 17000
+              },
+              {
+                "rank": 18,
+                "player_id": "14085",
+                "player_name": "Pollard, Tony",
+                "aav": 17000
+              },
+              {
+                "rank": 19,
+                "player_id": "15712",
+                "player_name": "Allgeier, Tyler",
+                "aav": 15000
+              },
+              {
+                "rank": 20,
+                "player_id": "17042",
+                "player_name": "Jeanty, Ashton",
+                "aav": 15000
+              },
+              {
+                "rank": 21,
+                "player_id": "16161",
+                "player_name": "Robinson, Bijan",
+                "aav": 15000
+              },
+              {
+                "rank": 22,
+                "player_id": "15716",
+                "player_name": "Robinson, Brian",
+                "aav": 15000
+              },
+              {
+                "rank": 23,
+                "player_id": "15742",
+                "player_name": "Warren, Jaylen",
+                "aav": 14000
+              },
+              {
+                "rank": 24,
+                "player_id": "17044",
+                "player_name": "Hampton, Omarion",
+                "aav": 13000
+              },
+              {
+                "rank": 25,
+                "player_id": "17043",
+                "player_name": "Henderson, TreVeyon",
+                "aav": 12000
+              },
+              {
+                "rank": 26,
+                "player_id": "16162",
+                "player_name": "Gibbs, Jahmyr",
+                "aav": 11000
+              },
+              {
+                "rank": 27,
+                "player_id": "17068",
+                "player_name": "Harvey, RJ",
+                "aav": 11000
+              },
+              {
+                "rank": 28,
+                "player_id": "13319",
+                "player_name": "Jones, Aaron",
+                "aav": 10000
+              },
+              {
+                "rank": 29,
+                "player_id": "14800",
+                "player_name": "Dobbins, J.K.",
+                "aav": 9000
+              },
+              {
+                "rank": 30,
+                "player_id": "15721",
+                "player_name": "White, Rachaad",
+                "aav": 9000
+              },
+              {
+                "rank": 31,
+                "player_id": "17051",
+                "player_name": "Judkins, Quinshon",
+                "aav": 8000
+              }
+            ]
+          }
+        ]
+      },
+      "WR": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-6 WR AAV",
+            "rank_min": 1,
+            "rank_max": 6,
+            "base_bid": 51000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "14832",
+                "player_name": "Lamb, CeeDee",
+                "aav": 64000
+              },
+              {
+                "rank": 2,
+                "player_id": "12801",
+                "player_name": "Hill, Tyreek",
+                "aav": 61000
+              },
+              {
+                "rank": 3,
+                "player_id": "14836",
+                "player_name": "Jefferson, Justin",
+                "aav": 48000
+              },
+              {
+                "rank": 4,
+                "player_id": "14104",
+                "player_name": "Brown, A.J.",
+                "aav": 46000
+              },
+              {
+                "rank": 5,
+                "player_id": "14842",
+                "player_name": "Pittman, Michael",
+                "aav": 45000
+              },
+              {
+                "rank": 6,
+                "player_id": "14835",
+                "player_name": "Higgins, Tee",
+                "aav": 37000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 7-14 WR AAV",
+            "rank_min": 7,
+            "rank_max": 14,
+            "base_bid": 32000,
+            "players": [
+              {
+                "rank": 7,
+                "player_id": "15281",
+                "player_name": "Chase, Ja'Marr",
+                "aav": 34000
+              },
+              {
+                "rank": 8,
+                "player_id": "15753",
+                "player_name": "Wilson, Garrett",
+                "aav": 34000
+              },
+              {
+                "rank": 9,
+                "player_id": "15751",
+                "player_name": "London, Drake",
+                "aav": 33000
+              },
+              {
+                "rank": 10,
+                "player_id": "14102",
+                "player_name": "Metcalf, DK",
+                "aav": 33000
+              },
+              {
+                "rank": 11,
+                "player_id": "15754",
+                "player_name": "Olave, Chris",
+                "aav": 31000
+              },
+              {
+                "rank": 12,
+                "player_id": "11675",
+                "player_name": "Adams, Davante",
+                "aav": 30000
+              },
+              {
+                "rank": 13,
+                "player_id": "15284",
+                "player_name": "Waddle, Jaylen",
+                "aav": 30000
+              },
+              {
+                "rank": 14,
+                "player_id": "13629",
+                "player_name": "Ridley, Calvin",
+                "aav": 28000
+              }
+            ]
+          },
+          {
+            "tier": 3,
+            "label": "Avg Top 15-40 WR AAV",
+            "rank_min": 15,
+            "rank_max": 40,
+            "base_bid": 15000,
+            "players": [
+              {
+                "rank": 15,
+                "player_id": "15282",
+                "player_name": "Smith, DeVonta",
+                "aav": 26000
+              },
+              {
+                "rank": 16,
+                "player_id": "15287",
+                "player_name": "St. Brown, Amon-Ra",
+                "aav": 25000
+              },
+              {
+                "rank": 17,
+                "player_id": "11671",
+                "player_name": "Evans, Mike",
+                "aav": 24000
+              },
+              {
+                "rank": 18,
+                "player_id": "15290",
+                "player_name": "Collins, Nico",
+                "aav": 22000
+              },
+              {
+                "rank": 19,
+                "player_id": "13635",
+                "player_name": "Moore, D.J.",
+                "aav": 21000
+              },
+              {
+                "rank": 20,
+                "player_id": "12186",
+                "player_name": "Diggs, Stefon",
+                "aav": 20000
+              },
+              {
+                "rank": 21,
+                "player_id": "15756",
+                "player_name": "Williams, Jameson",
+                "aav": 20000
+              },
+              {
+                "rank": 22,
+                "player_id": "14109",
+                "player_name": "McLaurin, Terry",
+                "aav": 19000
+              },
+              {
+                "rank": 23,
+                "player_id": "15762",
+                "player_name": "Pickens, George",
+                "aav": 19000
+              },
+              {
+                "rank": 24,
+                "player_id": "15761",
+                "player_name": "Shakir, Khalil",
+                "aav": 19000
+              },
+              {
+                "rank": 25,
+                "player_id": "16614",
+                "player_name": "Harrison Jr., Marvin",
+                "aav": 14000
+              },
+              {
+                "rank": 26,
+                "player_id": "17074",
+                "player_name": "Hunter, Travis",
+                "aav": 14000
+              },
+              {
+                "rank": 27,
+                "player_id": "15786",
+                "player_name": "Nailor, Jalen",
+                "aav": 14000
+              },
+              {
+                "rank": 28,
+                "player_id": "16615",
+                "player_name": "Nabers, Malik",
+                "aav": 13000
+              },
+              {
+                "rank": 29,
+                "player_id": "16342",
+                "player_name": "Douglas, Demario",
+                "aav": 12000
+              },
+              {
+                "rank": 30,
+                "player_id": "14974",
+                "player_name": "Mooney, Darnell",
+                "aav": 12000
+              },
+              {
+                "rank": 31,
+                "player_id": "15757",
+                "player_name": "Robinson, Wan'Dale",
+                "aav": 12000
+              },
+              {
+                "rank": 32,
+                "player_id": "14860",
+                "player_name": "Jennings, Jauan",
+                "aav": 11000
+              },
+              {
+                "rank": 33,
+                "player_id": "13163",
+                "player_name": "Godwin, Chris",
+                "aav": 10000
+              },
+              {
+                "rank": 34,
+                "player_id": "16616",
+                "player_name": "Odunze, Rome",
+                "aav": 10000
+              },
+              {
+                "rank": 35,
+                "player_id": "16185",
+                "player_name": "Smith-Njigba, Jaxon",
+                "aav": 10000
+              },
+              {
+                "rank": 36,
+                "player_id": "13630",
+                "player_name": "Sutton, Courtland",
+                "aav": 10000
+              },
+              {
+                "rank": 37,
+                "player_id": "13164",
+                "player_name": "Kupp, Cooper",
+                "aav": 9000
+              },
+              {
+                "rank": 38,
+                "player_id": "17076",
+                "player_name": "Bond, Isaiah",
+                "aav": 8000
+              },
+              {
+                "rank": 39,
+                "player_id": "14105",
+                "player_name": "Brown, Marquise",
+                "aav": 8000
+              },
+              {
+                "rank": 40,
+                "player_id": "16188",
+                "player_name": "Johnston, Quentin",
+                "aav": 8000
+              }
+            ]
+          }
+        ]
+      },
+      "TE": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-3 TE AAV",
+            "rank_min": 1,
+            "rank_max": 3,
+            "base_bid": 28000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "13299",
+                "player_name": "Kittle, George",
+                "aav": 29000
+              },
+              {
+                "rank": 2,
+                "player_id": "13671",
+                "player_name": "Andrews, Mark",
+                "aav": 27000
+              },
+              {
+                "rank": 3,
+                "player_id": "13192",
+                "player_name": "Njoku, David",
+                "aav": 27000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 4-6 TE AAV",
+            "rank_min": 4,
+            "rank_max": 6,
+            "base_bid": 24000,
+            "players": [
+              {
+                "rank": 4,
+                "player_id": "15329",
+                "player_name": "Pitts, Kyle",
+                "aav": 27000
+              },
+              {
+                "rank": 5,
+                "player_id": "15794",
+                "player_name": "McBride, Trey",
+                "aav": 22000
+              },
+              {
+                "rank": 6,
+                "player_id": "11244",
+                "player_name": "Kelce, Travis",
+                "aav": 21000
+              }
+            ]
+          },
+          {
+            "tier": 3,
+            "label": "Avg Top 7-13 TE AAV",
+            "rank_min": 7,
+            "rank_max": 13,
+            "base_bid": 10000,
+            "players": [
+              {
+                "rank": 7,
+                "player_id": "15798",
+                "player_name": "Likely, Isaiah",
+                "aav": 12000
+              },
+              {
+                "rank": 8,
+                "player_id": "15799",
+                "player_name": "Ferguson, Jake",
+                "aav": 11000
+              },
+              {
+                "rank": 9,
+                "player_id": "14138",
+                "player_name": "Hockenson, T.J.",
+                "aav": 11000
+              },
+              {
+                "rank": 10,
+                "player_id": "16641",
+                "player_name": "Bowers, Brock",
+                "aav": 9000
+              },
+              {
+                "rank": 11,
+                "player_id": "16213",
+                "player_name": "Kincaid, Dalton",
+                "aav": 9000
+              },
+              {
+                "rank": 12,
+                "player_id": "14867",
+                "player_name": "Kmet, Cole",
+                "aav": 9000
+              },
+              {
+                "rank": 13,
+                "player_id": "13674",
+                "player_name": "Goedert, Dallas",
+                "aav": 7000
+              }
+            ]
+          }
+        ]
+      },
+      "DL": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-6 DL AAV",
+            "rank_min": 1,
+            "rank_max": 6,
+            "base_bid": 8000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "14225",
+                "player_name": "Crosby, Maxx",
+                "aav": 10000
+              },
+              {
+                "rank": 2,
+                "player_id": "13198",
+                "player_name": "Garrett, Myles",
+                "aav": 9000
+              },
+              {
+                "rank": 3,
+                "player_id": "13214",
+                "player_name": "Watt, T.J.",
+                "aav": 8000
+              },
+              {
+                "rank": 4,
+                "player_id": "15350",
+                "player_name": "Parsons, Micah",
+                "aav": 7000
+              },
+              {
+                "rank": 5,
+                "player_id": "14249",
+                "player_name": "Van Ginkel, Andrew",
+                "aav": 7000
+              },
+              {
+                "rank": 6,
+                "player_id": "14147",
+                "player_name": "Bosa, Nick",
+                "aav": 5000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 7-12 DL AAV",
+            "rank_min": 7,
+            "rank_max": 12,
+            "base_bid": 5000,
+            "players": [
+              {
+                "rank": 7,
+                "player_id": "14171",
+                "player_name": "Burns, Brian",
+                "aav": 5000
+              },
+              {
+                "rank": 8,
+                "player_id": "15805",
+                "player_name": "Hutchinson, Aidan",
+                "aav": 5000
+              },
+              {
+                "rank": 9,
+                "player_id": "15861",
+                "player_name": "Bonitto, Nik",
+                "aav": 4000
+              },
+              {
+                "rank": 10,
+                "player_id": "12221",
+                "player_name": "Hunter, Danielle",
+                "aav": 4000
+              },
+              {
+                "rank": 11,
+                "player_id": "14163",
+                "player_name": "Simmons, Jeffery",
+                "aav": 4000
+              },
+              {
+                "rank": 12,
+                "player_id": "16266",
+                "player_name": "Tuipulotu, Tuli",
+                "aav": 4000
+              }
+            ]
+          }
+        ]
+      },
+      "LB": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-6 LB AAV",
+            "rank_min": 1,
+            "rank_max": 6,
+            "base_bid": 5000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "14893",
+                "player_name": "Baun, Zack",
+                "aav": 5000
+              },
+              {
+                "rank": 2,
+                "player_id": "14892",
+                "player_name": "Brooks, Jordyn",
+                "aav": 4000
+              },
+              {
+                "rank": 3,
+                "player_id": "15404",
+                "player_name": "Jones, Ernest",
+                "aav": 4000
+              },
+              {
+                "rank": 4,
+                "player_id": "14210",
+                "player_name": "Pratt, Germaine",
+                "aav": 4000
+              },
+              {
+                "rank": 5,
+                "player_id": "13696",
+                "player_name": "Smith, Roquan",
+                "aav": 4000
+              },
+              {
+                "rank": 6,
+                "player_id": "13743",
+                "player_name": "Warner, Fred",
+                "aav": 4000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 7-12 LB AAV",
+            "rank_min": 7,
+            "rank_max": 12,
+            "base_bid": 3000,
+            "players": [
+              {
+                "rank": 7,
+                "player_id": "14221",
+                "player_name": "Williams, Quincy",
+                "aav": 4000
+              },
+              {
+                "rank": 8,
+                "player_id": "16239",
+                "player_name": "Campbell, Jack",
+                "aav": 3000
+              },
+              {
+                "rank": 9,
+                "player_id": "15821",
+                "player_name": "Dean, Nakobe",
+                "aav": 3000
+              },
+              {
+                "rank": 10,
+                "player_id": "14303",
+                "player_name": "Elliss, Kaden",
+                "aav": 3000
+              },
+              {
+                "rank": 11,
+                "player_id": "15076",
+                "player_name": "Rozeboom, Christian",
+                "aav": 3000
+              },
+              {
+                "rank": 12,
+                "player_id": "13268",
+                "player_name": "Anzalone, Alex",
+                "aav": 2000
+              }
+            ]
+          }
+        ]
+      },
+      "DB": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Avg Top 1-6 DB AAV",
+            "rank_min": 1,
+            "rank_max": 6,
+            "base_bid": 4000,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "15834",
+                "player_name": "Hamilton, Kyle",
+                "aav": 5000
+              },
+              {
+                "rank": 2,
+                "player_id": "12752",
+                "player_name": "Byard, Kevin",
+                "aav": 4000
+              },
+              {
+                "rank": 3,
+                "player_id": "13714",
+                "player_name": "James, Derwin",
+                "aav": 4000
+              },
+              {
+                "rank": 4,
+                "player_id": "15839",
+                "player_name": "Cross, Nick",
+                "aav": 3000
+              },
+              {
+                "rank": 5,
+                "player_id": "14910",
+                "player_name": "Jones, Brandon",
+                "aav": 3000
+              },
+              {
+                "rank": 6,
+                "player_id": "15365",
+                "player_name": "Moehrig, Trevon",
+                "aav": 3000
+              }
+            ]
+          },
+          {
+            "tier": 2,
+            "label": "Avg Top 7-12 DB AAV",
+            "rank_min": 7,
+            "rank_max": 12,
+            "base_bid": 2000,
+            "players": [
+              {
+                "rank": 7,
+                "player_id": "16700",
+                "player_name": "Bishop, Cole",
+                "aav": 2000
+              },
+              {
+                "rank": 8,
+                "player_id": "17132",
+                "player_name": "Starks, Malaki",
+                "aav": 2000
+              },
+              {
+                "rank": 9,
+                "player_id": "16241",
+                "player_name": "Witherspoon, Devon",
+                "aav": 2000
+              },
+              {
+                "rank": 10,
+                "player_id": "15394",
+                "player_name": "Adebo, Paulson",
+                "aav": 1000
+              },
+              {
+                "rank": 11,
+                "player_id": "13251",
+                "player_name": "Baker, Budda",
+                "aav": 1000
+              },
+              {
+                "rank": 12,
+                "player_id": "13737",
+                "player_name": "Bates, Jessie",
+                "aav": 1000
+              }
+            ]
+          }
+        ]
+      },
+      "PK": {
+        "tiers": [
+          {
+            "tier": 1,
+            "label": "Prior salary + 1K",
+            "rank_min": null,
+            "rank_max": null,
+            "base_bid": 0,
+            "players": [
+              {
+                "rank": 1,
+                "player_id": "17241",
+                "player_name": "Crawshaw, Jeremy",
+                "aav": 3000
+              },
+              {
+                "rank": 2,
+                "player_id": "16414",
+                "player_name": "Aubrey, Brandon",
+                "aav": 2000
+              },
+              {
+                "rank": 3,
+                "player_id": "16330",
+                "player_name": "Baringer, Bryce",
+                "aav": 1000
+              },
+              {
+                "rank": 4,
+                "player_id": "16846",
+                "player_name": "Bates, Jake",
+                "aav": 1000
+              },
+              {
+                "rank": 5,
+                "player_id": "13869",
+                "player_name": "Bojorquez, Corey",
+                "aav": 1000
+              },
+              {
+                "rank": 6,
+                "player_id": "11936",
+                "player_name": "Boswell, Chris",
+                "aav": 1000
+              },
+              {
+                "rank": 7,
+                "player_id": "13354",
+                "player_name": "Butker, Harrison",
+                "aav": 1000
+              },
+              {
+                "rank": 8,
+                "player_id": "14630",
+                "player_name": "Cole, A.J.",
+                "aav": 1000
+              },
+              {
+                "rank": 9,
+                "player_id": "13844",
+                "player_name": "Cooke, Logan",
+                "aav": 1000
+              },
+              {
+                "rank": 10,
+                "player_id": "15979",
+                "player_name": "Dicker, Cameron",
+                "aav": 1000
+              },
+              {
+                "rank": 11,
+                "player_id": "13782",
+                "player_name": "Dickson, Michael",
+                "aav": 1000
+              },
+              {
+                "rank": 12,
+                "player_id": "16351",
+                "player_name": "Evans, Ethan",
+                "aav": 1000
+              },
+              {
+                "rank": 13,
+                "player_id": "12860",
+                "player_name": "Fairbairn, Ka'imi",
+                "aav": 1000
+              },
+              {
+                "rank": 14,
+                "player_id": "14244",
+                "player_name": "Gay, Matt",
+                "aav": 1000
+              },
+              {
+                "rank": 15,
+                "player_id": "14489",
+                "player_name": "Gillan, Jamie",
+                "aav": 1000
+              },
+              {
+                "rank": 16,
+                "player_id": "17352",
+                "player_name": "Kroeger, Kai",
+                "aav": 1000
+              },
+              {
+                "rank": 17,
+                "player_id": "16680",
+                "player_name": "Little, Cam",
+                "aav": 1000
+              },
+              {
+                "rank": 18,
+                "player_id": "17222",
+                "player_name": "Loop, Tyler",
+                "aav": 1000
+              },
+              {
+                "rank": 19,
+                "player_id": "12956",
+                "player_name": "Lutz, Wil",
+                "aav": 1000
+              },
+              {
+                "rank": 20,
+                "player_id": "14717",
+                "player_name": "McLaughlin, Chase",
+                "aav": 1000
+              },
+              {
+                "rank": 21,
+                "player_id": "16681",
+                "player_name": "Reichard, Will",
+                "aav": 1000
+              },
+              {
+                "rank": 22,
+                "player_id": "16724",
+                "player_name": "Taylor, Tory",
+                "aav": 1000
+              },
+              {
+                "rank": 23,
+                "player_id": "15051",
+                "player_name": "Townsend, Tommy",
+                "aav": 1000
+              },
+              {
+                "rank": 24,
+                "player_id": "16452",
+                "player_name": "Whelan, Daniel",
+                "aav": 1000
+              }
+            ]
+          }
+        ]
+      }
+    },
     "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the specified prior season."
   },
   "rows": [

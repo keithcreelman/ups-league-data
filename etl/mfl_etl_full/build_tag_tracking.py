@@ -366,28 +366,29 @@ def avg_values(vals: List[int]) -> int:
     return round_up_1000(avg)
 
 
-def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
+def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[Dict[str, Any]]]:
     sql = """
     SELECT
       CAST(player_id AS TEXT) AS player_id,
+      COALESCE(player_name, '') AS player_name,
       COALESCE(position, '') AS position,
       COALESCE(status, '') AS roster_status,
-      COALESCE(contract_status, '') AS contract_status,
       COALESCE(salary, 0) AS salary,
       COALESCE(contract_info, '') AS contract_info
     FROM rosters_weekly
     WHERE season = ?
       AND week = 1
     """
-    per_player: Dict[Tuple[str, str], int] = {}
+    per_player: Dict[Tuple[str, str], Dict[str, Any]] = {}
     for row in conn.execute(sql, (season,)).fetchall():
         pid = safe_str(row[0])
         if not pid:
             continue
-        pos_group = normalize_pos_group(row[1], "")
+        name = safe_str(row[1])
+        pos_group = normalize_pos_group(row[2], "")
         if pos_group not in TAG_RULES:
             continue
-        roster_status = safe_str(row[2]).upper()
+        roster_status = safe_str(row[3]).upper()
         if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
             continue
         salary = safe_int(row[4], 0)
@@ -396,13 +397,21 @@ def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
         if aav <= 0:
             continue
         key = (pos_group, pid)
-        per_player[key] = max(safe_int(per_player.get(key), 0), aav)
+        existing = per_player.get(key)
+        if not existing or aav > safe_int(existing.get("aav"), 0):
+            per_player[key] = {
+                "player_id": pid,
+                "player_name": name,
+                "aav": aav,
+            }
 
-    by_pos: Dict[str, List[int]] = {}
-    for (pos_group, _pid), aav in per_player.items():
-        by_pos.setdefault(pos_group, []).append(aav)
+    by_pos: Dict[str, List[Dict[str, Any]]] = {}
+    for (pos_group, _pid), rec in per_player.items():
+        by_pos.setdefault(pos_group, []).append(rec)
     for pos_group in by_pos:
-        by_pos[pos_group].sort(reverse=True)
+        by_pos[pos_group].sort(
+            key=lambda x: (-safe_int(x.get("aav"), 0), safe_str(x.get("player_name")).lower())
+        )
     return by_pos
 
 
@@ -444,10 +453,20 @@ def resolve_exclude_tag_season(season: int, override: int = 0) -> int:
     return season - 1
 
 
-def build_tier_bid_map(week1_aav_by_pos: Dict[str, List[int]]) -> Dict[Tuple[str, int], int]:
+def extract_aav_list(values: List[Any]) -> List[int]:
+    if not values:
+        return []
+    if isinstance(values[0], dict):
+        return [safe_int(v.get("aav"), 0) for v in values if safe_int(v.get("aav"), 0) > 0]
+    return [safe_int(v, 0) for v in values if safe_int(v, 0) > 0]
+
+
+def build_tier_bid_map(
+    week1_aav_by_pos: Dict[str, List[Dict[str, Any]]]
+) -> Dict[Tuple[str, int], int]:
     out: Dict[Tuple[str, int], int] = {}
     for pos_group, rules in TAG_RULES.items():
-        salary_ranked_aavs = week1_aav_by_pos.get(pos_group, [])
+        salary_ranked_aavs = extract_aav_list(week1_aav_by_pos.get(pos_group, []))
         for rule in rules:
             if pos_group == "PK":
                 # PK/PN tier bid comes from player-specific prior AAV + 1K.
@@ -476,14 +495,57 @@ def tag_side(pos_group: str) -> str:
     return "OTHER"
 
 
-def build_rows(conn, season: int, exclude_tag_season: int) -> List[Dict[str, Any]]:
+def build_calc_breakdown(
+    week1_aav_by_pos: Dict[str, List[Dict[str, Any]]]
+) -> Dict[str, Dict[str, Any]]:
+    breakdown: Dict[str, Dict[str, Any]] = {}
+    for pos_group, rules in TAG_RULES.items():
+        players = week1_aav_by_pos.get(pos_group, [])
+        ranked = [
+            {
+                "rank": idx + 1,
+                "player_id": safe_str(p.get("player_id")),
+                "player_name": safe_str(p.get("player_name")),
+                "aav": safe_int(p.get("aav"), 0),
+            }
+            for idx, p in enumerate(players)
+        ]
+        tiers: List[Dict[str, Any]] = []
+        for rule in rules:
+            players_in_range: List[Dict[str, Any]] = []
+            if rule.avg_rank_min is None:
+                if pos_group == "PK":
+                    players_in_range = ranked
+            else:
+                start = max(1, rule.avg_rank_min)
+                end = rule.avg_rank_max if rule.avg_rank_max is not None else len(ranked)
+                players_in_range = [p for p in ranked if start <= safe_int(p["rank"]) <= end]
+            base_bid = 0
+            if pos_group != "PK" and players_in_range:
+                base_bid = avg_values([safe_int(p.get("aav"), 0) for p in players_in_range])
+            tiers.append(
+                {
+                    "tier": rule.tier,
+                    "label": rule.rule_label,
+                    "rank_min": rule.avg_rank_min,
+                    "rank_max": rule.avg_rank_max,
+                    "base_bid": base_bid,
+                    "players": players_in_range,
+                }
+            )
+        breakdown[pos_group] = {"tiers": tiers}
+    return breakdown
+
+
+def build_rows(
+    conn, season: int, exclude_tag_season: int, week1_aav_by_pos: Dict[str, List[Dict[str, Any]]]
+) -> List[Dict[str, Any]]:
     league_id = fetch_league_id(conn, season)
     last_regular_week = fetch_regular_season_week(conn, season)
     candidates = fetch_candidates(conn, season)
     tagged_prev = fetch_tagged_season_ids(conn, exclude_tag_season)
     scoring_map = fetch_scoring_rank_map(conn, season, last_regular_week)
     prior_aav_map = fetch_week1_aav_map(conn, season)
-    week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
     tier_bid_map = build_tier_bid_map(week1_aav_by_pos)
 
     # Fallback for missing week 1 AAVs.
@@ -608,6 +670,7 @@ def build_meta(
     scoring_last_week: int,
     exclude_tag_season: int,
     tracking_for_season: int,
+    calc_breakdown: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     by_pos: Dict[str, int] = {}
     for r in rows:
@@ -623,6 +686,7 @@ def build_meta(
         "aav_snapshot_week": 1,
         "by_position": by_pos,
         "exclude_tagged_season": exclude_tag_season,
+        "calc_breakdown": calc_breakdown or {},
         "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the specified prior season.",
     }
 
@@ -651,13 +715,20 @@ def main() -> int:
     conn = get_conn(args.db_path)
     try:
         last_regular_week = fetch_regular_season_week(conn, season)
-        rows = build_rows(conn, season, exclude_tag_season)
+        week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
+        rows = build_rows(conn, season, exclude_tag_season, week1_aav_by_pos)
+        calc_breakdown = build_calc_breakdown(week1_aav_by_pos)
     finally:
         conn.close()
 
     doc = {
         "meta": build_meta(
-            rows, season, last_regular_week, exclude_tag_season, tracking_for_season
+            rows,
+            season,
+            last_regular_week,
+            exclude_tag_season,
+            tracking_for_season,
+            calc_breakdown,
         ),
         "rows": rows,
     }

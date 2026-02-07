@@ -701,13 +701,13 @@ table.ccc-table .cell-num{
 
 table.ccc-table .cell-sub{
   margin-top: 2px;
-  color: rgba(229,238,255,.72);
+  color: rgba(24,40,70,.85);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .ccc-tableWrap .cell-sub{
-  color: rgba(24,40,70,.7);
+  color: rgba(24,40,70,.85);
   font-weight: 800;
 }
 

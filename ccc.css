@@ -842,7 +842,7 @@ body.ccc-modalOpen #restructureModal *{
     overflow-x: auto;
     overflow-y: visible;
     overscroll-behavior: auto;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y;
   }
 }
 @media (max-width: 720px){

@@ -292,8 +292,8 @@
 }
 
 .ccc-nav .ccc-chipBtn{
-  font-size: 14px;
-  padding: 12px 18px;
+  font-size: 15px;
+  padding: 13px 20px;
   border-radius: 14px;
   box-shadow: 0 10px 20px rgba(15,23,42,.12);
 }
@@ -427,12 +427,68 @@
   align-items:center;
   gap:10px;
   flex-wrap:wrap;
-  justify-content:flex-end;
+  justify-content:flex-start;
   padding: 8px 10px;
   border-radius: 14px;
   background: var(--surface-1);
   border: 1px solid var(--line);
   box-shadow: 0 6px 16px rgba(15,23,42,.06);
+}
+
+.ccc-filterWrap{
+  margin-top: 12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.ccc-filterSection{
+  flex: 1 1 240px;
+  min-width: 220px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 12px;
+  align-items:flex-end;
+  box-shadow: var(--shadow-soft);
+}
+
+.ccc-filterSection[data-section="filters"]{
+  background: linear-gradient(135deg, var(--accent-soft), rgba(37,99,235,.04));
+  border-color: var(--accent-border);
+}
+
+.ccc-filterSection[data-section="display"]{
+  background: linear-gradient(135deg, var(--accent-soft-2), rgba(20,184,166,.04));
+  border-color: rgba(20,184,166,.35);
+}
+
+.ccc-filterSection[data-section="actions"]{
+  background: linear-gradient(135deg, var(--warn-soft), rgba(245,158,11,.04));
+  border-color: var(--warn-border);
+}
+
+.ccc-filterTitle{
+  width: 100%;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-strong);
+}
+
+.ccc-filterSection .ccc-field{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 150px;
+}
+
+.ccc-filterSection .ccc-check{
+  margin-top: 4px;
 }
 
 .ccc-adminControls{
@@ -601,6 +657,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   display:flex;
   align-items:center;
   gap:6px;
+  flex-wrap: wrap;
 }
 .ccc-eventToggle .ccc-chipBtn{
   font-size: 11px;
@@ -614,13 +671,16 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   flex-wrap:wrap;
 }
 .ccc-eventField{
-  min-width: 210px;
+  flex: 1 1 240px;
+  min-width: 0;
 }
 .ccc-eventDisplay{
   display:flex;
   flex-direction:column;
   gap:4px;
-  min-width: 160px;
+  flex: 1 1 200px;
+  min-width: 0;
+  max-width: 100%;
 }
 .ccc-eventLabel{
   font-size: 11px;
@@ -633,17 +693,23 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   font-size: 18px;
   font-weight: 1000;
   color: var(--text);
+  overflow-wrap: anywhere;
 }
 .ccc-eventHint{
   font-size: 11px;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {
   .ccc-eventBody{
     align-items:flex-start;
+    flex-direction: column;
   }
   .ccc-eventField{
+    width: 100%;
+  }
+  .ccc-eventDisplay{
     width: 100%;
   }
 }
@@ -657,7 +723,8 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface-2);
+  background: linear-gradient(135deg, var(--surface-2), var(--surface-1));
+  box-shadow: var(--shadow-soft);
 }
 
 .ccc-calcBreakdown{
@@ -784,6 +851,12 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   display:flex;
   gap:10px;
   flex-wrap:wrap;
+  align-items:center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-soft);
 }
 
 .ccc-tab{
@@ -791,14 +864,16 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   background: var(--surface-1);
   color: var(--text);
   border-radius: 999px;
-  padding: 9px 12px;
+  padding: 10px 14px;
   cursor:pointer;
   font-weight: 1000;
-  font-size: 12px;
+  font-size: 13px;
 }
 .ccc-tab.active{
-  background: var(--accent-soft);
+  background: var(--accent);
   border-color: var(--accent-border);
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(15,23,42,.18);
 }
 
 /* Table */
@@ -854,6 +929,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-tableWrap{
   margin-top: 12px;
   border: 1px solid var(--line);
+  border-top: 4px solid var(--accent-border);
   background: var(--surface-1);
   border-radius: 16px;
   overflow: auto;
@@ -904,17 +980,27 @@ table.ccc-table thead th{
   top: 0;
   z-index: 5;
   background: var(--table-head-bg);
+  background-image:
+    linear-gradient(120deg, rgba(255,255,255,.18), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.12) 0 8px, transparent 8px 16px);
+  background-blend-mode: soft-light;
   backdrop-filter: blur(8px);
   color: var(--table-head-text);
   font-size: var(--head-font-size);
   font-weight: 1000;
   text-align:left;
   padding: var(--header-pad-y) var(--header-pad-x);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--line);
   border-right: 1px solid var(--line);
   letter-spacing: .2px;
   white-space: nowrap;
   user-select: none;
+}
+
+#cccApp[data-theme="dark"] table.ccc-table thead th{
+  background-image:
+    linear-gradient(120deg, rgba(255,255,255,.08), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 8px, transparent 8px 16px);
 }
 
 table.ccc-table thead th:last-child{
@@ -1016,13 +1102,13 @@ table.ccc-table tbody tr:hover td{
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(234,88,12,.10); }
 
 #cccApp[data-highlight="team"] table.ccc-table tbody tr{
-  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .28), rgba(var(--team-rgb, 0, 0, 0), .08));
-  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .18);
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .38), rgba(var(--team-rgb, 0, 0, 0), .12));
+  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .28);
 }
 
 #cccApp[data-highlight="team"] table.ccc-table tbody tr td:first-child{
-  box-shadow: inset 6px 0 0 rgba(var(--team-rgb, 0, 0, 0), .95);
-  background: rgba(var(--team-rgb, 0, 0, 0), .28);
+  box-shadow: inset 7px 0 0 rgba(var(--team-rgb, 0, 0, 0), 1);
+  background: rgba(var(--team-rgb, 0, 0, 0), .36);
 }
 
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.16), rgba(96,165,250,.05)); }
@@ -1044,13 +1130,13 @@ table.ccc-table tbody tr:hover td{
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(234,88,12,.7); background: rgba(234,88,12,.12); }
 
 #cccApp[data-theme="dark"][data-highlight="team"] table.ccc-table tbody tr{
-  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .35), rgba(var(--team-rgb, 0, 0, 0), .12));
-  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .25);
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .45), rgba(var(--team-rgb, 0, 0, 0), .18));
+  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .32);
 }
 
 #cccApp[data-theme="dark"][data-highlight="team"] table.ccc-table tbody tr td:first-child{
-  box-shadow: inset 6px 0 0 rgba(var(--team-rgb, 0, 0, 0), .98);
-  background: rgba(var(--team-rgb, 0, 0, 0), .32);
+  box-shadow: inset 7px 0 0 rgba(var(--team-rgb, 0, 0, 0), 1);
+  background: rgba(var(--team-rgb, 0, 0, 0), .4);
 }
 
 table.ccc-table .playerCell{
@@ -1245,6 +1331,7 @@ body.ccc-modalOpen #tagModal *{
   .ccc-title{ font-size: 30px; }
   .ccc-titleArtImg{ width: 130px; }
   .ccc-nav{ overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .ccc-filterSection{ min-width: 200px; }
   .ccc-tableMeta{
     flex-direction: column;
     align-items: flex-start;
@@ -1262,6 +1349,9 @@ body.ccc-modalOpen #tagModal *{
 }
 @media (max-width: 720px){
   .kpi{ min-width: 46%; }
+  .ccc-filterSection{ width: 100%; min-width: 0; }
+  .ccc-filterSection .ccc-field{ width: 100%; }
+  .ccc-filterSection .ccc-check{ width: 100%; }
   .ccc-tableWrap{
     --row-pad-y: 8px;
     --row-pad-x: 8px;

@@ -20,10 +20,14 @@
   const FINAL_WEEK_OF_SEASON = 17;
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const TEAM_COLOR_OVERRIDES = {
-    "0003": { h: 205, s: 90, l: 45 }, // Gride
-    "0012": { h: 25, s: 95, l: 50 }, // Hawks
-    "0011": { h: 285, s: 85, l: 48 }, // Cleon Ca$h
-    "0005": { h: 120, s: 80, l: 45 }, // HammerTime
+    "0001": { h: 48, s: 88, l: 50 }, // L.A. Looks
+    "0002": { h: 170, s: 82, l: 44 }, // CBP
+    "0003": { h: 210, s: 90, l: 45 }, // Gride
+    "0005": { h: 120, s: 80, l: 42 }, // HammerTime
+    "0009": { h: 270, s: 82, l: 50 }, // C-Town Chivalry
+    "0010": { h: 5, s: 90, l: 50 }, // Blake Bombers
+    "0011": { h: 310, s: 80, l: 48 }, // Cleon Ca$h
+    "0012": { h: 28, s: 92, l: 50 }, // Hawks
   };
 
   // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
@@ -1300,7 +1304,7 @@
       state.activeModule !== "mym"
         ? true
         : state.commishMode || isMymActiveForSeason(baseSeason, nowRef);
-    const pageSize = clampInt(state.pageSize || 50, 10, 500);
+    const pageSize = clampInt(state.pageSize || 25, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
     const pageRaw = state.pageByTab[tabMode] || 1;
@@ -2419,7 +2423,7 @@
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     }
 
-    const pageSize = clampInt(state.pageSize || 50, 10, 500);
+    const pageSize = clampInt(state.pageSize || 25, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
     const pageRaw = state.pageByTab[tabMode] || 1;
@@ -2621,7 +2625,7 @@
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
     showAllTeams: false,
-    pageSize: 50,
+    pageSize: 25,
     tableDensity: "regular",
     pageByTab: { eligible: 1, submitted: 1 },
     detectedFranchiseId: "",
@@ -2785,13 +2789,30 @@
     if (!sel) return;
 
     sel.innerHTML = "";
-    teams.forEach((t) => {
+    const list = Array.isArray(teams) ? teams.slice() : [];
+    const owner = list[0] || null;
+    let hasSelected = false;
+    const addOpt = (value, label, selected) => {
       const opt = document.createElement("option");
-      opt.value = t.id;
-      opt.textContent = t.name;
-      opt.selected = t.id === selectedId;
+      opt.value = value;
+      opt.textContent = label;
+      opt.selected = !!selected;
+      if (selected) hasSelected = true;
       sel.appendChild(opt);
+    };
+
+    if (owner && owner.id) addOpt(owner.id, owner.name || owner.id, owner.id === selectedId);
+    addOpt("__ALL__", "All Teams", selectedId === "__ALL__");
+
+    const rest = owner ? list.slice(1) : list;
+    rest.forEach((t) => {
+      if (!t || !t.id) return;
+      addOpt(t.id, t.name || t.id, t.id === selectedId);
     });
+
+    if (!hasSelected && sel.options.length) {
+      sel.value = owner && owner.id ? owner.id : "__ALL__";
+    }
   }
 
   function buildPositionList(eligibilityRows, submissionRows) {
@@ -3629,7 +3650,8 @@
     const toggleBtn = $("#commishConsoleBtn");
     if (!consoleEl || !playerSelect) return;
 
-    const canShow = !!state.canCommishMode && !!state.commishMode;
+    const canShow =
+      !!state.canCommishMode && !!state.commishMode && state.activeModule === "commish";
     if (toggleBtn) {
       toggleBtn.style.display = canShow ? "" : "none";
       toggleBtn.textContent = state.commishConsoleOpen ? "Hide Commish Console" : "Commish Console";
@@ -3906,7 +3928,7 @@
 
     if (cccMeta) {
       let metaText =
-        `Season: ${season || "?"} | module: ${
+        `Module: ${
           state.activeModule === "restructure"
             ? "Restructure"
             : state.activeModule === "tag"
@@ -4845,10 +4867,8 @@
       must("#tabCostCalc");
       must("#tabEligible");
       must("#tabSubmitted");
-      must("#seasonSelect");
       must("#teamSelect");
       must("#positionSelect");
-      must("#showAllTeamsChk");
       must("#pageSizeSelect");
       must("#commishConsole");
       must("#commishPlayerSelect");
@@ -4861,7 +4881,6 @@
       must("#commishConsoleMsg");
       must("#commishModeWrap");
       must("#commishModeChk");
-      must("#commishConsoleBtn");
       must("#searchBox");
       must("#themeSelect");
       must("#rowHighlightChk");
@@ -5020,7 +5039,6 @@
         ? requestedSeason
         : seasons[0] || requestedSeason;
       state.selectedSeason = seasonSelected;
-      populateSeasonSelect(seasons, state.selectedSeason);
       if (state.commishMode) {
         populateAsOfSeasonSelect(seasons, state.asOfSeasonOverride);
       }
@@ -5048,13 +5066,13 @@
         ? teams[0].id
         : "";
       state.selectedTeam = detected;
-      state.showAllTeams = !!state.canCommishMode;
-      const showAllTeamsChk = $("#showAllTeamsChk");
-      if (showAllTeamsChk) showAllTeamsChk.checked = !!state.showAllTeams;
-      const teamSelect = $("#teamSelect");
-      if (teamSelect) teamSelect.disabled = !!state.showAllTeams;
-
       populateTeamSelect(teams, state.selectedTeam);
+      const teamSelect = $("#teamSelect");
+      if (teamSelect) {
+        const v = safeStr(teamSelect.value);
+        state.selectedTeam = v;
+        state.showAllTeams = v === "__ALL__";
+      }
       const positions = buildPositionList(seasonRows, mergedSubmissionRows);
       state.selectedPosition = "__ALL_POS__";
       populatePositionSelect(positions, state.selectedPosition);
@@ -5336,61 +5354,13 @@
     );
 
     // Filters
-    const seasonSelect = $("#seasonSelect");
-    if (seasonSelect)
-      seasonSelect.addEventListener("change", (e) => {
-        state.selectedSeason = normalizeSeasonValue(e.target.value);
-        resetAllTablePages();
-        const seasonRows = state.payload.eligibility.filter(
-          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
-        );
-        const seasonSubmissionRows = (state.payload.submissions || []).filter(
-          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
-        );
-        const seasonRestructureRows = (state.restructureSubmissions || []).filter(
-          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
-        );
-        const seasonTagRows = (state.tagTrackingRows || []).filter(
-          (r) => normalizeSeasonValue(r.season) === state.selectedSeason
-        );
-        const mergedSubmissionRows = seasonSubmissionRows.concat(
-          seasonRestructureRows,
-          seasonTagRows
-        );
-        const teams = buildTeamList(
-          seasonRows,
-          mergedSubmissionRows,
-          state.detectedFranchiseId
-        );
-        const stillValid = teams.some((t) => t.id === state.selectedTeam);
-        if (!stillValid) state.selectedTeam = teams[0] ? teams[0].id : "";
-        populateTeamSelect(teams, state.selectedTeam);
-        const positions = buildPositionList(seasonRows, mergedSubmissionRows);
-        if (state.selectedPosition !== "__ALL_POS__" && !positions.includes(state.selectedPosition)) {
-          state.selectedPosition = "__ALL_POS__";
-        }
-        populatePositionSelect(positions, state.selectedPosition);
-        render();
-      });
-
-    const showAllTeamsChk = $("#showAllTeamsChk");
-    if (showAllTeamsChk)
-      showAllTeamsChk.addEventListener("change", (e) => {
-        state.showAllTeams = !!e.target.checked;
-        resetAllTablePages();
-        const sel = $("#teamSelect");
-        if (sel) sel.disabled = state.showAllTeams;
-        render();
-      });
-
     const teamSelect = $("#teamSelect");
     if (teamSelect)
       teamSelect.addEventListener("change", (e) => {
-        state.selectedTeam = e.target.value;
-        state.showAllTeams = false;
+        const v = safeStr(e.target.value);
+        state.selectedTeam = v;
+        state.showAllTeams = v === "__ALL__";
         resetAllTablePages();
-        const showAll = $("#showAllTeamsChk");
-        if (showAll) showAll.checked = false;
         render();
       });
 
@@ -5433,14 +5403,6 @@
     if (commishApplyBtn)
       commishApplyBtn.addEventListener("click", () => {
         submitCommishContractUpdate();
-      });
-
-    const commishConsoleBtn = $("#commishConsoleBtn");
-    if (commishConsoleBtn)
-      commishConsoleBtn.addEventListener("click", () => {
-        if (!state.canCommishMode || !state.commishMode) return;
-        state.commishConsoleOpen = !state.commishConsoleOpen;
-        render();
       });
 
     const commishModeChk = $("#commishModeChk");

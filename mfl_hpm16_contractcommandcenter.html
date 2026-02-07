@@ -32,68 +32,12 @@
       <button id="moduleCommishChip" class="ccc-chipBtn" type="button" data-module="commish">Commish</button>
     </div>
 
-    <div class="ccc-controls">
+      <div class="ccc-controls">
         <label id="commishModeWrap" class="ccc-check" style="display:none;">
           <input id="commishModeChk" type="checkbox" />
           Commish Mode
         </label>
-        <button id="commishConsoleBtn" class="ccc-btn" type="button" style="display:none;">
-          Commish Console
-        </button>
-
-        <div class="ccc-field">
-          League Yr
-          <select id="seasonSelect" class="ccc-select"></select>
-        </div>
-
-        <div class="ccc-field">
-          Team
-          <select id="teamSelect" class="ccc-select"></select>
-        </div>
-        <div class="ccc-field">
-          Position
-          <select id="positionSelect" class="ccc-select"></select>
-        </div>
-        <label class="ccc-check">
-          <input id="showAllTeamsChk" type="checkbox" />
-          Show all teams
-        </label>
-
-        <div class="ccc-field">
-          Search
-          <input id="searchBox" class="ccc-input" placeholder="player name…" />
-        </div>
-        <div class="ccc-field">
-          Rows
-          <select id="pageSizeSelect" class="ccc-select">
-            <option value="25">25</option>
-            <option value="50" selected>50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-        <div class="ccc-field">
-          Theme
-          <select id="themeSelect" class="ccc-select">
-            <option value="auto">Auto</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-        <label class="ccc-check">
-          <input id="rowHighlightChk" type="checkbox" />
-          Highlight rows
-        </label>
-        <div id="rowHighlightModeWrap" class="ccc-field">
-          Highlight by
-          <select id="rowHighlightModeSelect" class="ccc-select">
-            <option value="position">Position</option>
-            <option value="team">Team</option>
-          </select>
-        </div>
-
-        <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
-        <button id="refreshBtn" class="ccc-btn" type="button">Roster Refresh</button>
-    </div>
+      </div>
   </div>
 
   <div id="commishConsole" class="ccc-summary ccc-commishConsole" style="display:none;">
@@ -145,6 +89,59 @@
   </div>
 
   <div id="cccMain" class="ccc-main">
+    <div id="moduleFilters" class="ccc-filterWrap">
+      <div class="ccc-filterSection" data-section="filters">
+        <div class="ccc-filterTitle">Filters</div>
+        <div class="ccc-field">
+          Team
+          <select id="teamSelect" class="ccc-select"></select>
+        </div>
+        <div class="ccc-field">
+          Position
+          <select id="positionSelect" class="ccc-select"></select>
+        </div>
+        <div class="ccc-field">
+          Search
+          <input id="searchBox" class="ccc-input" placeholder="player name…" />
+        </div>
+        <div class="ccc-field">
+          Rows
+          <select id="pageSizeSelect" class="ccc-select">
+            <option value="25" selected>25</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ccc-filterSection" data-section="display">
+        <div class="ccc-filterTitle">Display</div>
+        <div class="ccc-field">
+          Theme
+          <select id="themeSelect" class="ccc-select">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <label class="ccc-check">
+          <input id="rowHighlightChk" type="checkbox" />
+          Highlight rows
+        </label>
+        <div id="rowHighlightModeWrap" class="ccc-field">
+          Highlight by
+          <select id="rowHighlightModeSelect" class="ccc-select">
+            <option value="position">Position</option>
+            <option value="team">Team</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ccc-filterSection" data-section="actions">
+        <div class="ccc-filterTitle">Actions</div>
+        <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
+        <button id="refreshBtn" class="ccc-btn" type="button">Roster Refresh</button>
+      </div>
+    </div>
     <div id="summary" class="ccc-summary"></div>
 
     <div id="cccTabs" class="ccc-tabs">

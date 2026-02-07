@@ -334,6 +334,46 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   padding: 12px 12px;
 }
 
+.ccc-summaryControls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin: 6px 0 10px;
+}
+
+.ccc-calcBreakdown{
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(0,0,0,.18);
+}
+.ccc-calcBreakdown details{
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  background: rgba(10,16,28,.6);
+}
+.ccc-calcBreakdown summary{
+  cursor: pointer;
+  font-weight: 900;
+  color: rgba(235,242,255,.95);
+}
+.ccc-calcTier{
+  margin-top: 6px;
+}
+.ccc-calcPlayers{
+  margin-top: 6px;
+  padding-left: 6px;
+}
+.ccc-calcRow{
+  font-size: 12px;
+  color: rgba(223,234,251,.9);
+  padding: 2px 0;
+}
+
 .ccc-commishConsole{
   border-color: rgba(255,210,120,.35);
   background:

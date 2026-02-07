@@ -1254,9 +1254,6 @@
 
   function renderTagSummary(teamName, rows, season, selectedTeamId, showAllTeams) {
     const count = rows.length;
-    const avgTagSalary = count
-      ? Math.round(rows.reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0) / count)
-      : 0;
     const tier1 = rows.filter((r) => safeInt(r.tag_tier) === 1).length;
     const tier2 = rows.filter((r) => safeInt(r.tag_tier) === 2).length;
     const tier3 = rows.filter((r) => safeInt(r.tag_tier) === 3).length;
@@ -1301,11 +1298,6 @@
           <div class="hint">expiring contracts (years remaining = 1)</div>
         </div>
         <div class="kpi">
-          <div class="label">Avg Tag Salary</div>
-          <div class="value">${avgTagSalary.toLocaleString()}</div>
-          <div class="hint">based on current tag formulas</div>
-        </div>
-        <div class="kpi">
           <div class="label">Tier 1</div>
           <div class="value">${tier1}</div>
           <div class="hint">top positional finishers</div>
@@ -1332,8 +1324,45 @@
     `;
   }
 
-  function renderTagSummaryPage(rows, teamName, positionLabel) {
-    const scopeTxt = positionLabel && positionLabel !== "__ALL_POS__" ? ` | Position: ${positionLabel}` : "";
+  const TAG_TIER_RULES = {
+    QB: [
+      { tier: 1, avg_min: 1, avg_max: 5, label: "Avg Top 1-5 QB AAV" },
+      { tier: 2, avg_min: 6, avg_max: 15, label: "Avg Top 6-15 QB AAV" },
+      { tier: 3, avg_min: 16, avg_max: null, label: "Avg Top 16+ QB AAV" },
+    ],
+    RB: [
+      { tier: 1, avg_min: 1, avg_max: 4, label: "Avg Top 1-4 RB AAV" },
+      { tier: 2, avg_min: 5, avg_max: 8, label: "Avg Top 5-8 RB AAV" },
+      { tier: 3, avg_min: 9, avg_max: 31, label: "Avg Top 9-31 RB AAV" },
+    ],
+    WR: [
+      { tier: 1, avg_min: 1, avg_max: 6, label: "Avg Top 1-6 WR AAV" },
+      { tier: 2, avg_min: 7, avg_max: 14, label: "Avg Top 7-14 WR AAV" },
+      { tier: 3, avg_min: 15, avg_max: 40, label: "Avg Top 15-40 WR AAV" },
+    ],
+    TE: [
+      { tier: 1, avg_min: 1, avg_max: 3, label: "Avg Top 1-3 TE AAV" },
+      { tier: 2, avg_min: 4, avg_max: 6, label: "Avg Top 4-6 TE AAV" },
+      { tier: 3, avg_min: 7, avg_max: 13, label: "Avg Top 7-13 TE AAV" },
+    ],
+    DL: [
+      { tier: 1, avg_min: 1, avg_max: 6, label: "Avg Top 1-6 DL AAV" },
+      { tier: 2, avg_min: 7, avg_max: 12, label: "Avg Top 7-12 DL AAV" },
+    ],
+    LB: [
+      { tier: 1, avg_min: 1, avg_max: 6, label: "Avg Top 1-6 LB AAV" },
+      { tier: 2, avg_min: 7, avg_max: 12, label: "Avg Top 7-12 LB AAV" },
+    ],
+    DB: [
+      { tier: 1, avg_min: 1, avg_max: 6, label: "Avg Top 1-6 DB AAV" },
+      { tier: 2, avg_min: 7, avg_max: 12, label: "Avg Top 7-12 DB AAV" },
+    ],
+    PK: [{ tier: 1, avg_min: null, avg_max: null, label: "K/P rule: prior AAV + 1,000" }],
+  };
+
+  const TAG_POS_ORDER = ["QB", "RB", "WR", "TE", "DL", "LB", "DB", "PK"];
+
+  function buildTagBreakdownByPos(rows) {
     const byPos = new Map();
     (rows || []).forEach((r) => {
       const pos = safeStr(r.positional_grouping || r.position || "NA");
@@ -1346,36 +1375,144 @@
       else if (t === 3) rec.tier3 += 1;
       byPos.set(pos, rec);
     });
-
-    const rowsOut = Array.from(byPos.values()).sort((a, b) => {
+    return Array.from(byPos.values()).sort((a, b) => {
       if (a.count !== b.count) return b.count - a.count;
       return safeStr(a.pos).localeCompare(safeStr(b.pos));
     });
+  }
 
-    const top = `
-      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Tag Summary${htmlEsc(
-      scopeTxt
-    )}</div>
-      <div class="ccc-miniGrid">
-        <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${rows.length}</div></div>
-        <div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${rows
-          .reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0)
-          .toLocaleString()}</div></div>
+  function buildTagBreakdownByTeam(rows) {
+    const byTeam = new Map();
+    (rows || []).forEach((r) => {
+      const team = safeStr(r.franchise_name || r.franchise_id || "Team");
+      const rec = byTeam.get(team) || { team, count: 0, total: 0, tier1: 0, tier2: 0, tier3: 0 };
+      rec.count += 1;
+      rec.total += safeInt(r.tag_bid || r.tag_salary);
+      const t = safeInt(r.tag_tier);
+      if (t === 1) rec.tier1 += 1;
+      else if (t === 2) rec.tier2 += 1;
+      else if (t === 3) rec.tier3 += 1;
+      byTeam.set(team, rec);
+    });
+    return Array.from(byTeam.values()).sort((a, b) => safeStr(a.team).localeCompare(safeStr(b.team)));
+  }
+
+  function renderTagCalcBreakdown(rows) {
+    const byPos = new Map();
+    (rows || []).forEach((r) => {
+      const pos = posKeyFromRow(r);
+      if (!TAG_TIER_RULES[pos]) return;
+      const list = byPos.get(pos) || [];
+      list.push(r);
+      byPos.set(pos, list);
+    });
+    if (!byPos.size) return "";
+
+    const positions = TAG_POS_ORDER.filter((p) => byPos.has(p)).concat(
+      Array.from(byPos.keys()).filter((p) => !TAG_POS_ORDER.includes(p)).sort()
+    );
+
+    const posBlocks = positions
+      .map((pos) => {
+        const list = byPos.get(pos) || [];
+        const ranked = list
+          .map((r) => ({
+            row: r,
+            calcAav: safeInt(r.prior_aav_week1 || r.aav),
+          }))
+          .sort((a, b) => b.calcAav - a.calcAav || safeStr(a.row.player_name).localeCompare(safeStr(b.row.player_name)))
+          .map((rec, idx) => ({ ...rec, rank: idx + 1 }));
+
+        const tiers = (TAG_TIER_RULES[pos] || []).map((rule) => {
+          let players = ranked;
+          if (rule.avg_min) {
+            const start = Math.max(1, rule.avg_min);
+            const end = rule.avg_max ? rule.avg_max : ranked.length;
+            players = ranked.filter((p) => p.rank >= start && p.rank <= end);
+          }
+          const baseBid = players.reduce((acc, p) => {
+            const bid = safeInt(p.row.tag_base_bid || p.row.tag_salary);
+            return bid > acc ? bid : acc;
+          }, 0);
+          const playerLines = players.length
+            ? players
+                .map((p) => {
+                  const name = htmlEsc(p.row.player_name || "");
+                  const aav = safeInt(p.calcAav).toLocaleString();
+                  return `<div class="ccc-calcRow">#${p.rank} ${name} — AAV ${aav}</div>`;
+                })
+                .join("")
+            : `<div class="ccc-calcRow">No players in range.</div>`;
+          const baseTxt = baseBid ? ` | Base ${baseBid.toLocaleString()}` : "";
+          return `
+            <details class="ccc-calcTier">
+              <summary>Tier ${rule.tier} — ${htmlEsc(rule.label)}${baseTxt}</summary>
+              <div class="ccc-calcPlayers">${playerLines}</div>
+            </details>
+          `;
+        });
+
+        return `
+          <details class="ccc-calcPos">
+            <summary>${htmlEsc(pos)}</summary>
+            ${tiers.join("")}
+          </details>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="ccc-calcBreakdown">
+        ${posBlocks}
+      </div>
+    `;
+  }
+
+  function renderTagSummaryPage(rows, teamName, positionLabel, view, calcOpen, calcRows) {
+    const totalTagSalary = (rows || []).reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0);
+    const viewLabel = view === "team" ? "By Team" : "By Position";
+    const controls = `
+      <div class="ccc-summaryControls">
+        <span class="ccc-navTitle">Summary View</span>
+        <button type="button" class="ccc-pageBtn" data-tag-summary-view="pos" ${view === "pos" ? "disabled" : ""}>By Position</button>
+        <button type="button" class="ccc-pageBtn" data-tag-summary-view="team" ${view === "team" ? "disabled" : ""}>By Team</button>
+        <button type="button" class="ccc-pageBtn" data-tag-calc-toggle="1">${calcOpen ? "Hide" : "Show"} Calc Breakdown</button>
       </div>
     `;
 
-    if (!rowsOut.length) {
+    const top = `
+      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Tag Summary ${htmlEsc(viewLabel)}</div>
+      ${controls}
+      <div class="ccc-miniGrid">
+        <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${rows.length}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${totalTagSalary.toLocaleString()}</div></div>
+      </div>
+    `;
+
+    if (!rows || !rows.length) {
       return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No tag tracking rows.</div></div>`;
     }
 
+    const rowsOut = view === "team" ? buildTagBreakdownByTeam(rows) : buildTagBreakdownByPos(rows);
     const body = rowsOut
       .map((r) => {
-        const avg = r.count ? Math.round(r.total / r.count) : 0;
+        if (view === "team") {
+          return `
+          <tr>
+            <td>${htmlEsc(r.team)}</td>
+            <td>${r.count}</td>
+            <td>${r.total.toLocaleString()}</td>
+            <td>${r.tier1}</td>
+            <td>${r.tier2}</td>
+            <td>${r.tier3}</td>
+          </tr>
+        `;
+        }
         return `
           <tr class="pos-${htmlEsc(r.pos)}">
             <td>${htmlEsc(r.pos)}</td>
             <td>${r.count}</td>
-            <td>${avg.toLocaleString()}</td>
+            <td>${r.total.toLocaleString()}</td>
             <td>${r.tier1}</td>
             <td>${r.tier2}</td>
             <td>${r.tier3}</td>
@@ -1384,6 +1521,9 @@
       })
       .join("");
 
+    const headerLabel = view === "team" ? "Team" : "Position";
+    const calcHtml = calcOpen ? renderTagCalcBreakdown(calcRows || []) : "";
+
     return `
       <div class="ccc-summaryPage">
         ${top}
@@ -1391,9 +1531,9 @@
           <table class="ccc-table">
             <thead>
               <tr>
-                <th>Position</th>
+                <th>${headerLabel}</th>
                 <th>Tracked</th>
-                <th>Avg Tag Salary</th>
+                <th>Total Tag Salary</th>
                 <th>Tier 1</th>
                 <th>Tier 2</th>
                 <th>Tier 3</th>
@@ -1402,6 +1542,7 @@
             <tbody>${body}</tbody>
           </table>
         </div>
+        ${calcHtml}
       </div>
     `;
   }
@@ -1573,6 +1714,8 @@
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
+    tagSummaryView: "pos",
+    tagCalcOpen: false,
     adminDebug: null,
   };
 
@@ -2335,6 +2478,9 @@
 
     if (state.activeModule === "tag") {
       const tagEligibleRows = scopedTagTracking.filter((r) => safeInt(r.is_tag_eligible) === 1);
+      const tagEligibleAll = (seasonTagTracking || []).filter(
+        (r) => safeInt(r.is_tag_eligible) === 1
+      );
       const tagRows = sortRows(
         tagEligibleRows,
         sortState.tab === "eligible" ? sortState.key : "tagRank",
@@ -2352,7 +2498,15 @@
 
       if (summary)
         summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
-      if (tabSummary) tabSummary.innerHTML = renderTagSummaryPage(tagRows, teamName, selectedPosition);
+      if (tabSummary)
+        tabSummary.innerHTML = renderTagSummaryPage(
+          tagEligibleAll,
+          "League",
+          selectedPosition,
+          state.tagSummaryView || "pos",
+          !!state.tagCalcOpen,
+          seasonTagTracking || []
+        );
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
       if (tabSubmitted) tabSubmitted.innerHTML = renderTable([], "submitted");
@@ -3876,6 +4030,31 @@
         state.tagSubmissions = {};
         saveTagSelections(state.tagSelections);
         saveTagSubmissions(state.tagSubmissions);
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-summary-view]") : null;
+        if (!btn) return;
+        const view = safeStr(btn.getAttribute("data-tag-summary-view"));
+        state.tagSummaryView = view === "team" ? "team" : "pos";
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-calc-toggle]") : null;
+        if (!btn) return;
+        state.tagCalcOpen = !state.tagCalcOpen;
         render();
       },
       true

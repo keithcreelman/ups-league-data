@@ -1356,7 +1356,7 @@
     QB: [
       { tier: 1, avg_min: 1, avg_max: 5, label: "Avg Top 1-5 QB AAV" },
       { tier: 2, avg_min: 6, avg_max: 15, label: "Avg Top 6-15 QB AAV" },
-      { tier: 3, avg_min: 16, avg_max: null, label: "Avg Top 16+ QB AAV" },
+      { tier: 3, avg_min: 16, avg_max: 24, label: "Avg Top 16-24 QB AAV" },
     ],
     RB: [
       { tier: 1, avg_min: 1, avg_max: 4, label: "Avg Top 1-4 RB AAV" },

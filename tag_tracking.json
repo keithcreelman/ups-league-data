@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-07 09:41:46",
+    "generated_at": "2026-02-07 09:54:46",
     "season": 2025,
     "tracking_for_season": 2026,
     "count": 78,
@@ -131,10 +131,10 @@
           },
           {
             "tier": 3,
-            "label": "Avg Top 16+ QB AAV",
+            "label": "Avg Top 16-24 QB AAV",
             "rank_min": 16,
-            "rank_max": null,
-            "base_bid": 8000,
+            "rank_max": 24,
+            "base_bid": 16000,
             "players": [
               {
                 "rank": 16,
@@ -189,120 +189,6 @@
                 "player_id": "16584",
                 "player_name": "McCarthy, J.J.",
                 "aav": 11000
-              },
-              {
-                "rank": 25,
-                "player_id": "16152",
-                "player_name": "Richardson, Anthony",
-                "aav": 11000
-              },
-              {
-                "rank": 26,
-                "player_id": "17030",
-                "player_name": "Ward, Cam",
-                "aav": 10000
-              },
-              {
-                "rank": 27,
-                "player_id": "17032",
-                "player_name": "Dart, Jaxson",
-                "aav": 9000
-              },
-              {
-                "rank": 28,
-                "player_id": "16580",
-                "player_name": "Maye, Drake",
-                "aav": 8000
-              },
-              {
-                "rank": 29,
-                "player_id": "7836",
-                "player_name": "Rodgers, Aaron",
-                "aav": 7000
-              },
-              {
-                "rank": 30,
-                "player_id": "10703",
-                "player_name": "Wilson, Russell",
-                "aav": 7000
-              },
-              {
-                "rank": 31,
-                "player_id": "9064",
-                "player_name": "Flacco, Joe",
-                "aav": 6000
-              },
-              {
-                "rank": 32,
-                "player_id": "16149",
-                "player_name": "Levis, Will",
-                "aav": 6000
-              },
-              {
-                "rank": 33,
-                "player_id": "16582",
-                "player_name": "Nix, Bo",
-                "aav": 5000
-              },
-              {
-                "rank": 34,
-                "player_id": "16583",
-                "player_name": "Penix Jr., Michael",
-                "aav": 5000
-              },
-              {
-                "rank": 35,
-                "player_id": "16384",
-                "player_name": "Bagent, Tyson",
-                "aav": 4000
-              },
-              {
-                "rank": 36,
-                "player_id": "15694",
-                "player_name": "Willis, Malik",
-                "aav": 2000
-              },
-              {
-                "rank": 37,
-                "player_id": "13879",
-                "player_name": "Allen, Kyle",
-                "aav": 1000
-              },
-              {
-                "rank": 38,
-                "player_id": "12141",
-                "player_name": "Mariota, Marcus",
-                "aav": 1000
-              },
-              {
-                "rank": 39,
-                "player_id": "15702",
-                "player_name": "McKee, Tanner",
-                "aav": 1000
-              },
-              {
-                "rank": 40,
-                "player_id": "17240",
-                "player_name": "Miller, Cam",
-                "aav": 1000
-              },
-              {
-                "rank": 41,
-                "player_id": "16585",
-                "player_name": "Milton, Joe",
-                "aav": 1000
-              },
-              {
-                "rank": 42,
-                "player_id": "13115",
-                "player_name": "Trubisky, Mitchell",
-                "aav": 1000
-              },
-              {
-                "rank": 43,
-                "player_id": "13113",
-                "player_name": "Watson, Deshaun",
-                "aav": 1000
               }
             ]
           }
@@ -17383,8 +17269,8 @@
       "ppg_min_games": 9,
       "pos_rank": 22,
       "tag_tier": 3,
-      "tag_rank_band": "16+",
-      "tag_base_bid": 8000,
+      "tag_rank_band": "16-24",
+      "tag_base_bid": 16000,
       "tag_bid": 51000,
       "tag_salary": 51000,
       "tag_bid_bump_applied": 1,
@@ -17394,7 +17280,7 @@
       "eligibility_reason": "Tagged in 2025 (ineligible).",
       "tag_prev_season": 1,
       "tag_prev_season_year": 2025,
-      "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
+      "tag_formula": "Avg Top 16-24 QB AAV | 10% prior AAV bump (rounded up)",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -17531,10 +17417,10 @@
       "ppg_min_games": 9,
       "pos_rank": 16,
       "tag_tier": 3,
-      "tag_rank_band": "16+",
-      "tag_base_bid": 8000,
-      "tag_bid": 8000,
-      "tag_salary": 8000,
+      "tag_rank_band": "16-24",
+      "tag_base_bid": 16000,
+      "tag_bid": 16000,
+      "tag_salary": 16000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
@@ -17542,7 +17428,7 @@
       "eligibility_reason": "",
       "tag_prev_season": 0,
       "tag_prev_season_year": 0,
-      "tag_formula": "Avg Top 16+ QB AAV",
+      "tag_formula": "Avg Top 16-24 QB AAV",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -18714,19 +18600,19 @@
       "ppg_rank": 0,
       "ppg_min_games": 9,
       "pos_rank": 32,
-      "tag_tier": 3,
-      "tag_rank_band": "16+",
-      "tag_base_bid": 8000,
-      "tag_bid": 51000,
-      "tag_salary": 51000,
-      "tag_bid_bump_applied": 1,
+      "tag_tier": 0,
+      "tag_rank_band": "",
+      "tag_base_bid": 0,
+      "tag_bid": 0,
+      "tag_salary": 0,
+      "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
       "is_tag_eligible": 0,
       "eligibility_reason": "Tagged in 2025 (ineligible).",
       "tag_prev_season": 1,
       "tag_prev_season_year": 2025,
-      "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
+      "tag_formula": "",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -19380,19 +19266,19 @@
       "ppg_rank": 26,
       "ppg_min_games": 9,
       "pos_rank": 26,
-      "tag_tier": 3,
-      "tag_rank_band": "16+",
-      "tag_base_bid": 8000,
-      "tag_bid": 8000,
-      "tag_salary": 8000,
+      "tag_tier": 0,
+      "tag_rank_band": "",
+      "tag_base_bid": 0,
+      "tag_bid": 0,
+      "tag_salary": 0,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
-      "is_tag_eligible": 1,
-      "eligibility_reason": "",
+      "is_tag_eligible": 0,
+      "eligibility_reason": "No tier rule matched for position/rank.",
       "tag_prev_season": 0,
       "tag_prev_season_year": 0,
-      "tag_formula": "Avg Top 16+ QB AAV",
+      "tag_formula": "",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },
@@ -19824,19 +19710,19 @@
       "ppg_rank": 0,
       "ppg_min_games": 9,
       "pos_rank": 29,
-      "tag_tier": 3,
-      "tag_rank_band": "16+",
-      "tag_base_bid": 8000,
-      "tag_bid": 28000,
-      "tag_salary": 28000,
-      "tag_bid_bump_applied": 1,
+      "tag_tier": 0,
+      "tag_rank_band": "",
+      "tag_base_bid": 0,
+      "tag_bid": 0,
+      "tag_salary": 0,
+      "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
-      "is_tag_eligible": 1,
-      "eligibility_reason": "",
+      "is_tag_eligible": 0,
+      "eligibility_reason": "No tier rule matched for position/rank.",
       "tag_prev_season": 0,
       "tag_prev_season_year": 0,
-      "tag_formula": "Avg Top 16+ QB AAV | 10% prior AAV bump (rounded up)",
+      "tag_formula": "",
       "tracking_context": "in-season",
       "scoring_weeks_used": "1-17"
     },

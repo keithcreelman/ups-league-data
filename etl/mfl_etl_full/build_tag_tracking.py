@@ -129,7 +129,7 @@ TAG_RULES: Dict[str, List[TierRule]] = {
     "QB": [
         TierRule(1, 1, 5, 1, 5, "Avg Top 1-5 QB AAV"),
         TierRule(2, 6, 15, 6, 15, "Avg Top 6-15 QB AAV"),
-        TierRule(3, 16, None, 16, None, "Avg Top 16+ QB AAV"),
+        TierRule(3, 16, 24, 16, 24, "Avg Top 16-24 QB AAV"),
     ],
     "RB": [
         TierRule(1, 1, 4, 1, 4, "Avg Top 1-4 RB AAV"),

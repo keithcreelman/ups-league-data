@@ -1004,6 +1004,78 @@
     return hslToRgb(hue, 82, 50);
   }
 
+  function buildTeamPalette() {
+    const hues = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+    const lights = [44, 62];
+    const sat = 85;
+    const out = [];
+    lights.forEach((l) => {
+      hues.forEach((h) => {
+        out.push({ h, s: sat, l });
+      });
+    });
+    return out;
+  }
+
+  function colorDistance(a, b) {
+    const diff = Math.abs(a.h - b.h);
+    const hueDiff = Math.min(diff, 360 - diff) / 180;
+    const lightDiff = Math.abs(a.l - b.l) / 100;
+    const satDiff = Math.abs(a.s - b.s) / 100;
+    return hueDiff * 0.75 + lightDiff * 0.2 + satDiff * 0.05;
+  }
+
+  function assignTeamColors(teams) {
+    const palette = buildTeamPalette();
+    const assigned = [];
+    const map = {};
+    const list = (teams || [])
+      .map((t) => ({
+        id: pad4(t.id || t.franchise_id),
+        name: safeStr(t.name || t.franchise_name || ""),
+      }))
+      .filter((t) => t.id)
+      .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+
+    list.forEach((team) => {
+      let bestIdx = -1;
+      let bestScore = -1;
+      const seed = (hashToHue(team.id + team.name) % 360) / 360;
+      palette.forEach((color, idx) => {
+        let minDist = assigned.length
+          ? Math.min(...assigned.map((c) => colorDistance(color, c)))
+          : 1;
+        const bias = (1 - Math.abs(color.h / 360 - seed)) * 0.01;
+        const score = minDist + bias;
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = idx;
+        }
+      });
+      const chosen = bestIdx >= 0 ? palette.splice(bestIdx, 1)[0] : null;
+      if (chosen) {
+        const rgb = hslToRgb(chosen.h, chosen.s, chosen.l);
+        map[team.id] = rgb;
+        assigned.push(chosen);
+      }
+    });
+    return map;
+  }
+
+  function buildTeamColorMap(eligibilityRows, submissionRows, tagRows) {
+    const map = new Map();
+    const add = (r) => {
+      const id = pad4(r.franchise_id);
+      if (!id) return;
+      if (!map.has(id)) map.set(id, safeStr(r.franchise_name || ""));
+    };
+    (eligibilityRows || []).forEach(add);
+    (submissionRows || []).forEach(add);
+    (tagRows || []).forEach(add);
+    const list = Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+    return assignTeamColors(list);
+  }
+
   function buildTeamStyle(rowOrId, franchiseName) {
     let fid = "";
     let name = "";
@@ -1014,7 +1086,8 @@
       fid = safeStr(rowOrId);
       name = safeStr(franchiseName);
     }
-    const rgb = getTeamRgb(fid, name);
+    const mapped = state && state.teamColorMap ? state.teamColorMap[pad4(fid)] : null;
+    const rgb = mapped || getTeamRgb(fid, name);
     if (!rgb) return "";
     return `--team-rgb:${rgb.r},${rgb.g},${rgb.b};`;
   }
@@ -2190,6 +2263,7 @@
     calendarBaseSeason: "",
     calendarContractSeason: "",
     calendarNow: null,
+    teamColorMap: {},
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
@@ -3084,6 +3158,12 @@
       .filter((r) => !season || normalizeSeasonValue(r.season) === season);
     const seasonTagTracking = (state.tagTrackingRows || []).filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
+    );
+
+    state.teamColorMap = buildTeamColorMap(
+      seasonEligibility,
+      seasonMymSubmissions.concat(seasonRestructureSubmissions),
+      seasonTagTracking
     );
 
     const teamFilteredEligibility = showAllTeams

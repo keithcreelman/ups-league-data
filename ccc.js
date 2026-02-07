@@ -2536,10 +2536,13 @@
     if (deadlineEl)
       deadlineEl.textContent = `Tag deadline: ${deadlineTxt} | Rookie draft: ${rookieTxt}`;
 
+    const submission = state.tagSubmissions[selectionKey];
+    const isSubmitted =
+      submission && safeStr(submission.player_id) === safeStr(sel.player_id);
+
     const err = $("#tagModalErr");
     if (err) {
-      const submission = state.tagSubmissions[selectionKey];
-      if (submission && safeStr(submission.player_id) === safeStr(sel.player_id)) {
+      if (isSubmitted) {
         const submittedAt = submission.submitted_at_utc
           ? fmtLocalYMDHM(new Date(submission.submitted_at_utc))
           : "";
@@ -2552,6 +2555,9 @@
         err.classList.remove("ok");
       }
     }
+
+    const removeBtn = $("#tagRemoveBtn");
+    if (removeBtn) removeBtn.style.display = isSubmitted ? "" : "none";
 
     const submitBtn = $("#tagSubmitBtn");
     if (submitBtn) {

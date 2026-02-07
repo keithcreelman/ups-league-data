@@ -330,6 +330,53 @@ def fetch_scoring_rank_map(
     return out
 
 
+def fetch_scoring_pool(conn, season: int, last_regular_week: int) -> List[Dict[str, Any]]:
+    sql = """
+    WITH pts AS (
+      SELECT
+        CAST(player_id AS TEXT) AS player_id,
+        COALESCE(MAX(player_name), '') AS player_name,
+        COALESCE(MAX(position), '') AS position,
+        COALESCE(MAX(pos_group), '') AS pos_group,
+        SUM(COALESCE(score, 0)) AS points_total,
+        SUM(CASE WHEN COALESCE(score, 0) > 0 THEN 1 ELSE 0 END) AS games_played
+      FROM player_weeklyscoringresults
+      WHERE season = ?
+        AND week BETWEEN 1 AND ?
+      GROUP BY CAST(player_id AS TEXT)
+    )
+    SELECT
+      player_id,
+      player_name,
+      position,
+      pos_group,
+      points_total,
+      games_played
+    FROM pts
+    """
+    out: List[Dict[str, Any]] = []
+    for row in conn.execute(sql, (season, last_regular_week)).fetchall():
+        pid = safe_str(row[0])
+        if not pid:
+            continue
+        pos_group = normalize_pos_group(row[2], row[3])
+        points_total = float(row[4] or 0)
+        games_played = safe_int(row[5], 0)
+        ppg = points_total / games_played if games_played > 0 else 0.0
+        out.append(
+            {
+                "player_id": pid,
+                "player_name": safe_str(row[1]),
+                "position": safe_str(row[2]),
+                "positional_grouping": pos_group,
+                "points_total": points_total,
+                "points_per_game": ppg,
+                "games_played": games_played,
+            }
+        )
+    return out
+
+
 def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
     sql = """
     SELECT
@@ -671,6 +718,7 @@ def build_meta(
     exclude_tag_season: int,
     tracking_for_season: int,
     calc_breakdown: Optional[Dict[str, Any]] = None,
+    ppg_pool: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     by_pos: Dict[str, int] = {}
     for r in rows:
@@ -687,6 +735,7 @@ def build_meta(
         "by_position": by_pos,
         "exclude_tagged_season": exclude_tag_season,
         "calc_breakdown": calc_breakdown or {},
+        "ppg_pool": ppg_pool or [],
         "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the specified prior season.",
     }
 
@@ -715,6 +764,7 @@ def main() -> int:
     conn = get_conn(args.db_path)
     try:
         last_regular_week = fetch_regular_season_week(conn, season)
+        scoring_pool = fetch_scoring_pool(conn, season, last_regular_week)
         week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
         rows = build_rows(conn, season, exclude_tag_season, week1_aav_by_pos)
         calc_breakdown = build_calc_breakdown(week1_aav_by_pos)
@@ -729,6 +779,7 @@ def main() -> int:
             exclude_tag_season,
             tracking_for_season,
             calc_breakdown,
+            scoring_pool,
         ),
         "rows": rows,
     }

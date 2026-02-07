@@ -1421,22 +1421,22 @@
     return ordered.concat(rest);
   }
 
-  function computePpgRanks(rows, minGamesEnabled, minGames) {
+  function computePpgRanks(tagRows, poolRows, minGamesEnabled, minGames) {
+    const pool =
+      Array.isArray(poolRows) && poolRows.length ? poolRows : Array.isArray(tagRows) ? tagRows : [];
     const byPos = new Map();
-    (rows || []).forEach((r) => {
-      const pos = posKeyFromRow(r);
+    pool.forEach((r) => {
+      const pos = safeStr(
+        r.positional_grouping || r.positional_group || r.pos_group || r.position
+      ).toUpperCase();
+      if (!pos) return;
       const list = byPos.get(pos) || [];
       list.push(r);
       byPos.set(pos, list);
     });
 
+    const rankMap = new Map();
     byPos.forEach((list) => {
-      list.forEach((r) => {
-        r._ppg_rank = 0;
-        r._ppg_min_games = minGames;
-        r._ppg_min_enabled = !!minGamesEnabled;
-      });
-
       const eligible = list.filter((r) => {
         const games = safeInt(r.games_played);
         if (games <= 0) return false;
@@ -1453,8 +1453,16 @@
       });
 
       eligible.forEach((r, idx) => {
-        r._ppg_rank = idx + 1;
+        const pid = safeStr(r.player_id || r.id);
+        if (pid) rankMap.set(pid, idx + 1);
       });
+    });
+
+    (tagRows || []).forEach((r) => {
+      const pid = safeStr(r.player_id || r.id);
+      r._ppg_rank = pid && rankMap.has(pid) ? rankMap.get(pid) : 0;
+      r._ppg_min_games = minGames;
+      r._ppg_min_enabled = !!minGamesEnabled;
     });
   }
 
@@ -2694,7 +2702,11 @@
         (r) => safeInt(r.is_tag_eligible) === 1
       );
       const ppgMin = clampInt(state.ppgMinGames || 8, 1, 18);
-      computePpgRanks(tagEligibleAll, !!state.ppgMinGamesEnabled, ppgMin);
+      const ppgPool =
+        state.tagTrackingMeta && Array.isArray(state.tagTrackingMeta.ppg_pool)
+          ? state.tagTrackingMeta.ppg_pool
+          : null;
+      computePpgRanks(tagEligibleAll, ppgPool, !!state.ppgMinGamesEnabled, ppgMin);
       const tagRows = sortRows(
         tagEligibleRows,
         sortState.tab === "eligible" ? sortState.key : "tagRank",

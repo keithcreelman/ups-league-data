@@ -1286,6 +1286,9 @@
         `;
       }
     }
+    const clearLocalHtml = state.commishMode
+      ? `<div style="margin-top:10px;"><button type="button" class="ccc-pageBtn" data-tag-clear-all="1">Clear Local Tag Selections</button></div>`
+      : "";
 
     return `
       <div class="ccc-summaryTop">
@@ -1325,6 +1328,7 @@
         }
       </div>
       ${selectionsHtml}
+      ${clearLocalHtml}
     `;
   }
 
@@ -1459,7 +1463,8 @@
         const key = buildTagSelectionKey(season, r.franchise_id, side);
         const selected = state.tagSelections[key];
         const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
-        const isLocked = !!selected && !isSelected && limit <= 1;
+        const lockEnforced = !state.commishMode;
+        const isLocked = lockEnforced && !!selected && !isSelected && limit <= 1;
         const tagLabel = isSelected ? "Selected" : isLocked ? "Locked" : "Tag";
         const tagBtnClass = `ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}`;
         const submission = state.tagSubmissions[key];
@@ -3852,6 +3857,25 @@
         if (!key) return;
         delete state.tagSelections[key];
         saveTagSelections(state.tagSelections);
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-tag-clear-all='1']") : null;
+        if (!btn) return;
+        if (!state.commishMode) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        state.tagSelections = {};
+        state.tagSubmissions = {};
+        saveTagSelections(state.tagSelections);
+        saveTagSubmissions(state.tagSubmissions);
         render();
       },
       true

@@ -706,6 +706,15 @@ table.ccc-table .cell-sub{
   font-weight: 700;
 }
 
+.ccc-tableWrap .cell-sub{
+  color: rgba(24,40,70,.7);
+  font-weight: 800;
+}
+
+.ccc-tableWrap .muted{
+  color: rgba(36,62,104,.85);
+}
+
 table.ccc-table .muted{
   color: #2d456f;
 }

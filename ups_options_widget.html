@@ -1,0 +1,47 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link id="uowCss" rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ups_options_widget.css">
+
+<div id="uowApp">
+  <div class="uow-hero">
+    <div>
+      <div class="uow-title">UPS Options Widget</div>
+      <div class="uow-sub">League calendar + countdowns. More widgets coming.</div>
+    </div>
+    <div class="uow-pill">Countdown</div>
+  </div>
+
+  <div class="uow-card">
+    <div class="uow-card-head">
+      <div class="uow-card-title">Countdown Timer</div>
+      <div class="uow-toggle" role="group" aria-label="Toggle display mode">
+        <button type="button" data-mode="countdown" class="active">Countdown</button>
+        <button type="button" data-mode="date">Date</button>
+      </div>
+    </div>
+    <div class="uow-card-body">
+      <label class="uow-field">
+        Event
+        <select id="eventSelect" class="uow-select"></select>
+      </label>
+      <div class="uow-display">
+        <div class="uow-display-label" id="eventLabel">Event</div>
+        <div class="uow-display-value" id="eventValue">—</div>
+        <div class="uow-display-hint" id="eventHint">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search || "");
+    var v = params.get("cache") || params.get("v") || "";
+    var qs = v ? "?v=" + encodeURIComponent(v) : "";
+    var css = document.getElementById("uowCss");
+    if (css) css.href = "https://keithcreelman.github.io/ups-league-data/ups_options_widget.css" + qs;
+    var s = document.createElement("script");
+    s.src = "https://keithcreelman.github.io/ups-league-data/ups_options_widget.js" + qs;
+    s.defer = true;
+    document.body.appendChild(s);
+  })();
+</script>

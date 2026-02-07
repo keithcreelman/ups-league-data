@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --card-2: #f1f5f9;
+  --accent: #0ea5a4;
+  --accent-strong: #0f766e;
+  --accent-warm: #f59e0b;
+  --line: rgba(15, 23, 42, 0.12);
+  --shadow: 0 18px 38px rgba(15, 23, 42, 0.12);
+  --glow: 0 0 0 4px rgba(14, 165, 164, 0.15);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Sora', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(900px 400px at 10% -10%, rgba(14, 165, 164, 0.18), transparent 60%),
+    radial-gradient(700px 280px at 90% 0%, rgba(245, 158, 11, 0.16), transparent 55%),
+    var(--bg);
+}
+
+#uowApp {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 20px 40px;
+}
+
+.uow-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.uow-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.uow-sub {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.uow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(14, 165, 164, 0.12);
+  color: var(--accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.uow-card {
+  background: linear-gradient(135deg, #ffffff, #f8fafc 70%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px 18px 20px;
+  box-shadow: var(--shadow);
+  animation: riseIn 0.6s ease both;
+}
+
+.uow-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.uow-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.uow-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uow-toggle button {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.uow-toggle button.active {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+  background: rgba(14, 165, 164, 0.12);
+  color: var(--accent-strong);
+}
+
+.uow-card-body {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.uow-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  min-width: 240px;
+}
+
+.uow-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 36px 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+    linear-gradient(135deg, var(--accent) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(14, 165, 164, 0.12), rgba(14, 165, 164, 0.12));
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px),
+    calc(100% - 42px) 50%;
+  background-size: 6px 6px, 6px 6px, 1px 18px;
+  background-repeat: no-repeat;
+}
+
+.uow-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.uow-display {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.uow-display-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.uow-display-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  animation: pulseIn 0.6s ease both;
+}
+
+.uow-display-hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 720px) {
+  #uowApp { padding: 20px 16px 32px; }
+  .uow-card-body { align-items: flex-start; }
+  .uow-field { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

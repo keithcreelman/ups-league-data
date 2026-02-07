@@ -1633,7 +1633,6 @@
   function renderTagSummaryPage(rows, teamName, view, calcOpen, meta, sideFilter, calcRows) {
     const normalizedSide = normalizeTagSummarySide(sideFilter);
     const filteredRows = (rows || []).filter((r) => tagRowMatchesSide(r, normalizedSide));
-    const totalTagSalary = filteredRows.reduce((acc, r) => acc + safeInt(r.tag_bid || r.tag_salary), 0);
     const viewLabel = view === "team" ? "By Team" : "By Position";
     const sideLabel =
       normalizedSide === "OFFENSE"
@@ -1661,11 +1660,6 @@
       ${controls}
       <div class="ccc-miniGrid">
         <div class="ccc-miniKpi"><div class="label">Players Tracked</div><div class="value">${filteredRows.length}</div></div>
-        ${
-          view === "team"
-            ? ""
-            : `<div class="ccc-miniKpi"><div class="label">Total Tag Salary</div><div class="value">${totalTagSalary.toLocaleString()}</div></div>`
-        }
       </div>
     `;
 
@@ -1692,7 +1686,6 @@
           <tr class="pos-${htmlEsc(r.pos)}">
             <td>${htmlEsc(r.pos)}</td>
             <td>${r.count}</td>
-            <td>${r.total.toLocaleString()}</td>
             <td>${r.tier1}</td>
             <td>${r.tier2}</td>
             <td>${r.tier3}</td>
@@ -1717,7 +1710,6 @@
               <tr>
                 <th>${headerLabel}</th>
                 <th>Tracked</th>
-                ${view === "team" ? "" : "<th>Total Tag Salary</th>"}
                 <th>Tier 1</th>
                 <th>Tier 2</th>
                 <th>Tier 3</th>

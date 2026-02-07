@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-02-07 09:31:00",
+    "generated_at": "2026-02-07 09:41:46",
     "season": 2025,
     "tracking_for_season": 2026,
     "count": 78,
@@ -65,7 +65,7 @@
             "label": "Avg Top 6-15 QB AAV",
             "rank_min": 6,
             "rank_max": 15,
-            "base_bid": 36000,
+            "base_bid": 35000,
             "players": [
               {
                 "rank": 6,
@@ -75,57 +75,57 @@
               },
               {
                 "rank": 7,
+                "player_id": "14056",
+                "player_name": "Murray, Kyler",
+                "aav": 45000
+              },
+              {
+                "rank": 8,
                 "player_id": "12620",
                 "player_name": "Prescott, Dak",
                 "aav": 45000
               },
               {
-                "rank": 8,
-                "player_id": "14783",
-                "player_name": "Hurts, Jalen",
-                "aav": 42000
-              },
-              {
                 "rank": 9,
-                "player_id": "15694",
-                "player_name": "Willis, Malik",
-                "aav": 37000
-              },
-              {
-                "rank": 10,
                 "player_id": "14059",
                 "player_name": "Jones, Daniel",
                 "aav": 36000
               },
               {
-                "rank": 11,
+                "rank": 10,
                 "player_id": "12611",
                 "player_name": "Goff, Jared",
                 "aav": 35000
               },
               {
-                "rank": 12,
+                "rank": 11,
                 "player_id": "13590",
                 "player_name": "Mayfield, Baker",
                 "aav": 31000
               },
               {
-                "rank": 13,
+                "rank": 12,
                 "player_id": "15237",
                 "player_name": "Lawrence, Trevor",
                 "aav": 29000
               },
               {
-                "rank": 14,
+                "rank": 13,
                 "player_id": "15698",
                 "player_name": "Purdy, Brock",
                 "aav": 28000
               },
               {
-                "rank": 15,
+                "rank": 14,
                 "player_id": "15238",
                 "player_name": "Fields, Justin",
                 "aav": 25000
+              },
+              {
+                "rank": 15,
+                "player_id": "14783",
+                "player_name": "Hurts, Jalen",
+                "aav": 22000
               }
             ]
           },
@@ -158,7 +158,7 @@
                 "rank": 19,
                 "player_id": "11150",
                 "player_name": "Smith, Geno",
-                "aav": 15000
+                "aav": 17000
               },
               {
                 "rank": 20,
@@ -216,14 +216,14 @@
               },
               {
                 "rank": 29,
-                "player_id": "14056",
-                "player_name": "Murray, Kyler",
-                "aav": 8000
+                "player_id": "7836",
+                "player_name": "Rodgers, Aaron",
+                "aav": 7000
               },
               {
                 "rank": 30,
-                "player_id": "7836",
-                "player_name": "Rodgers, Aaron",
+                "player_id": "10703",
+                "player_name": "Wilson, Russell",
                 "aav": 7000
               },
               {
@@ -252,56 +252,56 @@
               },
               {
                 "rank": 35,
+                "player_id": "16384",
+                "player_name": "Bagent, Tyson",
+                "aav": 4000
+              },
+              {
+                "rank": 36,
+                "player_id": "15694",
+                "player_name": "Willis, Malik",
+                "aav": 2000
+              },
+              {
+                "rank": 37,
                 "player_id": "13879",
                 "player_name": "Allen, Kyle",
                 "aav": 1000
               },
               {
-                "rank": 36,
-                "player_id": "16384",
-                "player_name": "Bagent, Tyson",
-                "aav": 1000
-              },
-              {
-                "rank": 37,
+                "rank": 38,
                 "player_id": "12141",
                 "player_name": "Mariota, Marcus",
                 "aav": 1000
               },
               {
-                "rank": 38,
+                "rank": 39,
                 "player_id": "15702",
                 "player_name": "McKee, Tanner",
                 "aav": 1000
               },
               {
-                "rank": 39,
+                "rank": 40,
                 "player_id": "17240",
                 "player_name": "Miller, Cam",
                 "aav": 1000
               },
               {
-                "rank": 40,
+                "rank": 41,
                 "player_id": "16585",
                 "player_name": "Milton, Joe",
                 "aav": 1000
               },
               {
-                "rank": 41,
+                "rank": 42,
                 "player_id": "13115",
                 "player_name": "Trubisky, Mitchell",
                 "aav": 1000
               },
               {
-                "rank": 42,
+                "rank": 43,
                 "player_id": "13113",
                 "player_name": "Watson, Deshaun",
-                "aav": 1000
-              },
-              {
-                "rank": 43,
-                "player_id": "10703",
-                "player_name": "Wilson, Russell",
                 "aav": 1000
               }
             ]
@@ -19752,9 +19752,9 @@
       "pos_rank": 6,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 36000,
-      "tag_bid": 36000,
-      "tag_salary": 36000,
+      "tag_base_bid": 35000,
+      "tag_bid": 35000,
+      "tag_salary": 35000,
       "tag_bid_bump_applied": 0,
       "tag_side": "OFFENSE",
       "tag_limit_per_side": 1,
@@ -19789,7 +19789,7 @@
       "pos_rank": 15,
       "tag_tier": 2,
       "tag_rank_band": "6-15",
-      "tag_base_bid": 36000,
+      "tag_base_bid": 35000,
       "tag_bid": 40000,
       "tag_salary": 40000,
       "tag_bid_bump_applied": 1,

@@ -377,10 +377,67 @@ def fetch_scoring_pool(conn, season: int, last_regular_week: int) -> List[Dict[s
     return out
 
 
-def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
+def table_exists(conn, table_name: str) -> bool:
+    row = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name = ?",
+        (table_name,),
+    ).fetchone()
+    return bool(row and row[0])
+
+
+def fetch_contract_history_week1_map(conn, season: int) -> Dict[str, Dict[str, Any]]:
+    if not table_exists(conn, "contract_history_snapshots"):
+        return {}
     sql = """
     SELECT
       CAST(player_id AS TEXT) AS player_id,
+      COALESCE(player_name, '') AS player_name,
+      COALESCE(position, '') AS position,
+      COALESCE(status, '') AS roster_status,
+      COALESCE(contract_status, '') AS contract_status,
+      COALESCE(aav, 0) AS aav,
+      COALESCE(contract_info, '') AS contract_info,
+      COALESCE(prior_aav, 0) AS prior_aav
+    FROM contract_history_snapshots
+    WHERE season = ?
+      AND snapshot_week = 1
+    """
+    out: Dict[str, Dict[str, Any]] = {}
+    for row in conn.execute(sql, (season,)).fetchall():
+        pid = safe_str(row[0])
+        if not pid:
+            continue
+        out[pid] = {
+            "player_id": pid,
+            "player_name": safe_str(row[1]),
+            "position": safe_str(row[2]),
+            "roster_status": safe_str(row[3]),
+            "contract_status": safe_str(row[4]),
+            "aav": safe_int(row[5], 0),
+            "contract_info": safe_str(row[6]),
+            "prior_aav": safe_int(row[7], 0),
+        }
+    return out
+
+
+def should_use_prior_aav(contract_status: str, prior_aav: int) -> bool:
+    if prior_aav <= 0:
+        return False
+    s = safe_str(contract_status).upper()
+    if not s:
+        return False
+    if "ROOKIE" in s:
+        return False
+    blocked = ("WW", "WAIVER", "FA", "FREE", "BL")
+    return any(tok in s for tok in blocked)
+
+
+def fetch_week1_contract_pool(conn, season: int) -> List[Dict[str, Any]]:
+    ch_map = fetch_contract_history_week1_map(conn, season)
+    sql = """
+    SELECT
+      CAST(player_id AS TEXT) AS player_id,
+      COALESCE(player_name, '') AS player_name,
       COALESCE(position, '') AS position,
       COALESCE(status, '') AS roster_status,
       COALESCE(contract_status, '') AS contract_status,
@@ -390,17 +447,60 @@ def fetch_week1_aav_map(conn, season: int) -> Dict[str, int]:
     WHERE season = ?
       AND week = 1
     """
-    out: Dict[str, int] = {}
+    pool: List[Dict[str, Any]] = []
     for row in conn.execute(sql, (season,)).fetchall():
         pid = safe_str(row[0])
         if not pid:
             continue
-        roster_status = safe_str(row[2]).upper()
+        roster_status = safe_str(row[3]).upper()
         if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
             continue
-        salary = safe_int(row[4], 0)
-        info = safe_str(row[5])
+        name = safe_str(row[1])
+        position = safe_str(row[2])
+        contract_status = safe_str(row[4])
+        salary = safe_int(row[5], 0)
+        info = safe_str(row[6])
         aav = effective_aav(0, salary, info)
+
+        ch = ch_map.get(pid)
+        if ch:
+            ch_aav = safe_int(ch.get("aav"), 0)
+            if ch_aav > 0:
+                aav = ch_aav
+            if should_use_prior_aav(ch.get("contract_status", ""), safe_int(ch.get("prior_aav"), 0)):
+                aav = safe_int(ch.get("prior_aav"), 0)
+            if not name:
+                name = safe_str(ch.get("player_name"))
+            if not position:
+                position = safe_str(ch.get("position"))
+            if not contract_status:
+                contract_status = safe_str(ch.get("contract_status"))
+
+        if aav <= 0:
+            continue
+        pos_group = normalize_pos_group(position, "")
+        if pos_group not in TAG_RULES:
+            continue
+        pool.append(
+            {
+                "player_id": pid,
+                "player_name": name,
+                "position": position,
+                "positional_grouping": pos_group,
+                "contract_status": contract_status,
+                "aav": aav,
+            }
+        )
+    return pool
+
+
+def build_week1_aav_map(pool: List[Dict[str, Any]]) -> Dict[str, int]:
+    out: Dict[str, int] = {}
+    for row in pool:
+        pid = safe_str(row.get("player_id"))
+        if not pid:
+            continue
+        aav = safe_int(row.get("aav"), 0)
         if aav > 0:
             out[pid] = max(safe_int(out.get(pid), 0), aav)
     return out
@@ -413,46 +513,27 @@ def avg_values(vals: List[int]) -> int:
     return round_up_1000(avg)
 
 
-def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[Dict[str, Any]]]:
-    sql = """
-    SELECT
-      CAST(player_id AS TEXT) AS player_id,
-      COALESCE(player_name, '') AS player_name,
-      COALESCE(position, '') AS position,
-      COALESCE(status, '') AS roster_status,
-      COALESCE(salary, 0) AS salary,
-      COALESCE(contract_info, '') AS contract_info
-    FROM rosters_weekly
-    WHERE season = ?
-      AND week = 1
-    """
+def build_week1_aav_by_pos(pool: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    by_pos: Dict[str, List[Dict[str, Any]]] = {}
     per_player: Dict[Tuple[str, str], Dict[str, Any]] = {}
-    for row in conn.execute(sql, (season,)).fetchall():
-        pid = safe_str(row[0])
+    for row in pool:
+        pid = safe_str(row.get("player_id"))
         if not pid:
             continue
-        name = safe_str(row[1])
-        pos_group = normalize_pos_group(row[2], "")
+        pos_group = safe_str(row.get("positional_grouping")).upper()
         if pos_group not in TAG_RULES:
-            continue
-        roster_status = safe_str(row[3]).upper()
-        if roster_status and roster_status not in {"ROSTER", "INJURED_RESERVE"}:
-            continue
-        salary = safe_int(row[4], 0)
-        info = safe_str(row[5])
-        aav = effective_aav(0, salary, info)
-        if aav <= 0:
             continue
         key = (pos_group, pid)
         existing = per_player.get(key)
+        aav = safe_int(row.get("aav"), 0)
+        if aav <= 0:
+            continue
         if not existing or aav > safe_int(existing.get("aav"), 0):
             per_player[key] = {
                 "player_id": pid,
-                "player_name": name,
+                "player_name": safe_str(row.get("player_name")),
                 "aav": aav,
             }
-
-    by_pos: Dict[str, List[Dict[str, Any]]] = {}
     for (pos_group, _pid), rec in per_player.items():
         by_pos.setdefault(pos_group, []).append(rec)
     for pos_group in by_pos:
@@ -585,14 +666,17 @@ def build_calc_breakdown(
 
 
 def build_rows(
-    conn, season: int, exclude_tag_season: int, week1_aav_by_pos: Dict[str, List[Dict[str, Any]]]
+    conn,
+    season: int,
+    exclude_tag_season: int,
+    prior_aav_map: Dict[str, int],
+    week1_aav_by_pos: Dict[str, List[Dict[str, Any]]],
 ) -> List[Dict[str, Any]]:
     league_id = fetch_league_id(conn, season)
     last_regular_week = fetch_regular_season_week(conn, season)
     candidates = fetch_candidates(conn, season)
     tagged_prev = fetch_tagged_season_ids(conn, exclude_tag_season)
     scoring_map = fetch_scoring_rank_map(conn, season, last_regular_week)
-    prior_aav_map = fetch_week1_aav_map(conn, season)
     tier_bid_map = build_tier_bid_map(week1_aav_by_pos)
 
     # Fallback for missing week 1 AAVs.
@@ -765,8 +849,16 @@ def main() -> int:
     try:
         last_regular_week = fetch_regular_season_week(conn, season)
         scoring_pool = fetch_scoring_pool(conn, season, last_regular_week)
-        week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
-        rows = build_rows(conn, season, exclude_tag_season, week1_aav_by_pos)
+        week1_pool = fetch_week1_contract_pool(conn, season)
+        prior_aav_map = build_week1_aav_map(week1_pool)
+        week1_aav_by_pos = build_week1_aav_by_pos(week1_pool)
+        rows = build_rows(
+            conn,
+            season,
+            exclude_tag_season,
+            prior_aav_map,
+            week1_aav_by_pos,
+        )
         calc_breakdown = build_calc_breakdown(week1_aav_by_pos)
     finally:
         conn.close()

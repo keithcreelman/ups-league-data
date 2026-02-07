@@ -114,6 +114,14 @@
     return { year, memorial, rookieDraft, tagDeadline };
   }
 
+  function isTagDeadlinePassed(season) {
+    const info = getTagDeadlineInfo(season);
+    if (!info || !info.tagDeadline) return false;
+    const end = new Date(info.tagDeadline.getTime());
+    end.setHours(23, 59, 59, 999);
+    return Date.now() > end.getTime();
+  }
+
   function fmtLocalYMDHM(d) {
     if (!d || isNaN(d.getTime())) return "";
     const y = d.getFullYear();
@@ -2557,7 +2565,12 @@
     }
 
     const removeBtn = $("#tagRemoveBtn");
-    if (removeBtn) removeBtn.style.display = isSubmitted ? "" : "none";
+    if (removeBtn) {
+      const pastDeadline = isTagDeadlinePassed(state.selectedSeason);
+      const canRemoveAfterDeadline = !!state.commishMode;
+      const showRemove = isSubmitted && (!pastDeadline || canRemoveAfterDeadline);
+      removeBtn.style.display = showRemove ? "" : "none";
+    }
 
     const submitBtn = $("#tagSubmitBtn");
     if (submitBtn) {

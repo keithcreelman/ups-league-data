@@ -210,6 +210,7 @@
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
   const LOCAL_THEME_KEY = "ccc_theme_v1";
   const LOCAL_HIGHLIGHT_KEY = "ccc_row_highlight_v1";
+  const LOCAL_DEFAULT_FILTERS_KEY = "ccc_default_filters_v1";
   const LOCAL_ASOF_SEASON_KEY = "ccc_asof_season_v1";
 
   function loadLocalOverrides() {
@@ -297,6 +298,9 @@
     if (app) app.setAttribute("data-theme", t);
     const sel = $("#themeSelect");
     if (sel) sel.value = t;
+    $$("[data-admin-theme]").forEach((el) => {
+      if (el) el.value = t;
+    });
   }
 
   function normalizeHighlightMode(mode) {
@@ -337,6 +341,34 @@
           byModule: byModule || {},
         })
       );
+    } catch (e) {}
+  }
+
+  function normalizeDefaultFilters(raw) {
+    const obj = raw && typeof raw === "object" ? raw : {};
+    const teamId = safeStr(obj.teamId || obj.team_id || "");
+    const positionRaw = safeStr(obj.position || obj.pos || "__ALL_POS__");
+    const position = positionRaw ? positionRaw : "__ALL_POS__";
+    const rawSize = clampInt(obj.pageSize || obj.page_size || 25, 10, 500);
+    const pageSize = [25, 100].includes(rawSize) ? rawSize : 25;
+    return { teamId, position, pageSize };
+  }
+
+  function loadDefaultFilters() {
+    try {
+      const raw = localStorage.getItem(LOCAL_DEFAULT_FILTERS_KEY);
+      if (!raw) return { teamId: "", position: "__ALL_POS__", pageSize: 25 };
+      const obj = JSON.parse(raw);
+      return normalizeDefaultFilters(obj);
+    } catch (e) {
+      return { teamId: "", position: "__ALL_POS__", pageSize: 25 };
+    }
+  }
+
+  function saveDefaultFilters(filters) {
+    try {
+      const data = normalizeDefaultFilters(filters || {});
+      localStorage.setItem(LOCAL_DEFAULT_FILTERS_KEY, JSON.stringify(data));
     } catch (e) {}
   }
 
@@ -1727,6 +1759,124 @@
     `;
   }
 
+  function buildRestructureSummaryByPos(eligibleRows, submittedRows) {
+    const map = new Map();
+    const upsert = (pos) => {
+      const key = safeStr(pos || "NA");
+      let rec = map.get(key);
+      if (!rec) {
+        rec = {
+          pos: key,
+          eligible: 0,
+          eligible2: 0,
+          eligible3: 0,
+          eligibleSalary: 0,
+          eligibleSalary2: 0,
+          eligibleSalary3: 0,
+          submitted: 0,
+          submittedSalary: 0,
+        };
+        map.set(key, rec);
+      }
+      return rec;
+    };
+
+    (eligibleRows || []).forEach((r) => {
+      const pos = posKeyFromRow(r);
+      const rec = upsert(pos);
+      const salary = safeInt(r.salary);
+      const years = safeInt(r.contract_year);
+      rec.eligible += 1;
+      rec.eligibleSalary += salary;
+      if (years === 2) {
+        rec.eligible2 += 1;
+        rec.eligibleSalary2 += salary;
+      } else if (years === 3) {
+        rec.eligible3 += 1;
+        rec.eligibleSalary3 += salary;
+      }
+    });
+
+    (submittedRows || []).forEach((r) => {
+      const pos = posKeyFromRow(r);
+      const rec = upsert(pos);
+      rec.submitted += 1;
+      rec.submittedSalary += safeInt(r.salary);
+    });
+
+    const ordered = orderPositions(Array.from(map.keys()));
+    return ordered.map((p) => map.get(p)).filter(Boolean);
+  }
+
+  function renderRestructureSummaryPage(eligibleRows, submittedRows, teamName, positionLabel) {
+    const eligibleCount = eligibleRows.length;
+    const submittedCount = submittedRows.length;
+    const eligibleSalary = eligibleRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
+    const submittedSalary = submittedRows.reduce((acc, r) => acc + safeInt(r.salary), 0);
+    const rows = buildRestructureSummaryByPos(eligibleRows, submittedRows);
+    const scopeTxt =
+      positionLabel && positionLabel !== "__ALL_POS__" ? ` | Position: ${positionLabel}` : "";
+
+    const top = `
+      <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">${htmlEsc(teamName)} Restructure Summary${htmlEsc(
+      scopeTxt
+    )}</div>
+      <div class="ccc-miniGrid">
+        <div class="ccc-miniKpi"><div class="label">Eligible Players</div><div class="value">${eligibleCount}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Eligible Salary</div><div class="value">${eligibleSalary.toLocaleString()}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Submitted</div><div class="value">${submittedCount}</div></div>
+        <div class="ccc-miniKpi"><div class="label">Submitted Salary</div><div class="value">${submittedSalary.toLocaleString()}</div></div>
+      </div>
+    `;
+
+    if (!rows.length) {
+      return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No summary rows.</div></div>`;
+    }
+
+    const body = rows
+      .map((r) => {
+        const rowClass = buildRowClass(r, r.pos);
+        return `
+          <tr class="${rowClass}">
+            <td>${htmlEsc(r.pos)}</td>
+            <td>${r.eligible}</td>
+            <td>${r.eligible2}</td>
+            <td>${r.eligible3}</td>
+            <td>${safeInt(r.eligibleSalary).toLocaleString()}</td>
+            <td>${safeInt(r.eligibleSalary2).toLocaleString()}</td>
+            <td>${safeInt(r.eligibleSalary3).toLocaleString()}</td>
+            <td>${r.submitted}</td>
+            <td>${safeInt(r.submittedSalary).toLocaleString()}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="ccc-summaryPage">
+        ${top}
+        <div class="ccc-tableWrap">
+          <table class="ccc-table">
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th>Eligible</th>
+                <th>Eligible 2Y</th>
+                <th>Eligible 3Y</th>
+                <th>Eligible Salary</th>
+                <th>Eligible Salary 2Y</th>
+                <th>Eligible Salary 3Y</th>
+                <th>Submitted</th>
+                <th>Submitted Salary</th>
+              </tr>
+            </thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
   function renderMymSubmissionSeasonControls(options, selected) {
     const list = Array.isArray(options) ? options.filter(Boolean) : [];
     if (!list.length) return "";
@@ -2400,13 +2550,103 @@
 
   function renderCommishModulePage() {
     const mode = safeStr(state.commishViewMode || "A").toUpperCase();
+    const canCommish = !!state.canCommishMode;
+    const season = normalizeSeasonValue(state.selectedSeason);
+    const seasonRows = state.payload.eligibility.filter(
+      (r) => normalizeSeasonValue(r.season) === season
+    );
+    const seasonSubmissionRows = state.payload.submissions.filter(
+      (r) => normalizeSeasonValue(r.season) === season
+    );
+    const seasonRestructureRows = (state.restructureSubmissions || []).filter(
+      (r) => normalizeSeasonValue(r.season) === season
+    );
+    const seasonTagRows = (state.tagTrackingRows || []).filter(
+      (r) => normalizeSeasonValue(r.season) === season
+    );
+    const mergedSubmissionRows = seasonSubmissionRows.concat(seasonRestructureRows, seasonTagRows);
+    const teams = buildTeamList(seasonRows, mergedSubmissionRows, state.detectedFranchiseId || "");
+    const positions = buildPositionList(seasonRows, mergedSubmissionRows);
+    const defaults = normalizeDefaultFilters(state.defaultFilters || {});
+    const themeVal = safeStr(state.theme || "auto").toLowerCase();
+
+    const teamOptions = teams
+      .map((t, idx) => {
+        if (!t || !t.id) return "";
+        const isSelected = defaults.teamId ? defaults.teamId === t.id : idx === 0;
+        return `<option value="${htmlEsc(t.id)}"${isSelected ? " selected" : ""}>${htmlEsc(
+          t.name || t.id
+        )}</option>`;
+      })
+      .join("");
+    const allSelected = defaults.teamId === "__ALL__";
+    const teamSelect = `
+      <option value="__ALL__"${allSelected ? " selected" : ""}>All Teams</option>
+      ${teamOptions}
+    `;
+
+    const posOptions = ["__ALL_POS__", ...positions]
+      .map((p) => {
+        const label = p === "__ALL_POS__" ? "All Positions" : p;
+        const isSelected = defaults.position ? defaults.position === p : p === "__ALL_POS__";
+        return `<option value="${htmlEsc(p)}"${isSelected ? " selected" : ""}>${htmlEsc(
+          label
+        )}</option>`;
+      })
+      .join("");
+
+    const rowOptions = [25, 100]
+      .map((n) => {
+        const isSelected = defaults.pageSize === n;
+        return `<option value="${n}"${isSelected ? " selected" : ""}>${n}</option>`;
+      })
+      .join("");
+
+    const adminPanel = `
+      <div class="ccc-adminPanel" style="display:block;">
+        <div class="ccc-adminTitle">Admin Controls</div>
+        <div class="ccc-adminGrid">
+          <button id="refreshBtn" class="ccc-btn" type="button" data-admin-action="refresh">Refresh (use if rosters are not refreshed)</button>
+          <div class="ccc-field">
+            Theme
+            <select id="themeSelect" class="ccc-select" data-admin-theme="1">
+              <option value="auto"${themeVal === "auto" ? " selected" : ""}>Auto</option>
+              <option value="light"${themeVal === "light" ? " selected" : ""}>Light</option>
+              <option value="dark"${themeVal === "dark" ? " selected" : ""}>Dark</option>
+            </select>
+          </div>
+          <div class="ccc-field">
+            Default Team
+            <select class="ccc-select" data-admin-default="team">${teamSelect}</select>
+          </div>
+          <div class="ccc-field">
+            Default Position
+            <select class="ccc-select" data-admin-default="position">${posOptions}</select>
+          </div>
+          <div class="ccc-field">
+            Default Rows
+            <select class="ccc-select" data-admin-default="rows">${rowOptions}</select>
+          </div>
+        </div>
+      </div>
+    `;
+
     const opts = `
       <div class="ccc-summaryControls">
-        <span class="ccc-navTitle">Commish Views</span>
+        <span class="ccc-navTitle">Admin Views</span>
         <button type="button" class="ccc-pageBtn ${mode === "A" ? "is-active" : ""}" data-commish-view="A" aria-pressed="${mode === "A" ? "true" : "false"}">Option A</button>
         <button type="button" class="ccc-pageBtn ${mode === "B" ? "is-active" : ""}" data-commish-view="B" aria-pressed="${mode === "B" ? "true" : "false"}">Option B</button>
         <button type="button" class="ccc-pageBtn ${mode === "C" ? "is-active" : ""}" data-commish-view="C" aria-pressed="${mode === "C" ? "true" : "false"}">Option C</button>
       </div>
+    `;
+
+    const toggleAttrs = canCommish
+      ? ""
+      : "disabled title='Admin console is commissioner-only'";
+    const toggleBtn = `
+      <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1" ${toggleAttrs}>
+        ${state.commishConsoleOpen ? "Hide" : "Show"} Admin Console
+      </button>
     `;
 
     let body = "";
@@ -2415,12 +2655,9 @@
         <div class="ccc-landing">
           <div>
             <div class="ccc-landingTitle">Option A</div>
-            <div class="muted" style="margin-top:6px;">Toggle the existing Commish Console panel.</div>
-            <div style="margin-top:12px;">
-              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
-                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
-              </button>
-            </div>
+            <div class="muted" style="margin-top:6px;">Toggle the existing Admin Console panel.</div>
+            <div style="margin-top:12px;">${toggleBtn}</div>
+            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
           </div>
         </div>
       `;
@@ -2429,12 +2666,9 @@
         <div class="ccc-landing">
           <div>
             <div class="ccc-landingTitle">Option B</div>
-            <div class="muted" style="margin-top:6px;">Full Commish Module view (layout placeholder).</div>
-            <div style="margin-top:12px;">
-              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
-                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
-              </button>
-            </div>
+            <div class="muted" style="margin-top:6px;">Full Admin Module view (layout placeholder).</div>
+            <div style="margin-top:12px;">${toggleBtn}</div>
+            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
           </div>
         </div>
       `;
@@ -2443,12 +2677,9 @@
         <div class="ccc-landing">
           <div>
             <div class="ccc-landingTitle">Option C</div>
-            <div class="muted" style="margin-top:6px;">Quick shortcut to the Commish Console.</div>
-            <div style="margin-top:12px;">
-              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
-                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
-              </button>
-            </div>
+            <div class="muted" style="margin-top:6px;">Quick shortcut to the Admin Console.</div>
+            <div style="margin-top:12px;">${toggleBtn}</div>
+            ${canCommish ? "" : '<div class="muted" style="margin-top:8px;">Commissioner-only tools.</div>'}
           </div>
         </div>
       `;
@@ -2456,6 +2687,7 @@
 
     return `
       <div class="ccc-summaryPage">
+        ${adminPanel}
         ${opts}
         ${body}
       </div>
@@ -2662,6 +2894,7 @@
     mode: normalizeHighlightMode(initialHighlightSettings.mode),
   };
   const initialHighlightByModule = initialHighlightSettings.byModule || {};
+  const initialDefaultFilters = loadDefaultFilters();
   const initialAsOfSeasonOverride = loadAsOfSeasonOverride();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
@@ -2678,7 +2911,7 @@
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",
     showAllTeams: false,
-    pageSize: 25,
+    pageSize: initialDefaultFilters.pageSize,
     tableDensity: "regular",
     pageByTab: { eligible: 1, submitted: 1 },
     detectedFranchiseId: "",
@@ -2704,6 +2937,7 @@
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
     theme: initialThemeSetting,
+    defaultFilters: initialDefaultFilters,
     highlightDefault: initialHighlightDefault,
     highlightByModule: initialHighlightByModule,
     rowHighlightEnabled: initialHighlightDefault.enabled,
@@ -2714,7 +2948,6 @@
     mymDeadlineBySeason: {},
     mymDeadlineFetch: {},
     commishViewMode: "A",
-    adminPanelOpen: false,
     lastOwnerTeam: "",
     mymSubmissionSeason: "",
   };
@@ -3159,7 +3392,7 @@
       extensionsChip.classList.add("primary");
     }
     if (commishChip) {
-      commishChip.style.display = state.canCommishMode ? "" : "none";
+      commishChip.style.display = "";
     }
     const setModuleState = (id, active, lockForOwners) => {
       const el = $(id);
@@ -3454,7 +3687,7 @@
       !!state.canCommishMode && !!state.commishMode && state.activeModule === "commish";
     if (toggleBtn) {
       toggleBtn.style.display = canShow ? "" : "none";
-      toggleBtn.textContent = state.commishConsoleOpen ? "Hide Commish Console" : "Commish Console";
+      toggleBtn.textContent = state.commishConsoleOpen ? "Hide Admin Console" : "Admin Console";
     }
 
     const isVisible = canShow && !!state.commishConsoleOpen;
@@ -3640,14 +3873,7 @@
 
     if (cccTabs) cccTabs.style.display = "";
     if (cccMain) cccMain.style.display = "";
-    const adminBtn = $("#adminBtn");
-    const adminPanel = $("#adminPanel");
     const teamFilterWrap = $("#teamFilterWrap");
-    if (adminBtn) {
-      adminBtn.style.display = "";
-      adminBtn.classList.toggle("is-selected", !!state.adminPanelOpen);
-    }
-    if (adminPanel) adminPanel.style.display = state.adminPanelOpen ? "" : "none";
     if (teamFilterWrap) teamFilterWrap.style.display = state.commishMode ? "none" : "";
 
 
@@ -3777,7 +4003,7 @@
             : state.activeModule === "extensions"
             ? "Extensions"
             : state.activeModule === "commish"
-            ? "Commish"
+            ? "Admin"
             : "MYM"
         }` +
         (built ? ` | built: ${built}` : "") +
@@ -3961,12 +4187,15 @@
       );
     }
     if (tabSummary) {
-      tabSummary.innerHTML = renderSummaryPage(
-        eligibleRows,
-        submittedRowsRaw,
-        teamName,
-        selectedPosition
-      );
+      tabSummary.innerHTML =
+        state.activeModule === "restructure"
+          ? renderRestructureSummaryPage(
+              eligibleRows,
+              submittedRowsRaw,
+              teamName,
+              selectedPosition
+            )
+          : renderSummaryPage(eligibleRows, submittedRowsRaw, teamName, selectedPosition);
     }
     if (tabCostCalc) tabCostCalc.innerHTML = "";
     if (tabEligible) {
@@ -4729,7 +4958,6 @@
       must("#commishModeWrap");
       must("#commishModeChk");
       must("#searchBox");
-      must("#themeSelect");
       must("#rowHighlightChk");
       must("#rowHighlightModeSelect");
       must("#adminBadge");
@@ -4738,10 +4966,7 @@
       must("#asOfApplyBtn");
       must("#asOfResetBtn");
       must("#asOfSeasonSelect");
-      must("#refreshBtn");
       must("#clearBtn");
-      must("#adminBtn");
-      must("#adminPanel");
       must("#teamFilterWrap");
 
       applyThemeSetting(state.theme);
@@ -4838,7 +5063,6 @@
       state.canCommishMode = canCommish;
       state.commishMode = state.canCommishMode ? true : false;
       state.commishConsoleOpen = false;
-      state.adminPanelOpen = false;
       state.adminReason = adminReason;
       state.adminDebug = {
         canCommish: !!canCommish,
@@ -4937,9 +5161,35 @@
       const positionSelect = $("#positionSelect");
       if (positionSelect) positionSelect.disabled = false;
 
+      // Apply saved defaults
+      const defaults = state.defaultFilters || {};
+      if (!state.commishMode) {
+        const defaultTeam = safeStr(defaults.teamId || "");
+        if (teamSelect && defaultTeam) {
+          const hasOpt = Array.from(teamSelect.options).some((o) => o.value === defaultTeam);
+          if (hasOpt) {
+            teamSelect.value = defaultTeam;
+            state.selectedTeam = defaultTeam;
+            state.showAllTeams = defaultTeam === "__ALL__";
+          }
+        }
+      }
+      if (positionSelect) {
+        const defaultPos = safeStr(defaults.position || "");
+        if (defaultPos) {
+          const hasOpt = Array.from(positionSelect.options).some((o) => o.value === defaultPos);
+          if (hasOpt) {
+            positionSelect.value = defaultPos;
+            state.selectedPosition = defaultPos;
+          }
+        }
+      }
+
       const pageSizeSelect = $("#pageSizeSelect");
       if (pageSizeSelect) {
-        state.pageSize = clampInt(pageSizeSelect.value || state.pageSize, 10, 500);
+        const defaults = state.defaultFilters || {};
+        const defaultSize = clampInt(defaults.pageSize || state.pageSize, 10, 500);
+        state.pageSize = [25, 100].includes(defaultSize) ? defaultSize : 25;
         pageSizeSelect.value = String(state.pageSize);
       }
 
@@ -5178,22 +5428,12 @@
     const moduleCommishChip = $("#moduleCommishChip");
     if (moduleCommishChip)
       moduleCommishChip.addEventListener("click", () => {
-        if (!state.canCommishMode) return;
         rememberHighlightForModule(state.activeModule || "default");
         state.activeModule = state.activeModule === "commish" ? "" : "commish";
         setHighlightForModule(state.activeModule || "default");
         resetAllTablePages();
         setTab("summary");
         render();
-      });
-
-    const themeSelect = $("#themeSelect");
-    if (themeSelect)
-      themeSelect.addEventListener("change", (e) => {
-        const v = safeStr(e.target.value || "auto").toLowerCase();
-        state.theme = v === "light" || v === "dark" || v === "auto" ? v : "auto";
-        saveThemeSetting(state.theme);
-        applyThemeSetting(state.theme);
       });
 
     const rowHighlightChk = $("#rowHighlightChk");
@@ -5212,6 +5452,62 @@
         rememberHighlightForModule(state.activeModule || "default");
         applyHighlightSetting();
       });
+
+    // Admin module controls
+    document.addEventListener("change", (e) => {
+      const target = e.target;
+      if (!target) return;
+      if (target.getAttribute && target.getAttribute("data-admin-theme")) {
+        const v = safeStr(target.value || "auto").toLowerCase();
+        state.theme = v === "light" || v === "dark" || v === "auto" ? v : "auto";
+        saveThemeSetting(state.theme);
+        applyThemeSetting(state.theme);
+        return;
+      }
+      const defKey = target.getAttribute && target.getAttribute("data-admin-default");
+      if (!defKey) return;
+      state.defaultFilters = state.defaultFilters || loadDefaultFilters();
+      if (defKey === "team") {
+        const v = safeStr(target.value || "");
+        state.defaultFilters.teamId = v;
+        saveDefaultFilters(state.defaultFilters);
+        if (!state.commishMode) {
+          const teamSelect = $("#teamSelect");
+          if (teamSelect && v) {
+            teamSelect.value = v;
+            state.selectedTeam = v;
+            state.showAllTeams = v === "__ALL__";
+          }
+        }
+      } else if (defKey === "position") {
+        const v = safeStr(target.value || "__ALL_POS__");
+        state.defaultFilters.position = v;
+        saveDefaultFilters(state.defaultFilters);
+        const positionSelect = $("#positionSelect");
+        if (positionSelect) {
+          positionSelect.value = v;
+          state.selectedPosition = v;
+        }
+      } else if (defKey === "rows") {
+        const v = clampInt(target.value || state.pageSize, 10, 500);
+        state.defaultFilters.pageSize = [25, 100].includes(v) ? v : 25;
+        saveDefaultFilters(state.defaultFilters);
+        const pageSizeSelect = $("#pageSizeSelect");
+        state.pageSize = state.defaultFilters.pageSize;
+        if (pageSizeSelect) pageSizeSelect.value = String(state.pageSize);
+      }
+      resetAllTablePages();
+      render();
+    });
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest("[data-admin-action]") : null;
+      if (!btn) return;
+      const action = safeStr(btn.getAttribute("data-admin-action"));
+      if (action === "refresh") {
+        handleRosterRefreshClick();
+      }
+    });
 
     // Tabs
     $$(".ccc-tab").forEach((btn) =>
@@ -5280,7 +5576,6 @@
         state.commishMode = !!e.target.checked;
         if (!state.commishMode) {
           state.commishConsoleOpen = false;
-          state.adminPanelOpen = false;
         }
         const adminBadge = $("#adminBadge");
         const adminControls = $("#adminControls");
@@ -5323,13 +5618,6 @@
         render();
       });
 
-    const adminBtn = $("#adminBtn");
-    if (adminBtn)
-      adminBtn.addEventListener("click", () => {
-        state.adminPanelOpen = !state.adminPanelOpen;
-        render();
-      });
-
     const pageSizeSelect = $("#pageSizeSelect");
     if (pageSizeSelect)
       pageSizeSelect.addEventListener("change", (e) => {
@@ -5338,12 +5626,6 @@
         resetAllTablePages();
         render();
       });
-
-    const refreshBtn = $("#refreshBtn");
-    if (refreshBtn) {
-      refreshBtn.textContent = "Refresh (use if rosters are not refreshed)";
-      refreshBtn.addEventListener("click", () => handleRosterRefreshClick());
-    }
 
     // Admin as-of
     const asOfInput = $("#asOfInput");

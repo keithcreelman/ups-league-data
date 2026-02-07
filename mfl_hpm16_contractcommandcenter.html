@@ -7,7 +7,7 @@
       <div class="ccc-brand">
         <div class="ccc-titleRow">
           <div class="ccc-title">
-            Contract Command Center - COMMISH TESTING
+            Contract Command Center
             <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
           </div>
           <img
@@ -29,7 +29,7 @@
       <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" data-module="restructure" title="Placeholder for future module">Restructures</button>
       <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" data-module="auction" title="Placeholder for future module">Auction Contracts</button>
       <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-module="mym" data-tool="mym">MYM</button>
-      <button id="moduleCommishChip" class="ccc-chipBtn" type="button" data-module="commish">Commish</button>
+      <button id="moduleCommishChip" class="ccc-chipBtn" type="button" data-module="commish">Admin</button>
     </div>
 
       <div class="ccc-controls">
@@ -42,7 +42,7 @@
 
   <div id="commishConsole" class="ccc-summary ccc-commishConsole" style="display:none;">
     <div class="ccc-summaryTop">
-      <div class="ccc-summaryTitle">Commish Console</div>
+      <div class="ccc-summaryTitle">Admin Console</div>
       <span class="pill">Manual contract update tool</span>
     </div>
 
@@ -131,25 +131,9 @@
       <div class="ccc-filterSection" data-section="actions">
         <div class="ccc-filterTitle">Actions</div>
         <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
-        <button id="adminBtn" class="ccc-btn" type="button" style="display:none;">Admin</button>
       </div>
     </div>
-    <div id="adminPanel" class="ccc-adminPanel" style="display:none;">
-      <div class="ccc-adminTitle">Admin Controls</div>
-      <div class="ccc-adminGrid">
-        <button id="refreshBtn" class="ccc-btn" type="button">
-          Refresh (use if rosters are not refreshed)
-        </button>
-        <div class="ccc-field">
-          Theme
-          <select id="themeSelect" class="ccc-select">
-            <option value="auto">Auto</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-      </div>
-    </div>
+
     <div id="summary" class="ccc-summary"></div>
 
     <div id="cccTabs" class="ccc-tabs">

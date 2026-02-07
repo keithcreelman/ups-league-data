@@ -825,7 +825,7 @@
       return {
         ok: false,
         isAdmin: false,
-        reason: "Commish check requires MFL page session",
+        reason: "Admin check requires MFL page session",
         emailCount: 0,
         L,
         YEAR,
@@ -1382,7 +1382,7 @@
                 ${sortTh("salary", "Salary", "", "is-num")}
                 ${sortTh("contractYear", "Years Remaining", "min-width:145px;", "is-num")}
                 ${sortTh("status", "Status")}
-                ${showOverrideCols ? `<th>Commish Override</th><th>Override As-Of</th>` : ``}
+                ${showOverrideCols ? `<th>Admin Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
               `
                   : `
@@ -5056,8 +5056,8 @@
         !!commishGateFranchise &&
         currentFranchiseId === commishGateFranchise;
       const adminReason = canCommish
-        ? safeStr(workerAdmin.reason || "Commish mode")
-        : "Owner mode (commish tools hidden)";
+        ? safeStr(workerAdmin.reason || "Admin mode")
+        : "Owner mode (admin tools limited)";
 
       state.isAdmin = canCommish;
       state.canCommishMode = canCommish;

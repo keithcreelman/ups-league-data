@@ -16,6 +16,7 @@
     "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
     "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
   };
+  const MFL_API_BASE = "https://api.myfantasyleague.com";
 
   // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
@@ -247,26 +248,12 @@
     } catch (_) {}
   }
 
-  function themeLabel(theme) {
-    const t = safeStr(theme).toLowerCase();
-    if (t === "light") return "Light";
-    if (t === "dark") return "Dark";
-    return "Auto";
-  }
-
   function applyThemeSetting(theme) {
     const t = safeStr(theme).toLowerCase() || "auto";
     const app = $("#cccApp");
     if (app) app.setAttribute("data-theme", t);
-    const btn = $("#themeToggleBtn");
-    if (btn) btn.textContent = `Theme: ${themeLabel(t)}`;
-  }
-
-  function nextThemeSetting(theme) {
-    const t = safeStr(theme).toLowerCase();
-    if (t === "auto") return "light";
-    if (t === "light") return "dark";
-    return "auto";
+    const sel = $("#themeSelect");
+    if (sel) sel.value = t;
   }
 
   function loadAsOfSeasonOverride() {
@@ -2021,6 +2008,8 @@
     asOfSeasonOverride: initialAsOfSeasonOverride,
     asOfDraft: null,
     adminDebug: null,
+    mymDeadlineBySeason: {},
+    mymDeadlineFetch: {},
   };
 
   function normalizeSeasonValue(v) {
@@ -2217,11 +2206,124 @@
     return isNaN(d.getTime()) ? null : d;
   }
 
+  function buildMflScheduleUrl(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return "";
+    return `${MFL_API_BASE}/${s}/export?TYPE=nflSchedule&W=ALL&JSON=1`;
+  }
+
+  function parseKickoffToDate(val) {
+    if (val === null || val === undefined) return null;
+    const raw = String(val).trim();
+    if (!raw) return null;
+    if (/^\d+$/.test(raw)) {
+      const n = Number(raw);
+      if (!isNaN(n)) {
+        if (raw.length >= 13) return new Date(n);
+        if (raw.length >= 10) return new Date(n * 1000);
+      }
+    }
+    return parseDate(raw);
+  }
+
+  function collectKickoffEntries(node, out) {
+    if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach((item) => collectKickoffEntries(item, out));
+      return;
+    }
+    if (typeof node !== "object") return;
+
+    if (node.kickoff !== undefined) {
+      const weekVal = safeInt(node.week || node.week_id || node.week_no || "");
+      out.push({ week: weekVal, kickoff: node.kickoff });
+    }
+
+    Object.keys(node).forEach((k) => collectKickoffEntries(node[k], out));
+  }
+
+  function extractWeek1Kickoff(scheduleData) {
+    const out = [];
+    collectKickoffEntries(scheduleData, out);
+    if (!out.length) return null;
+    const week1 = out.filter((x) => x && x.week === 1);
+    const pool = week1.length ? week1 : out;
+    const dates = pool
+      .map((x) => parseKickoffToDate(x.kickoff))
+      .filter((d) => d && !isNaN(d.getTime()))
+      .sort((a, b) => a.getTime() - b.getTime());
+    return dates[0] || null;
+  }
+
+  function computePriorSunday(kickoffDate) {
+    if (!kickoffDate || isNaN(kickoffDate.getTime())) return null;
+    const base = new Date(
+      kickoffDate.getFullYear(),
+      kickoffDate.getMonth(),
+      kickoffDate.getDate(),
+      12,
+      0,
+      0
+    );
+    const day = base.getDay();
+    const daysBack = day === 0 ? 7 : day;
+    return addDays(base, -daysBack);
+  }
+
+  function resolveMymDeadlineYmd(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return "";
+    const evt = MYM_EVENTS_BY_SEASON[s] || {};
+    const staticDeadline = safeStr(evt.contract_deadline);
+    const dynamic = state && state.mymDeadlineBySeason ? state.mymDeadlineBySeason[s] : null;
+    const dynamicYmd = dynamic && dynamic.deadlineYmd ? dynamic.deadlineYmd : "";
+    if (!dynamicYmd && state && state.mymDeadlineFetch) {
+      const fetching = !!state.mymDeadlineFetch[s];
+      const seasonNum = safeInt(s);
+      const currentYear = new Date().getFullYear();
+      if (!fetching && (seasonNum >= currentYear || !staticDeadline)) {
+        requestMymDeadlineFromSchedule(s);
+      }
+    }
+    return dynamicYmd || staticDeadline;
+  }
+
+  async function requestMymDeadlineFromSchedule(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s || !state) return;
+    if (!state.mymDeadlineBySeason) state.mymDeadlineBySeason = {};
+    if (!state.mymDeadlineFetch) state.mymDeadlineFetch = {};
+    if (state.mymDeadlineFetch[s]) return;
+    state.mymDeadlineFetch[s] = true;
+
+    try {
+      const url = buildMflScheduleUrl(s);
+      if (!url) return;
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`MFL schedule HTTP ${res.status}`);
+      const data = await res.json();
+      const kickoff = extractWeek1Kickoff(data);
+      const deadlineDate = computePriorSunday(kickoff);
+      const deadlineYmd = deadlineDate ? fmtYMDDate(deadlineDate) : "";
+      const kickoffYmd = kickoff ? fmtYMDDate(kickoff) : "";
+      state.mymDeadlineBySeason[s] = { deadlineYmd, kickoffYmd };
+    } catch (e) {
+      state.mymDeadlineBySeason[s] = {
+        deadlineYmd: "",
+        kickoffYmd: "",
+        error: e && e.message ? e.message : String(e),
+      };
+    } finally {
+      state.mymDeadlineFetch[s] = true;
+      render();
+    }
+  }
+
   function getMymSeasonWindow(season) {
     const s = normalizeSeasonValue(season);
     if (!s) return null;
-    const evt = MYM_EVENTS_BY_SEASON[s] || {};
-    const deadlineYmd = safeStr(evt.contract_deadline) || `${s}-09-01`;
+    const deadlineYmd = resolveMymDeadlineYmd(s);
+    if (!deadlineYmd) return null;
     const start = parseYMDDate(deadlineYmd);
     // League year rolls on March 1, so keep the current season active through end of February.
     const endExclusive = parseYMDDate(`${safeInt(s) + 1}-03-01`);
@@ -2239,9 +2341,9 @@
   function getRestructureSeasonWindow(season) {
     const s = normalizeSeasonValue(season);
     if (!s) return null;
-    const evt = MYM_EVENTS_BY_SEASON[s] || {};
     const start = parseYMDDate(`${s}-02-01`);
-    const endYmd = safeStr(evt.contract_deadline) || `${s}-09-01`;
+    const endYmd = resolveMymDeadlineYmd(s);
+    if (!endYmd) return null;
     const end = parseYMDDate(endYmd);
     if (!start || !end) return null;
     // Include contract deadline day.
@@ -2315,7 +2417,7 @@
       const availSeason = getAvailabilitySeason(season);
       if (isRestructureActiveForSeason(availSeason, getEffectiveNow(availSeason))) return "";
       const win = getRestructureSeasonWindow(availSeason);
-      const endTxt = win ? win.endYmd : "contract deadline";
+      const endTxt = win ? win.endYmd : resolveMymDeadlineYmd(availSeason) || "TBD";
       return `<div class="ccc-eligWarn">Restructures Available Feb 1 Through ${htmlEsc(
         endTxt
       )}</div>`;
@@ -2325,7 +2427,7 @@
     if (!s) return "";
     if (isMymActiveForSeason(s, getEffectiveNow(s))) return "";
     const win = getMymSeasonWindow(s);
-    const deadlineTxt = win ? win.deadlineYmd : "contract deadline";
+    const deadlineTxt = win ? win.deadlineYmd : resolveMymDeadlineYmd(s) || "TBD";
     return `<div class="ccc-eligWarn">MYM Not Available Until After Contract Deadline Date (${htmlEsc(
       deadlineTxt
     )})</div>`;
@@ -3662,7 +3764,6 @@
       must("#positionSelect");
       must("#showAllTeamsChk");
       must("#pageSizeSelect");
-      must("#densitySelect");
       must("#commishConsole");
       must("#commishPlayerSelect");
       must("#commishSalaryInput");
@@ -3676,7 +3777,7 @@
       must("#commishModeChk");
       must("#commishConsoleBtn");
       must("#searchBox");
-      must("#themeToggleBtn");
+      must("#themeSelect");
       must("#adminBadge");
       must("#adminControls");
       must("#asOfInput");
@@ -3875,13 +3976,6 @@
       if (pageSizeSelect) {
         state.pageSize = clampInt(pageSizeSelect.value || state.pageSize, 10, 500);
         pageSizeSelect.value = String(state.pageSize);
-      }
-      const densitySelect = $("#densitySelect");
-      if (densitySelect) {
-        const densityVal = safeStr(densitySelect.value || "regular");
-        state.tableDensity =
-          densityVal === "compact" || densityVal === "relaxed" ? densityVal : "regular";
-        densitySelect.value = state.tableDensity;
       }
 
       resetAllTablePages();
@@ -4091,10 +4185,11 @@
         render();
       });
 
-    const themeToggleBtn = $("#themeToggleBtn");
-    if (themeToggleBtn)
-      themeToggleBtn.addEventListener("click", () => {
-        state.theme = nextThemeSetting(state.theme);
+    const themeSelect = $("#themeSelect");
+    if (themeSelect)
+      themeSelect.addEventListener("change", (e) => {
+        const v = safeStr(e.target.value || "auto").toLowerCase();
+        state.theme = v === "light" || v === "dark" || v === "auto" ? v : "auto";
         saveThemeSetting(state.theme);
         applyThemeSetting(state.theme);
       });
@@ -4251,16 +4346,6 @@
         state.pageSize = clampInt(e.target.value || state.pageSize, 10, 500);
         e.target.value = String(state.pageSize);
         resetAllTablePages();
-        render();
-      });
-
-    const densitySelect = $("#densitySelect");
-    if (densitySelect)
-      densitySelect.addEventListener("change", (e) => {
-        const density = safeStr(e.target.value || "regular");
-        state.tableDensity =
-          density === "compact" || density === "relaxed" ? density : "regular";
-        e.target.value = state.tableDensity;
         render();
       });
 

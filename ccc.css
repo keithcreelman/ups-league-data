@@ -742,7 +742,9 @@ body.ccc-modalOpen > *{
 body.ccc-modalOpen #mymModal,
 body.ccc-modalOpen #mymModal *,
 body.ccc-modalOpen #restructureModal,
-body.ccc-modalOpen #restructureModal *{
+body.ccc-modalOpen #restructureModal *,
+body.ccc-modalOpen #tagModal,
+body.ccc-modalOpen #tagModal *{
   pointer-events: auto;
 }
 

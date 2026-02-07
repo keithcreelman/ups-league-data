@@ -261,6 +261,38 @@
       </div>
     </div>
   </div>
+
+  <!-- TAG SUBMISSION MODAL -->
+  <div id="tagModal" class="ccc-modal" aria-hidden="true">
+    <div class="ccc-modal-backdrop" data-close="1"></div>
+
+    <div class="ccc-modal-card" role="dialog" aria-modal="true" aria-labelledby="tagModalTitle">
+      <div class="ccc-modal-head">
+        <div>
+          <div id="tagModalTitle" class="ccc-modal-title">Submit Tag Selection</div>
+          <div id="tagModalSub" class="ccc-modal-sub muted"></div>
+        </div>
+        <button class="ccc-modal-x" type="button" data-close="1">✕</button>
+      </div>
+
+      <div class="ccc-modal-body">
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Selection</div>
+          <div class="ccc-code" id="tagModalSelection">—</div>
+        </div>
+        <div class="ccc-modal-row">
+          <div id="tagModalDeadline" class="muted" style="font-size:12px; font-weight:800;"></div>
+        </div>
+        <div class="ccc-error" id="tagModalErr" style="display:none;"></div>
+      </div>
+
+      <div class="ccc-modal-foot">
+        <button class="ccc-btn" type="button" data-close="1">Cancel</button>
+        <button class="ccc-btn" type="button" id="tagRemoveBtn">Remove Tag</button>
+        <button class="ccc-btn" type="button" id="tagSubmitBtn" style="font-weight:1000;">Submit Tag</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>

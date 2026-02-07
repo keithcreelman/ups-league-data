@@ -138,6 +138,7 @@
   const LOCAL_OVERRIDE_KEY = "ccc_mym_submit_overrides_v1";
   const LOCAL_ASOF_OVERRIDE_KEY = "ccc_asof_override_v1";
   const LOCAL_TAG_SELECTIONS_KEY = "ccc_tag_selections_v1";
+  const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
 
   function loadLocalOverrides() {
     try {
@@ -170,6 +171,23 @@
   function saveTagSelections(selections) {
     try {
       localStorage.setItem(LOCAL_TAG_SELECTIONS_KEY, JSON.stringify(selections || {}));
+    } catch (e) {}
+  }
+
+  function loadTagSubmissions() {
+    try {
+      const raw = localStorage.getItem(LOCAL_TAG_SUBMISSIONS_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveTagSubmissions(submissions) {
+    try {
+      localStorage.setItem(LOCAL_TAG_SUBMISSIONS_KEY, JSON.stringify(submissions || {}));
     } catch (e) {}
   }
 
@@ -1434,8 +1452,14 @@
         const selected = state.tagSelections[key];
         const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
         const isLocked = !!selected && !isSelected && limit <= 1;
-        const tagLabel = isSelected ? "Untag" : isLocked ? "Locked" : "Tag";
+        const tagLabel = isSelected ? "Selected" : isLocked ? "Locked" : "Tag";
         const tagBtnClass = `ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}`;
+        const submission = state.tagSubmissions[key];
+        const isSubmitted =
+          !!submission && safeStr(submission.player_id) === safeStr(r.player_id);
+        const submittedTag = isSubmitted
+          ? `<div class="cell-sub">Submitted</div>`
+          : ``;
         const tagBtn = `
           <button
             type="button"
@@ -1445,6 +1469,7 @@
             data-tag-limit="${limit}"
             data-season="${htmlEsc(season)}"
             data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
+            data-franchise-name="${htmlEsc(r.franchise_name || "")}"
             data-player-id="${htmlEsc(r.player_id)}"
             data-player-name="${htmlEsc(r.player_name)}"
             data-pos="${htmlEsc(posKeyFromRow(r))}"
@@ -1460,7 +1485,7 @@
           ppgRank > 0 ? String(ppgRank) : `N/A<div class="cell-sub">not enough games played</div>`;
         return `
           <tr class="pos-${posKey}">
-            <td>${tagBtn}</td>
+            <td>${tagBtn}${submittedTag}</td>
             <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
             <td>${htmlEsc(posKeyFromRow(r))}</td>
@@ -1534,6 +1559,7 @@
     activeTab: "eligible",
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
+    tagSubmissions: loadTagSubmissions(),
     adminDebug: null,
   };
 
@@ -2406,6 +2432,7 @@
   // 9B) MODAL STATE + HELPERS
   // ======================================================
   const mymModalState = { open: false, row: null, years: 2 };
+  const tagModalState = { open: false, key: "" };
 
   function formatK(n) {
     const v = safeInt(n);
@@ -2476,6 +2503,105 @@
         pill.style.display = "none";
       }
     }
+  }
+
+  function openTagModal(selectionKey) {
+    const modal = $("#tagModal");
+    if (!modal) return;
+    const sel = state.tagSelections[selectionKey];
+    if (!sel) return;
+
+    tagModalState.open = true;
+    tagModalState.key = selectionKey;
+
+    const title = $("#tagModalTitle");
+    if (title) title.textContent = "Submit Tag Selection";
+
+    const deadlineInfo = getTagDeadlineInfo(state.selectedSeason);
+    const deadlineTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.tagDeadline) : "TBD";
+    const rookieTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.rookieDraft) : "TBD";
+
+    const sub = $("#tagModalSub");
+    if (sub) {
+      sub.textContent = `You can change your selection until ${deadlineTxt}.`;
+    }
+
+    const selectionLine = `${safeStr(sel.player_name)} (${safeStr(sel.pos)}) — ${
+      safeStr(sel.franchise_name || sel.franchise_id) || "Team"
+    }`;
+    const selectionEl = $("#tagModalSelection");
+    if (selectionEl) selectionEl.textContent = selectionLine;
+
+    const deadlineEl = $("#tagModalDeadline");
+    if (deadlineEl)
+      deadlineEl.textContent = `Tag deadline: ${deadlineTxt} | Rookie draft: ${rookieTxt}`;
+
+    const err = $("#tagModalErr");
+    if (err) {
+      const submission = state.tagSubmissions[selectionKey];
+      if (submission && safeStr(submission.player_id) === safeStr(sel.player_id)) {
+        const submittedAt = submission.submitted_at_utc
+          ? fmtLocalYMDHM(new Date(submission.submitted_at_utc))
+          : "";
+        err.style.display = "";
+        err.textContent = submittedAt ? `Submitted: ${submittedAt}` : "Submitted.";
+        err.classList.add("ok");
+      } else {
+        err.style.display = "none";
+        err.textContent = "";
+        err.classList.remove("ok");
+      }
+    }
+
+    const submitBtn = $("#tagSubmitBtn");
+    if (submitBtn) {
+      submitBtn.textContent = "Submit Tag";
+      submitBtn.disabled = false;
+    }
+
+    modal.classList.add("is-open");
+    document.body.classList.add("ccc-modalOpen");
+    modal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeTagModal() {
+    const modal = $("#tagModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    tagModalState.open = false;
+    tagModalState.key = "";
+    const mym = $("#mymModal");
+    const rs = $("#restructureModal");
+    const anyOpen =
+      (mym && mym.classList.contains("is-open")) ||
+      (rs && rs.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
+  }
+
+  function submitTagSelection() {
+    const key = safeStr(tagModalState.key);
+    if (!key) return;
+    const sel = state.tagSelections[key];
+    if (!sel) return;
+    state.tagSubmissions[key] = {
+      ...sel,
+      submitted_at_utc: new Date().toISOString(),
+    };
+    saveTagSubmissions(state.tagSubmissions);
+    closeTagModal();
+    render();
+  }
+
+  function removeTagSelection() {
+    const key = safeStr(tagModalState.key);
+    if (!key) return;
+    delete state.tagSelections[key];
+    delete state.tagSubmissions[key];
+    saveTagSelections(state.tagSelections);
+    saveTagSubmissions(state.tagSubmissions);
+    closeTagModal();
+    render();
   }
 
   function setModalOption(years) {
@@ -3023,6 +3149,9 @@
       must("#rsYear1Input");
       must("#rsYear2Input");
       must("#rsSubmitBtn");
+      must("#tagModal");
+      must("#tagSubmitBtn");
+      must("#tagRemoveBtn");
 
       $("#cccMeta").textContent = "Loading MYM data…";
 
@@ -3651,6 +3780,7 @@
         const side = safeStr(btn.getAttribute("data-tag-side") || "OFFENSE");
         const limit = Math.max(1, safeInt(btn.getAttribute("data-tag-limit") || 1));
         const fid = pad4(btn.getAttribute("data-franchise-id"));
+        const franchiseName = safeStr(btn.getAttribute("data-franchise-name"));
         const pid = safeStr(btn.getAttribute("data-player-id"));
         const playerName = safeStr(btn.getAttribute("data-player-name"));
         const pos = safeStr(btn.getAttribute("data-pos"));
@@ -3658,9 +3788,7 @@
         const existing = state.tagSelections[key];
 
         if (existing && safeStr(existing.player_id) === pid) {
-          delete state.tagSelections[key];
-          saveTagSelections(state.tagSelections);
-          render();
+          openTagModal(key);
           return;
         }
 
@@ -3672,14 +3800,20 @@
           league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
           season,
           franchise_id: fid,
+          franchise_name: franchiseName,
           player_id: pid,
           player_name: playerName,
           pos,
           side,
           at: Date.now(),
         };
+        if (state.tagSubmissions[key]) {
+          delete state.tagSubmissions[key];
+          saveTagSubmissions(state.tagSubmissions);
+        }
         saveTagSelections(state.tagSelections);
         render();
+        openTagModal(key);
       },
       true
     );
@@ -3775,13 +3909,23 @@
       });
     }
 
+    const tagModal = $("#tagModal");
+    if (tagModal) {
+      tagModal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeTagModal();
+      });
+    }
+
     // Escape closes modal
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         const modalElMym = $("#mymModal");
         const modalElRes = $("#restructureModal");
+        const modalElTag = $("#tagModal");
         if (modalElMym && modalElMym.classList.contains("is-open")) closeMYMModal();
         if (modalElRes && modalElRes.classList.contains("is-open")) closeRestructureModal();
+        if (modalElTag && modalElTag.classList.contains("is-open")) closeTagModal();
       }
     });
 
@@ -3794,6 +3938,12 @@
     // Submit
     const submitBtn = $("#mymSubmitBtn");
     if (submitBtn) submitBtn.addEventListener("click", () => submitMYMContract());
+
+    const tagSubmitBtn = $("#tagSubmitBtn");
+    if (tagSubmitBtn) tagSubmitBtn.addEventListener("click", () => submitTagSelection());
+
+    const tagRemoveBtn = $("#tagRemoveBtn");
+    if (tagRemoveBtn) tagRemoveBtn.addEventListener("click", () => removeTagSelection());
 
     ["#rsTcvInput", "#rsYear1Input", "#rsYear2Input"].forEach((sel) => {
       const el = $(sel);

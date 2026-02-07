@@ -2,18 +2,129 @@
   --bg:#F5F7FB;
   --panel:#FFFFFF;
   --card:#F2F5F9;
+  --surface-1:#FFFFFF;
+  --surface-2:#F7F9FC;
+  --surface-3:#EEF2F7;
+  --surface-4:#F3F6FB;
+  --surface-5:#F8FAFC;
   --muted:#5B6B80;
   --text:#152033;
+  --text-strong:#111827;
   --line:rgba(15,23,42,.12);
   --accent:#2563EB;
   --accent2:#14B8A6;
+  --accent-soft:rgba(37,99,235,.10);
+  --accent-soft-2:rgba(20,184,166,.10);
+  --accent-border:rgba(37,99,235,.45);
+  --accent-underline:rgba(37,99,235,.85);
+  --accent-ring:rgba(37,99,235,.18);
   --good:#16A34A;
   --warn:#F59E0B;
+  --warn-soft:rgba(245,158,11,.10);
+  --warn-border:rgba(245,158,11,.35);
   --bad:#EF4444;
+  --bad-soft:rgba(239,68,68,.08);
+  --bad-border:rgba(239,68,68,.35);
   --chip:#E8EDF4;
   --shadow: 0 10px 30px rgba(15,23,42,.08);
+  --shadow-soft: 0 10px 22px rgba(15,23,42,.08);
   --radius: 18px;
   --control-bg: #FFFFFF;
+  --table-head-bg: #F3F6FB;
+  --table-head-text: #1A2637;
+  --table-row: #FFFFFF;
+  --table-row-alt: #F8FAFC;
+  --table-sticky: #EEF2F7;
+  --table-text: #1B2738;
+  --modal-backdrop: rgba(15,23,42,.55);
+  --placeholder: rgba(91,107,128,.55);
+  --select-arrow: #94A3B8;
+}
+
+#cccApp[data-theme="dark"]{
+  --bg:#0B1220;
+  --panel:#0F1A2E;
+  --card:#111C2F;
+  --surface-1:#0F1A2E;
+  --surface-2:#0C1628;
+  --surface-3:#0B1423;
+  --surface-4:#14233B;
+  --surface-5:#0B1423;
+  --muted:#9AA7BD;
+  --text:#E9EEF9;
+  --text-strong:#F6FBFF;
+  --line:rgba(255,255,255,.12);
+  --accent:#60A5FA;
+  --accent2:#22D3EE;
+  --accent-soft:rgba(96,165,250,.22);
+  --accent-soft-2:rgba(34,211,238,.18);
+  --accent-border:rgba(96,165,250,.55);
+  --accent-underline:rgba(96,165,250,.95);
+  --accent-ring:rgba(96,165,250,.2);
+  --good:#33D19A;
+  --warn:#FBBF24;
+  --warn-soft:rgba(251,191,36,.12);
+  --warn-border:rgba(251,191,36,.4);
+  --bad:#FF6B6B;
+  --bad-soft:rgba(255,107,107,.15);
+  --bad-border:rgba(255,107,107,.45);
+  --chip:#182646;
+  --shadow: 0 14px 50px rgba(0,0,0,.35);
+  --shadow-soft: 0 10px 22px rgba(0,0,0,.35);
+  --control-bg: #0F1A2E;
+  --table-head-bg: #14233B;
+  --table-head-text: rgba(241,247,255,.95);
+  --table-row: #0F1A2E;
+  --table-row-alt: #111F35;
+  --table-sticky: #14233B;
+  --table-text: #E7EEFB;
+  --modal-backdrop: rgba(0,0,0,.75);
+  --placeholder: rgba(154,167,189,.55);
+  --select-arrow: #C7D2E5;
+}
+
+@media (prefers-color-scheme: dark) {
+  #cccApp[data-theme="auto"]{
+    --bg:#0B1220;
+    --panel:#0F1A2E;
+    --card:#111C2F;
+    --surface-1:#0F1A2E;
+    --surface-2:#0C1628;
+    --surface-3:#0B1423;
+    --surface-4:#14233B;
+    --surface-5:#0B1423;
+    --muted:#9AA7BD;
+    --text:#E9EEF9;
+    --text-strong:#F6FBFF;
+    --line:rgba(255,255,255,.12);
+    --accent:#60A5FA;
+    --accent2:#22D3EE;
+    --accent-soft:rgba(96,165,250,.22);
+    --accent-soft-2:rgba(34,211,238,.18);
+    --accent-border:rgba(96,165,250,.55);
+    --accent-underline:rgba(96,165,250,.95);
+    --accent-ring:rgba(96,165,250,.2);
+    --good:#33D19A;
+    --warn:#FBBF24;
+    --warn-soft:rgba(251,191,36,.12);
+    --warn-border:rgba(251,191,36,.4);
+    --bad:#FF6B6B;
+    --bad-soft:rgba(255,107,107,.15);
+    --bad-border:rgba(255,107,107,.45);
+    --chip:#182646;
+    --shadow: 0 14px 50px rgba(0,0,0,.35);
+    --shadow-soft: 0 10px 22px rgba(0,0,0,.35);
+    --control-bg: #0F1A2E;
+    --table-head-bg: #14233B;
+    --table-head-text: rgba(241,247,255,.95);
+    --table-row: #0F1A2E;
+    --table-row-alt: #111F35;
+    --table-sticky: #14233B;
+    --table-text: #E7EEFB;
+    --modal-backdrop: rgba(0,0,0,.75);
+    --placeholder: rgba(154,167,189,.55);
+    --select-arrow: #C7D2E5;
+  }
 }
 
 /* ===== CCC base scope ===== */
@@ -35,9 +146,9 @@
 /* Header */
 .ccc-hero{
   background:
-    radial-gradient(900px 500px at 20% 0%, rgba(37,99,235,.10), transparent 60%),
-    radial-gradient(900px 500px at 85% 0%, rgba(20,184,166,.10), transparent 60%),
-    #ffffff;
+    radial-gradient(900px 500px at 20% 0%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 500px at 85% 0%, var(--accent-soft-2), transparent 60%),
+    var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 16px 16px 14px;
@@ -73,7 +184,7 @@
   display:flex;
   align-items:center;
   gap:10px;
-  color: #111827;
+  color: var(--text-strong);
   text-shadow: 0 1px 2px rgba(15,23,42,.08);
 }
 
@@ -81,7 +192,7 @@
   font-size: 11px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,.10);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--muted);
   font-weight: 800;
@@ -91,20 +202,20 @@
   width: 170px;
   height: auto;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.06);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
 }
 
 .ccc-subtag{
   font-size: 13px;
-  color: rgba(236,244,255,.9);
+  color: var(--muted);
   font-weight: 700;
 }
 
 .ccc-sub{
   margin-top: 6px;
   font-size: 13px;
-  color: rgba(228,236,250,.92);
+  color: var(--muted);
   font-weight: 700;
 }
 
@@ -122,7 +233,7 @@
   font-weight: 900;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: rgba(233,238,249,.74);
+  color: var(--muted);
 }
 
 .ccc-navWarn{
@@ -134,9 +245,9 @@
 .ccc-eligWarn{
   margin: 10px 0 0 0;
   padding: 12px;
-  border: 1px solid rgba(239,68,68,.35);
+  border: 1px solid var(--bad-border);
   border-radius: 12px;
-  background: rgba(239,68,68,.08);
+  background: var(--bad-soft);
   color: var(--bad);
   font-size: 18px;
   font-weight: 1000;
@@ -147,7 +258,7 @@
 /* Buttons */
 .ccc-chipBtn{
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   color: var(--text);
   padding: 9px 12px;
   border-radius: 999px;
@@ -159,17 +270,17 @@
   box-shadow: 0 8px 18px rgba(15,23,42,.08);
 }
 .ccc-chipBtn:hover{
-  background: #f7f9fc;
-  border-color: rgba(37,99,235,.35);
+  background: var(--surface-2);
+  border-color: var(--accent-border);
   box-shadow: 0 10px 20px rgba(15,23,42,.1);
 }
 .ccc-chipBtn:active{ transform: translateY(1px); }
 .ccc-chipBtn.primary{
-  background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(20,184,166,.14));
-  border-color: rgba(37,99,235,.45);
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent-soft-2));
+  border-color: var(--accent-border);
 }
 .ccc-chipBtn.is-selected{
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 0 0 2px rgba(37,99,235,.2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 0 0 2px var(--accent-ring);
 }
 .ccc-chipBtn.disabled{
   opacity:.55;
@@ -185,7 +296,7 @@
   justify-content:flex-end;
   padding: 8px 10px;
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--surface-1);
   border: 1px solid var(--line);
   box-shadow: 0 6px 16px rgba(15,23,42,.06);
 }
@@ -197,7 +308,7 @@
   align-items:center;
   display:flex;
 }
-.ccc-adminLabel{ color: rgba(233,238,249,.75); font-weight:900; }
+.ccc-adminLabel{ color: var(--muted); font-weight:900; }
 
 .ccc-field{
   display:flex;
@@ -242,19 +353,19 @@
 }
 
 .ccc-input:focus, .ccc-select:focus{
-  border-color: rgba(37,99,235,.85);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-ring);
 }
 
-.ccc-input::placeholder{ color: rgba(233,238,249,.45); }
+.ccc-input::placeholder{ color: var(--placeholder); }
 
 .ccc-select{
   appearance: none;
   -webkit-appearance: none;
   padding-right: 34px;
   background-image:
-    linear-gradient(45deg, transparent 50%, #d3e6ff 50%),
-    linear-gradient(135deg, #d3e6ff 50%, transparent 50%),
+    linear-gradient(45deg, transparent 50%, var(--select-arrow) 50%),
+    linear-gradient(135deg, var(--select-arrow) 50%, transparent 50%),
     var(--control-bg);
   background-position:
     calc(100% - 16px) calc(50% - 2px),
@@ -265,7 +376,7 @@
 }
 
 .ccc-btn{
-  background: #ffffff;
+  background: var(--surface-1);
   border: 1px solid var(--line);
   color: var(--text);
   padding: 9px 14px;
@@ -277,7 +388,7 @@
   transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
 }
 .ccc-btn:hover{
-  border-color: rgba(37,99,235,.45);
+  border-color: var(--accent-border);
   box-shadow: 0 10px 20px rgba(15,23,42,.12);
 }
 .ccc-btn:active{ transform: translateY(1px); }
@@ -287,31 +398,31 @@
   box-shadow: none;
 }
 .ccc-btn.is-selected{
-  background: linear-gradient(135deg, rgba(37,99,235,.15), rgba(20,184,166,.15));
-  border-color: rgba(37,99,235,.45);
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent-soft-2));
+  border-color: var(--accent-border);
 }
 
 .ccc-btn-offer{
-  background: #ffffff;
-  border-color: rgba(37,99,235,.35);
+  background: var(--surface-1);
+  border-color: var(--accent-border);
   color: var(--text);
 }
 .ccc-btn-offer:hover{
-  border-color: rgba(232,242,255,.78);
+  border-color: var(--accent-border);
 }
 
 .ccc-btn-tag{
-  background: #ffffff;
-  border-color: rgba(37,99,235,.35);
+  background: var(--surface-1);
+  border-color: var(--accent-border);
   color: var(--text);
 }
 .ccc-btn-tag.is-selected{
-  background: rgba(37,99,235,.12);
-  border-color: rgba(37,99,235,.5);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
   color: var(--text);
 }
 .ccc-btn-tag:disabled{
-  background: rgba(226,232,240,.7);
+  background: var(--surface-3);
   border-color: rgba(148,163,184,.5);
   color: rgba(100,116,139,.9);
   opacity: 1;
@@ -330,10 +441,10 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-summary{
   margin-top: 12px;
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   border-radius: var(--radius);
   padding: 12px 12px;
-  box-shadow: 0 10px 24px rgba(15,23,42,.06);
+  box-shadow: var(--shadow-soft);
 }
 
 .ccc-summaryControls{
@@ -345,7 +456,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #f7f9fc;
+  background: var(--surface-2);
 }
 
 .ccc-calcBreakdown{
@@ -353,14 +464,14 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background: #f7f9fc;
+  background: var(--surface-2);
 }
 .ccc-calcBreakdown details{
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 6px 8px;
   margin-bottom: 8px;
-  background: #ffffff;
+  background: var(--surface-1);
 }
 .ccc-calcBreakdown summary{
   cursor: pointer;
@@ -381,10 +492,10 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 }
 
 .ccc-commishConsole{
-  border-color: rgba(245,158,11,.45);
+  border-color: var(--warn-border);
   background:
-    radial-gradient(600px 180px at 0% 0%, rgba(245,158,11,.10), transparent 70%),
-    #ffffff;
+    radial-gradient(600px 180px at 0% 0%, var(--warn-soft), transparent 70%),
+    var(--surface-1);
 }
 
 .ccc-commishConsole .ccc-adminControls{
@@ -421,7 +532,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 }
 
 .kpi{
-  background: rgba(255,255,255,.06);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 10px 10px;
@@ -430,14 +541,14 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 
 .kpi .label{ font-size:11px; color: var(--muted); font-weight:800; }
 .kpi .value{ font-size:18px; font-weight:1000; margin-top:3px; }
-.kpi .hint{ font-size:11px; color: rgba(233,238,249,.65); margin-top:4px; }
+.kpi .hint{ font-size:11px; color: var(--muted); margin-top:4px; }
 
 .ccc-summaryPage{
   margin-top: 12px;
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--surface-1);
 }
 
 .ccc-miniGrid{
@@ -451,7 +562,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
-  background: #f8fafc;
+  background: var(--surface-5);
 }
 
 .ccc-miniKpi .label{
@@ -476,7 +587,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 
 .ccc-tab{
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   color: var(--text);
   border-radius: 999px;
   padding: 9px 12px;
@@ -485,8 +596,8 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   font-size: 12px;
 }
 .ccc-tab.active{
-  background: rgba(37,99,235,.12);
-  border-color: rgba(37,99,235,.35);
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
 }
 
 /* Table */
@@ -501,7 +612,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-tableMetaInfo{
   font-size: 12px;
   font-weight: 800;
-  color: rgba(233,238,249,.78);
+  color: var(--muted);
 }
 
 .ccc-tableMetaActions{
@@ -513,12 +624,12 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-pageLabel{
   font-size: 12px;
   font-weight: 900;
-  color: rgba(241,247,255,.92);
+  color: var(--text);
 }
 
 .ccc-pageBtn{
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   color: var(--text);
   border-radius: 10px;
   padding: 6px 10px;
@@ -535,14 +646,14 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-tableWrap{
   margin-top: 12px;
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   border-radius: 16px;
   overflow: auto;
   max-height: 68vh;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-x pan-y;
-  box-shadow: 0 10px 22px rgba(15,23,42,.08);
+  box-shadow: var(--shadow-soft);
   --row-pad-y: 12px;
   --row-pad-x: 12px;
   --header-pad-y: 13px;
@@ -574,7 +685,7 @@ table.ccc-table{
   border-collapse: separate;
   border-spacing: 0;
   min-width: 980px;
-  color: #162540;
+  color: var(--table-text);
   font-size: var(--row-font-size);
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
@@ -584,9 +695,9 @@ table.ccc-table thead th{
   position: sticky;
   top: 0;
   z-index: 5;
-  background: #f3f6fb;
+  background: var(--table-head-bg);
   backdrop-filter: blur(8px);
-  color: #1a2637;
+  color: var(--table-head-text);
   font-size: var(--head-font-size);
   font-weight: 1000;
   text-align:left;
@@ -613,12 +724,12 @@ table.ccc-table thead th.is-sortable{
 }
 
 table.ccc-table thead th.is-sortable:hover{
-  background: #e9eef5;
+  background: var(--surface-3);
 }
 
 table.ccc-table thead th.is-sorted{
-  color: #1a2637;
-  box-shadow: inset 0 -3px 0 rgba(37,99,235,.85);
+  color: var(--table-head-text);
+  box-shadow: inset 0 -3px 0 var(--accent-underline);
 }
 
 table.ccc-table thead th .sort{
@@ -633,11 +744,11 @@ table.ccc-table thead th.is-num{
 
 table.ccc-table tbody td{
   padding: var(--row-pad-y) var(--row-pad-x);
-  border-bottom: 1px solid rgba(15,23,42,.08);
-  border-right: 1px solid rgba(15,23,42,.06);
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   font-size: var(--row-font-size);
   vertical-align: top;
-  color: #1b2738;
+  color: var(--table-text);
   font-weight: 700;
   background: transparent;
 }
@@ -650,15 +761,15 @@ table.ccc-table tbody td:last-child{
   position: sticky;
   left: 0;
   z-index: 4;
-  background: #eef2f7;
+  background: var(--table-sticky);
 }
 
 table.ccc-table tbody tr{
-  background: #ffffff;
+  background: var(--table-row);
 }
 
 table.ccc-table tbody tr:nth-child(even){
-  background: #f8fafc;
+  background: var(--table-row-alt);
 }
 
 table.ccc-table tbody tr:hover{
@@ -696,6 +807,24 @@ table.ccc-table tbody tr.pos-DL td:first-child{ background: rgba(239,68,68,.10);
 table.ccc-table tbody tr.pos-LB td:first-child{ background: rgba(14,165,233,.10); }
 table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(234,88,12,.10); }
 
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.16), rgba(96,165,250,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(34,197,94,.14), rgba(34,197,94,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.16), rgba(168,85,247,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.16), rgba(245,158,11,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.16), rgba(236,72,153,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.16), rgba(239,68,68,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(14,165,233,.16), rgba(14,165,233,.05)); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(234,88,12,.16), rgba(234,88,12,.05)); }
+
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(96,165,250,.7); background: rgba(96,165,250,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(34,197,94,.7); background: rgba(34,197,94,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.7); background: rgba(168,85,247,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.7); background: rgba(245,158,11,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-K td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.7); background: rgba(236,72,153,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.7); background: rgba(239,68,68,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(14,165,233,.7); background: rgba(14,165,233,.12); }
+#cccApp[data-theme="dark"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(234,88,12,.7); background: rgba(234,88,12,.12); }
+
 table.ccc-table .playerCell{
   font-weight: 1000;
   letter-spacing: .1px;
@@ -708,22 +837,22 @@ table.ccc-table .cell-num{
 
 table.ccc-table .cell-sub{
   margin-top: 2px;
-  color: rgba(24,40,70,.85);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 800;
 }
 
 .ccc-tableWrap .cell-sub{
-  color: rgba(24,40,70,.85);
+  color: var(--muted);
   font-weight: 800;
 }
 
 .ccc-tableWrap .muted{
-  color: rgba(71,85,105,.9);
+  color: var(--muted);
 }
 
 table.ccc-table .muted{
-  color: rgba(71,85,105,.9);
+  color: var(--muted);
 }
 
 .pill{
@@ -733,22 +862,22 @@ table.ccc-table .muted{
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #f7f9fc;
+  background: var(--surface-2);
   font-weight: 1000;
   font-size: 11px;
   white-space: nowrap;
 }
 
-.pill.auction{ border-color: rgba(37,99,235,.35); background: rgba(37,99,235,.08); }
+.pill.auction{ border-color: var(--accent-border); background: var(--accent-soft); }
 .pill.waiver { border-color: rgba(100,116,139,.35); background: rgba(100,116,139,.08); }
-.pill.rookie { border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+.pill.rookie { border-color: var(--warn-border); background: var(--warn-soft); }
 .pill.good{ border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.08); }
-.pill.bad{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08); }
+.pill.bad{ border-color: var(--bad-border); background: var(--bad-soft); }
 
 .muted{ color: var(--muted); font-weight: 700; }
-.playerCell{ font-weight: 1000; color:#1b2738; }
+.playerCell{ font-weight: 1000; color: var(--table-text); }
 .explain{
-  color: rgba(241,247,255,.93);
+  color: var(--text);
   line-height: 1.32;
   max-width: 560px;
 }
@@ -781,7 +910,7 @@ table.ccc-table .muted{
 .ccc-modal-backdrop{
   position: fixed;
   inset: 0;
-  background: rgba(15,23,42,.55);
+  background: var(--modal-backdrop);
   backdrop-filter: blur(2px);
 }
 
@@ -810,7 +939,7 @@ body.ccc-modalOpen #tagModal *{
   width: min(720px, 100%);
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: #ffffff;
+  background: var(--surface-1);
   box-shadow: 0 30px 90px rgba(15,23,42,.25);
   overflow: hidden;
 }
@@ -820,8 +949,8 @@ body.ccc-modalOpen #tagModal *{
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(900px 500px at 25% 0%, rgba(37,99,235,.08), transparent 60%),
-    radial-gradient(900px 500px at 85% 0%, rgba(20,184,166,.08), transparent 60%);
+    radial-gradient(900px 500px at 25% 0%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 500px at 85% 0%, var(--accent-soft-2), transparent 60%);
   pointer-events: none;
 }
 .ccc-modal-card > *{ position: relative; z-index: 1; }
@@ -838,7 +967,7 @@ body.ccc-modalOpen #tagModal *{
 .ccc-modal-sub{ margin-top:4px; font-size:12px; color: var(--muted); font-weight: 700; }
 
 .ccc-modal-x{
-  background: #f7f9fc;
+  background: var(--surface-2);
   border: 1px solid var(--line);
   color: var(--text);
   border-radius: 10px;
@@ -868,7 +997,7 @@ body.ccc-modalOpen #tagModal *{
 
 .ccc-code{
   border: 1px solid var(--line);
-  background: #f8fafc;
+  background: var(--surface-5);
   border-radius: 12px;
   padding: 10px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

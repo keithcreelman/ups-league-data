@@ -156,6 +156,7 @@
   const LOCAL_TAG_SELECTIONS_KEY = "ccc_tag_selections_v1";
   const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
+  const LOCAL_THEME_KEY = "ccc_theme_v1";
 
   function loadLocalOverrides() {
     try {
@@ -219,6 +220,43 @@
     } catch (e) {
       return { minGames: 8, enabled: true };
     }
+  }
+
+  function loadThemeSetting() {
+    try {
+      const raw = localStorage.getItem(LOCAL_THEME_KEY);
+      const v = safeStr(raw).toLowerCase();
+      if (v === "light" || v === "dark" || v === "auto") return v;
+    } catch (_) {}
+    return "auto";
+  }
+
+  function saveThemeSetting(theme) {
+    try {
+      localStorage.setItem(LOCAL_THEME_KEY, safeStr(theme || "auto"));
+    } catch (_) {}
+  }
+
+  function themeLabel(theme) {
+    const t = safeStr(theme).toLowerCase();
+    if (t === "light") return "Light";
+    if (t === "dark") return "Dark";
+    return "Auto";
+  }
+
+  function applyThemeSetting(theme) {
+    const t = safeStr(theme).toLowerCase() || "auto";
+    const app = $("#cccApp");
+    if (app) app.setAttribute("data-theme", t);
+    const btn = $("#themeToggleBtn");
+    if (btn) btn.textContent = `Theme: ${themeLabel(t)}`;
+  }
+
+  function nextThemeSetting(theme) {
+    const t = safeStr(theme).toLowerCase();
+    if (t === "auto") return "light";
+    if (t === "light") return "dark";
+    return "auto";
   }
 
   function savePpgSettings(settings) {
@@ -1902,6 +1940,7 @@
   // 8) STATE + TEAM LIST
   // ======================================================
   const initialPpgSettings = loadPpgSettings();
+  const initialThemeSetting = loadThemeSetting();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     restructureSubmissions: [],
@@ -1936,6 +1975,7 @@
     tagCalcOpen: false,
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
+    theme: initialThemeSetting,
     adminDebug: null,
   };
 
@@ -3554,12 +3594,15 @@
       must("#commishModeChk");
       must("#commishConsoleBtn");
       must("#searchBox");
+      must("#themeToggleBtn");
       must("#adminBadge");
       must("#adminControls");
       must("#asOfInput");
       must("#asOfResetBtn");
       must("#refreshBtn");
       must("#clearBtn");
+
+      applyThemeSetting(state.theme);
 
       // Modal required elements
       must("#mymModal");
@@ -3957,6 +4000,14 @@
         sortState.dir = "desc";
         resetAllTablePages();
         render();
+      });
+
+    const themeToggleBtn = $("#themeToggleBtn");
+    if (themeToggleBtn)
+      themeToggleBtn.addEventListener("click", () => {
+        state.theme = nextThemeSetting(state.theme);
+        saveThemeSetting(state.theme);
+        applyThemeSetting(state.theme);
       });
 
     // Tabs

@@ -299,6 +299,23 @@
   border-color: rgba(232,242,255,.78);
 }
 
+.ccc-btn-tag{
+  background: linear-gradient(180deg, rgba(18,28,48,.98), rgba(10,18,34,.98));
+  border-color: rgba(192,215,250,.55);
+  color: #f6fbff;
+}
+.ccc-btn-tag.is-selected{
+  background: linear-gradient(180deg, rgba(10,18,34,.98), rgba(6,12,24,.98));
+  border-color: rgba(230,240,255,.7);
+  color: #ffffff;
+}
+.ccc-btn-tag:disabled{
+  background: linear-gradient(180deg, rgba(12,18,32,.92), rgba(6,10,20,.92));
+  border-color: rgba(160,180,210,.45);
+  color: #ffffff;
+  opacity: 1;
+}
+
 table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(78,161,255,.25); border-color: rgba(78,161,255,.85); }
 table.ccc-table tbody tr.pos-RB .ccc-btn-offer{ background: rgba(51,209,154,.25); border-color: rgba(51,209,154,.85); }
 table.ccc-table tbody tr.pos-WR .ccc-btn-offer{ background: rgba(191,109,255,.25); border-color: rgba(191,109,255,.88); }

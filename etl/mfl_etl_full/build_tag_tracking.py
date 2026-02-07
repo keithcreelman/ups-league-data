@@ -383,9 +383,8 @@ def fetch_week1_aav_by_pos(conn, season: int) -> Dict[str, List[int]]:
     return by_pos
 
 
-def fetch_tagged_previous_season_ids(conn, season: int) -> set[str]:
-    prev = season - 1
-    if prev <= 0:
+def fetch_tagged_season_ids(conn, season: int) -> set[str]:
+    if season <= 0:
         return set()
     tagged: set[str] = set()
     sql_weekly = """
@@ -394,7 +393,7 @@ def fetch_tagged_previous_season_ids(conn, season: int) -> set[str]:
     WHERE season = ?
       AND UPPER(COALESCE(contract_status, '')) LIKE '%TAG%'
     """
-    for row in conn.execute(sql_weekly, (prev,)).fetchall():
+    for row in conn.execute(sql_weekly, (season,)).fetchall():
         pid = safe_str(row[0])
         if pid:
             tagged.add(pid)
@@ -404,11 +403,22 @@ def fetch_tagged_previous_season_ids(conn, season: int) -> set[str]:
     WHERE season = ?
       AND UPPER(COALESCE(contract_status, '')) LIKE '%TAG%'
     """
-    for row in conn.execute(sql_current, (prev,)).fetchall():
+    for row in conn.execute(sql_current, (season,)).fetchall():
         pid = safe_str(row[0])
         if pid:
             tagged.add(pid)
     return tagged
+
+
+def resolve_exclude_tag_season(season: int, override: int = 0) -> int:
+    if override and override > 0:
+        return override
+    # Offseason logic: if we're in Jan/Feb and tracking the prior season,
+    # exclude tags from that same season (since we're preparing for next year).
+    now = datetime.now()
+    if now.month < 3 and season == now.year - 1:
+        return season
+    return season - 1
 
 
 def build_tier_bid_map(week1_aav_by_pos: Dict[str, List[int]]) -> Dict[Tuple[str, int], int]:
@@ -443,11 +453,11 @@ def tag_side(pos_group: str) -> str:
     return "OTHER"
 
 
-def build_rows(conn, season: int) -> List[Dict[str, Any]]:
+def build_rows(conn, season: int, exclude_tag_season: int) -> List[Dict[str, Any]]:
     league_id = fetch_league_id(conn, season)
     last_regular_week = fetch_regular_season_week(conn, season)
     candidates = fetch_candidates(conn, season)
-    tagged_prev = fetch_tagged_previous_season_ids(conn, season)
+    tagged_prev = fetch_tagged_season_ids(conn, exclude_tag_season)
     scoring_map = fetch_scoring_rank_map(conn, season, last_regular_week)
     prior_aav_map = fetch_week1_aav_map(conn, season)
     week1_aav_by_pos = fetch_week1_aav_by_pos(conn, season)
@@ -513,7 +523,7 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
                 eligibility_reason = "Not eligible."
         if was_tagged_prev:
             is_eligible = 0
-            eligibility_reason = "Tagged in prior season (ineligible)."
+            eligibility_reason = f"Tagged in {exclude_tag_season} (ineligible)."
 
         row = {
             "league_id": league_id,
@@ -543,6 +553,7 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
             "is_tag_eligible": is_eligible,
             "eligibility_reason": eligibility_reason,
             "tag_prev_season": 1 if was_tagged_prev else 0,
+            "tag_prev_season_year": exclude_tag_season if was_tagged_prev else 0,
             "tag_formula": formula,
             "tracking_context": "in-season",
             "scoring_weeks_used": f"1-{last_regular_week}",
@@ -560,7 +571,13 @@ def build_rows(conn, season: int) -> List[Dict[str, Any]]:
     return out
 
 
-def build_meta(rows: List[Dict[str, Any]], season: int, scoring_last_week: int) -> Dict[str, Any]:
+def build_meta(
+    rows: List[Dict[str, Any]],
+    season: int,
+    scoring_last_week: int,
+    exclude_tag_season: int,
+    tracking_for_season: int,
+) -> Dict[str, Any]:
     by_pos: Dict[str, int] = {}
     for r in rows:
         p = safe_str(r.get("positional_grouping"))
@@ -568,12 +585,14 @@ def build_meta(rows: List[Dict[str, Any]], season: int, scoring_last_week: int) 
     return {
         "generated_at": now_local_stamp(),
         "season": season,
+        "tracking_for_season": tracking_for_season,
         "count": len(rows),
         "source": "tag-tracking-v1",
         "scoring_weeks_used": f"1-{scoring_last_week}",
         "aav_snapshot_week": 1,
         "by_position": by_pos,
-        "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the prior season.",
+        "exclude_tagged_season": exclude_tag_season,
+        "notes": "Tracking uses current season scoring and non-rookie expiring contracts (contract_year=1). Excludes players tagged in the specified prior season.",
     }
 
 
@@ -581,6 +600,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--db-path", default=DEFAULT_DB_PATH)
     parser.add_argument("--season", type=int, default=0)
+    parser.add_argument(
+        "--exclude-tagged-season",
+        type=int,
+        default=0,
+        help="Season to exclude players tagged in that year (0 uses automatic logic).",
+    )
     parser.add_argument("--out-path", default=str(DEFAULT_OUT_PATH))
     return parser.parse_args()
 
@@ -589,15 +614,22 @@ def main() -> int:
     args = parse_args()
     season = args.season if args.season > 0 else default_tracking_season()
     out_path = Path(args.out_path)
+    exclude_tag_season = resolve_exclude_tag_season(season, args.exclude_tagged_season)
+    tracking_for_season = season + 1 if exclude_tag_season == season else season
 
     conn = get_conn(args.db_path)
     try:
         last_regular_week = fetch_regular_season_week(conn, season)
-        rows = build_rows(conn, season)
+        rows = build_rows(conn, season, exclude_tag_season)
     finally:
         conn.close()
 
-    doc = {"meta": build_meta(rows, season, last_regular_week), "rows": rows}
+    doc = {
+        "meta": build_meta(
+            rows, season, last_regular_week, exclude_tag_season, tracking_for_season
+        ),
+        "rows": rows,
+    }
     out_path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
 
     print(f"Wrote {out_path}")

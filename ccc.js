@@ -984,15 +984,37 @@
     };
   }
 
-  function getTeamRgb(franchiseId) {
+  function computeTeamHue(franchiseId, franchiseName) {
     const fid = safeStr(franchiseId);
-    if (!fid) return null;
-    const hue = hashToHue(fid);
-    return hslToRgb(hue, 75, 50);
+    const name = safeStr(franchiseName);
+    const n = safeInt(fid);
+    if (n > 0) {
+      const base = (n * 137.508) % 360;
+      const tweak = name ? (hashToHue(name) % 20) - 10 : 0;
+      return (base + tweak + 360) % 360;
+    }
+    return hashToHue(name || fid);
   }
 
-  function buildTeamStyle(franchiseId) {
-    const rgb = getTeamRgb(franchiseId);
+  function getTeamRgb(franchiseId, franchiseName) {
+    const fid = safeStr(franchiseId);
+    const name = safeStr(franchiseName);
+    if (!fid && !name) return null;
+    const hue = computeTeamHue(fid, name);
+    return hslToRgb(hue, 82, 50);
+  }
+
+  function buildTeamStyle(rowOrId, franchiseName) {
+    let fid = "";
+    let name = "";
+    if (rowOrId && typeof rowOrId === "object") {
+      fid = safeStr(rowOrId.franchise_id);
+      name = safeStr(rowOrId.franchise_name);
+    } else {
+      fid = safeStr(rowOrId);
+      name = safeStr(franchiseName);
+    }
+    const rgb = getTeamRgb(fid, name);
     if (!rgb) return "";
     return `--team-rgb:${rgb.r},${rgb.g},${rgb.b};`;
   }
@@ -1214,7 +1236,7 @@
           }`;
           const posKey = posKeyFromRow(r);
           const rowClass = buildRowClass(r, posKey);
-          const rowStyle = buildTeamStyle(r.franchise_id);
+          const rowStyle = buildTeamStyle(r);
           const team = htmlEsc(r.franchise_name || r.franchise_id || "");
           const player = htmlEsc(r.player_name || r.player_id);
           const posDisp = htmlEsc(r.position || "");
@@ -1253,7 +1275,7 @@
         const posKeyRaw = posKeyFromRow(r);
         const posKey = htmlEsc(posKeyRaw);
         const rowClass = buildRowClass(r, posKeyRaw);
-        const rowStyle = buildTeamStyle(r.franchise_id);
+        const rowStyle = buildTeamStyle(r);
         const salaryNum = safeInt(r.salary);
         const salary = salaryNum.toLocaleString();
         const acqType = safeStr(r.mym_acq_type);
@@ -2083,7 +2105,7 @@
           ppgRankCell = "N/A";
         }
         const rowClass = buildRowClass(r, posKeyRaw);
-        const rowStyle = buildTeamStyle(r.franchise_id);
+        const rowStyle = buildTeamStyle(r);
         return `
           <tr class="${rowClass}"${rowStyle ? ` style="${rowStyle}"` : ""}>
             <td>${tagBtn}${submittedTag}</td>

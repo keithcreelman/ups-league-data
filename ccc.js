@@ -988,7 +988,7 @@
     const fid = safeStr(franchiseId);
     if (!fid) return null;
     const hue = hashToHue(fid);
-    return hslToRgb(hue, 60, 55);
+    return hslToRgb(hue, 75, 50);
   }
 
   function buildTeamStyle(franchiseId) {

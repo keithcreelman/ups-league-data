@@ -17,6 +17,12 @@
     "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
   };
   const MFL_API_BASE = "https://api.myfantasyleague.com";
+  const TEAM_COLOR_OVERRIDES = {
+    "0003": { h: 205, s: 90, l: 45 }, // Gride
+    "0012": { h: 25, s: 95, l: 50 }, // Hawks
+    "0011": { h: 285, s: 85, l: 48 }, // Cleon Ca$h
+    "0005": { h: 120, s: 80, l: 45 }, // HammerTime
+  };
 
   // Cloudflare Worker: { ok:true, isAdmin:true/false, reason:"...", emailCount:n }
   const ADMIN_WORKER_URL = "https://ups-league-data.keith-creelman.workers.dev/";
@@ -1025,9 +1031,9 @@
     return hueDiff * 0.75 + lightDiff * 0.2 + satDiff * 0.05;
   }
 
-  function assignTeamColors(teams) {
+  function assignTeamColors(teams, usedColors) {
     const palette = buildTeamPalette();
-    const assigned = [];
+    const assigned = Array.isArray(usedColors) ? usedColors.slice() : [];
     const map = {};
     const list = (teams || [])
       .map((t) => ({
@@ -1073,7 +1079,18 @@
     (submissionRows || []).forEach(add);
     (tagRows || []).forEach(add);
     const list = Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-    return assignTeamColors(list);
+    const overrides = {};
+    const used = [];
+    list.forEach((t) => {
+      const ov = TEAM_COLOR_OVERRIDES[pad4(t.id)];
+      if (ov) {
+        overrides[pad4(t.id)] = hslToRgb(ov.h, ov.s, ov.l);
+        used.push({ h: ov.h, s: ov.s, l: ov.l });
+      }
+    });
+    const remaining = list.filter((t) => !TEAM_COLOR_OVERRIDES[pad4(t.id)]);
+    const assigned = assignTeamColors(remaining, used);
+    return { ...assigned, ...overrides };
   }
 
   function buildTeamStyle(rowOrId, franchiseName) {

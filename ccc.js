@@ -147,6 +147,7 @@
   const LOCAL_ASOF_OVERRIDE_KEY = "ccc_asof_override_v1";
   const LOCAL_TAG_SELECTIONS_KEY = "ccc_tag_selections_v1";
   const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
+  const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
 
   function loadLocalOverrides() {
     try {
@@ -196,6 +197,31 @@
   function saveTagSubmissions(submissions) {
     try {
       localStorage.setItem(LOCAL_TAG_SUBMISSIONS_KEY, JSON.stringify(submissions || {}));
+    } catch (e) {}
+  }
+
+  function loadPpgSettings() {
+    try {
+      const raw = localStorage.getItem(LOCAL_PPG_SETTINGS_KEY);
+      if (!raw) return { minGames: 8, enabled: true };
+      const obj = JSON.parse(raw);
+      const minGames = clampInt(obj && obj.minGames ? obj.minGames : 8, 1, 18);
+      const enabled = obj && obj.enabled !== undefined ? !!obj.enabled : true;
+      return { minGames, enabled };
+    } catch (e) {
+      return { minGames: 8, enabled: true };
+    }
+  }
+
+  function savePpgSettings(settings) {
+    try {
+      localStorage.setItem(
+        LOCAL_PPG_SETTINGS_KEY,
+        JSON.stringify({
+          minGames: clampInt(settings && settings.minGames ? settings.minGames : 8, 1, 18),
+          enabled: settings && settings.enabled !== undefined ? !!settings.enabled : true,
+        })
+      );
     } catch (e) {}
   }
 
@@ -806,8 +832,10 @@
         return Number(r.points_total || 0);
       case "ppg":
         return Number(r.points_per_game || 0);
-      case "ppgRank":
-        return safeInt(r.ppg_rank || 99999);
+      case "ppgRank": {
+        const v = safeInt(r._ppg_rank || r.ppg_rank);
+        return v > 0 ? v : 99999;
+      }
       case "tagRank":
         return safeInt(r.pos_rank || 99999);
       case "tagTier":
@@ -1362,6 +1390,43 @@
 
   const TAG_POS_ORDER = ["QB", "RB", "WR", "TE", "DL", "LB", "DB", "PK"];
 
+  function computePpgRanks(rows, minGamesEnabled, minGames) {
+    const byPos = new Map();
+    (rows || []).forEach((r) => {
+      const pos = posKeyFromRow(r);
+      const list = byPos.get(pos) || [];
+      list.push(r);
+      byPos.set(pos, list);
+    });
+
+    byPos.forEach((list) => {
+      list.forEach((r) => {
+        r._ppg_rank = 0;
+        r._ppg_min_games = minGames;
+        r._ppg_min_enabled = !!minGamesEnabled;
+      });
+
+      const eligible = list.filter((r) => {
+        const games = safeInt(r.games_played);
+        if (games <= 0) return false;
+        if (minGamesEnabled && games < minGames) return false;
+        return true;
+      });
+
+      eligible.sort((a, b) => {
+        const ppgDiff = Number(b.points_per_game || 0) - Number(a.points_per_game || 0);
+        if (ppgDiff !== 0) return ppgDiff;
+        const ptsDiff = Number(b.points_total || 0) - Number(a.points_total || 0);
+        if (ptsDiff !== 0) return ptsDiff;
+        return safeStr(a.player_name).localeCompare(safeStr(b.player_name));
+      });
+
+      eligible.forEach((r, idx) => {
+        r._ppg_rank = idx + 1;
+      });
+    });
+  }
+
   function buildTagBreakdownByPos(rows) {
     const byPos = new Map();
     (rows || []).forEach((r) => {
@@ -1477,6 +1542,16 @@
         <button type="button" class="ccc-pageBtn" data-tag-summary-view="pos" ${view === "pos" ? "disabled" : ""}>By Position</button>
         <button type="button" class="ccc-pageBtn" data-tag-summary-view="team" ${view === "team" ? "disabled" : ""}>By Team</button>
         <button type="button" class="ccc-pageBtn" data-tag-calc-toggle="1">${calcOpen ? "Hide" : "Show"} Calc Breakdown</button>
+        <label class="ccc-check" style="margin-left:6px;">
+          <input type="checkbox" data-ppg-enabled="1" ${state.ppgMinGamesEnabled ? "checked" : ""} />
+          PPG Min Games
+        </label>
+        <label class="ccc-field">
+          Min
+          <input type="number" class="ccc-input" data-ppg-min="1" min="1" max="18" value="${clampInt(state.ppgMinGames || 8, 1, 18)}" ${
+  state.ppgMinGamesEnabled ? "" : "disabled"
+} />
+        </label>
       </div>
     `;
 
@@ -1634,9 +1709,18 @@
         const gamesPlayed = safeInt(r.games_played);
         const ppg = Number(r.points_per_game || 0);
         const ppgDisplay = gamesPlayed > 0 ? ppg.toFixed(1) : "—";
-        const ppgRank = safeInt(r.ppg_rank);
-        const ppgRankCell =
-          ppgRank > 0 ? String(ppgRank) : `N/A<div class="cell-sub">not enough games played</div>`;
+        const ppgRank = safeInt(r._ppg_rank || r.ppg_rank);
+        const minGames = state.ppgMinGamesEnabled ? state.ppgMinGames : 0;
+        let ppgRankCell = "";
+        if (gamesPlayed <= 0) {
+          ppgRankCell = `N/A<div class="cell-sub">no games played</div>`;
+        } else if (state.ppgMinGamesEnabled && gamesPlayed < minGames) {
+          ppgRankCell = `N/A<div class="cell-sub">min ${minGames} games</div>`;
+        } else if (ppgRank > 0) {
+          ppgRankCell = String(ppgRank);
+        } else {
+          ppgRankCell = "N/A";
+        }
         return `
           <tr class="pos-${posKey}">
             <td>${tagBtn}${submittedTag}</td>
@@ -1646,9 +1730,9 @@
             <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
+            <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
             <td class="cell-num">${ppgDisplay}</td>
             <td class="cell-num">${ppgRankCell}</td>
-            <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
             <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
           </tr>
@@ -1669,9 +1753,9 @@
               ${sortTh("player", "Player")}
               ${sortTh("aav", "AAV", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
+              ${sortTh("tagRank", "Positional Rank", "", "is-num")}
               ${sortTh("ppg", "PPG", "", "is-num")}
               ${sortTh("ppgRank", "PPG Rank", "", "is-num")}
-              ${sortTh("tagRank", "Positional Rank", "", "is-num")}
               ${sortTh("tagTier", "Tier", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}
             </tr>
@@ -1686,6 +1770,7 @@
   // ======================================================
   // 8) STATE + TEAM LIST
   // ======================================================
+  const initialPpgSettings = loadPpgSettings();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     restructureSubmissions: [],
@@ -1716,6 +1801,8 @@
     tagSubmissions: loadTagSubmissions(),
     tagSummaryView: "pos",
     tagCalcOpen: false,
+    ppgMinGames: initialPpgSettings.minGames,
+    ppgMinGamesEnabled: initialPpgSettings.enabled,
     adminDebug: null,
   };
 
@@ -2481,6 +2568,8 @@
       const tagEligibleAll = (seasonTagTracking || []).filter(
         (r) => safeInt(r.is_tag_eligible) === 1
       );
+      const ppgMin = clampInt(state.ppgMinGames || 8, 1, 18);
+      computePpgRanks(tagEligibleAll, !!state.ppgMinGamesEnabled, ppgMin);
       const tagRows = sortRows(
         tagEligibleRows,
         sortState.tab === "eligible" ? sortState.key : "tagRank",
@@ -4059,6 +4148,28 @@
       },
       true
     );
+
+    document.addEventListener("change", (e) => {
+      const target = e.target;
+      if (!target || !target.getAttribute) return;
+      if (target.getAttribute("data-ppg-enabled") === "1") {
+        state.ppgMinGamesEnabled = !!target.checked;
+        savePpgSettings({
+          minGames: state.ppgMinGames,
+          enabled: state.ppgMinGamesEnabled,
+        });
+        render();
+      }
+      if (target.getAttribute("data-ppg-min") === "1") {
+        const v = clampInt(target.value || state.ppgMinGames, 1, 18);
+        state.ppgMinGames = v;
+        savePpgSettings({
+          minGames: state.ppgMinGames,
+          enabled: state.ppgMinGamesEnabled,
+        });
+        render();
+      }
+    });
 
     // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
     document.addEventListener(

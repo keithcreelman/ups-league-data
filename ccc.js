@@ -2260,7 +2260,7 @@
     commishMode: false,
     commishConsoleOpen: false,
     adminReason: "",
-    activeModule: "mym",
+    activeModule: "tag",
     selectedSeason: "",
     selectedTeam: "",
     selectedPosition: "__ALL_POS__",

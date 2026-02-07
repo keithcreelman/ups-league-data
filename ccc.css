@@ -83,6 +83,11 @@
   --select-arrow: #C7D2E5;
 }
 
+#cccApp[data-theme="dark"] .ccc-nav{
+  background: linear-gradient(135deg, rgba(148,163,184,.12), rgba(30,41,59,.4));
+  box-shadow: 0 12px 24px rgba(0,0,0,.35);
+}
+
 @media (prefers-color-scheme: dark) {
   #cccApp[data-theme="auto"]{
     --bg:#0B1220;
@@ -223,17 +228,29 @@
 .ccc-nav{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   flex-wrap:wrap;
   margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(15,23,42,.06), rgba(15,23,42,.02));
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 24px rgba(15,23,42,.08);
 }
 
 .ccc-navTitle{
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.ccc-nav .ccc-chipBtn{
+  font-size: 14px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 20px rgba(15,23,42,.12);
 }
 
 .ccc-navWarn{

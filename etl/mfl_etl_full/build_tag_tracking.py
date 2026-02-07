@@ -257,7 +257,8 @@ def fetch_scoring_rank_map(
         COALESCE(MAX(player_name), '') AS player_name,
         COALESCE(MAX(position), '') AS position,
         COALESCE(MAX(pos_group), '') AS pos_group,
-        SUM(COALESCE(score, 0)) AS points_total
+        SUM(COALESCE(score, 0)) AS points_total,
+        SUM(CASE WHEN COALESCE(score, 0) > 0 THEN 1 ELSE 0 END) AS games_played
       FROM player_weeklyscoringresults
       WHERE season = ?
         AND week BETWEEN 1 AND ?
@@ -269,7 +270,8 @@ def fetch_scoring_rank_map(
         player_name,
         position,
         pos_group,
-        points_total
+        points_total,
+        games_played
       FROM pts
     )
     SELECT
@@ -277,7 +279,8 @@ def fetch_scoring_rank_map(
       player_name,
       position,
       pos_group,
-      points_total
+      points_total,
+      games_played
     FROM ranked
     """
     grouped: Dict[str, List[Dict[str, Any]]] = {}
@@ -286,24 +289,44 @@ def fetch_scoring_rank_map(
         if not pid:
             continue
         pos_group = normalize_pos_group(row[2], row[3])
+        points_total = float(row[4] or 0)
+        games_played = safe_int(row[5], 0)
+        ppg = points_total / games_played if games_played > 0 else 0.0
         grouped.setdefault(pos_group, []).append(
             {
                 "player_id": pid,
                 "player_name": safe_str(row[1]),
                 "position": safe_str(row[2]),
                 "positional_grouping": pos_group,
-                "points_total": float(row[4] or 0),
+                "points_total": points_total,
+                "games_played": games_played,
+                "points_per_game": ppg,
             }
         )
 
     out: Dict[str, Dict[str, Any]] = {}
+    min_games = int(math.ceil(last_regular_week / 2.0))
     for pos_group, items in grouped.items():
         items.sort(key=lambda x: (-float(x["points_total"]), safe_str(x["player_name"]).lower()))
         for idx, item in enumerate(items, start=1):
             out[item["player_id"]] = {
                 **item,
                 "pos_rank": idx,
+                "ppg_rank": 0,
+                "ppg_min_games": min_games,
             }
+
+        eligible = [i for i in items if safe_int(i["games_played"]) >= min_games]
+        eligible.sort(
+            key=lambda x: (
+                -float(x["points_per_game"]),
+                -float(x["points_total"]),
+                safe_str(x["player_name"]).lower(),
+            )
+        )
+        for idx, item in enumerate(eligible, start=1):
+            if item["player_id"] in out:
+                out[item["player_id"]]["ppg_rank"] = idx
     return out
 
 
@@ -478,6 +501,10 @@ def build_rows(conn, season: int, exclude_tag_season: int) -> List[Dict[str, Any
         score = scoring_map.get(pid, {})
         rank = safe_int(score.get("pos_rank"), 0)
         points_total = float(score.get("points_total") or 0)
+        points_per_game = float(score.get("points_per_game") or 0)
+        games_played = safe_int(score.get("games_played"), 0)
+        ppg_rank = safe_int(score.get("ppg_rank"), 0)
+        ppg_min_games = safe_int(score.get("ppg_min_games"), 0)
         rule = lookup_tier_rule(pos_group, rank)
 
         tier = safe_int(rule.tier, 0) if rule else 0
@@ -541,6 +568,10 @@ def build_rows(conn, season: int, exclude_tag_season: int) -> List[Dict[str, Any
             "contract_status": c["contract_status"],
             "contract_info": c["contract_info"],
             "points_total": points_total,
+            "points_per_game": points_per_game,
+            "games_played": games_played,
+            "ppg_rank": ppg_rank,
+            "ppg_min_games": ppg_min_games,
             "pos_rank": rank,
             "tag_tier": tier,
             "tag_rank_band": rank_band,

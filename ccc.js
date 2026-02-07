@@ -377,6 +377,10 @@
       contract_status: safeStr(r.contract_status),
       contract_info: safeStr(r.contract_info),
       points_total: Number(r.points_total || 0),
+      points_per_game: Number(r.points_per_game || r.ppg || 0),
+      games_played: safeInt(r.games_played || r.games || 0),
+      ppg_rank: safeInt(r.ppg_rank || r.ppgRank || 0),
+      ppg_min_games: safeInt(r.ppg_min_games || r.ppgMinGames || 0),
       pos_rank: safeInt(r.pos_rank),
       tag_tier: safeInt(r.tag_tier),
       tag_rank_band: safeStr(r.tag_rank_band),
@@ -774,6 +778,10 @@
         return safeInt(r.aav);
       case "points":
         return Number(r.points_total || 0);
+      case "ppg":
+        return Number(r.points_per_game || 0);
+      case "ppgRank":
+        return safeInt(r.ppg_rank || 99999);
       case "tagRank":
         return safeInt(r.pos_rank || 99999);
       case "tagTier":
@@ -1444,6 +1452,12 @@
             ${isLocked ? `title="Tag already used for ${htmlEsc(side)}"` : ``}
           >${tagLabel}</button>
         `;
+        const gamesPlayed = safeInt(r.games_played);
+        const ppg = Number(r.points_per_game || 0);
+        const ppgDisplay = gamesPlayed > 0 ? ppg.toFixed(1) : "—";
+        const ppgRank = safeInt(r.ppg_rank);
+        const ppgRankCell =
+          ppgRank > 0 ? String(ppgRank) : `N/A<div class="cell-sub">not enough games played</div>`;
         return `
           <tr class="pos-${posKey}">
             <td>${tagBtn}</td>
@@ -1453,6 +1467,8 @@
             <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
+            <td class="cell-num">${ppgDisplay}</td>
+            <td class="cell-num">${ppgRankCell}</td>
             <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
             <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
@@ -1474,6 +1490,8 @@
               ${sortTh("player", "Player")}
               ${sortTh("aav", "AAV", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
+              ${sortTh("ppg", "PPG", "", "is-num")}
+              ${sortTh("ppgRank", "PPG Rank", "", "is-num")}
               ${sortTh("tagRank", "Positional Rank", "", "is-num")}
               ${sortTh("tagTier", "Tier", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}

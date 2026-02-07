@@ -16,6 +16,8 @@
     "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
     "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
   };
+  const PLAYOFF_START_WEEK = 15;
+  const FINAL_WEEK_OF_SEASON = 17;
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const TEAM_COLOR_OVERRIDES = {
     "0003": { h: 205, s: 90, l: 45 }, // Gride
@@ -191,6 +193,70 @@
   function fmtLocalFromValue(x) {
     const d = parseDate(x);
     return d ? fmtLocalYMDHM(d) : "";
+  }
+
+  function getCountdownNow() {
+    if (state && state.commishMode && state.asOfOverrideActive && state.asOfDate) {
+      return new Date(state.asOfDate.getTime());
+    }
+    return new Date();
+  }
+
+  function atLocalNoon(year, monthIndex, day) {
+    return new Date(year, monthIndex, day, 12, 0, 0, 0);
+  }
+
+  function sameYMD(a, b) {
+    if (!a || !b) return false;
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  }
+
+  function getNextAnnualDate(baseYear, monthIndex, day, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    let year = safeInt(baseYear) || ref.getFullYear();
+    let candidate = atLocalNoon(year, monthIndex, day);
+    while (candidate.getTime() < ref.getTime()) {
+      year += 1;
+      candidate = atLocalNoon(year, monthIndex, day);
+    }
+    return candidate;
+  }
+
+  function getFirstWeekdayOfMonth(year, monthIndex, weekday) {
+    const d = new Date(year, monthIndex, 1, 12, 0, 0, 0);
+    const day = d.getDay();
+    const offset = (weekday - day + 7) % 7;
+    d.setDate(d.getDate() + offset);
+    return d;
+  }
+
+  function getLastWeekdayOfMonth(year, monthIndex, weekday) {
+    const d = new Date(year, monthIndex + 1, 0, 12, 0, 0, 0);
+    const day = d.getDay();
+    const offset = (day - weekday + 7) % 7;
+    d.setDate(d.getDate() - offset);
+    return d;
+  }
+
+  function getThanksgivingDate(year) {
+    // Fourth Thursday in November.
+    const firstThursday = getFirstWeekdayOfMonth(year, 10, 4);
+    return addDays(firstThursday, 21);
+  }
+
+  function formatCountdown(diffMs) {
+    if (diffMs <= 0) return "Now";
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    if (days > 0) return `${days}d ${hours}h ${mins}m`;
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
   }
 
   function must(sel) {
@@ -1499,6 +1565,111 @@
     `;
   }
 
+  function renderLeagueEventModule() {
+    const payload = buildLeagueEvents();
+    const events = payload.events || [];
+    const now = payload.now || new Date();
+    syncLeagueEventSelection(events, now);
+    const selectedId = state.leagueEventSelectedId || (events[0] && events[0].id) || "";
+    const selected = events.find((e) => e && e.id === selectedId) || events[0] || null;
+    const mode = state.leagueEventMode === "date" ? "date" : "countdown";
+    const dateText =
+      selected && selected.date && !isNaN(selected.date.getTime()) ? fmtYMDDate(selected.date) : "TBD";
+    const countdownText =
+      selected && selected.date && !isNaN(selected.date.getTime())
+        ? formatCountdown(selected.date.getTime() - now.getTime())
+        : "TBD";
+    const primaryText = mode === "date" ? dateText : countdownText;
+    const secondaryLabel = mode === "date" ? "Countdown" : "Date";
+    const secondaryValue = mode === "date" ? countdownText : dateText;
+    const hintParts = [];
+    if (secondaryValue) hintParts.push(`${secondaryLabel}: ${secondaryValue}`);
+    if (selected && selected.hint) hintParts.push(selected.hint);
+    const hintText = hintParts.join(" | ");
+    const labelText = selected ? selected.label : "Event";
+
+    const options = events
+      .map(
+        (e) =>
+          `<option value="${htmlEsc(e.id)}" ${e.id === selectedId ? "selected" : ""}>${htmlEsc(
+            e.label
+          )}</option>`
+      )
+      .join("");
+
+    return `
+      <div id="leagueEventModule" class="ccc-eventCard">
+        <div class="ccc-eventHead">
+          <div class="ccc-summaryTitle">League Calendar</div>
+          <div class="ccc-eventToggle" role="group" aria-label="League event display mode">
+            <button type="button" class="ccc-chipBtn ${mode === "countdown" ? "primary" : ""}" data-league-event-mode="countdown">Countdown</button>
+            <button type="button" class="ccc-chipBtn ${mode === "date" ? "primary" : ""}" data-league-event-mode="date">Date</button>
+          </div>
+        </div>
+        <div class="ccc-eventBody">
+          <label class="ccc-field ccc-field-col ccc-eventField">
+            Event
+            <select id="leagueEventSelect" class="ccc-select">
+              ${options}
+            </select>
+          </label>
+          <div class="ccc-eventDisplay">
+            <div class="ccc-eventLabel" id="leagueEventLabel">${htmlEsc(labelText)}</div>
+            <div class="ccc-eventValue" id="leagueEventValue">${htmlEsc(primaryText)}</div>
+            <div class="ccc-eventHint" id="leagueEventHint">${htmlEsc(hintText)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSummaryWithEvents(bodyHtml) {
+    return `${renderLeagueEventModule()}${bodyHtml || ""}`;
+  }
+
+  function updateLeagueEventModule() {
+    const module = $("#leagueEventModule");
+    if (!module) return;
+    const payload = buildLeagueEvents();
+    const events = payload.events || [];
+    const now = payload.now || new Date();
+    syncLeagueEventSelection(events, now);
+    const selectedId = state.leagueEventSelectedId || (events[0] && events[0].id) || "";
+    const selected = events.find((e) => e && e.id === selectedId) || events[0] || null;
+    if (!selected) return;
+
+    const mode = state.leagueEventMode === "date" ? "date" : "countdown";
+    const dateText =
+      selected.date && !isNaN(selected.date.getTime()) ? fmtYMDDate(selected.date) : "TBD";
+    const countdownText =
+      selected.date && !isNaN(selected.date.getTime())
+        ? formatCountdown(selected.date.getTime() - now.getTime())
+        : "TBD";
+    const primaryText = mode === "date" ? dateText : countdownText;
+    const secondaryLabel = mode === "date" ? "Countdown" : "Date";
+    const secondaryValue = mode === "date" ? countdownText : dateText;
+    const hintParts = [];
+    if (secondaryValue) hintParts.push(`${secondaryLabel}: ${secondaryValue}`);
+    if (selected.hint) hintParts.push(selected.hint);
+    const hintText = hintParts.join(" | ");
+
+    const labelEl = $("#leagueEventLabel");
+    const valueEl = $("#leagueEventValue");
+    const hintEl = $("#leagueEventHint");
+    if (labelEl) labelEl.textContent = selected.label;
+    if (valueEl) valueEl.textContent = primaryText;
+    if (hintEl) hintEl.textContent = hintText;
+
+    const selectEl = $("#leagueEventSelect");
+    if (selectEl && selectEl.value !== selectedId) {
+      selectEl.value = selectedId;
+    }
+    if (selectEl) {
+      const option = selectEl.querySelector(`option[value="${selectedId}"]`);
+      if (option && option.textContent !== selected.label) option.textContent = selected.label;
+    }
+  }
+
   function buildTeamPositionBreakdown(eligibleRows, submittedRows) {
     const posOrder = ["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"];
     const map = new Map();
@@ -1651,19 +1822,18 @@
       </div>
       <div class="ccc-kpis">
         <div class="kpi">
-          <div class="label">Tag Candidates</div>
+          <div class="label">Total Players</div>
           <div class="value">${count}</div>
-          <div class="hint">expiring contracts (years remaining = 1)</div>
+          <div class="hint">snapshot excludes currently tagged or ineligible players</div>
         </div>
         <div class="kpi">
-          <div class="label">Tier 1</div>
-          <div class="value">${tier1}</div>
-          <div class="hint">top positional finishers</div>
-        </div>
-        <div class="kpi">
-          <div class="label">Tier 2 / 3</div>
-          <div class="value">${tier2} / ${tier3}</div>
-          <div class="hint">remaining tracked tiers</div>
+          <div class="label">Players by Tier</div>
+          <div class="value">
+            <button type="button" class="ccc-pageBtn" data-tag-tier-summary="1">
+              Tier 1 - ${tier1} | Tier 2 - ${tier2} | Tier 3 - ${tier3}
+            </button>
+          </div>
+          <div class="hint">tier counts across tag pool</div>
         </div>
         ${
           deadlineInfo
@@ -1671,7 +1841,7 @@
         <div class="kpi">
           <div class="label">Tag Deadline</div>
           <div class="value">${htmlEsc(fmtYMDDate(deadlineInfo.tagDeadline))}</div>
-          <div class="hint">Rookie draft: ${htmlEsc(fmtYMDDate(deadlineInfo.rookieDraft))}</div>
+          <div class="hint">tag window close</div>
         </div>
         `
             : ""
@@ -1973,13 +2143,12 @@
     const controls = `
       <div class="ccc-summaryControls">
         <span class="ccc-navTitle">Summary View</span>
-        <button type="button" class="ccc-pageBtn" data-tag-summary-view="pos" ${view === "pos" ? "disabled" : ""}>By Position</button>
-        <button type="button" class="ccc-pageBtn" data-tag-summary-view="team" ${view === "team" ? "disabled" : ""}>By Team</button>
+        <button type="button" class="ccc-pageBtn ${view === "pos" ? "is-active" : ""}" data-tag-summary-view="pos" aria-pressed="${view === "pos" ? "true" : "false"}">By Position</button>
+        <button type="button" class="ccc-pageBtn ${view === "team" ? "is-active" : ""}" data-tag-summary-view="team" aria-pressed="${view === "team" ? "true" : "false"}">By Team</button>
         <span class="ccc-navTitle" style="margin-left:6px;">Scope</span>
-        <button type="button" class="ccc-pageBtn" data-tag-summary-side="all" ${normalizedSide === "ALL" ? "disabled" : ""}>All</button>
-        <button type="button" class="ccc-pageBtn" data-tag-summary-side="offense" ${normalizedSide === "OFFENSE" ? "disabled" : ""}>Offense</button>
-        <button type="button" class="ccc-pageBtn" data-tag-summary-side="defense" ${normalizedSide === "DEFENSE" ? "disabled" : ""}>Defense/ST</button>
-        <button type="button" class="ccc-pageBtn" data-tag-calc-toggle="1">${calcOpen ? "Hide" : "Show"} Calc Breakdown</button>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "ALL" ? "is-active" : ""}" data-tag-summary-side="all" aria-pressed="${normalizedSide === "ALL" ? "true" : "false"}">All</button>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "OFFENSE" ? "is-active" : ""}" data-tag-summary-side="offense" aria-pressed="${normalizedSide === "OFFENSE" ? "true" : "false"}">Offense</button>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "DEFENSE" ? "is-active" : ""}" data-tag-summary-side="defense" aria-pressed="${normalizedSide === "DEFENSE" ? "true" : "false"}">Defense/ST</button>
       </div>
     `;
 
@@ -2026,11 +2195,7 @@
       .join("");
 
     const headerLabel = view === "team" ? "Team" : "Position";
-    const calcData =
-      meta && typeof meta === "object"
-        ? meta.calc_breakdown || meta.calcBreakdown || null
-        : null;
-    const calcHtml = calcOpen ? renderTagCalcBreakdown(calcData, normalizedSide, calcRows || []) : "";
+    const calcHtml = "";
 
     return `
       <div class="ccc-summaryPage">
@@ -2050,6 +2215,197 @@
           </table>
         </div>
         ${calcHtml}
+      </div>
+    `;
+  }
+
+  function buildTagSubmissionSeasonList(defaultSeason) {
+    const set = new Set();
+    Object.values(state.tagSubmissions || {}).forEach((s) => {
+      const season = normalizeSeasonValue(s && s.season);
+      if (season) set.add(season);
+    });
+    const list = Array.from(set).sort((a, b) => safeInt(b) - safeInt(a));
+    const def = normalizeSeasonValue(defaultSeason);
+    if (def && !list.includes(def)) list.unshift(def);
+    return list.length ? list : def ? [def] : [];
+  }
+
+  function renderTagCostCalcPage(meta, sideFilter, calcRows) {
+    const normalizedSide = normalizeTagSummarySide(sideFilter);
+    const sideLabel =
+      normalizedSide === "OFFENSE"
+        ? "Offense"
+        : normalizedSide === "DEFENSE"
+        ? "Defense/ST"
+        : "All Players";
+    const controls = `
+      <div class="ccc-summaryControls" style="margin-bottom:10px;">
+        <span class="ccc-navTitle">Scope</span>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "ALL" ? "is-active" : ""}" data-tag-summary-side="all" aria-pressed="${normalizedSide === "ALL" ? "true" : "false"}">All</button>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "OFFENSE" ? "is-active" : ""}" data-tag-summary-side="offense" aria-pressed="${normalizedSide === "OFFENSE" ? "true" : "false"}">Offense</button>
+        <button type="button" class="ccc-pageBtn ${normalizedSide === "DEFENSE" ? "is-active" : ""}" data-tag-summary-side="defense" aria-pressed="${normalizedSide === "DEFENSE" ? "true" : "false"}">Defense/ST</button>
+      </div>
+    `;
+    const calcData =
+      meta && typeof meta === "object"
+        ? meta.calc_breakdown || meta.calcBreakdown || null
+        : null;
+    const calcHtml = calcData
+      ? renderTagCalcBreakdown(calcData, normalizedSide, calcRows || [])
+      : "";
+    const body = calcHtml || `<div class="ccc-tableWrap" style="padding:12px;">No calc data.</div>`;
+    return `
+      <div class="ccc-summaryPage">
+        <div class="ccc-summaryTitle" style="margin:0 0 10px 2px;">Cost Calc Breakdown (${htmlEsc(
+          sideLabel
+        )})</div>
+        ${controls}
+        ${body}
+      </div>
+    `;
+  }
+
+  function renderTagFinalizedSubmissionsPage(defaultSeason) {
+    const seasonList = buildTagSubmissionSeasonList(defaultSeason);
+    const fallbackSeason = normalizeSeasonValue(defaultSeason);
+    if (!state.tagSubmissionSeason || !seasonList.includes(state.tagSubmissionSeason)) {
+      state.tagSubmissionSeason = seasonList[0] || fallbackSeason || "";
+    }
+    const selectedSeason = state.tagSubmissionSeason;
+    const rows = Object.values(state.tagSubmissions || {}).filter(
+      (s) => normalizeSeasonValue(s && s.season) === selectedSeason
+    );
+
+    const seasonOptions = seasonList
+      .map(
+        (s) =>
+          `<option value="${htmlEsc(s)}" ${s === selectedSeason ? "selected" : ""}>${htmlEsc(
+            s
+          )}</option>`
+      )
+      .join("");
+
+    const header = `
+      <div class="ccc-summaryControls" style="margin-bottom:10px;">
+        <span class="ccc-navTitle">Finalized Submissions</span>
+        <label class="ccc-field">
+          Season
+          <select class="ccc-select" data-tag-submission-season="1">
+            ${seasonOptions}
+          </select>
+        </label>
+      </div>
+    `;
+
+    if (!rows.length) {
+      return `${header}<div class="ccc-tableWrap" style="padding:12px;">No submissions for ${htmlEsc(
+        selectedSeason || ""
+      )}.</div>`;
+    }
+
+    const body = rows
+      .sort((a, b) => {
+        const da = parseDate(a.submitted_at_utc) || new Date(0);
+        const db = parseDate(b.submitted_at_utc) || new Date(0);
+        return db - da;
+      })
+      .map((r) => {
+        const submittedFmt = formatSubmittedValue(r.submitted_at_utc);
+        const submitted = `${htmlEsc(submittedFmt.date)}${
+          submittedFmt.time ? `<div class="cell-sub">${htmlEsc(submittedFmt.time)}</div>` : ""
+        }`;
+        return `
+          <tr>
+            <td>${submitted}</td>
+            <td>${htmlEsc(r.franchise_name || r.franchise_id || "")}</td>
+            <td class="playerCell">${htmlEsc(r.player_name || "")}</td>
+            <td class="muted">${htmlEsc(r.pos || "")}</td>
+            <td>${htmlEsc(r.side || "")}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      ${header}
+      <div class="ccc-tableWrap">
+        <table class="ccc-table">
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Team</th>
+              <th>Player</th>
+              <th>Pos</th>
+              <th>Side</th>
+            </tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderCommishModulePage() {
+    const mode = safeStr(state.commishViewMode || "A").toUpperCase();
+    const opts = `
+      <div class="ccc-summaryControls">
+        <span class="ccc-navTitle">Commish Views</span>
+        <button type="button" class="ccc-pageBtn ${mode === "A" ? "is-active" : ""}" data-commish-view="A" aria-pressed="${mode === "A" ? "true" : "false"}">Option A</button>
+        <button type="button" class="ccc-pageBtn ${mode === "B" ? "is-active" : ""}" data-commish-view="B" aria-pressed="${mode === "B" ? "true" : "false"}">Option B</button>
+        <button type="button" class="ccc-pageBtn ${mode === "C" ? "is-active" : ""}" data-commish-view="C" aria-pressed="${mode === "C" ? "true" : "false"}">Option C</button>
+      </div>
+    `;
+
+    let body = "";
+    if (mode === "A") {
+      body = `
+        <div class="ccc-landing">
+          <div>
+            <div class="ccc-landingTitle">Option A</div>
+            <div class="muted" style="margin-top:6px;">Toggle the existing Commish Console panel.</div>
+            <div style="margin-top:12px;">
+              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
+                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (mode === "B") {
+      body = `
+        <div class="ccc-landing">
+          <div>
+            <div class="ccc-landingTitle">Option B</div>
+            <div class="muted" style="margin-top:6px;">Full Commish Module view (layout placeholder).</div>
+            <div style="margin-top:12px;">
+              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
+                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      body = `
+        <div class="ccc-landing">
+          <div>
+            <div class="ccc-landingTitle">Option C</div>
+            <div class="muted" style="margin-top:6px;">Quick shortcut to the Commish Console.</div>
+            <div style="margin-top:12px;">
+              <button type="button" class="ccc-pageBtn" data-commish-console-toggle="1">
+                ${state.commishConsoleOpen ? "Hide" : "Show"} Commish Console
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="ccc-summaryPage">
+        ${opts}
+        ${body}
       </div>
     `;
   }
@@ -2275,7 +2631,7 @@
     commishSelectedPlayerId: "",
     commishFormDirty: false,
     search: "",
-    activeTab: "eligible",
+    activeTab: "summary",
     availabilitySeason: "",
     calendarBaseSeason: "",
     calendarContractSeason: "",
@@ -2287,6 +2643,7 @@
     tagSummaryView: "pos",
     tagSummarySide: "ALL",
     tagCalcOpen: false,
+    tagSubmissionSeason: "",
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
     theme: initialThemeSetting,
@@ -2297,6 +2654,11 @@
     adminDebug: null,
     mymDeadlineBySeason: {},
     mymDeadlineFetch: {},
+    nflScheduleBySeason: {},
+    nflScheduleFetch: {},
+    leagueEventMode: "countdown",
+    leagueEventSelectedId: "",
+    commishViewMode: "A",
   };
 
   function normalizeSeasonValue(v) {
@@ -2557,6 +2919,62 @@
     return dates[0] || null;
   }
 
+  function extractWeekKickoffs(scheduleData) {
+    const entries = [];
+    collectKickoffEntries(scheduleData, entries);
+    if (!entries.length) return [];
+    const map = new Map();
+    entries.forEach((entry) => {
+      const week = safeInt(entry && entry.week);
+      const kickoff = parseKickoffToDate(entry && entry.kickoff);
+      if (!week || !kickoff || isNaN(kickoff.getTime())) return;
+      const existing = map.get(week);
+      if (!existing || kickoff.getTime() < existing.getTime()) {
+        map.set(week, kickoff);
+      }
+    });
+    const out = Array.from(map.entries()).map(([week, kickoff]) => ({ week, kickoff }));
+    out.sort((a, b) => a.week - b.week);
+    return out;
+  }
+
+  function getScheduleWeekKickoffs(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s || !state) return null;
+    const cached = state.nflScheduleBySeason ? state.nflScheduleBySeason[s] : null;
+    if (cached && Array.isArray(cached.weekKickoffs)) return cached.weekKickoffs;
+    if (state.nflScheduleFetch && !state.nflScheduleFetch[s]) {
+      requestNflSchedule(s);
+    }
+    return null;
+  }
+
+  async function requestNflSchedule(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s || !state) return;
+    if (!state.nflScheduleBySeason) state.nflScheduleBySeason = {};
+    if (!state.nflScheduleFetch) state.nflScheduleFetch = {};
+    if (state.nflScheduleFetch[s]) return;
+    state.nflScheduleFetch[s] = true;
+
+    try {
+      const url = buildMflScheduleUrl(s);
+      if (!url) return;
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`MFL schedule HTTP ${res.status}`);
+      const data = await res.json();
+      const weekKickoffs = extractWeekKickoffs(data);
+      state.nflScheduleBySeason[s] = { weekKickoffs };
+    } catch (e) {
+      state.nflScheduleBySeason[s] = {
+        weekKickoffs: [],
+        error: e && e.message ? e.message : String(e),
+      };
+    } finally {
+      render();
+    }
+  }
+
   function computePriorSunday(kickoffDate) {
     if (!kickoffDate || isNaN(kickoffDate.getTime())) return null;
     const base = new Date(
@@ -2688,6 +3106,213 @@
     return now.getTime() >= win.start.getTime() && now.getTime() <= win.end.getTime();
   }
 
+  function resolveSeasonYear(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    const year = safeInt(seasonYear);
+    return year || ref.getFullYear();
+  }
+
+  function resolveRookieDraftDate(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    let year = resolveSeasonYear(seasonYear, ref);
+    let memorial = getMemorialDay(year);
+    let draft = memorial ? addDays(memorial, -1) : null;
+    while (draft && draft.getTime() < ref.getTime()) {
+      year += 1;
+      memorial = getMemorialDay(year);
+      draft = memorial ? addDays(memorial, -1) : null;
+    }
+    return draft;
+  }
+
+  function resolveLastSaturdayOfJuly(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    let year = resolveSeasonYear(seasonYear, ref);
+    let date = getLastWeekdayOfMonth(year, 6, 6);
+    while (date && date.getTime() < ref.getTime()) {
+      year += 1;
+      date = getLastWeekdayOfMonth(year, 6, 6);
+    }
+    return date;
+  }
+
+  function resolveFirstWeekOfMay(seasonYear, now) {
+    return getNextAnnualDate(resolveSeasonYear(seasonYear, now), 4, 1, now);
+  }
+
+  function resolveContractDeadlineDate(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    let year = resolveSeasonYear(seasonYear, ref);
+    let deadline = getContractDeadlineDate(String(year));
+    if (!deadline || deadline.getTime() < ref.getTime()) {
+      year += 1;
+      const next = getContractDeadlineDate(String(year));
+      if (next) return next;
+    }
+    return deadline || null;
+  }
+
+  function resolveWeekKickoffInfo(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    const tryYear = (year) => {
+      const weeks = getScheduleWeekKickoffs(String(year));
+      if (!weeks || !weeks.length) return null;
+      let next = null;
+      weeks.forEach((w) => {
+        if (!w || !w.kickoff || isNaN(w.kickoff.getTime())) return;
+        if (w.kickoff.getTime() < ref.getTime()) return;
+        if (!next || w.kickoff.getTime() < next.kickoff.getTime()) next = w;
+      });
+      if (next) return { week: next.week, kickoff: next.kickoff, season: year };
+      return { week: null, kickoff: null, season: year };
+    };
+
+    let info = tryYear(resolveSeasonYear(seasonYear, ref));
+    if (info && info.kickoff) return info;
+    if (!info) return null;
+    const nextYear = resolveSeasonYear(seasonYear, ref) + 1;
+    info = tryYear(nextYear);
+    if (info && info.kickoff) return info;
+    return null;
+  }
+
+  function resolveWeekKickoffForWeek(seasonYear, week, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    const tryYear = (year) => {
+      const weeks = getScheduleWeekKickoffs(String(year));
+      if (!weeks || !weeks.length) return null;
+      const entry = weeks.find((w) => safeInt(w.week) === safeInt(week));
+      return entry && entry.kickoff ? { kickoff: entry.kickoff, season: year } : null;
+    };
+
+    let info = tryYear(resolveSeasonYear(seasonYear, ref));
+    if (info && info.kickoff && info.kickoff.getTime() >= ref.getTime()) return info.kickoff;
+    const nextYear = resolveSeasonYear(seasonYear, ref) + 1;
+    info = tryYear(nextYear);
+    return info && info.kickoff ? info.kickoff : null;
+  }
+
+  function resolveThanksgivingKickoff(seasonYear, now) {
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    const tryYear = (year) => {
+      const thanksgiving = getThanksgivingDate(year);
+      const weeks = getScheduleWeekKickoffs(String(year));
+      if (weeks && weeks.length) {
+        let kickoff = null;
+        weeks.forEach((w) => {
+          if (!w || !w.kickoff || isNaN(w.kickoff.getTime())) return;
+          if (!sameYMD(w.kickoff, thanksgiving)) return;
+          if (!kickoff || w.kickoff.getTime() < kickoff.getTime()) kickoff = w.kickoff;
+        });
+        if (kickoff) return kickoff;
+      }
+      return thanksgiving;
+    };
+
+    let date = tryYear(resolveSeasonYear(seasonYear, ref));
+    if (date && date.getTime() >= ref.getTime()) return date;
+    return tryYear(resolveSeasonYear(seasonYear, ref) + 1);
+  }
+
+  function buildLeagueEvents() {
+    const now = getCountdownNow();
+    const seasonYear = resolveSeasonYear(
+      state && state.calendarContractSeason ? state.calendarContractSeason : state && state.selectedSeason,
+      now
+    );
+
+    const events = [];
+    events.push({
+      id: "seasonStart",
+      label: "Start of new season",
+      date: getNextAnnualDate(seasonYear, 2, 1, now),
+      hint: "March 1",
+    });
+    events.push({
+      id: "tagExtensionDeadline",
+      label: "Tag & Expired Rookie Extension Deadline",
+      date: getNextAnnualDate(seasonYear, 3, 30, now),
+      hint: "April 30",
+    });
+    events.push({
+      id: "expiredRookieAuction",
+      label: "Expired Rookie Contract Auction",
+      date: resolveFirstWeekOfMay(seasonYear, now),
+      hint: "First week of May",
+    });
+    events.push({
+      id: "rookieDraft",
+      label: "Rookie Draft",
+      date: resolveRookieDraftDate(seasonYear, now),
+      hint: "Memorial Day weekend",
+    });
+    events.push({
+      id: "freeAgentAuction",
+      label: "Free Agent Auction",
+      date: resolveLastSaturdayOfJuly(seasonYear, now),
+      hint: "Last weekend of July",
+    });
+    events.push({
+      id: "contractDeadline",
+      label: "Contract Deadline",
+      date: resolveContractDeadlineDate(seasonYear, now),
+      hint: "Last Sunday before Week 1",
+    });
+
+    const weekKickoffInfo = resolveWeekKickoffInfo(seasonYear, now);
+    const weekLabel = weekKickoffInfo && weekKickoffInfo.week
+      ? `Week ${weekKickoffInfo.week} of NFL`
+      : "Week 1 of NFL";
+    events.push({
+      id: "weekKickoff",
+      label: weekLabel,
+      date: weekKickoffInfo ? weekKickoffInfo.kickoff : null,
+      hint: "Next kickoff (auto-advances weekly)",
+    });
+
+    events.push({
+      id: "tradeDeadline",
+      label: "Trade Deadline",
+      date: resolveThanksgivingKickoff(seasonYear, now),
+      hint: "Thanksgiving kickoff",
+    });
+    events.push({
+      id: "regularSeasonEnd",
+      label: "Regular Season End",
+      date: resolveWeekKickoffForWeek(seasonYear, PLAYOFF_START_WEEK, now),
+      hint: `Week ${PLAYOFF_START_WEEK} kickoff`,
+    });
+    events.push({
+      id: "finalWeek",
+      label: "Final Week of season",
+      date: resolveWeekKickoffForWeek(seasonYear, FINAL_WEEK_OF_SEASON, now),
+      hint: `Week ${FINAL_WEEK_OF_SEASON} kickoff`,
+    });
+
+    return { events, now };
+  }
+
+  function pickNextLeagueEventId(events, now) {
+    if (!events || !events.length) return "";
+    const ref = now && !isNaN(now.getTime()) ? now : new Date();
+    const candidates = events.filter((e) => e && e.date && !isNaN(e.date.getTime()));
+    candidates.sort((a, b) => a.date.getTime() - b.date.getTime());
+    const next = candidates.find((e) => e.date.getTime() >= ref.getTime());
+    return (next || candidates[0] || events[0]).id || "";
+  }
+
+  function syncLeagueEventSelection(events, now) {
+    const ids = new Set((events || []).map((e) => e && e.id).filter(Boolean));
+    const selected = events.find((e) => e && e.id === state.leagueEventSelectedId) || null;
+    const selectedDate = selected && selected.date && !isNaN(selected.date.getTime())
+      ? selected.date
+      : null;
+    const expired = selectedDate && now && selectedDate.getTime() < now.getTime();
+    if (!state.leagueEventSelectedId || !ids.has(state.leagueEventSelectedId) || expired) {
+      state.leagueEventSelectedId = pickNextLeagueEventId(events, now);
+    }
+  }
+
   function updateModuleStatusChips() {
     const baseSeason = getBaseSeasonValue(normalizeSeasonValue(state.selectedSeason));
     const nowRef = getEffectiveNow(baseSeason);
@@ -2698,6 +3323,7 @@
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
     const extensionsChip = $("#moduleExtensionsChip");
+    const commishChip = $("#moduleCommishChip");
 
     if (tagChip) {
       tagChip.classList.remove("disabled");
@@ -2710,6 +3336,9 @@
     if (extensionsChip) {
       extensionsChip.classList.remove("disabled");
       extensionsChip.classList.add("primary");
+    }
+    if (commishChip) {
+      commishChip.style.display = state.canCommishMode ? "" : "none";
     }
     const setModuleState = (id, active, lockForOwners) => {
       const el = $(id);
@@ -2902,25 +3531,29 @@
 
   function syncTabLabels() {
     const summaryTab = $(`.ccc-tab[data-tab="summary"]`);
+    const costTab = $(`.ccc-tab[data-tab="costcalc"]`);
     const eligibleTab = $(`.ccc-tab[data-tab="eligible"]`);
     const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
     if (summaryTab) summaryTab.textContent = "Summary";
-    if (eligibleTab) {
-      eligibleTab.textContent =
-        state.activeModule === "tag"
-          ? "Tag Tracking"
-          : state.activeModule === "extensions"
-          ? "Extensions"
-          : "Eligible";
-    }
-    if (submittedTab) {
-      submittedTab.textContent = state.activeModule === "restructure"
-        ? "Restructure - Submitted"
-        : state.activeModule === "tag"
-        ? "Tag - Submitted"
-        : state.activeModule === "extensions"
-        ? "Extensions"
-        : "MYM - Submitted";
+    if (state.activeModule === "tag") {
+      if (costTab) {
+        costTab.style.display = "";
+        costTab.textContent = "Cost Calc";
+      }
+      if (eligibleTab) eligibleTab.textContent = "Player Tracking";
+      if (submittedTab) submittedTab.textContent = "Finalized Submissions";
+    } else {
+      if (costTab) costTab.style.display = "none";
+      if (eligibleTab)
+        eligibleTab.textContent =
+          state.activeModule === "extensions" ? "Extensions" : "Eligible";
+      if (submittedTab)
+        submittedTab.textContent =
+          state.activeModule === "restructure"
+            ? "Restructure - Submitted"
+            : state.activeModule === "extensions"
+            ? "Extensions"
+            : "MYM - Submitted";
     }
   }
 
@@ -2929,6 +3562,7 @@
     const mymChip = $("#moduleMymChip");
     const restructureChip = $("#moduleRestructuresChip");
     const extensionsChip = $("#moduleExtensionsChip");
+    const commishChip = $("#moduleCommishChip");
     if (tagChip) tagChip.classList.toggle("is-selected", state.activeModule === "tag");
     if (mymChip) mymChip.classList.toggle("is-selected", state.activeModule === "mym");
     if (restructureChip) {
@@ -2936,6 +3570,9 @@
     }
     if (extensionsChip) {
       extensionsChip.classList.toggle("is-selected", state.activeModule === "extensions");
+    }
+    if (commishChip) {
+      commishChip.classList.toggle("is-selected", state.activeModule === "commish");
     }
   }
 
@@ -3156,6 +3793,7 @@
     const cccMeta = $("#cccMeta");
     const summary = $("#summary");
     const tabSummary = $("#tabSummary");
+    const tabCostCalc = $("#tabCostCalc");
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
     const tabSubmitted = $("#tabSubmitted");
@@ -3254,6 +3892,10 @@
             ? "Restructure"
             : state.activeModule === "tag"
             ? "Tags"
+            : state.activeModule === "extensions"
+            ? "Extensions"
+            : state.activeModule === "commish"
+            ? "Commish"
             : "MYM"
         }` +
         (built ? ` | built: ${built}` : "") +
@@ -3310,7 +3952,9 @@
       syncCommishConsole(scopedEligibility);
 
       if (summary)
-        summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
+        summary.innerHTML = renderSummaryWithEvents(
+          renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams)
+        );
       if (tabSummary)
         tabSummary.innerHTML = renderTagSummaryPage(
           tagEligibleAll,
@@ -3321,9 +3965,30 @@
           state.tagSummarySide || "ALL",
           seasonTagTracking || []
         );
+      if (tabCostCalc)
+        tabCostCalc.innerHTML = renderTagCostCalcPage(
+          state.tagTrackingMeta || {},
+          state.tagSummarySide || "ALL",
+          seasonTagTracking || []
+        );
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
-      if (tabSubmitted) tabSubmitted.innerHTML = renderTable([], "submitted");
+      if (tabSubmitted) tabSubmitted.innerHTML = renderTagFinalizedSubmissionsPage(season);
+      updateModuleStatusChips();
+      return;
+    }
+
+    if (state.activeModule === "commish") {
+      const landing = renderCommishModulePage();
+      syncTabLabels();
+      syncModuleChipSelection();
+      syncCommishConsole(scopedEligibility);
+      if (summary) summary.innerHTML = renderSummaryWithEvents(landing);
+      if (tabSummary) tabSummary.innerHTML = landing;
+      if (tabCostCalc) tabCostCalc.innerHTML = "";
+      if (tabEligible) tabEligible.innerHTML = landing;
+      if (tabIneligible) tabIneligible.innerHTML = "";
+      if (tabSubmitted) tabSubmitted.innerHTML = landing;
       updateModuleStatusChips();
       return;
     }
@@ -3337,8 +4002,9 @@
       syncTabLabels();
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
-      if (summary) summary.innerHTML = landing;
+      if (summary) summary.innerHTML = renderSummaryWithEvents(landing);
       if (tabSummary) tabSummary.innerHTML = landing;
+      if (tabCostCalc) tabCostCalc.innerHTML = "";
       if (tabEligible) tabEligible.innerHTML = landing;
       if (tabIneligible) tabIneligible.innerHTML = "";
       if (tabSubmitted) tabSubmitted.innerHTML = "";
@@ -3401,14 +4067,16 @@
     // Keep commish console list aligned with current team/position/search filters.
     syncCommishConsole(scopedEligibility);
     if (summary) {
-      summary.innerHTML = renderSummary(
-        teamName,
-        positionFilteredEligibility,
-        eligibleRows,
-        usedCount,
-        remainingCount,
-        asOfDate,
-        !!asOfDate
+      summary.innerHTML = renderSummaryWithEvents(
+        renderSummary(
+          teamName,
+          positionFilteredEligibility,
+          eligibleRows,
+          usedCount,
+          remainingCount,
+          asOfDate,
+          !!asOfDate
+        )
       );
     }
     if (tabSummary) {
@@ -3419,6 +4087,7 @@
         selectedPosition
       );
     }
+    if (tabCostCalc) tabCostCalc.innerHTML = "";
     if (tabEligible) {
       tabEligible.innerHTML = renderEligibleAvailabilityNotice(season) + renderTable(eligibleRows, "eligible");
     }
@@ -3519,7 +4188,6 @@
     const baseSeason = state.calendarBaseSeason || getBaseSeasonValue(state.selectedSeason);
     const deadlineInfo = getTagDeadlineInfo(baseSeason);
     const deadlineTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.tagDeadline) : "TBD";
-    const rookieTxt = deadlineInfo ? fmtYMDDate(deadlineInfo.rookieDraft) : "TBD";
 
     const sub = $("#tagModalSub");
     if (sub) {
@@ -3533,8 +4201,7 @@
     if (selectionEl) selectionEl.textContent = selectionLine;
 
     const deadlineEl = $("#tagModalDeadline");
-    if (deadlineEl)
-      deadlineEl.textContent = `Tag deadline: ${deadlineTxt} | Rookie draft: ${rookieTxt}`;
+    if (deadlineEl) deadlineEl.textContent = `Tag deadline: ${deadlineTxt}`;
 
     const submission = state.tagSubmissions[selectionKey];
     const isSubmitted =
@@ -4129,6 +4796,7 @@
     try {
       must("#cccMeta");
       must("#tabSummary");
+      must("#tabCostCalc");
       must("#tabEligible");
       must("#tabSubmitted");
       must("#seasonSelect");
@@ -4354,7 +5022,7 @@
       }
 
       resetAllTablePages();
-      setTab("eligible");
+      setTab("summary");
 
       // default sort per tab
       sortState.tab = "eligible";
@@ -4494,11 +5162,13 @@
     state.activeTab = tab;
 
     const tabSummary = $("#tabSummary");
+    const tabCostCalc = $("#tabCostCalc");
     const tabEligible = $("#tabEligible");
     const tabIneligible = $("#tabIneligible");
     const tabSubmitted = $("#tabSubmitted");
 
     if (tabSummary) tabSummary.style.display = tab === "summary" ? "" : "none";
+    if (tabCostCalc) tabCostCalc.style.display = tab === "costcalc" ? "" : "none";
     if (tabEligible) tabEligible.style.display = tab === "eligible" ? "" : "none";
     if (tabIneligible) tabIneligible.style.display = tab === "ineligible" ? "" : "none";
     if (tabSubmitted) tabSubmitted.style.display = tab === "submitted" ? "" : "none";
@@ -4535,6 +5205,7 @@
         sortState.key = "tagRank";
         sortState.dir = "asc";
         resetAllTablePages();
+        setTab("summary");
         render();
       });
 
@@ -4546,6 +5217,7 @@
         sortState.key = "acquired";
         sortState.dir = "desc";
         resetAllTablePages();
+        setTab("summary");
         render();
       });
 
@@ -4557,6 +5229,7 @@
         sortState.key = "salary";
         sortState.dir = "desc";
         resetAllTablePages();
+        setTab("summary");
         render();
       });
 
@@ -4567,6 +5240,16 @@
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
+        resetAllTablePages();
+        setTab("summary");
+        render();
+      });
+
+    const moduleCommishChip = $("#moduleCommishChip");
+    if (moduleCommishChip)
+      moduleCommishChip.addEventListener("click", () => {
+        if (!state.canCommishMode) return;
+        state.activeModule = "commish";
         resetAllTablePages();
         setTab("summary");
         render();
@@ -4960,9 +5643,25 @@
       "click",
       (e) => {
         const btn =
-          e.target && e.target.closest ? e.target.closest("[data-tag-calc-toggle]") : null;
+          e.target && e.target.closest ? e.target.closest("[data-commish-view]") : null;
         if (!btn) return;
-        state.tagCalcOpen = !state.tagCalcOpen;
+        if (!state.canCommishMode) return;
+        const mode = safeStr(btn.getAttribute("data-commish-view")).toUpperCase();
+        state.commishViewMode = ["A", "B", "C"].includes(mode) ? mode : "A";
+        if (state.commishViewMode === "A") state.commishConsoleOpen = true;
+        render();
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-commish-console-toggle]") : null;
+        if (!btn) return;
+        if (!state.canCommishMode) return;
+        state.commishConsoleOpen = !state.commishConsoleOpen;
         render();
       },
       true
@@ -4971,6 +5670,11 @@
     document.addEventListener("change", (e) => {
       const target = e.target;
       if (!target || !target.getAttribute) return;
+      if (target.id === "leagueEventSelect") {
+        state.leagueEventSelectedId = safeStr(target.value);
+        updateLeagueEventModule();
+        return;
+      }
       if (target.getAttribute("data-ppg-enabled") === "1") {
         state.ppgMinGamesEnabled = !!target.checked;
         savePpgSettings({
@@ -4988,7 +5692,34 @@
         });
         render();
       }
+      if (target.getAttribute("data-tag-submission-season") === "1") {
+        const v = normalizeSeasonValue(target.value);
+        state.tagSubmissionSeason = v;
+        render();
+      }
     });
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-league-event-mode]") : null;
+        if (!btn) return;
+        const mode = safeStr(btn.getAttribute("data-league-event-mode")) === "date" ? "date" : "countdown";
+        state.leagueEventMode = mode;
+        const group = btn.parentElement;
+        if (group) {
+          Array.from(group.querySelectorAll("[data-league-event-mode]")).forEach((el) => {
+            el.classList.toggle(
+              "primary",
+              safeStr(el.getAttribute("data-league-event-mode")) === mode
+            );
+          });
+        }
+        updateLeagueEventModule();
+      },
+      true
+    );
 
     // OPEN MODAL (capture + stopImmediatePropagation beats MFL handlers)
     document.addEventListener(
@@ -5159,6 +5890,18 @@
     }
   }
 
+  let leagueEventTimerId = null;
+  function startLeagueEventTicker() {
+    if (leagueEventTimerId) return;
+    updateLeagueEventModule();
+    leagueEventTimerId = window.setInterval(() => {
+      updateLeagueEventModule();
+    }, 60000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) updateLeagueEventModule();
+    });
+  }
+
   // ======================================================
   // START
   // ======================================================
@@ -5167,10 +5910,12 @@
       wireEvents();
       load();
       startAutoHeightMessaging();
+      startLeagueEventTicker();
     });
   } else {
     wireEvents();
     load();
     startAutoHeightMessaging();
+    startLeagueEventTicker();
   }
 })();

@@ -88,6 +88,42 @@
   box-shadow: 0 12px 24px rgba(0,0,0,.35);
 }
 
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="tag"]{
+  --module-bg: #E2E8F0;
+  --module-border: #CBD5F5;
+  --module-text: #0F172A;
+}
+
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="extensions"]{
+  --module-bg: #F3E8FF;
+  --module-border: #C4B5FD;
+  --module-text: #4C1D95;
+}
+
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="restructure"]{
+  --module-bg: #DCFCE7;
+  --module-border: #86EFAC;
+  --module-text: #14532D;
+}
+
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="auction"]{
+  --module-bg: #FFEDD5;
+  --module-border: #FDBA74;
+  --module-text: #7C2D12;
+}
+
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="mym"]{
+  --module-bg: #CCFBF1;
+  --module-border: #5EEAD4;
+  --module-text: #0F766E;
+}
+
+#cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="commish"]{
+  --module-bg: #E5E7EB;
+  --module-border: #9CA3AF;
+  --module-text: #111827;
+}
+
 @media (prefers-color-scheme: dark) {
   #cccApp[data-theme="auto"]{
     --bg:#0B1220;
@@ -230,7 +266,7 @@
   align-items:center;
   gap:12px;
   flex-wrap:wrap;
-  margin-top: 12px;
+  margin: 12px 0;
   padding: 14px 16px;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(15,23,42,.06), rgba(15,23,42,.02));
@@ -251,6 +287,57 @@
   padding: 12px 18px;
   border-radius: 14px;
   box-shadow: 0 10px 20px rgba(15,23,42,.12);
+}
+
+.ccc-nav .ccc-chipBtn.primary{
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), 0 0 0 2px var(--accent-ring), 0 10px 20px rgba(15,23,42,.12);
+}
+
+.ccc-nav .ccc-chipBtn[data-module]{
+  background: var(--module-bg, var(--surface-1));
+  border-color: var(--module-border, var(--line));
+  color: var(--module-text, var(--text));
+}
+
+.ccc-nav .ccc-chipBtn[data-module="tag"]{
+  --module-bg: #0F172A;
+  --module-border: #1E293B;
+  --module-text: #F8FAFC;
+}
+
+.ccc-nav .ccc-chipBtn[data-module="extensions"]{
+  --module-bg: #4C1D95;
+  --module-border: #6D28D9;
+  --module-text: #F5F3FF;
+}
+
+.ccc-nav .ccc-chipBtn[data-module="restructure"]{
+  --module-bg: #14532D;
+  --module-border: #166534;
+  --module-text: #ECFDF3;
+}
+
+.ccc-nav .ccc-chipBtn[data-module="auction"]{
+  --module-bg: #7C2D12;
+  --module-border: #9A3412;
+  --module-text: #FFF7ED;
+}
+
+.ccc-nav .ccc-chipBtn[data-module="mym"]{
+  --module-bg: #0F766E;
+  --module-border: #0F9E92;
+  --module-text: #ECFEFF;
+}
+
+.ccc-nav .ccc-chipBtn[data-module="commish"]{
+  --module-bg: #111827;
+  --module-border: #1F2937;
+  --module-text: #F9FAFB;
+}
+
+.ccc-nav .ccc-chipBtn.disabled{
+  opacity:.45;
+  filter: saturate(.6);
 }
 
 .ccc-landing{
@@ -485,6 +572,73 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
   box-shadow: var(--shadow-soft);
 }
 
+.ccc-eventCard{
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  display: grid;
+  gap: 8px;
+}
+.ccc-eventHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.ccc-eventToggle{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.ccc-eventToggle .ccc-chipBtn{
+  font-size: 11px;
+  padding: 6px 10px;
+  box-shadow: none;
+}
+.ccc-eventBody{
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.ccc-eventField{
+  min-width: 210px;
+}
+.ccc-eventDisplay{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width: 160px;
+}
+.ccc-eventLabel{
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.ccc-eventValue{
+  font-size: 18px;
+  font-weight: 1000;
+  color: var(--text);
+}
+.ccc-eventHint{
+  font-size: 11px;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .ccc-eventBody{
+    align-items:flex-start;
+  }
+  .ccc-eventField{
+    width: 100%;
+  }
+}
+
 .ccc-summaryControls{
   display:flex;
   align-items:center;
@@ -679,6 +833,13 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25)
 .ccc-pageBtn:disabled{
   opacity: .45;
   cursor: not-allowed;
+}
+
+.ccc-pageBtn.is-active{
+  background: var(--accent);
+  border-color: var(--accent-border);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--accent-ring);
 }
 
 .ccc-tableWrap{

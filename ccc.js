@@ -1980,7 +1980,6 @@
 
     const body = pageRows
       .map((r) => {
-        const posKey = htmlEsc(posKeyFromRow(r));
         const season = normalizeSeasonValue(r.season || state.selectedSeason);
         const side = safeStr(r.tag_side || "OFFENSE");
         const limit = Math.max(1, safeInt(r.tag_limit_per_side || 1));

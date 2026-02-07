@@ -50,10 +50,19 @@
   }
 
   function getEffectiveNow(season) {
+    if (state && state.commishMode && state.asOfOverrideActive && state.asOfDate) {
+      return new Date(state.asOfDate.getTime());
+    }
     if (!FORCE_SEASON_ROLLOVER) return new Date();
     const s = safeInt(normalizeSeasonValue(season || getYear() || DEFAULT_YEAR));
     const year = s ? s + 1 : new Date().getFullYear();
     return new Date(year, 2, 1, 12, 0, 0);
+  }
+
+  function getAvailabilitySeason(baseSeason) {
+    const override =
+      state && state.commishMode ? safeStr(state.asOfSeasonOverride || "") : "";
+    return override || safeStr(baseSeason);
   }
 
   function pad4(fid) {
@@ -157,6 +166,7 @@
   const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
   const LOCAL_THEME_KEY = "ccc_theme_v1";
+  const LOCAL_ASOF_SEASON_KEY = "ccc_asof_season_v1";
 
   function loadLocalOverrides() {
     try {
@@ -257,6 +267,21 @@
     if (t === "auto") return "light";
     if (t === "light") return "dark";
     return "auto";
+  }
+
+  function loadAsOfSeasonOverride() {
+    try {
+      const raw = localStorage.getItem(LOCAL_ASOF_SEASON_KEY);
+      const v = safeStr(raw);
+      if (v && /\d{4}/.test(v)) return v;
+    } catch (_) {}
+    return "";
+  }
+
+  function saveAsOfSeasonOverride(value) {
+    try {
+      localStorage.setItem(LOCAL_ASOF_SEASON_KEY, safeStr(value || ""));
+    } catch (_) {}
   }
 
   function savePpgSettings(settings) {
@@ -967,6 +992,13 @@
     const isSubmittedTab = tabMode === "submitted";
     const isRestructureMode = state.activeModule === "restructure";
     const showOverrideCols = !!state.commishMode;
+    const availabilitySeason = getAvailabilitySeason(
+      normalizeSeasonValue(state.availabilitySeason || state.selectedSeason)
+    );
+    const mymActionsOpen =
+      state.activeModule !== "mym"
+        ? true
+        : state.commishMode || isMymActiveForSeason(availabilitySeason, getEffectiveNow(availabilitySeason));
     const pageSize = clampInt(state.pageSize || 50, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
@@ -1105,6 +1137,12 @@
         const expl = htmlEsc(r.rule_explanation || "");
         const extSuffix = extractExtSuffix(r.contract_info);
 
+        const actionDisabled = !isRestructureMode && !mymActionsOpen;
+        const actionLabel = isRestructureMode
+          ? "Restructure"
+          : mymActionsOpen
+          ? "Offer Contract"
+          : "MYM Closed";
         const actions = isEligibleTab
           ? `
           <button
@@ -1123,7 +1161,9 @@
             data-franchise-name="${htmlEsc(r.franchise_name || "")}"
             data-acq-type="${htmlEsc(acqType)}"
             data-deadline="${htmlEsc(fmtYMD(r.mym_deadline))}"
-          >${isRestructureMode ? "Restructure" : "Offer Contract"}</button>
+            ${actionDisabled ? "disabled" : ""}
+            ${actionDisabled ? `title="MYM is not available right now"` : ""}
+          >${actionLabel}</button>
         `
           : ``;
 
@@ -1941,6 +1981,7 @@
   // ======================================================
   const initialPpgSettings = loadPpgSettings();
   const initialThemeSetting = loadThemeSetting();
+  const initialAsOfSeasonOverride = loadAsOfSeasonOverride();
   const state = {
     payload: { eligibility: [], usage: [], submissions: [], meta: {} },
     restructureSubmissions: [],
@@ -1967,6 +2008,7 @@
     commishFormDirty: false,
     search: "",
     activeTab: "eligible",
+    availabilitySeason: "",
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
@@ -1976,6 +2018,8 @@
     ppgMinGames: initialPpgSettings.minGames,
     ppgMinGamesEnabled: initialPpgSettings.enabled,
     theme: initialThemeSetting,
+    asOfSeasonOverride: initialAsOfSeasonOverride,
+    asOfDraft: null,
     adminDebug: null,
   };
 
@@ -2041,6 +2085,34 @@
       opt.selected = s === selectedSeason;
       sel.appendChild(opt);
     });
+  }
+
+  function populateAsOfSeasonSelect(seasons, selectedOverride) {
+    const sel = $("#asOfSeasonSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    const base = Array.isArray(seasons) ? seasons.slice() : [];
+    let maxSeason = 0;
+    base.forEach((s) => {
+      const n = safeInt(s);
+      if (n > maxSeason) maxSeason = n;
+    });
+    if (maxSeason) base.push(String(maxSeason + 1));
+    const list = Array.from(new Set(base.filter(Boolean))).sort((a, b) => safeInt(b) - safeInt(a));
+
+    const optDefault = document.createElement("option");
+    optDefault.value = "";
+    optDefault.textContent = "Use Selected";
+    sel.appendChild(optDefault);
+
+    list.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      sel.appendChild(opt);
+    });
+
+    sel.value = safeStr(selectedOverride || "");
   }
 
   function buildTeamList(rows, submittedRows, ownerFranchiseId) {
@@ -2199,7 +2271,7 @@
   }
 
   function updateModuleStatusChips() {
-    const season = normalizeSeasonValue(state.selectedSeason);
+    const season = getAvailabilitySeason(normalizeSeasonValue(state.selectedSeason));
     const nowRef = getEffectiveNow(season);
     const mymActive = isMymActiveForSeason(season, nowRef);
     const restructureActive = state.commishMode || isRestructureActiveForSeason(season, nowRef);
@@ -2212,7 +2284,7 @@
       tagChip.classList.add("primary");
     }
     if (mymChip) {
-      mymChip.classList.toggle("disabled", !mymActive);
+      mymChip.classList.remove("disabled");
       mymChip.classList.toggle("primary", mymActive);
     }
     const setModuleState = (id, active, lockForOwners) => {
@@ -2240,15 +2312,16 @@
 
     if (state.activeModule === "restructure") {
       if (state.commishMode) return "";
-      if (isRestructureActiveForSeason(season, getEffectiveNow(season))) return "";
-      const win = getRestructureSeasonWindow(season);
+      const availSeason = getAvailabilitySeason(season);
+      if (isRestructureActiveForSeason(availSeason, getEffectiveNow(availSeason))) return "";
+      const win = getRestructureSeasonWindow(availSeason);
       const endTxt = win ? win.endYmd : "contract deadline";
       return `<div class="ccc-eligWarn">Restructures Available Feb 1 Through ${htmlEsc(
         endTxt
       )}</div>`;
     }
 
-    const s = normalizeSeasonValue(season);
+    const s = getAvailabilitySeason(normalizeSeasonValue(season));
     if (!s) return "";
     if (isMymActiveForSeason(s, getEffectiveNow(s))) return "";
     const win = getMymSeasonWindow(s);
@@ -2657,6 +2730,8 @@
 
     const searchLower = safeStr(state.search).trim().toLowerCase();
     const season = normalizeSeasonValue(state.selectedSeason);
+    const availabilitySeason = getAvailabilitySeason(season);
+    state.availabilitySeason = availabilitySeason;
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
     const selectedTeamId = pad4(state.selectedTeam);
@@ -2735,6 +2810,12 @@
         (built ? ` | built: ${built}` : "") +
         (minSeason ? ` | min season: ${minSeason}` : "") +
         (state.commishMode && state.adminReason ? ` | ${state.adminReason}` : "");
+      if (state.commishMode && state.asOfOverrideActive && state.asOfDate) {
+        metaText += ` | as-of: ${fmtLocalYMDHM(state.asOfDate)}`;
+      }
+      if (state.commishMode && state.asOfSeasonOverride) {
+        metaText += ` | as-of season: ${state.asOfSeasonOverride}`;
+      }
       if (state.activeModule === "tag") {
         const scoringWeeks =
           (state.tagTrackingRows[0] && safeStr(state.tagTrackingRows[0].scoring_weeks_used)) || "";
@@ -2799,7 +2880,8 @@
     }
 
     const restructureActiveNow =
-      state.commishMode || isRestructureActiveForSeason(season, getEffectiveNow(season));
+      state.commishMode ||
+      isRestructureActiveForSeason(availabilitySeason, getEffectiveNow(availabilitySeason));
     const restructureUsageByTeam = computeSubmissionUsageByTeam(seasonRestructureSubmissions);
     const eligibleRowsRaw =
       state.activeModule === "restructure"
@@ -3598,7 +3680,9 @@
       must("#adminBadge");
       must("#adminControls");
       must("#asOfInput");
+      must("#asOfApplyBtn");
       must("#asOfResetBtn");
+      must("#asOfSeasonSelect");
       must("#refreshBtn");
       must("#clearBtn");
 
@@ -3726,9 +3810,11 @@
           state.asOfOverrideActive = false;
         }
         $("#asOfInput").value = fmtForDatetimeLocal(state.asOfDate);
+        state.asOfDraft = state.asOfDate ? new Date(state.asOfDate.getTime()) : null;
       } else {
         state.asOfDate = null;
         state.asOfOverrideActive = false;
+        state.asOfDraft = null;
         clearAsOfOverrideState();
         $("#asOfInput").value = "";
       }
@@ -3745,6 +3831,9 @@
         : seasons[0] || requestedSeason;
       state.selectedSeason = seasonSelected;
       populateSeasonSelect(seasons, state.selectedSeason);
+      if (state.commishMode) {
+        populateAsOfSeasonSelect(seasons, state.asOfSeasonOverride);
+      }
 
       const seasonRows = state.payload.eligibility.filter(
         (r) => normalizeSeasonValue(r.season) === state.selectedSeason
@@ -4188,6 +4277,14 @@
         if (!state.canCommishMode || !state.commishMode) return;
         const v = asOfInput.value;
         const d = v ? new Date(v) : new Date();
+        state.asOfDraft = isNaN(d.getTime()) ? new Date() : d;
+      });
+
+    const asOfApplyBtn = $("#asOfApplyBtn");
+    if (asOfApplyBtn)
+      asOfApplyBtn.addEventListener("click", () => {
+        if (!state.canCommishMode || !state.commishMode) return;
+        const d = state.asOfDraft || new Date();
         state.asOfDate = isNaN(d.getTime()) ? new Date() : d;
         state.asOfOverrideActive = true;
         saveAsOfOverrideState(state.asOfDate, state.asOfOverrideActive);
@@ -4201,8 +4298,19 @@
         const now = new Date();
         state.asOfDate = now;
         state.asOfOverrideActive = false;
+        state.asOfDraft = now;
         $("#asOfInput").value = fmtForDatetimeLocal(now);
         saveAsOfOverrideState(state.asOfDate, state.asOfOverrideActive);
+        render();
+      });
+
+    const asOfSeasonSelect = $("#asOfSeasonSelect");
+    if (asOfSeasonSelect)
+      asOfSeasonSelect.addEventListener("change", (e) => {
+        if (!state.canCommishMode || !state.commishMode) return;
+        const v = safeStr(e.target.value);
+        state.asOfSeasonOverride = v;
+        saveAsOfSeasonOverride(v);
         render();
       });
 

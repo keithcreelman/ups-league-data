@@ -1,30 +1,60 @@
+/* ============================================================
+   COLOR SCHEME OPTIONS - Quick Switch Guide
+   ============================================================
+   
+   Currently Active: OPTION A - Enhanced Professional
+   
+   To switch schemes, replace the color variables in:
+   1. :root { } (light mode)
+   2. #cccApp[data-theme="dark"] { } (dark mode)
+   3. @media (prefers-color-scheme: dark) #cccApp[data-theme="auto"] { }
+   
+   OPTION B: Modern Sports (Bold, Energetic)
+   - Light bg: #F8FAFC
+   - Dark bg: #0A0E1A (deep navy-black)
+   - Accent2: #06B6D4 (bright cyan) / #22D3EE (dark)
+   - Accent3: #F97316 (orange)
+   
+   OPTION C: Elite Dashboard (Premium Dark-First)
+   - Dark bg: #000000 (true black OLED)
+   - Panel: #0D1117 (GitHub dark)
+   - Accent: #58A6FF (GitHub blue)
+   - Accent2: #3FB950 (GitHub green)
+   - Accent3: #A371F7 (purple)
+   
+   ============================================================ */
+
+/* OPTION A: Enhanced Professional (Active) */
 :root{
-  --bg:#F5F7FB;
+  --bg:#F0F4F8;
   --panel:#FFFFFF;
   --card:#F2F5F9;
   --surface-1:#FFFFFF;
-  --surface-2:#F7F9FC;
-  --surface-3:#EEF2F7;
+  --surface-2:#FAFBFC;
+  --surface-3:#EDF2F7;
   --surface-4:#F3F6FB;
   --surface-5:#F8FAFC;
-  --muted:#5B6B80;
-  --text:#152033;
-  --text-strong:#111827;
+  --muted:#64748B;
+  --text:#1A202C;
+  --text-strong:#0F172A;
   --line:rgba(15,23,42,.12);
-  --accent:#2563EB;
-  --accent2:#14B8A6;
-  --accent-soft:rgba(37,99,235,.10);
-  --accent-soft-2:rgba(20,184,166,.10);
-  --accent-border:rgba(37,99,235,.45);
-  --accent-underline:rgba(37,99,235,.85);
-  --accent-ring:rgba(37,99,235,.18);
-  --good:#16A34A;
+  --accent:#3B82F6;
+  --accent2:#10B981;
+  --accent3:#8B5CF6;
+  --accent-soft:rgba(59,130,246,.10);
+  --accent-soft-2:rgba(16,185,129,.10);
+  --accent-soft-3:rgba(139,92,246,.10);
+  --accent-border:rgba(59,130,246,.45);
+  --accent-border-2:rgba(16,185,129,.45);
+  --accent-underline:rgba(59,130,246,.85);
+  --accent-ring:rgba(59,130,246,.18);
+  --good:#059669;
   --warn:#F59E0B;
   --warn-soft:rgba(245,158,11,.10);
   --warn-border:rgba(245,158,11,.35);
-  --bad:#EF4444;
-  --bad-soft:rgba(239,68,68,.08);
-  --bad-border:rgba(239,68,68,.35);
+  --bad:#DC2626;
+  --bad-soft:rgba(220,38,38,.08);
+  --bad-border:rgba(220,38,38,.35);
   --chip:#E8EDF4;
   --shadow: 0 10px 30px rgba(15,23,42,.08);
   --shadow-soft: 0 10px 22px rgba(15,23,42,.08);
@@ -37,47 +67,51 @@
   --table-sticky: #EEF2F7;
   --table-text: #1B2738;
   --modal-backdrop: rgba(15,23,42,.55);
-  --placeholder: rgba(91,107,128,.55);
+  --placeholder: rgba(100,116,139,.55);
   --select-arrow: #94A3B8;
 }
 
+/* OPTION A: Enhanced Professional - Dark Mode */
 #cccApp[data-theme="dark"]{
-  --bg:#0B0F16;
-  --panel:#121821;
-  --card:#141B26;
-  --surface-1:#121821;
-  --surface-2:#0F151D;
-  --surface-3:#0D1219;
-  --surface-4:#182230;
-  --surface-5:#101622;
-  --muted:#9BA8BA;
-  --text:#E8EEF7;
-  --text-strong:#F5F9FF;
+  --bg:#0F172A;
+  --panel:#1E293B;
+  --card:#1E293B;
+  --surface-1:#1E293B;
+  --surface-2:#334155;
+  --surface-3:#475569;
+  --surface-4:#1E293B;
+  --surface-5:#1A2332;
+  --muted:#94A3B8;
+  --text:#F1F5F9;
+  --text-strong:#FFFFFF;
   --line:rgba(255,255,255,.08);
-  --accent:#6CB6FF;
-  --accent2:#3DD6C9;
-  --accent-soft:rgba(108,182,255,.18);
-  --accent-soft-2:rgba(61,214,201,.14);
-  --accent-border:rgba(108,182,255,.45);
-  --accent-underline:rgba(108,182,255,.9);
-  --accent-ring:rgba(108,182,255,.2);
-  --good:#3AD39F;
-  --warn:#F6C453;
-  --warn-soft:rgba(246,196,83,.12);
-  --warn-border:rgba(246,196,83,.35);
-  --bad:#FF7A7A;
-  --bad-soft:rgba(255,122,122,.14);
-  --bad-border:rgba(255,122,122,.4);
-  --chip:#1A2230;
+  --accent:#60A5FA;
+  --accent2:#34D399;
+  --accent3:#A78BFA;
+  --accent-soft:rgba(96,165,250,.18);
+  --accent-soft-2:rgba(52,211,153,.14);
+  --accent-soft-3:rgba(167,139,250,.14);
+  --accent-border:rgba(96,165,250,.55);
+  --accent-border-2:rgba(52,211,153,.55);
+  --accent-underline:rgba(96,165,250,.9);
+  --accent-ring:rgba(96,165,250,.2);
+  --good:#10B981;
+  --warn:#FBBF24;
+  --warn-soft:rgba(251,191,36,.12);
+  --warn-border:rgba(251,191,36,.35);
+  --bad:#F87171;
+  --bad-soft:rgba(248,113,113,.14);
+  --bad-border:rgba(248,113,113,.4);
+  --chip:#1E293B;
   --shadow: 0 12px 36px rgba(0,0,0,.35);
   --shadow-soft: 0 10px 22px rgba(0,0,0,.28);
-  --control-bg: #121821;
-  --table-head-bg: #1A2433;
-  --table-head-text: #F2F6FF;
-  --table-row: #121821;
-  --table-row-alt: #151D2A;
-  --table-sticky: #1A2433;
-  --table-text: #E6EDF7;
+  --control-bg: #1E293B;
+  --table-head-bg: #1E293B;
+  --table-head-text: #F1F5F9;
+  --table-row: #1E293B;
+  --table-row-alt: #283548;
+  --table-sticky: #1E293B;
+  --table-text: #F1F5F9;
   --modal-backdrop: rgba(0,0,0,.7);
   --placeholder: rgba(155,168,186,.6);
   --select-arrow: #B7C3D6;
@@ -125,43 +159,47 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  /* OPTION A: Enhanced Professional - Auto Dark Mode */
   #cccApp[data-theme="auto"]{
-    --bg:#0B0F16;
-    --panel:#121821;
-    --card:#141B26;
-    --surface-1:#121821;
-    --surface-2:#0F151D;
-    --surface-3:#0D1219;
-    --surface-4:#182230;
-    --surface-5:#101622;
-    --muted:#9BA8BA;
-    --text:#E8EEF7;
-    --text-strong:#F5F9FF;
+    --bg:#0F172A;
+    --panel:#1E293B;
+    --card:#1E293B;
+    --surface-1:#1E293B;
+    --surface-2:#334155;
+    --surface-3:#475569;
+    --surface-4:#1E293B;
+    --surface-5:#1A2332;
+    --muted:#94A3B8;
+    --text:#F1F5F9;
+    --text-strong:#FFFFFF;
     --line:rgba(255,255,255,.08);
-    --accent:#6CB6FF;
-    --accent2:#3DD6C9;
-    --accent-soft:rgba(108,182,255,.18);
-    --accent-soft-2:rgba(61,214,201,.14);
-    --accent-border:rgba(108,182,255,.45);
-    --accent-underline:rgba(108,182,255,.9);
-    --accent-ring:rgba(108,182,255,.2);
-    --good:#3AD39F;
-    --warn:#F6C453;
-    --warn-soft:rgba(246,196,83,.12);
-    --warn-border:rgba(246,196,83,.35);
-    --bad:#FF7A7A;
-    --bad-soft:rgba(255,122,122,.14);
-    --bad-border:rgba(255,122,122,.4);
-    --chip:#1A2230;
+    --accent:#60A5FA;
+    --accent2:#34D399;
+    --accent3:#A78BFA;
+    --accent-soft:rgba(96,165,250,.18);
+    --accent-soft-2:rgba(52,211,153,.14);
+    --accent-soft-3:rgba(167,139,250,.14);
+    --accent-border:rgba(96,165,250,.55);
+    --accent-border-2:rgba(52,211,153,.55);
+    --accent-underline:rgba(96,165,250,.9);
+    --accent-ring:rgba(96,165,250,.2);
+    --good:#10B981;
+    --warn:#FBBF24;
+    --warn-soft:rgba(251,191,36,.12);
+    --warn-border:rgba(251,191,36,.35);
+    --bad:#F87171;
+    --bad-soft:rgba(248,113,113,.14);
+    --bad-border:rgba(248,113,113,.4);
+    --chip:#1E293B;
     --shadow: 0 12px 36px rgba(0,0,0,.35);
     --shadow-soft: 0 10px 22px rgba(0,0,0,.28);
-    --control-bg: #121821;
-    --table-head-bg: #1A2433;
-    --table-head-text: #F2F6FF;
-    --table-row: #121821;
-    --table-row-alt: #151D2A;
-    --table-sticky: #1A2433;
-    --table-text: #E6EDF7;
+    --control-bg: #1E293B;
+    --table-head-bg: #1E293B;
+    --table-head-text: #F1F5F9;
+    --table-row: #1E293B;
+    --table-row-alt: #283548;
+    --table-sticky: #1E293B;
+    --table-text: #F1F5F9;
     --modal-backdrop: rgba(0,0,0,.7);
     --placeholder: rgba(155,168,186,.6);
     --select-arrow: #B7C3D6;
@@ -706,14 +744,15 @@
   opacity: 1;
 }
 
-table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(37,99,235,.12); border-color: rgba(37,99,235,.45); }
-table.ccc-table tbody tr.pos-RB .ccc-btn-offer{ background: rgba(51,209,154,.25); border-color: rgba(51,209,154,.85); }
-table.ccc-table tbody tr.pos-WR .ccc-btn-offer{ background: rgba(191,109,255,.25); border-color: rgba(191,109,255,.88); }
-table.ccc-table tbody tr.pos-TE .ccc-btn-offer{ background: rgba(184,138,35,.25); border-color: rgba(184,138,35,.88); }
-table.ccc-table tbody tr.pos-K .ccc-btn-offer{ background: rgba(255,120,180,.25); border-color: rgba(255,120,180,.88); }
-table.ccc-table tbody tr.pos-DL .ccc-btn-offer{ background: rgba(255,107,107,.25); border-color: rgba(255,107,107,.88); }
-table.ccc-table tbody tr.pos-LB .ccc-btn-offer{ background: rgba(6,182,212,.25); border-color: rgba(6,182,212,.88); }
-table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(255,145,60,.25); border-color: rgba(255,145,60,.88); }
+/* Standardized Position Colors - Offer Buttons */
+table.ccc-table tbody tr.pos-QB .ccc-btn-offer{ background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.55); }
+table.ccc-table tbody tr.pos-RB .ccc-btn-offer{ background: rgba(16,185,129,.20); border-color: rgba(16,185,129,.75); }
+table.ccc-table tbody tr.pos-WR .ccc-btn-offer{ background: rgba(168,85,247,.20); border-color: rgba(168,85,247,.75); }
+table.ccc-table tbody tr.pos-TE .ccc-btn-offer{ background: rgba(245,158,11,.20); border-color: rgba(245,158,11,.75); }
+table.ccc-table tbody tr.pos-K .ccc-btn-offer{ background: rgba(236,72,153,.20); border-color: rgba(236,72,153,.75); }
+table.ccc-table tbody tr.pos-DL .ccc-btn-offer{ background: rgba(239,68,68,.20); border-color: rgba(239,68,68,.75); }
+table.ccc-table tbody tr.pos-LB .ccc-btn-offer{ background: rgba(6,182,212,.20); border-color: rgba(6,182,212,.75); }
+table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(249,115,22,.20); border-color: rgba(249,115,22,.75); }
 
 /* Summary */
 .ccc-summary{
@@ -1084,32 +1123,33 @@ table.ccc-table tbody tr:hover td{
   color: inherit;
 }
 
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(37,99,235,.10), rgba(37,99,235,.03)); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(34,197,94,.10), rgba(34,197,94,.03)); }
+/* Standardized Position Colors - Row Highlights */
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(59,130,246,.10), rgba(59,130,246,.03)); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(16,185,129,.10), rgba(16,185,129,.03)); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.10), rgba(168,85,247,.03)); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.10), rgba(245,158,11,.03)); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.10), rgba(236,72,153,.03)); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.10), rgba(239,68,68,.03)); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(14,165,233,.10), rgba(14,165,233,.03)); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(234,88,12,.10), rgba(234,88,12,.03)); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.10), rgba(6,182,212,.03)); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.10), rgba(249,115,22,.03)); }
 
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(37,99,235,.65); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(34,197,94,.65); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(59,130,246,.65); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(16,185,129,.65); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.65); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.65); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-K  td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.65); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.65); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(14,165,233,.65); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(234,88,12,.65); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.65); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(249,115,22,.65); }
 
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ background: rgba(37,99,235,.10); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ background: rgba(34,197,94,.10); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ background: rgba(59,130,246,.10); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ background: rgba(16,185,129,.10); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-WR td:first-child{ background: rgba(168,85,247,.10); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-TE td:first-child{ background: rgba(245,158,11,.10); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-K td:first-child{ background: rgba(236,72,153,.10); }
 #cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DL td:first-child{ background: rgba(239,68,68,.10); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ background: rgba(14,165,233,.10); }
-#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(234,88,12,.10); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ background: rgba(6,182,212,.10); }
+#cccApp[data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ background: rgba(249,115,22,.10); }
 
 #cccApp[data-highlight="team"] table.ccc-table tbody tr{
   background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .30), rgba(var(--team-rgb, 0, 0, 0), .10));
@@ -1121,23 +1161,24 @@ table.ccc-table tbody tr:hover td{
   background: rgba(var(--team-rgb, 0, 0, 0), .30);
 }
 
+/* Dark Mode Position Highlights */
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.16), rgba(96,165,250,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(34,197,94,.14), rgba(34,197,94,.05)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(52,211,153,.14), rgba(52,211,153,.05)); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.16), rgba(168,85,247,.05)); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.16), rgba(245,158,11,.05)); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.16), rgba(236,72,153,.05)); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.16), rgba(239,68,68,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(14,165,233,.16), rgba(14,165,233,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(234,88,12,.16), rgba(234,88,12,.05)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.16), rgba(6,182,212,.05)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.16), rgba(249,115,22,.05)); }
 
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(96,165,250,.7); background: rgba(96,165,250,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(34,197,94,.7); background: rgba(34,197,94,.12); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(52,211,153,.7); background: rgba(52,211,153,.12); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.7); background: rgba(168,85,247,.12); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.7); background: rgba(245,158,11,.12); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.7); background: rgba(236,72,153,.12); }
 #cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.7); background: rgba(239,68,68,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(14,165,233,.7); background: rgba(14,165,233,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(234,88,12,.7); background: rgba(234,88,12,.12); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.7); background: rgba(6,182,212,.12); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(249,115,22,.7); background: rgba(249,115,22,.12); }
 
 #cccApp[data-theme="dark"][data-highlight="team"] table.ccc-table tbody tr{
   background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .38), rgba(var(--team-rgb, 0, 0, 0), .14));

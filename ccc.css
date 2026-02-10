@@ -353,9 +353,9 @@
 }
 
 .ccc-nav .ccc-chipBtn[data-module="extensions"]{
-  --module-bg: #4C1D95;
-  --module-border: #6D28D9;
-  --module-text: #F5F3FF;
+  --module-bg: #EA580C;
+  --module-border: #F97316;
+  --module-text: #FFF7ED;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="restructure"]{

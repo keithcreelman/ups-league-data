@@ -347,39 +347,39 @@
 }
 
 .ccc-nav .ccc-chipBtn[data-module="tag"]{
-  --module-bg: #0F172A;
-  --module-border: #1E293B;
-  --module-text: #F8FAFC;
+  --module-bg: #EFF6FF;
+  --module-border: #3B82F6;
+  --module-text: #1E40AF;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="extensions"]{
-  --module-bg: #EA580C;
+  --module-bg: #FFF7ED;
   --module-border: #F97316;
-  --module-text: #FFF7ED;
+  --module-text: #C2410C;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="restructure"]{
-  --module-bg: #14532D;
-  --module-border: #166534;
-  --module-text: #ECFDF3;
+  --module-bg: #ECFDF5;
+  --module-border: #10B981;
+  --module-text: #065F46;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="auction"]{
-  --module-bg: #7C2D12;
-  --module-border: #9A3412;
-  --module-text: #FFF7ED;
+  --module-bg: #FEF3C7;
+  --module-border: #F59E0B;
+  --module-text: #92400E;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="mym"]{
-  --module-bg: #0F766E;
-  --module-border: #0F9E92;
-  --module-text: #ECFEFF;
+  --module-bg: #F0FDFA;
+  --module-border: #14B8A6;
+  --module-text: #0F766E;
 }
 
 .ccc-nav .ccc-chipBtn[data-module="commish"]{
-  --module-bg: #111827;
-  --module-border: #1F2937;
-  --module-text: #F9FAFB;
+  --module-bg: #F3F4F6;
+  --module-border: #6B7280;
+  --module-text: #374151;
 }
 
 .ccc-nav .ccc-chipBtn.disabled{

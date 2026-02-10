@@ -2,7 +2,7 @@
    COLOR SCHEME OPTIONS - Quick Switch Guide
    ============================================================
    
-   Currently Active: OPTION A - Enhanced Professional
+   Currently Active: OPTION B - Modern Sports (Bold, Energetic)
    
    To switch schemes, replace the color variables in:
    1. :root { } (light mode)
@@ -24,185 +24,185 @@
    
    ============================================================ */
 
-/* OPTION A: Enhanced Professional (Active) */
+/* OPTION B: Modern Sports (Bold, Energetic) - Active */
 :root{
-  --bg:#F0F4F8;
+  --bg:#F8FAFC;
   --panel:#FFFFFF;
-  --card:#F2F5F9;
+  --card:#F8FAFC;
   --surface-1:#FFFFFF;
-  --surface-2:#FAFBFC;
-  --surface-3:#EDF2F7;
-  --surface-4:#F3F6FB;
-  --surface-5:#F8FAFC;
+  --surface-2:#F1F5F9;
+  --surface-3:#E2E8F0;
+  --surface-4:#F8FAFC;
+  --surface-5:#FAFBFD;
   --muted:#64748B;
-  --text:#1A202C;
-  --text-strong:#0F172A;
-  --line:rgba(15,23,42,.12);
-  --accent:#3B82F6;
-  --accent2:#10B981;
-  --accent3:#8B5CF6;
-  --accent-soft:rgba(59,130,246,.10);
-  --accent-soft-2:rgba(16,185,129,.10);
-  --accent-soft-3:rgba(139,92,246,.10);
-  --accent-border:rgba(59,130,246,.45);
-  --accent-border-2:rgba(16,185,129,.45);
-  --accent-underline:rgba(59,130,246,.85);
-  --accent-ring:rgba(59,130,246,.18);
-  --good:#059669;
+  --text:#0F172A;
+  --text-strong:#020617;
+  --line:rgba(15,23,42,.10);
+  --accent:#0EA5E9;
+  --accent2:#06B6D4;
+  --accent3:#F97316;
+  --accent-soft:rgba(14,165,233,.12);
+  --accent-soft-2:rgba(6,182,212,.12);
+  --accent-soft-3:rgba(249,115,22,.10);
+  --accent-border:rgba(14,165,233,.50);
+  --accent-border-2:rgba(6,182,212,.50);
+  --accent-underline:rgba(14,165,233,.90);
+  --accent-ring:rgba(14,165,233,.20);
+  --good:#10B981;
   --warn:#F59E0B;
   --warn-soft:rgba(245,158,11,.10);
-  --warn-border:rgba(245,158,11,.35);
-  --bad:#DC2626;
-  --bad-soft:rgba(220,38,38,.08);
-  --bad-border:rgba(220,38,38,.35);
-  --chip:#E8EDF4;
-  --shadow: 0 10px 30px rgba(15,23,42,.08);
-  --shadow-soft: 0 10px 22px rgba(15,23,42,.08);
-  --radius: 18px;
+  --warn-border:rgba(245,158,11,.40);
+  --bad:#EF4444;
+  --bad-soft:rgba(239,68,68,.10);
+  --bad-border:rgba(239,68,68,.40);
+  --chip:#E0F2FE;
+  --shadow: 0 8px 24px rgba(6,182,212,.12);
+  --shadow-soft: 0 6px 18px rgba(6,182,212,.08);
+  --radius: 16px;
   --control-bg: #FFFFFF;
-  --table-head-bg: #F3F6FB;
-  --table-head-text: #1A2637;
+  --table-head-bg: #F0F9FF;
+  --table-head-text: #0C4A6E;
   --table-row: #FFFFFF;
   --table-row-alt: #F8FAFC;
-  --table-sticky: #EEF2F7;
-  --table-text: #1B2738;
-  --modal-backdrop: rgba(15,23,42,.55);
-  --placeholder: rgba(100,116,139,.55);
-  --select-arrow: #94A3B8;
+  --table-sticky: #E0F2FE;
+  --table-text: #0F172A;
+  --modal-backdrop: rgba(6,182,212,.25);
+  --placeholder: rgba(100,116,139,.50);
+  --select-arrow: #64748B;
 }
 
-/* OPTION A: Enhanced Professional - Dark Mode */
+/* OPTION B: Modern Sports (Bold, Energetic) - Dark Mode */
 #cccApp[data-theme="dark"]{
-  --bg:#0F172A;
-  --panel:#1E293B;
-  --card:#1E293B;
-  --surface-1:#1E293B;
-  --surface-2:#334155;
-  --surface-3:#475569;
-  --surface-4:#1E293B;
-  --surface-5:#1A2332;
-  --muted:#94A3B8;
-  --text:#F1F5F9;
+  --bg:#0A0E1A;
+  --panel:#111827;
+  --card:#111827;
+  --surface-1:#111827;
+  --surface-2:#1F2937;
+  --surface-3:#374151;
+  --surface-4:#111827;
+  --surface-5:#0C111D;
+  --muted:#9CA3AF;
+  --text:#F3F4F6;
   --text-strong:#FFFFFF;
-  --line:rgba(255,255,255,.08);
-  --accent:#60A5FA;
-  --accent2:#34D399;
-  --accent3:#A78BFA;
-  --accent-soft:rgba(96,165,250,.18);
-  --accent-soft-2:rgba(52,211,153,.14);
-  --accent-soft-3:rgba(167,139,250,.14);
-  --accent-border:rgba(96,165,250,.55);
-  --accent-border-2:rgba(52,211,153,.55);
-  --accent-underline:rgba(96,165,250,.9);
-  --accent-ring:rgba(96,165,250,.2);
-  --good:#10B981;
+  --line:rgba(255,255,255,.10);
+  --accent:#38BDF8;
+  --accent2:#22D3EE;
+  --accent3:#FB923C;
+  --accent-soft:rgba(56,189,248,.20);
+  --accent-soft-2:rgba(34,211,238,.18);
+  --accent-soft-3:rgba(251,146,60,.16);
+  --accent-border:rgba(56,189,248,.60);
+  --accent-border-2:rgba(34,211,238,.60);
+  --accent-underline:rgba(56,189,248,.95);
+  --accent-ring:rgba(56,189,248,.25);
+  --good:#34D399;
   --warn:#FBBF24;
-  --warn-soft:rgba(251,191,36,.12);
-  --warn-border:rgba(251,191,36,.35);
+  --warn-soft:rgba(251,191,36,.16);
+  --warn-border:rgba(251,191,36,.50);
   --bad:#F87171;
-  --bad-soft:rgba(248,113,113,.14);
-  --bad-border:rgba(248,113,113,.4);
-  --chip:#1E293B;
-  --shadow: 0 12px 36px rgba(0,0,0,.35);
-  --shadow-soft: 0 10px 22px rgba(0,0,0,.28);
-  --control-bg: #1E293B;
-  --table-head-bg: #1E293B;
-  --table-head-text: #F1F5F9;
-  --table-row: #1E293B;
-  --table-row-alt: #283548;
-  --table-sticky: #1E293B;
-  --table-text: #F1F5F9;
-  --modal-backdrop: rgba(0,0,0,.7);
-  --placeholder: rgba(155,168,186,.6);
-  --select-arrow: #B7C3D6;
+  --bad-soft:rgba(248,113,113,.16);
+  --bad-border:rgba(248,113,113,.50);
+  --chip:#0C4A6E;
+  --shadow: 0 12px 40px rgba(0,0,0,.50);
+  --shadow-soft: 0 10px 28px rgba(0,0,0,.40);
+  --control-bg: #111827;
+  --table-head-bg: #0C111D;
+  --table-head-text: #22D3EE;
+  --table-row: #111827;
+  --table-row-alt: #1A202E;
+  --table-sticky: #0A0E1A;
+  --table-text: #F3F4F6;
+  --modal-backdrop: rgba(6,182,212,.35);
+  --placeholder: rgba(156,163,175,.55);
+  --select-arrow: #9CA3AF;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav{
-  background: linear-gradient(135deg, rgba(108,182,255,.10), rgba(15,23,42,.6));
-  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  background: linear-gradient(135deg, rgba(34,211,238,.15), rgba(10,14,26,.7));
+  box-shadow: 0 10px 28px rgba(0,0,0,.45);
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="tag"]{
-  --module-bg: #172034;
-  --module-border: #3B82F6;
-  --module-text: #E8F1FF;
+  --module-bg: #082F49;
+  --module-border: #38BDF8;
+  --module-text: #E0F2FE;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="extensions"]{
-  --module-bg: #1C1930;
-  --module-border: #A78BFA;
-  --module-text: #F2EBFF;
+  --module-bg: #431407;
+  --module-border: #FB923C;
+  --module-text: #FFEDD5;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="restructure"]{
-  --module-bg: #162326;
+  --module-bg: #022C22;
   --module-border: #34D399;
   --module-text: #D1FAE5;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="auction"]{
-  --module-bg: #221C14;
-  --module-border: #F59E0B;
+  --module-bg: #422006;
+  --module-border: #FBBF24;
   --module-text: #FEF3C7;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="mym"]{
-  --module-bg: #142326;
-  --module-border: #2DD4BF;
-  --module-text: #CCFBF1;
+  --module-bg: #083344;
+  --module-border: #22D3EE;
+  --module-text: #CFFAFE;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav .ccc-chipBtn[data-module="commish"]{
-  --module-bg: #20242D;
-  --module-border: #94A3B8;
-  --module-text: #E2E8F0;
+  --module-bg: #1F2937;
+  --module-border: #9CA3AF;
+  --module-text: #F3F4F6;
 }
 
 @media (prefers-color-scheme: dark) {
-  /* OPTION A: Enhanced Professional - Auto Dark Mode */
+  /* OPTION B: Modern Sports (Bold, Energetic) - Auto Dark Mode */
   #cccApp[data-theme="auto"]{
-    --bg:#0F172A;
-    --panel:#1E293B;
-    --card:#1E293B;
-    --surface-1:#1E293B;
-    --surface-2:#334155;
-    --surface-3:#475569;
-    --surface-4:#1E293B;
-    --surface-5:#1A2332;
-    --muted:#94A3B8;
-    --text:#F1F5F9;
+    --bg:#0A0E1A;
+    --panel:#111827;
+    --card:#111827;
+    --surface-1:#111827;
+    --surface-2:#1F2937;
+    --surface-3:#374151;
+    --surface-4:#111827;
+    --surface-5:#0C111D;
+    --muted:#9CA3AF;
+    --text:#F3F4F6;
     --text-strong:#FFFFFF;
-    --line:rgba(255,255,255,.08);
-    --accent:#60A5FA;
-    --accent2:#34D399;
-    --accent3:#A78BFA;
-    --accent-soft:rgba(96,165,250,.18);
-    --accent-soft-2:rgba(52,211,153,.14);
-    --accent-soft-3:rgba(167,139,250,.14);
-    --accent-border:rgba(96,165,250,.55);
-    --accent-border-2:rgba(52,211,153,.55);
-    --accent-underline:rgba(96,165,250,.9);
-    --accent-ring:rgba(96,165,250,.2);
-    --good:#10B981;
+    --line:rgba(255,255,255,.10);
+    --accent:#38BDF8;
+    --accent2:#22D3EE;
+    --accent3:#FB923C;
+    --accent-soft:rgba(56,189,248,.20);
+    --accent-soft-2:rgba(34,211,238,.18);
+    --accent-soft-3:rgba(251,146,60,.16);
+    --accent-border:rgba(56,189,248,.60);
+    --accent-border-2:rgba(34,211,238,.60);
+    --accent-underline:rgba(56,189,248,.95);
+    --accent-ring:rgba(56,189,248,.25);
+    --good:#34D399;
     --warn:#FBBF24;
-    --warn-soft:rgba(251,191,36,.12);
-    --warn-border:rgba(251,191,36,.35);
+    --warn-soft:rgba(251,191,36,.16);
+    --warn-border:rgba(251,191,36,.50);
     --bad:#F87171;
-    --bad-soft:rgba(248,113,113,.14);
-    --bad-border:rgba(248,113,113,.4);
-    --chip:#1E293B;
-    --shadow: 0 12px 36px rgba(0,0,0,.35);
-    --shadow-soft: 0 10px 22px rgba(0,0,0,.28);
-    --control-bg: #1E293B;
-    --table-head-bg: #1E293B;
-    --table-head-text: #F1F5F9;
-    --table-row: #1E293B;
-    --table-row-alt: #283548;
-    --table-sticky: #1E293B;
-    --table-text: #F1F5F9;
-    --modal-backdrop: rgba(0,0,0,.7);
-    --placeholder: rgba(155,168,186,.6);
-    --select-arrow: #B7C3D6;
+    --bad-soft:rgba(248,113,113,.16);
+    --bad-border:rgba(248,113,113,.50);
+    --chip:#0C4A6E;
+    --shadow: 0 12px 40px rgba(0,0,0,.50);
+    --shadow-soft: 0 10px 28px rgba(0,0,0,.40);
+    --control-bg: #111827;
+    --table-head-bg: #0C111D;
+    --table-head-text: #22D3EE;
+    --table-row: #111827;
+    --table-row-alt: #1A202E;
+    --table-sticky: #0A0E1A;
+    --table-text: #F3F4F6;
+    --modal-backdrop: rgba(6,182,212,.35);
+    --placeholder: rgba(156,163,175,.55);
+    --select-arrow: #9CA3AF;
   }
 }
 

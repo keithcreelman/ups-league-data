@@ -12,9 +12,10 @@ from typing import Iterable, List, Optional
 
 
 DATE_RE = re.compile(
-    r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+"
+    r"((Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+"
     r"[A-Z][a-z]{2}\s+\d{1,2}\s+"
-    r"\d{1,2}:\d{2}:\d{2}\s+[ap]\.m\.\s+ET\s+\d{4}$"
+    r"\d{1,2}:\d{2}:\d{2}\s+[ap]\.m\.\s+ET\s+\d{4}|"
+    r"DATE UNKNOWN)$"
 )
 
 RULE_KEYWORDS = re.compile(
@@ -64,7 +65,22 @@ def is_header_line(line: str) -> bool:
     return False
 
 
+def is_strict_header_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return True
+    if stripped in HEADER_EXACT:
+        return True
+    if re.search(r"\bFROM\s+MESSAGE\s+DATE\b", stripped):
+        return True
+    if re.search(r"\bFROM\s+MESSAGE\b", stripped):
+        return True
+    return False
+
+
 def parse_date(date_str: str) -> Optional[datetime]:
+    if date_str.strip() == "DATE UNKNOWN":
+        return None
     cleaned = (
         date_str.replace("a.m.", "AM")
         .replace("p.m.", "PM")
@@ -104,6 +120,11 @@ def flush_block(lines: List[str]) -> Optional[Entry]:
     if lines[-1] == "":
         lines = lines[:-1]
 
+    if not lines:
+        return None
+
+    # Remove table headers that sometimes appear inside the dump.
+    lines = [line for line in lines if not is_strict_header_line(line)]
     if not lines:
         return None
 
@@ -168,7 +189,9 @@ def write_chronological(entries: Iterable[Entry], out_path: Path, title: str) ->
 
 def write_highlights(entries_by_year: dict, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    lines: List[str] = ["# Rule-Related Highlights (2010–2011)", ""]
+    years = sorted(entries_by_year.keys())
+    title_range = f"{years[0]}–{years[-1]}" if years else ""
+    lines: List[str] = [f"# Rule-Related Highlights ({title_range})", ""]
 
     for year in sorted(entries_by_year.keys()):
         entries = [e for e in entries_by_year[year] if RULE_KEYWORDS.search(e.message)]
@@ -204,10 +227,8 @@ def main() -> int:
     highlights_path = Path(args.highlights)
 
     entries_by_year: dict[str, List[Entry]] = {}
-    for year in ("2010", "2011"):
-        path = manual_dir / f"{year}_messageboard.txt"
-        if not path.exists():
-            continue
+    for path in sorted(manual_dir.glob("*_messageboard.txt")):
+        year = path.stem.split("_")[0]
         entries = parse_manual_file(path)
         entries_by_year[year] = entries
         write_chronological(

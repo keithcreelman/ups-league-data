@@ -9,9 +9,11 @@ Change Notes:
 - 2014 entry fee was $50 ($60 for new owners); current rulebook lists $200 dues.
 - Competition Committee (CC) was eliminated (during the season the Baldarellis were banned); current governance is commissioner-led.
 - Current rulebook adds admission quiz, two-season probation, and dispersal draft for new owners, which are not present in legacy versions.
+- 2012 poll adopted a bench-player (non-QB) tiebreaker for playoff/regular-season ties; this rule was removed prior to the 2025 season by commissioner ruling.
 Needs Confirmation:
 - Confirm whether legacy voting thresholds (51% off-season, 90% in-season, 75% dues) still apply under commissioner-led governance.
 - Confirm whether conference-based standings/tiebreakers and double-header scheduling still apply (detailed in 2014 rulebook but not in current).
+- Pin down the exact season the bench-player tiebreaker was removed (known to be pre-2025).
 Legacy Rules Not In Current Rulebook:
 - 2014: League hosted on MFL; 12-team salary cap league.
 - 2014: 2 conferences with 2 divisions of 3 teams each; realignment every 3 years based on all-play record Weeks 1-13, with specific division groupings and .500 all-play assigned to new owners in realignment years.
@@ -23,7 +25,7 @@ Legacy Rules Not In Current Rulebook:
 
 **2. League Calendar**
 Change Notes:
-- Season rollover moved from Feb 1 (2013/2014) to March 1-15 (2018 and current).
+- Season rollover moved from Feb 1 to March 1 starting with the 2014 season; later shifted to March 1-15 (2018 and current).
 - Rookie Draft timing shifted from June (2014) to mid-June (2018) to Memorial Day weekend (current).
 - Free Agent Auction timing shifted from Aug 1 (2014/2018) to the last weekend of July with a 3-day prior roster lock (current).
 - Trade deadline moved from Week 12 (2014) and Week 11 (2013/2014 by-laws) to Thanksgiving kickoff (2018/current).
@@ -38,11 +40,14 @@ Legacy Rules Not In Current Rulebook:
 **3. Roster Management**
 Change Notes:
 - Roster size increased from 23-26 (2014) to min 27 and max 30 after the contract deadline (max 35 during auction) in the current rulebook.
+- Historical roster caps: 2012–2017 in-season max was 26, with auction-only overage up to 31; 2018+ in-season max is 30, with auction-only overage up to 35.
 - Taxi rules changed: 2014 allowed max 9 with 5/3/1 contract-year tiers (forum vote 2014-02-11, 7–5); current uses a 10-player taxi with 1 IDP minimum and 2nd-round+ eligibility.
 - Starting lineup shifted from the 2014 fixed structure to the current flex/superflex format with expanded IDP slots and a 3-starting-QB roster cap.
 - Holdout/suspension handling moved from special-circumstance 25% relief options (2013/2014) to current IR rules (50% relief, rollover rules).
+- 2012 poll rejected a minimum 8-IDP roster requirement (only lineup IDP requirements remained).
 - 2014 forum vote (Feb 11, 2014) clarified taxi-squad cuts: players not on the active roster incur no cap charge when cut; 2nd+ round rookies cut before the contract deadline are penalty-free if never promoted; once promoted, cuts incur cap hits.
 Needs Confirmation:
+- Confirm the season when suspended players became IR-eligible (owner confirmation says this was added later).
 - Confirm whether the 2014 taxi squad limits by contract years still apply or are fully replaced by the current taxi rules.
 - Confirm whether holdout relief is 50% (current) or legacy 25% with Week-8 options.
 - Confirm whether the 2014 taxi-squad cut/guarantee rule (no cap hit unless promoted) remains the governing standard.
@@ -58,10 +63,11 @@ Legacy Rules Not In Current Rulebook:
 
 **4. Rookie Draft**
 Change Notes:
-- Rookie contract length changed from 2 years (2014) to 3 years (2018/current).
+- Rookie contract length was 2 years in 2012, moved to 3 years starting 2013 by league vote, then removed prior to the 2025 season by commissioner ruling for ease of management.
 - Rookie salary schedule evolved: legacy docs specify 3rd+ round salaries ($2K or $1K); current rulebook only lists 1st/2nd round salaries in the table.
 Needs Confirmation:
 - Current rulebook does not specify rookie salaries for rounds 3+; confirm whether legacy $2K/$1K rules still apply.
+- Confirm the current rookie-contract length enforcement after the pre-2025 removal (if any default length is still used).
 Legacy Rules Not In Current Rulebook:
 - 2014: Rookie draft is 5 rounds, non-snake, 3-minute clock with ADP auto-pick.
 - 2014: Draft order determined by playoff finish (toilet bowl picks 1-6; championship picks 7-12).
@@ -71,6 +77,7 @@ Legacy Rules Not In Current Rulebook:
 Change Notes:
 - Auction format shifted from daily nominations (2014) and a 2-week auction (2018) to a 7-day minimum nomination window in late July (current).
 - Legacy docs list explicit warnings/fines for missed nominations; current rulebook does not define those penalties.
+- Nomination cadence has been treated as flexible in practice (e.g., 2/day with a noon start and midnight reset, allowing multiple nominations within a 12-hour window).
 Needs Confirmation:
 - Confirm whether missed-nomination warnings/fines from 2014 still apply.
 Legacy Rules Not In Current Rulebook:
@@ -92,6 +99,7 @@ Change Notes:
 - Blind-bid waiver run days changed from Wed/Thu/Sat/Sun (2014) to Thu/Fri/Sat/Sun (current).
 - Tie-breaker order changed from record-based (2014) to All-Play/Overall/Points/H2H (current).
 - FCFS window expanded from Sunday 9 AM-1 PM (2014) to post-Sunday waiver run until kickoff (current).
+- First blind-bid run timing has varied year to year (2012 poll selected first Wednesday after auction, but later seasons moved away from Wednesday runs).
 Needs Confirmation:
 - Confirm whether any rolling-waiver order or waiver-claim limits still exist alongside blind-bid waivers.
 Legacy Rules Not In Current Rulebook:
@@ -101,7 +109,8 @@ Legacy Rules Not In Current Rulebook:
 
 **8. Trades**
 Change Notes:
-- Trade processing moved from commissioner with potential veto poll (2014) to immediate processing with post-review (current).
+- Trade votes were removed in 2013: commissioner processes trades; two collusion objections within 48 hours trigger a veto poll requiring 5 collusion votes. Trades involving starters must process 4 hours before kickoff, and MFL blocks trades if any involved player has already kicked off.
+- Trade processing later moved from commissioner with potential veto poll (2014) to immediate processing with post-review (current).
 - Current rulebook adds an asset-required rule (salary-only trades prohibited) and disallows trading Round 6 picks.
 Needs Confirmation:
 - Confirm whether 2014 veto-poll mechanics are fully replaced by immediate processing with review.
@@ -112,11 +121,12 @@ Legacy Rules Not In Current Rulebook:
 
 **9. Contract Management**
 Change Notes:
-- Rookie contracts moved from 2 years (2014) to 3 years (2018/current).
+ - Rookie contract length rule shifted from 2 years (2012) to 3 years (2013) and was removed prior to 2025 (see Rookie Draft section).
 - MYM (Mid-Year Multi) limit increased from 2 per season (2018) to 3 per season (current).
 - Legacy docs include franchise/transition tag systems with compensation rules; current rulebook does not mention tags.
 - Legacy docs use 20% cap-penalty on remaining salary; current uses 75% guarantee with monthly earning schedule.
 - Legacy docs allow contract restructures (often capped at 2 per season); current mentions restructures but not limits.
+- 2012 poll adopted off-season extension timing where raises apply only to extension years (not immediately).
 - 2014 forum vote (Feb 11, 2014; passed 7–5) allowed restructures only when an extension is granted; extension cost can be incorporated into the current year and split evenly or front/back loaded.
 - 2014 forum clarification (Jun 9, 2013) and vote outcome (Feb 11, 2014 tie) reaffirmed cap of six 3-year contracts, excluding rookie contracts.
 Needs Confirmation:
@@ -143,6 +153,7 @@ Legacy Rules Not In Current Rulebook:
 Change Notes:
 - Current penalties section is marked as under review with placeholders; legacy docs provide concrete warning and fine structures.
 - Legacy special-circumstance rules (holdouts, suspensions, jail, retirements) are more detailed than the current placeholders.
+- 2012 Philip Rivers drop reversal established a precedent for reversing immediate drops when reported promptly; waiver-bid mistakes were still treated separately.
 Needs Confirmation:
 - Penalty amounts and appeal process are placeholders; requires authoritative update.
 - 2014 forum proposal to run MFL pools (Survivor/Confidence/Pick Em) with a draft-pick prize (e.g., 1.13/2.13) was deferred on 2014-09-03; confirm whether any pool prize rules were later adopted.
@@ -151,11 +162,16 @@ Legacy Rules Not In Current Rulebook:
 - 2014: Trade response strikes (4 days in-season, 2 weeks off-season); 3 strikes removes trading privileges.
 - 2014: Replacement owners may cut 1 player penalty-free and are relieved of prior cap hits; multi-owner replacement uses dispersal draft rules.
 
+**12. Scoring Settings**
+Change Notes:
+- Punter scoring changed after 2011: 2011 used gross punt yards (PNY) plus punts inside 20 at 2 points; starting in 2012 the league removed net-yards scoring and moved to punts inside 20 at 4 points plus punt-average bonus tiers (ANY).
+- Return yardage scoring (UY/KY) begins in 2012 at 0.05 per punt return yard and 0.025 per kickoff return yard.
+
 **League History & Records (In Progress)**
 Change Notes:
 - Salary cap changes: 2010: 210; 2011: 300000; 2019: 300000.49
-- Roster size changes: 2010: 17; 2011: 23; 2012: 31; 2013: 26; 2018: 30
-- Taxi squad size changes: 2010: 0; 2012: 5; 2014: 9; 2018: 10; 2020: 25; 2021: 10
+- Roster size changes: 2010: 17; 2011: 23; 2012–2017: 26 (auction max 31); 2018–present: 30 (auction max 35)
+- Taxi squad size changes: 2010: 0; 2012: 5; 2014: 9; 2018: 10 (min 1 IDP); 2020: 25 (COVID); 2021–present: 10 (min 1 IDP)
 - Starters count changes: 2010: 9; 2011: 14; 2015: 15; 2018: 17; 2022: 18
 - IDP starters changes: 2011: 5; 2018: 7
 - Last regular season week changes: 2010: 16; 2011: 13; 2021: 14

@@ -878,6 +878,84 @@ def fetch_trade_events(
     return out
 
 
+def parse_contract_years_from_text(raw_text: str) -> int:
+    txt = safe_str(raw_text).upper()
+    if not txt:
+        return 0
+    if 'DEFAULT 1YR' in txt or 'DEFAULT 1 YEAR' in txt:
+        return 0
+    m = re.search(r"(\d+)\s*(?:YR|YRS|YEAR|YEARS)", txt)
+    if m:
+        return safe_int(m.group(1), 0)
+    return 0
+
+
+def parse_submitted_at_to_et(value: str) -> tuple[str, str]:
+    if not value:
+        return "", ""
+    try:
+        dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except ValueError:
+        return "", ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    if EASTERN_TZ:
+        dt = dt.astimezone(EASTERN_TZ)
+    return dt.strftime('%Y-%m-%d'), dt.strftime('%H:%M:%S')
+
+
+def fetch_contract_submission_events(
+    conn: sqlite3.Connection,
+    season: int,
+    position: str,
+) -> List[Dict[str, Any]]:
+    sql = """
+    SELECT submission_type, source, season, franchise_id, franchise_name,
+           player_id, player_name, position, submitted_at_utc, raw_text
+    FROM contract_submissions
+    WHERE season = ?
+    """
+    events: List[Dict[str, Any]] = []
+    for row in conn.execute(sql, (season,)).fetchall():
+        pid = safe_str(row[5])
+        if not pid:
+            continue
+        pos = normalize_position(row[7])
+        if pos != position.upper():
+            continue
+        raw_text = safe_str(row[9])
+        years = parse_contract_years_from_text(raw_text)
+        if years <= 0:
+            continue
+        date_et, time_et = parse_submitted_at_to_et(safe_str(row[8]))
+        source = safe_str(row[0]).upper()
+        event_source = f"CONTRACT_SUBMISSION:{source}" if source else "CONTRACT_SUBMISSION"
+        detail = raw_text if raw_text else f"years={years}"
+        if raw_text and f"years={years}" not in raw_text.lower():
+            detail = f"{raw_text}|years={years}"
+        events.append(
+            {
+                "season": season,
+                "position_filter": position.upper(),
+                "player_id": pid,
+                "player_name": safe_str(row[6]),
+                "nfl_team": "",
+                "event_seq": 0,
+                "event_type": "CONTRACT_SUBMISSION",
+                "event_source": event_source,
+                "event_date": date_et,
+                "event_time": time_et,
+                "franchise_id": safe_str(row[3]).zfill(4)[-4:],
+                "team_name": safe_str(row[4]),
+                "detail": detail,
+                "contract_length_override": years,
+                "contract_raw_text": raw_text,
+                "generated_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
+    return events
+
+
 def fetch_owner_change_events(
     conn: sqlite3.Connection,
     season: int,
@@ -1956,6 +2034,9 @@ def build_transaction_snapshot_rows_for_season(
     position: str,
 ) -> List[Dict[str, Any]]:
     timeline_rows = build_timeline_rows_for_season(conn, season, position)
+    contract_submission_events = fetch_contract_submission_events(conn, season, position)
+    if contract_submission_events:
+        timeline_rows.extend(contract_submission_events)
     kickoff_date, season_end_date, week_dates, last_week = get_season_bounds(conn, season)
     snapshot_cache: Dict[int, Dict[str, Dict[str, Any]]] = {}
     week1_snap = fetch_snapshot(conn, season, 1, position)
@@ -2050,6 +2131,11 @@ def build_transaction_snapshot_rows_for_season(
             if prior_snap:
                 prior_snapshot_source = "fallback_week1"
 
+        event_type = safe_str(row.get("event_type")).upper()
+        if not snap and prior_snap and event_type in {"DROP", "CONTRACT_SUBMISSION"}:
+            snap = prior_snap
+            snapshot_source = f"{snapshot_source}|prior_for_{event_type.lower()}"
+
         salary = safe_int(snap.get("salary"), 0) if snap else 0
         contract_year = safe_int(snap.get("contract_year"), 0) if snap else 0
         contract_status = safe_str(snap.get("contract_status") if snap else "")
@@ -2064,6 +2150,32 @@ def build_transaction_snapshot_rows_for_season(
                 aav_label=format_k(parts.aav),
                 year_values=year_values,
             )
+
+        contract_length_val = safe_int(parts.contract_length, 0) if parts else 0
+        tcv_val = safe_int(parts.tcv, 0) if parts else 0
+        aav_val = safe_int(parts.aav, 0) if parts else 0
+        year_values_json_val = safe_str(parts.year_values_json) if parts else "{}"
+
+        override_years = safe_int(row.get("contract_length_override"), 0)
+        override_raw = safe_str(row.get("contract_raw_text"))
+        if override_years > 0 and safe_str(row.get("event_type")).upper() == "CONTRACT_SUBMISSION":
+            contract_year = override_years
+            contract_length_val = override_years
+            year_values = {}
+            if salary > 0:
+                tcv_val = salary * override_years
+                aav_val = salary
+                year_values = {i: salary for i in range(1, override_years + 1)}
+                year_values_json_val = json.dumps({f"Y{i}": salary for i in range(1, override_years + 1)}, separators=(",", ":"))
+            inferred_contract_info = build_contract_info_string(
+                contract_length=contract_length_val,
+                tcv=tcv_val,
+                aav_label=format_k(aav_val),
+                year_values=year_values,
+                suffix="",
+            )
+            if override_raw:
+                contract_info = override_raw
 
         extension_flag = 1 if "EXT:" in contract_info.upper() else 0
         mym_flag = detect_mym_flag(contract_status, contract_info)
@@ -2112,10 +2224,10 @@ def build_transaction_snapshot_rows_for_season(
             "contract_status": contract_status,
             "contract_info": contract_info,
             "inferred_contract_info": inferred_contract_info,
-            "contract_length": safe_int(parts.contract_length, 0) if parts else 0,
-            "tcv": safe_int(parts.tcv, 0) if parts else 0,
-            "aav": safe_int(parts.aav, 0) if parts else 0,
-            "year_values_json": safe_str(parts.year_values_json) if parts else "{}",
+            "contract_length": contract_length_val,
+            "tcv": tcv_val,
+            "aav": aav_val,
+            "year_values_json": year_values_json_val,
             "extension_flag": extension_flag,
             "restructure_flag": restructure_flag,
             "mym_flag": mym_flag,
@@ -2188,7 +2300,7 @@ def build_transaction_snapshot_rows_for_season(
         row["salary"] = salary_amt
         return row
 
-    # Split last add into ADD + CONTRACT_SUBMISSION for baseline contract tracking.
+    # Normalize add events to default 1-year baseline.
     grouped: Dict[Tuple[str, int], List[Dict[str, Any]]] = {}
     for r in rows:
         key = (safe_str(r.get("player_id")), safe_int(r.get("season"), 0))
@@ -2196,50 +2308,9 @@ def build_transaction_snapshot_rows_for_season(
 
     final_rows: List[Dict[str, Any]] = []
     for _key, group in grouped.items():
-        # Remove any existing contract submission rows (rebuild off last add).
-        group = [r for r in group if safe_str(r.get("event_type")).upper() != "CONTRACT_SUBMISSION"]
         add_candidates = [r for r in group if is_add_source(r)]
-        last_add = None
-        if add_candidates:
-            add_candidates.sort(
-                key=lambda r: (
-                    safe_str(r.get("event_date")),
-                    safe_str(r.get("event_time")),
-                    safe_int(r.get("event_seq"), 0),
-                )
-            )
-            last_add = add_candidates[-1]
-
-        if last_add:
-            original = dict(last_add)
-            # Convert all add events to default 1-year for baseline.
-            for r in add_candidates:
-                apply_default_add(r)
-
-            # Contract submission row (assumed off last add)
-            contract_row = dict(original)
-            contract_row["event_type"] = "CONTRACT_SUBMISSION"
-            src = safe_str(original.get("event_source")).upper()
-            contract_source = "CONTRACT:UNKNOWN"
-            if "MYM" in safe_str(original.get("contract_status")).upper() or "MYM" in safe_str(original.get("contract_info")).upper():
-                contract_source = "CONTRACT:MYM"
-            elif src.startswith("AUCTION"):
-                contract_source = "CONTRACT:AUCTION"
-            elif src.startswith("ROOKIE_DRAFT"):
-                contract_source = "CONTRACT:ROOKIE_DRAFT"
-            elif src.startswith("ADDDROP") or src == "FREE_AGENT":
-                contract_source = "CONTRACT:ADD"
-            contract_row["event_source"] = contract_source
-            contract_row["event_detail"] = (
-                f"{contract_row['event_detail']}|assumed_contract_from_last_add"
-                if contract_row.get("event_detail")
-                else "assumed_contract_from_last_add"
-            )
-            contract_row["mym_flag"] = 1 if contract_source == "CONTRACT:MYM" else contract_row.get("mym_flag", 0)
-            contract_row["post_add_multi_year_flag"] = 1 if safe_int(contract_row.get("contract_year"), 0) > 1 else 0
-            contract_row["post_add_multi_year_reason"] = src if safe_int(contract_row.get("contract_year"), 0) > 1 else ""
-
-            group.append(contract_row)
+        for r in add_candidates:
+            apply_default_add(r)
 
         # Deduplicate same-timestamp add/drop duplicates (prefer ADDDROP over FREE_AGENT).
         deduped: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
@@ -2285,6 +2356,73 @@ def build_transaction_snapshot_rows_for_season(
             )
 
         group.sort(key=_sort_key)
+
+        last_contract = None
+        for item in group:
+            etype = safe_str(item.get("event_type")).upper()
+            if etype == "CONTRACT_SUBMISSION":
+                if last_contract:
+                    if safe_int(item.get("salary"), 0) <= 0:
+                        item["salary"] = safe_int(last_contract.get("salary"), 0)
+                    if safe_int(item.get("contract_year"), 0) <= 0:
+                        item["contract_year"] = safe_int(last_contract.get("contract_year"), 0)
+                    if not safe_str(item.get("contract_status")):
+                        item["contract_status"] = safe_str(last_contract.get("contract_status"))
+                years = 0
+                m = re.search(r"years=([0-9]+)", safe_str(item.get("event_detail")), re.IGNORECASE)
+                if m:
+                    years = safe_int(m.group(1), 0)
+                if years <= 0:
+                    years = safe_int(item.get("contract_year"), 0)
+                if years > 0:
+                    item["contract_year"] = years
+                    salary_val = safe_int(item.get("salary"), 0)
+                    tcv_val = salary_val * years if salary_val > 0 else 0
+                    aav_val = salary_val
+                    year_values = {i: salary_val for i in range(1, years + 1)} if salary_val > 0 else {}
+                    item["contract_length"] = years
+                    item["tcv"] = tcv_val
+                    item["aav"] = aav_val
+                    item["year_values_json"] = (
+                        json.dumps({f"Y{i}": salary_val for i in range(1, years + 1)}, separators=(",", ":"))
+                        if salary_val > 0
+                        else "{}"
+                    )
+                    item["inferred_contract_info"] = build_contract_info_string(
+                        contract_length=years,
+                        tcv=tcv_val,
+                        aav_label=format_k(aav_val),
+                        year_values=year_values,
+                    )
+            elif etype == "DROP":
+                if last_contract:
+                    for key in (
+                        "salary",
+                        "contract_year",
+                        "contract_status",
+                        "contract_info",
+                        "inferred_contract_info",
+                        "contract_length",
+                        "tcv",
+                        "aav",
+                        "year_values_json",
+                    ):
+                        if safe_str(item.get(key)) == "" or safe_int(item.get(key), 0) == 0:
+                            item[key] = last_contract.get(key)
+
+            if safe_int(item.get("salary"), 0) > 0 or safe_int(item.get("contract_year"), 0) > 0:
+                last_contract = {
+                    "salary": safe_int(item.get("salary"), 0),
+                    "contract_year": safe_int(item.get("contract_year"), 0),
+                    "contract_status": safe_str(item.get("contract_status")),
+                    "contract_info": safe_str(item.get("contract_info")),
+                    "inferred_contract_info": safe_str(item.get("inferred_contract_info")),
+                    "contract_length": safe_int(item.get("contract_length"), 0),
+                    "tcv": safe_int(item.get("tcv"), 0),
+                    "aav": safe_int(item.get("aav"), 0),
+                    "year_values_json": safe_str(item.get("year_values_json")),
+                }
+
         for idx, item in enumerate(group, 1):
             item["event_seq"] = idx
             final_rows.append(item)
@@ -2443,6 +2581,9 @@ def ensure_table(conn: sqlite3.Connection, table_name: str) -> None:
           last_trade_group_id TEXT,
           cap_penalty INTEGER,
           cap_penalty_note TEXT,
+          legacy_cap_penalty_amount INTEGER,
+          current_cap_penalty_amount INTEGER,
+          at_time_cap_penalty_amount INTEGER,
           generated_at_utc TEXT,
           PRIMARY KEY (season, position_filter, player_id)
         )

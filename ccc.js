@@ -415,17 +415,24 @@
     const app = $("#cccApp");
     const enabled = !!state.rowHighlightEnabled;
     const mode = normalizeHighlightMode(state.rowHighlightMode);
-    if (app) app.setAttribute("data-highlight", enabled ? mode : "none");
+    const appliesToTagTracking = state.activeModule === "tag" && state.activeTab === "eligible";
+    if (app) app.setAttribute("data-highlight", appliesToTagTracking && enabled ? mode : "none");
     const chk = $("#rowHighlightChk");
-    if (chk) chk.checked = enabled;
+    if (chk) {
+      chk.checked = enabled;
+      chk.disabled = !appliesToTagTracking;
+    }
     const sel = $("#rowHighlightModeSelect");
-    if (sel) sel.value = mode;
+    if (sel) {
+      sel.value = mode;
+      sel.disabled = !appliesToTagTracking || !enabled;
+    }
     const seg = $("#rowHighlightSeg");
     if (seg) {
       seg.querySelectorAll(".seg").forEach((btn) => {
         const isActive = btn.getAttribute("data-highlight") === mode;
         btn.classList.toggle("is-active", isActive);
-        btn.disabled = !enabled;
+        btn.disabled = !appliesToTagTracking || !enabled;
       });
     }
   }
@@ -2333,6 +2340,39 @@
       return `<div class="ccc-summaryPage">${top}<div class="ccc-tableWrap" style="padding:12px;">No tag tracking rows.</div></div>`;
     }
 
+    const canTagFromSummary = (r) => {
+      if (state.commishMode) return true;
+      if (state.showAllTeams) return false;
+      return pad4(r.franchise_id) === pad4(state.selectedTeam);
+    };
+
+    const renderSummaryTagButton = (r) => {
+      const season = normalizeSeasonValue(r.season || state.selectedSeason);
+      const side = safeStr(r.tag_side || "OFFENSE");
+      const limit = Math.max(1, safeInt(r.tag_limit_per_side || 1));
+      const key = buildTagSelectionKey(season, r.franchise_id, side);
+      const selected = state.tagSelections[key];
+      const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
+      const isLocked = !state.commishMode && !!selected && !isSelected && limit <= 1;
+      const tagLabel = isSelected ? "Selected" : isLocked ? "Locked" : "Tag";
+      return `
+        <button
+          type="button"
+          class="ccc-btn ccc-btn-tag${isSelected ? " is-selected" : ""}"
+          data-tag-action="1"
+          data-tag-side="${htmlEsc(side)}"
+          data-tag-limit="${limit}"
+          data-season="${htmlEsc(season)}"
+          data-franchise-id="${htmlEsc(pad4(r.franchise_id))}"
+          data-franchise-name="${htmlEsc(r.franchise_name || "")}"
+          data-player-id="${htmlEsc(r.player_id)}"
+          data-player-name="${htmlEsc(r.player_name)}"
+          data-pos="${htmlEsc(posKeyFromRow(r))}"
+          ${isLocked ? "disabled" : ""}
+        >${tagLabel}</button>
+      `;
+    };
+
     if (view === "team") {
       const groupMap = new Map();
       filteredRows.forEach((r) => {
@@ -2355,10 +2395,11 @@
         const pos = safeStr(r.positional_grouping || r.position || "NA").toUpperCase();
         let rec = group.rows.get(pos);
         if (!rec) {
-          rec = { pos, count: 0, tier1: 0, tier2: 0, tier3: 0 };
+          rec = { pos, count: 0, tier1: 0, tier2: 0, tier3: 0, players: [] };
           group.rows.set(pos, rec);
         }
         rec.count += 1;
+        rec.players.push(r);
         const t = safeInt(r.tag_tier);
         if (t === 1) rec.tier1 += 1;
         else if (t === 2) rec.tier2 += 1;
@@ -2385,6 +2426,27 @@
               if (!r) return "";
               const rowClass = buildRowClass({ franchise_id: g.team_id }, r.pos);
               const styleAttr = rowStyle ? ` style="${rowStyle}"` : "";
+              const players = (r.players || [])
+                .slice()
+                .sort(
+                  (a, b) =>
+                    safeInt(b.points_total) - safeInt(a.points_total) ||
+                    safeStr(a.player_name).localeCompare(safeStr(b.player_name))
+                )
+                .map((p) => {
+                  const canTag = canTagFromSummary(p);
+                  const action = canTag ? renderSummaryTagButton(p) : "";
+                  return `
+                    <tr class="${buildRowClass(p, posKeyFromRow(p))}"${styleAttr}>
+                      <td class="playerCell">${htmlEsc(p.player_name)}</td>
+                      <td>${htmlEsc(posKeyFromRow(p))}</td>
+                      <td class="cell-num">${safeInt(p.tag_tier) || "—"}</td>
+                      <td class="cell-num">${safeInt(p.tag_bid || p.tag_salary).toLocaleString()}</td>
+                      <td>${action}</td>
+                    </tr>
+                  `;
+                })
+                .join("");
               return `
             <tr class="${rowClass}"${styleAttr}>
               <td>${htmlEsc(r.pos)}</td>
@@ -2392,6 +2454,21 @@
               <td>${r.tier1}</td>
               <td>${r.tier2}</td>
               <td>${r.tier3}</td>
+            </tr>
+            <tr class="${rowClass}"${styleAttr}>
+              <td colspan="5">
+                <details class="ccc-summaryPlayers">
+                  <summary>Players (${r.count})</summary>
+                  <div class="ccc-tableWrap ccc-summary-force-team" style="margin-top:8px;">
+                    <table class="ccc-table">
+                      <thead>
+                        <tr><th>Player</th><th>Pos</th><th>Tier</th><th>Tag $</th><th>Action</th></tr>
+                      </thead>
+                      <tbody>${players}</tbody>
+                    </table>
+                  </div>
+                </details>
+              </td>
             </tr>`;
             })
             .join("");
@@ -2407,7 +2484,7 @@
               <div class="ccc-summaryStat"><span class="label">Tier 3</span><span class="value">${g.tier3}</span></div>
             </div>
           </summary>
-          <div class="ccc-tableWrap">
+          <div class="ccc-tableWrap ccc-summary-force-team">
             <table class="ccc-table">
               <thead>
                 <tr>
@@ -2434,10 +2511,48 @@
     `;
     }
 
-    const rowsOut = buildTagBreakdownByPos(filteredRows);
+    const posMap = new Map();
+    filteredRows.forEach((r) => {
+      const pos = safeStr(r.positional_grouping || r.position || "NA").toUpperCase();
+      let rec = posMap.get(pos);
+      if (!rec) {
+        rec = { pos, count: 0, tier1: 0, tier2: 0, tier3: 0, players: [] };
+        posMap.set(pos, rec);
+      }
+      rec.count += 1;
+      rec.players.push(r);
+      const t = safeInt(r.tag_tier);
+      if (t === 1) rec.tier1 += 1;
+      else if (t === 2) rec.tier2 += 1;
+      else if (t === 3) rec.tier3 += 1;
+    });
+    const rowsOut = orderPositions(Array.from(posMap.keys()))
+      .map((k) => posMap.get(k))
+      .filter(Boolean);
     const body = rowsOut
       .map((r) => {
         const rowClass = buildRowClass(r, r.pos);
+        const players = (r.players || [])
+          .slice()
+          .sort(
+            (a, b) =>
+              safeInt(b.points_total) - safeInt(a.points_total) ||
+              safeStr(a.player_name).localeCompare(safeStr(b.player_name))
+          )
+          .map((p) => {
+            const canTag = canTagFromSummary(p);
+            const action = canTag ? renderSummaryTagButton(p) : "";
+            return `
+              <tr class="${buildRowClass(p, posKeyFromRow(p))}">
+                <td class="playerCell">${htmlEsc(p.player_name)}</td>
+                <td>${htmlEsc(p.franchise_name || p.franchise_id)}</td>
+                <td class="cell-num">${safeInt(p.tag_tier) || "—"}</td>
+                <td class="cell-num">${safeInt(p.tag_bid || p.tag_salary).toLocaleString()}</td>
+                <td>${action}</td>
+              </tr>
+            `;
+          })
+          .join("");
         return `
           <tr class="${rowClass}">
             <td>${htmlEsc(r.pos)}</td>
@@ -2445,6 +2560,21 @@
             <td>${r.tier1}</td>
             <td>${r.tier2}</td>
             <td>${r.tier3}</td>
+          </tr>
+          <tr class="${rowClass}">
+            <td colspan="5">
+              <details class="ccc-summaryPlayers">
+                <summary>Players (${r.count})</summary>
+                <div class="ccc-tableWrap ccc-summary-force-pos" style="margin-top:8px;">
+                  <table class="ccc-table">
+                    <thead>
+                      <tr><th>Player</th><th>Team</th><th>Tier</th><th>Tag $</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>${players}</tbody>
+                  </table>
+                </div>
+              </details>
+            </td>
           </tr>
         `;
       })
@@ -2455,7 +2585,7 @@
     return `
       <div class="ccc-summaryPage">
         ${top}
-        <div class="ccc-tableWrap">
+        <div class="ccc-tableWrap ccc-summary-force-pos">
           <table class="ccc-table">
             <thead>
               <tr>
@@ -2557,6 +2687,13 @@
             ${seasonOptions}
           </select>
         </label>
+      </div>
+      <div class="ccc-summary" style="margin-bottom:10px;">
+        <div class="muted" style="font-weight:900;">Tagged Player Notes</div>
+        <ul style="margin:8px 0 0 18px; padding:0;">
+          <li>Tagged players may be cut before the FA Auction with no cap penalty and no bidding restrictions.</li>
+          <li>Submitted tags can be rescinded any time before the tag deadline.</li>
+        </ul>
       </div>
     `;
 
@@ -5524,6 +5661,7 @@
     if (tabSubmitted) tabSubmitted.style.display = tab === "submitted" ? "" : "none";
 
     $$(".ccc-tab").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+    applyHighlightSetting();
   }
 
   function handleHeaderSortClick(th, tableMode) {

@@ -1226,6 +1226,49 @@ table.ccc-table tbody tr:hover td{
   background: rgba(var(--team-rgb, 0, 0, 0), .34);
 }
 
+/* Tag Summary Always-Highlighted Tables */
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(59,130,246,.10), rgba(59,130,246,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(16,185,129,.10), rgba(16,185,129,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.10), rgba(168,85,247,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.10), rgba(245,158,11,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.10), rgba(236,72,153,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.10), rgba(239,68,68,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.10), rgba(6,182,212,.03)); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.10), rgba(249,115,22,.03)); }
+
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(59,130,246,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(16,185,129,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-K  td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.65); }
+.ccc-summary-force-pos table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(249,115,22,.65); }
+
+.ccc-summary-force-team table.ccc-table tbody tr{
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .30), rgba(var(--team-rgb, 0, 0, 0), .10));
+  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .28);
+}
+
+.ccc-summary-force-team table.ccc-table tbody tr td:first-child{
+  box-shadow: inset 7px 0 0 rgba(var(--team-rgb, 0, 0, 0), 1);
+  background: rgba(var(--team-rgb, 0, 0, 0), .30);
+}
+
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.28), rgba(96,165,250,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(52,211,153,.25), rgba(52,211,153,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.28), rgba(168,85,247,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.27), rgba(245,158,11,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.26), rgba(236,72,153,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.28), rgba(239,68,68,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.28), rgba(6,182,212,.10)); }
+#cccApp[data-theme="dark"] .ccc-summary-force-pos table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.28), rgba(249,115,22,.10)); }
+
+#cccApp[data-theme="dark"] .ccc-summary-force-team table.ccc-table tbody tr{
+  background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .38), rgba(var(--team-rgb, 0, 0, 0), .14));
+  box-shadow: inset 0 0 0 1px rgba(var(--team-rgb, 0, 0, 0), .32);
+}
+
 table.ccc-table .playerCell{
   font-weight: 1000;
   letter-spacing: .1px;

@@ -350,19 +350,19 @@
     const teamId = safeStr(obj.teamId || obj.team_id || "");
     const positionRaw = safeStr(obj.position || obj.pos || "__ALL_POS__");
     const position = positionRaw ? positionRaw : "__ALL_POS__";
-    const rawSize = clampInt(obj.pageSize || obj.page_size || 25, 10, 500);
-    const pageSize = [25, 100].includes(rawSize) ? rawSize : 25;
+    const rawSize = clampInt(obj.pageSize || obj.page_size || 50, 10, 500);
+    const pageSize = [25, 50, 100].includes(rawSize) ? rawSize : 50;
     return { teamId, position, pageSize };
   }
 
   function loadDefaultFilters() {
     try {
       const raw = localStorage.getItem(LOCAL_DEFAULT_FILTERS_KEY);
-      if (!raw) return { teamId: "", position: "__ALL_POS__", pageSize: 25 };
+      if (!raw) return { teamId: "", position: "__ALL_POS__", pageSize: 50 };
       const obj = JSON.parse(raw);
       return normalizeDefaultFilters(obj);
     } catch (e) {
-      return { teamId: "", position: "__ALL_POS__", pageSize: 25 };
+      return { teamId: "", position: "__ALL_POS__", pageSize: 50 };
     }
   }
 
@@ -1379,7 +1379,7 @@
       state.activeModule !== "mym"
         ? true
         : state.commishMode || isMymActiveForSeason(baseSeason, nowRef);
-    const pageSize = clampInt(state.pageSize || 25, 10, 500);
+    const pageSize = clampInt(state.pageSize || 50, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
     const pageRaw = state.pageByTab[tabMode] || 1;
@@ -2662,7 +2662,7 @@
       })
       .join("");
 
-    const rowOptions = [25, 100]
+    const rowOptions = [25, 50, 100]
       .map((n) => {
         const isSelected = defaults.pageSize === n;
         return `<option value="${n}"${isSelected ? " selected" : ""}>${n}</option>`;
@@ -2729,7 +2729,7 @@
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     }
 
-    const pageSize = clampInt(state.pageSize || 25, 10, 500);
+    const pageSize = clampInt(state.pageSize || 50, 10, 500);
     const totalRows = rows.length;
     const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
     const pageRaw = state.pageByTab[tabMode] || 1;
@@ -2889,17 +2889,17 @@
           <thead>
             <tr>
               <th style="min-width:120px;">Tag</th>
-              ${sortTh("tagTier", "Tier (Based on Total Points)", "", "is-num")}
-              ${sortTh("tagBid", "Cost to Tag (Projected Bid)", "min-width:190px;", "is-num")}
-              ${sortTh("team", "Team")}
-              ${sortTh("pos", "Position")}
+              ${sortTh("tagTier", "Tier", "", "is-num")}
+              ${sortTh("tagBid", "Tag $", "min-width:120px;", "is-num")}
+              ${sortTh("team", "Tm")}
+              ${sortTh("pos", "Pos")}
               ${sortTh("player", "Player")}
               ${sortTh("aav", "AAV", "", "is-num")}
-              ${sortTh("points", "Points", "", "is-num")}
-              ${sortTh("tagRank", "Positional Rank", "", "is-num")}
+              ${sortTh("points", "Pts", "", "is-num")}
+              ${sortTh("tagRank", "Pos Rk", "", "is-num")}
               ${sortTh("ppg", "PPG", "", "is-num")}
-              ${sortTh("ppgRank", "PPG Rank", "", "is-num")}
-              ${sortTh("tagFormula", "Formula", "min-width:240px;")}
+              ${sortTh("ppgRank", "PPG Rk", "", "is-num")}
+              ${sortTh("tagFormula", "Calc", "min-width:160px;")}
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -2985,7 +2985,7 @@
       showAllTeams: !!state.showAllTeams,
       selectedPosition: safeStr(state.selectedPosition || "__ALL_POS__"),
       search: safeStr(state.search || ""),
-      pageSize: clampInt(state.pageSize || 25, 10, 500),
+      pageSize: clampInt(state.pageSize || 50, 10, 500),
     };
   }
 
@@ -3018,7 +3018,7 @@
     state.search = safeStr(saved && saved.search ? saved.search : "");
     const rawSize =
       saved && saved.pageSize !== undefined ? safeInt(saved.pageSize) : safeInt(defaults.pageSize);
-    state.pageSize = [25, 100].includes(rawSize) ? rawSize : 25;
+    state.pageSize = [25, 50, 100].includes(rawSize) ? rawSize : 50;
   }
 
   function switchModule(nextModule) {
@@ -3992,10 +3992,6 @@
     const searchBoxEl = $("#searchBox");
     if (searchBoxEl && searchBoxEl.value !== safeStr(state.search || "")) {
       searchBoxEl.value = safeStr(state.search || "");
-    }
-    const pageSizeSelectEl = $("#pageSizeSelect");
-    if (pageSizeSelectEl && pageSizeSelectEl.value !== String(state.pageSize || 25)) {
-      pageSizeSelectEl.value = String(state.pageSize || 25);
     }
 
     const seasonEligibility = eligibility.filter(
@@ -5122,7 +5118,6 @@
       must("#tabSubmitted");
       must("#teamSelect");
       must("#positionSelect");
-      must("#pageSizeSelect");
       must("#commishConsole");
       must("#commishPlayerSelect");
       must("#commishSalaryInput");
@@ -5184,6 +5179,9 @@
 
       const raw = await res.json();
       state.payload = normalizePayload(raw);
+      const payloadSubRows = Array.isArray(state.payload.submissions)
+        ? state.payload.submissions.slice()
+        : [];
       let subRows = [];
       if (subRes && subRes.ok) {
         try {
@@ -5191,7 +5189,7 @@
           subRows = normalizeSubmissions(subRaw);
         } catch (e) {}
       }
-      state.payload.submissions = subRows;
+      state.payload.submissions = subRows.length ? subRows : payloadSubRows;
       let restructureRows = [];
       if (restructureSubRes && restructureSubRes.ok) {
         try {
@@ -5362,13 +5360,9 @@
         }
       }
 
-      const pageSizeSelect = $("#pageSizeSelect");
-      if (pageSizeSelect) {
-        const defaults = state.defaultFilters || {};
-        const defaultSize = clampInt(defaults.pageSize || state.pageSize, 10, 500);
-        state.pageSize = [25, 100].includes(defaultSize) ? defaultSize : 25;
-        pageSizeSelect.value = String(state.pageSize);
-      }
+      const defaultsSize = state.defaultFilters || {};
+      const defaultSize = clampInt(defaultsSize.pageSize || state.pageSize, 10, 500);
+      state.pageSize = [25, 50, 100].includes(defaultSize) ? defaultSize : 50;
 
       resetAllTablePages();
       setTab("summary");
@@ -5668,11 +5662,9 @@
         }
       } else if (defKey === "rows") {
         const v = clampInt(target.value || state.pageSize, 10, 500);
-        state.defaultFilters.pageSize = [25, 100].includes(v) ? v : 25;
+        state.defaultFilters.pageSize = [25, 50, 100].includes(v) ? v : 50;
         saveDefaultFilters(state.defaultFilters);
-        const pageSizeSelect = $("#pageSizeSelect");
         state.pageSize = state.defaultFilters.pageSize;
-        if (pageSizeSelect) pageSizeSelect.value = String(state.pageSize);
       }
       resetAllTablePages();
       render();
@@ -5795,16 +5787,6 @@
       clearBtn.addEventListener("click", () => {
         $("#searchBox").value = "";
         state.search = "";
-        saveFiltersForModule(state.activeModule || "default");
-        resetAllTablePages();
-        render();
-      });
-
-    const pageSizeSelect = $("#pageSizeSelect");
-    if (pageSizeSelect)
-      pageSizeSelect.addEventListener("change", (e) => {
-        state.pageSize = clampInt(e.target.value || state.pageSize, 10, 500);
-        e.target.value = String(state.pageSize);
         saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();

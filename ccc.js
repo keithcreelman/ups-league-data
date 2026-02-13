@@ -2947,7 +2947,7 @@
     commishSelectedPlayerId: "",
     commishFormDirty: false,
     search: "",
-    activeTab: "summary",
+    activeTab: "eligible",
     availabilitySeason: "",
     calendarBaseSeason: "",
     calendarContractSeason: "",
@@ -3672,7 +3672,7 @@
         costTab.style.display = "";
         costTab.textContent = "Cost Calc";
       }
-      if (eligibleTab) eligibleTab.textContent = "Player Tracking";
+      if (eligibleTab) eligibleTab.textContent = "Player Tagging";
       if (submittedTab) submittedTab.textContent = "Finalized Submissions";
     } else {
       if (costTab) costTab.style.display = "none";
@@ -5372,7 +5372,7 @@
       state.pageSize = [25, 50, 100].includes(defaultSize) ? defaultSize : 50;
 
       resetAllTablePages();
-      setTab("summary");
+      setTab("eligible");
 
       // default sort per tab
       sortState.tab = "eligible";
@@ -5555,7 +5555,7 @@
         sortState.key = "player";
         sortState.dir = "asc";
         resetAllTablePages();
-        setTab("summary");
+        setTab("eligible");
         render();
       });
 
@@ -5567,7 +5567,7 @@
         sortState.key = "acquired";
         sortState.dir = "desc";
         resetAllTablePages();
-        setTab("summary");
+        setTab("eligible");
         render();
       });
 
@@ -5579,7 +5579,7 @@
         sortState.key = "salary";
         sortState.dir = "desc";
         resetAllTablePages();
-        setTab("summary");
+        setTab("eligible");
         render();
       });
 
@@ -5591,7 +5591,7 @@
         sortState.key = "acquired";
         sortState.dir = "desc";
         resetAllTablePages();
-        setTab("summary");
+        setTab("eligible");
         render();
       });
 
@@ -5600,7 +5600,7 @@
       moduleCommishChip.addEventListener("click", () => {
         switchModule("commish");
         resetAllTablePages();
-        setTab("summary");
+        setTab("eligible");
         render();
       });
 

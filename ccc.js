@@ -4048,8 +4048,8 @@
         summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
       if (tabSummary)
         tabSummary.innerHTML = renderTagSummaryPage(
-          tagEligibleAll,
-          "League",
+          tagEligibleRows,
+          showAllTeams ? "League" : teamName,
           state.tagSummaryView || "pos",
           !!state.tagCalcOpen,
           state.tagTrackingMeta || {},

@@ -400,8 +400,28 @@
   function getWeekKickoffs(year) {
     const y = String(year);
     const cached = state.scheduleByYear[y];
+    if (cached && cached.weekKickoffs) return cached.weekKickoffs;
+
+    // Try inline/local immediately
+    const inline = INLINE_SCHEDULES[y];
+    if (inline) {
+      const parsed = inline
+        .map((item) => {
+          const week = safeInt(item && item.week);
+          const kickoff = parseKickoffToDate(item && item.kickoff);
+          return week && kickoff ? { week, kickoff } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.week - b.week);
+      if (parsed.length) {
+        state.scheduleByYear[y] = { weekKickoffs: parsed, inline: true };
+        if (!state.scheduleFetch[y]) fetchSchedule(y); // still fetch live for freshness
+        return parsed;
+      }
+    }
+
     if (!cached && !state.scheduleFetch[y]) fetchSchedule(y);
-    return cached ? cached.weekKickoffs : null;
+    return null;
   }
 
   function computeWeekStart(kickoffDate) {

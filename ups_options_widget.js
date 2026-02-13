@@ -17,7 +17,7 @@
   };
 
   const DEFAULT_PLAYOFF_END_WEEK = 17;
-  const DEFAULT_REGULAR_END_WEEK = Math.max(1, DEFAULT_PLAYOFF_END_WEEK - 1);
+  const DEFAULT_REGULAR_END_WEEK = 16;
 
   const INLINE_SCHEDULES = {
     "2026": [
@@ -493,14 +493,23 @@
     return thanksgiving;
   }
 
+  function resolveActiveSeasonYear(baseYear, now) {
+    const currentYear = now.getFullYear();
+    const seedYear = Math.max(baseYear, currentYear);
+    const week1Seed = resolveWeekKickoff(seedYear, 1);
+    if (week1Seed && week1Seed.getTime() >= now.getTime()) return seedYear;
+    const week1Next = resolveWeekKickoff(seedYear + 1, 1);
+    if (week1Next) return seedYear + 1;
+    return seedYear;
+  }
+
   function buildEvents() {
     const now = getNow();
     const baseYear = parseSeasonYear();
-    const leagueId = parseLeagueId();
-    const leagueConfig = getLeagueWeekConfig(baseYear, leagueId) || {};
+    const seasonYear = resolveActiveSeasonYear(baseYear, now);
 
     const faFallback = (year) => makeZonedDate(year, 7, getLastWeekdayOfMonth(year, 6, 6).getDate(), 12, 0);
-    const scheduleMaxWeek = getScheduleMaxWeek(baseYear);
+    const scheduleMaxWeek = getScheduleMaxWeek(seasonYear);
     const fallbackRegularWeek = Math.max(
       1,
       scheduleMaxWeek ? Math.min(scheduleMaxWeek, DEFAULT_REGULAR_END_WEEK) : DEFAULT_REGULAR_END_WEEK
@@ -509,10 +518,8 @@
       fallbackRegularWeek + 1,
       scheduleMaxWeek ? Math.min(scheduleMaxWeek, DEFAULT_PLAYOFF_END_WEEK) : DEFAULT_PLAYOFF_END_WEEK
     );
-    const leagueRegularWeek = safeInt(leagueConfig.lastRegularWeek);
-    const leagueEndWeek = safeInt(leagueConfig.endWeek);
-    let regularWeek = leagueRegularWeek || fallbackRegularWeek;
-    let endWeek = leagueEndWeek || fallbackPlayoffWeek;
+    let regularWeek = fallbackRegularWeek;
+    let endWeek = fallbackPlayoffWeek;
     regularWeek = Math.min(regularWeek, Math.max(1, endWeek - 1));
     endWeek = Math.max(endWeek, regularWeek + 1, fallbackPlayoffWeek);
 
@@ -520,25 +527,25 @@
       {
         id: "seasonStart",
         label: "Start of UPS Season",
-        date: resolveFixedDate("seasonStart", baseYear, now, (y) => makeZonedDate(y, 3, 1, 0, 0)),
+        date: resolveFixedDate("seasonStart", seasonYear, now, (y) => makeZonedDate(y, 3, 1, 0, 0)),
         hint: "March 1"
       },
       {
         id: "ownersMeeting",
         label: "Annual Owner's Meeting",
-        date: resolveFixedDate("ownersMeeting", baseYear, now, (y) => makeZonedDate(y, 3, 19, 21, 0)),
+        date: resolveFixedDate("ownersMeeting", seasonYear, now, (y) => makeZonedDate(y, 3, 19, 21, 0)),
         hint: "March 19, 9:00 PM ET"
       },
       {
         id: "expiringDeadline",
         label: "Expiring Rookie Extension/Tagged Player Deadline",
-        date: resolveFixedDate("expiringDeadline", baseYear, now, (y) => makeZonedDate(y, 4, 30, 12, 0)),
+        date: resolveFixedDate("expiringDeadline", seasonYear, now, (y) => makeZonedDate(y, 4, 30, 12, 0)),
         hint: "Deadline time ET"
       },
       {
         id: "rookieDraft",
         label: "Rookie Draft",
-        date: resolveFixedDate("rookieDraft", baseYear, now, (y) => {
+        date: resolveFixedDate("rookieDraft", seasonYear, now, (y) => {
           const memorial = getMemorialDay(y);
           const draft = addDays(memorial, -1);
           draft.setHours(18, 30, 0, 0);
@@ -549,7 +556,7 @@
       {
         id: "cutDeadline",
         label: "Deadline to Cut Players",
-        date: resolveFixedDate("cutDeadline", baseYear, now, (y) => {
+        date: resolveFixedDate("cutDeadline", seasonYear, now, (y) => {
           const fa = faFallback(y);
           return addDays(fa, -2);
         }),
@@ -558,16 +565,16 @@
       {
         id: "faAuction",
         label: "FA Auction",
-        date: resolveFixedDate("faAuction", baseYear, now, faFallback),
+        date: resolveFixedDate("faAuction", seasonYear, now, faFallback),
         hint: "Auction kickoff"
       }
     ];
 
-    const kickoffInfo = resolveNextKickoffInfo(baseYear, now);
+    const kickoffInfo = resolveNextKickoffInfo(seasonYear, now);
     events.push({
       id: "contractDeadline",
       label: "Contract Deadline",
-      date: resolveContractDeadline(baseYear),
+      date: resolveContractDeadline(seasonYear),
       hint: "Last Sunday before Week 1"
     });
 
@@ -581,18 +588,18 @@
     events.push({
       id: "tradeDeadline",
       label: "Trade Deadline",
-      date: resolveTradeDeadline(baseYear),
+      date: resolveTradeDeadline(seasonYear),
       hint: "Thanksgiving kickoff"
     });
 
     events.push({
       id: "regularSeasonEnd",
       label: "End of UPS Regular Season",
-      date: resolveWeekKickoff(baseYear, regularWeek),
+      date: resolveWeekKickoff(seasonYear, regularWeek),
       hint: `Week ${regularWeek} kickoff`
     });
 
-    const playoffEndKickoff = resolveWeekKickoff(baseYear, endWeek);
+    const playoffEndKickoff = resolveWeekKickoff(seasonYear, endWeek);
 
     events.push({
       id: "playoffsEnd",
@@ -771,7 +778,8 @@
   }
 
   function init() {
-    const year = parseSeasonYear();
+    const parsedYear = parseSeasonYear();
+    const year = Math.max(parsedYear, new Date().getFullYear());
     const leagueId = parseLeagueId();
     applyThemeSetting(state.theme);
     wireThemeListener();

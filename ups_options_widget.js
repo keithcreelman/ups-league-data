@@ -12,12 +12,35 @@
       expiringDeadline: { month: 5, day: 21, hour: 12, minute: 0 },
       rookieDraft: { month: 5, day: 24, hour: 18, minute: 30 },
       cutDeadline: { month: 7, day: 29, hour: 12, minute: 0 },
-      faAuction: { month: 7, day: 31, hour: 12, minute: 0 }
+    faAuction: { month: 7, day: 31, hour: 12, minute: 0 }
     }
   };
 
   const DEFAULT_PLAYOFF_END_WEEK = 17;
   const DEFAULT_REGULAR_END_WEEK = Math.max(1, DEFAULT_PLAYOFF_END_WEEK - 1);
+
+  const INLINE_SCHEDULES = {
+    "2026": [
+      { week: 1, kickoff: 1789086000 },
+      { week: 2, kickoff: 1789690500 },
+      { week: 3, kickoff: 1790295300 },
+      { week: 4, kickoff: 1790900100 },
+      { week: 5, kickoff: 1791504900 },
+      { week: 6, kickoff: 1792109700 },
+      { week: 7, kickoff: 1792714500 },
+      { week: 8, kickoff: 1793319300 },
+      { week: 9, kickoff: 1793927700 },
+      { week: 10, kickoff: 1794532500 },
+      { week: 11, kickoff: 1795137300 },
+      { week: 12, kickoff: 1795742100 },
+      { week: 13, kickoff: 1796320800 },
+      { week: 14, kickoff: 1796951700 },
+      { week: 15, kickoff: 1797556500 },
+      { week: 16, kickoff: 1798161300 },
+      { week: 17, kickoff: 1798740000 },
+      { week: 18, kickoff: 1799530200 }
+    ]
+  };
 
   const PUBLIC_ASSETS_BASE = (function () {
     const script = document.currentScript;
@@ -153,30 +176,18 @@
     return first;
   }
 
-  function formatCountdown(diffMs, opts = {}) {
+  function formatCountdown(diffMs) {
     if (!Number.isFinite(diffMs)) return "TBD";
-    if (diffMs <= 0) {
-      const totalSeconds = Math.floor(-diffMs / 1000);
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const mins = Math.floor((totalSeconds % 3600) / 60);
-      const label = opts.pastLabel || "Now";
-      const parts = [];
-      if (days > 0) parts.push(`${days}d`);
-      if (hours > 0) parts.push(`${hours}h`);
-      parts.push(`${mins}m`);
-      const detail = parts.join(" ");
-      return label === "Now" && detail.trim() === "0m" ? "Now" : `${label} ${detail}`.trim();
-    }
-    const totalSeconds = Math.floor(diffMs / 1000);
+    const totalSeconds = Math.floor(Math.abs(diffMs) / 1000);
     const days = Math.floor(totalSeconds / 86400);
     const hours = Math.floor((totalSeconds % 86400) / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
-    if (days > 0) return `${days}d ${hours}h ${mins}m`;
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins}m`;
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    parts.push(`${mins}m`);
+    return parts.join(" ");
   }
-
 
   function formatDate(d) {
     if (!d || Number.isNaN(d.getTime())) return "TBD";
@@ -328,6 +339,17 @@
 
   async function loadLocalSchedule(year) {
     const key = String(year);
+    const inline = INLINE_SCHEDULES[key];
+    if (inline) {
+      return inline
+        .map((item) => {
+          const week = safeInt(item && item.week);
+          const kickoff = parseKickoffToDate(item && item.kickoff);
+          return week && kickoff ? { week, kickoff } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.week - b.week);
+    }
     const manifestPath = LOCAL_SCHEDULE_MANIFEST[key];
     if (!manifestPath) return null;
     try {
@@ -617,10 +639,9 @@
     const current = events.find((e) => e.id === state.selectedId) || events[0];
     const dateText = current && current.date ? formatDate(current.date) : "TBD";
     const diffMs = current && current.date ? current.date.getTime() - now.getTime() : NaN;
-    const countdownText =
-      current && current.date
-        ? formatCountdown(diffMs, { pastLabel: current && current.id === "tradeDeadline" ? "Days Ago" : undefined })
-        : "TBD";
+    const rawCountdown = current && current.date ? formatCountdown(diffMs) : "TBD";
+    const isPast = current && current.date && diffMs < 0;
+    const countdownText = rawCountdown === "TBD" ? "TBD" : isPast ? `${rawCountdown} Ago` : rawCountdown;
     const primary = state.mode === "date" ? dateText : countdownText;
     const secondary = state.mode === "date" ? countdownText : dateText;
 
@@ -734,6 +755,8 @@
     const leagueId = parseLeagueId();
     applyThemeSetting(state.theme);
     wireThemeListener();
+    applyScheduleFallback(year);
+    applyScheduleFallback(year + 1);
     fetchSchedule(year);
     fetchSchedule(year + 1);
     fetchLeagueDetails(year, leagueId);

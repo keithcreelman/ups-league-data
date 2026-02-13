@@ -18,6 +18,25 @@
     }
   };
 
+  const PUBLIC_ASSETS_BASE = (function () {
+    const script = document.currentScript;
+    if (script && script.src) {
+      try {
+        const url = new URL(script.src, window.location.href);
+        url.search = "";
+        url.hash = "";
+        return url.href.replace(/ups_options_widget\.js$/, "");
+      } catch (e) {
+        // fall through to default
+      }
+    }
+    return "https://keithcreelman.github.io/ups-league-data/";
+  })();
+
+  const LOCAL_SCHEDULE_MANIFEST = {
+    "2026": "ups_options_widget_schedule_2026.json"
+  };
+
   const state = {
     mode: "countdown",
     selectedId: "",
@@ -25,7 +44,8 @@
     scheduleFetch: {},
     leagueDetailsByYear: {},
     leagueDetailsFetch: {},
-    theme: loadThemeSetting()
+    theme: loadThemeSetting(),
+    manualSelection: false
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -286,6 +306,38 @@
     return out;
   }
 
+  async function loadLocalSchedule(year) {
+    const key = String(year);
+    const manifestPath = LOCAL_SCHEDULE_MANIFEST[key];
+    if (!manifestPath) return null;
+    try {
+      const res = await fetch(PUBLIC_ASSETS_BASE + manifestPath, { cache: "no-store" });
+      if (!res.ok) throw new Error(`Local schedule HTTP ${res.status}`);
+      const data = await res.json();
+      if (!data || !Array.isArray(data.weekKickoffs)) return null;
+      const parsed = data.weekKickoffs
+        .map((item) => {
+          const week = safeInt(item && item.week);
+          const kickoff = parseKickoffToDate(item && item.kickoff);
+          return week && kickoff ? { week, kickoff } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.week - b.week);
+      return parsed.length ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function applyScheduleFallback(year) {
+    const y = String(year);
+    const fallback = await loadLocalSchedule(year);
+    if (fallback && fallback.length) {
+      state.scheduleByYear[y] = { weekKickoffs: fallback };
+      updateDisplay();
+    }
+  }
+
   async function fetchSchedule(year) {
     const y = String(year);
     if (state.scheduleFetch[y]) return;
@@ -297,6 +349,7 @@
       state.scheduleByYear[y] = { weekKickoffs: extractWeekKickoffs(data) };
     } catch (e) {
       state.scheduleByYear[y] = { weekKickoffs: [], error: e && e.message ? e.message : String(e) };
+      applyScheduleFallback(year);
     } finally {
       updateDisplay();
     }
@@ -490,8 +543,18 @@
       return;
     }
     const current = events.find((e) => e.id === state.selectedId);
-    if (!current || !current.date || current.date.getTime() < now.getTime()) {
+    const hasValidDate = current && current.date && !Number.isNaN(current.date.getTime());
+    const isManual = state.manualSelection;
+    if (!hasValidDate) {
+      if (!isManual) {
+        state.selectedId = pickNextEventId(events, now);
+        state.manualSelection = false;
+      }
+      return;
+    }
+    if (!isManual && current.date.getTime() < now.getTime()) {
       state.selectedId = pickNextEventId(events, now);
+      state.manualSelection = false;
     }
   }
 
@@ -559,6 +622,7 @@
     if (selectEl) {
       selectEl.addEventListener("change", (e) => {
         state.selectedId = String(e.target.value || "");
+        state.manualSelection = true;
         updateDisplay();
       });
     }

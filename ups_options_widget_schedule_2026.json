@@ -1,0 +1,23 @@
+{
+  "year": 2026,
+  "weekKickoffs": [
+    { "week": 1, "kickoff": 1789086000 },
+    { "week": 2, "kickoff": 1789690500 },
+    { "week": 3, "kickoff": 1790295300 },
+    { "week": 4, "kickoff": 1790900100 },
+    { "week": 5, "kickoff": 1791504900 },
+    { "week": 6, "kickoff": 1792109700 },
+    { "week": 7, "kickoff": 1792714500 },
+    { "week": 8, "kickoff": 1793319300 },
+    { "week": 9, "kickoff": 1793927700 },
+    { "week": 10, "kickoff": 1794532500 },
+    { "week": 11, "kickoff": 1795137300 },
+    { "week": 12, "kickoff": 1795742100 },
+    { "week": 13, "kickoff": 1796320800 },
+    { "week": 14, "kickoff": 1796951700 },
+    { "week": 15, "kickoff": 1797556500 },
+    { "week": 16, "kickoff": 1798161300 },
+    { "week": 17, "kickoff": 1798740000 },
+    { "week": 18, "kickoff": 1799530200 }
+  ]
+}

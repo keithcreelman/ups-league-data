@@ -3,8 +3,6 @@
 
   const TIMEZONE = "America/New_York";
   const MFL_API_BASE = "https://api.myfantasyleague.com";
-  const PLAYOFF_START_WEEK = 15;
-  const PLAYOFF_END_WEEK = 18;
   const THEME_KEY = "uow_theme_v1";
 
   const EVENT_OVERRIDES = {
@@ -17,6 +15,9 @@
       faAuction: { month: 7, day: 31, hour: 12, minute: 0 }
     }
   };
+
+  const DEFAULT_PLAYOFF_END_WEEK = 17;
+  const DEFAULT_REGULAR_END_WEEK = Math.max(1, DEFAULT_PLAYOFF_END_WEEK - 1);
 
   const PUBLIC_ASSETS_BASE = (function () {
     const script = document.currentScript;
@@ -152,9 +153,21 @@
     return first;
   }
 
-  function formatCountdown(diffMs) {
+  function formatCountdown(diffMs, opts = {}) {
     if (!Number.isFinite(diffMs)) return "TBD";
-    if (diffMs <= 0) return "Now";
+    if (diffMs <= 0) {
+      const totalSeconds = Math.floor(-diffMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const label = opts.pastLabel || "Now";
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      if (hours > 0) parts.push(`${hours}h`);
+      parts.push(`${mins}m`);
+      const detail = parts.join(" ");
+      return label === "Now" && detail.trim() === "0m" ? "Now" : `${label} ${detail}`.trim();
+    }
     const totalSeconds = Math.floor(diffMs / 1000);
     const days = Math.floor(totalSeconds / 86400);
     const hours = Math.floor((totalSeconds % 86400) / 3600);
@@ -163,6 +176,7 @@
     if (hours > 0) return `${hours}h ${mins}m`;
     return `${mins}m`;
   }
+
 
   function formatDate(d) {
     if (!d || Number.isNaN(d.getTime())) return "TBD";
@@ -306,6 +320,12 @@
     return out;
   }
 
+  function getScheduleMaxWeek(year) {
+    const weeks = getWeekKickoffs(year);
+    if (!weeks || !weeks.length) return 0;
+    return weeks.reduce((max, entry) => Math.max(max, safeInt(entry && entry.week)), 0);
+  }
+
   async function loadLocalSchedule(year) {
     const key = String(year);
     const manifestPath = LOCAL_SCHEDULE_MANIFEST[key];
@@ -438,6 +458,21 @@
     const leagueConfig = getLeagueWeekConfig(baseYear, leagueId) || {};
 
     const faFallback = (year) => makeZonedDate(year, 7, getLastWeekdayOfMonth(year, 6, 6).getDate(), 12, 0);
+    const scheduleMaxWeek = getScheduleMaxWeek(baseYear);
+    const fallbackRegularWeek = Math.max(
+      1,
+      scheduleMaxWeek ? Math.min(scheduleMaxWeek, DEFAULT_REGULAR_END_WEEK) : DEFAULT_REGULAR_END_WEEK
+    );
+    const fallbackPlayoffWeek = Math.max(
+      fallbackRegularWeek + 1,
+      scheduleMaxWeek ? Math.min(scheduleMaxWeek, DEFAULT_PLAYOFF_END_WEEK) : DEFAULT_PLAYOFF_END_WEEK
+    );
+    const leagueRegularWeek = safeInt(leagueConfig.lastRegularWeek);
+    const leagueEndWeek = safeInt(leagueConfig.endWeek);
+    let regularWeek = leagueRegularWeek || fallbackRegularWeek;
+    let endWeek = leagueEndWeek || fallbackPlayoffWeek;
+    regularWeek = Math.min(regularWeek, Math.max(1, endWeek - 1));
+    endWeek = Math.max(endWeek, regularWeek + 1, fallbackPlayoffWeek);
 
     const events = [
       {
@@ -508,7 +543,6 @@
       hint: "Thanksgiving kickoff"
     });
 
-    const regularWeek = leagueConfig.lastRegularWeek || PLAYOFF_START_WEEK;
     events.push({
       id: "regularSeasonEnd",
       label: "End of UPS Regular Season",
@@ -516,7 +550,6 @@
       hint: `Week ${regularWeek} kickoff`
     });
 
-    const endWeek = leagueConfig.endWeek || regularWeek || PLAYOFF_END_WEEK;
     const playoffEndKickoff = resolveWeekKickoff(baseYear, endWeek);
 
     events.push({
@@ -583,7 +616,11 @@
 
     const current = events.find((e) => e.id === state.selectedId) || events[0];
     const dateText = current && current.date ? formatDate(current.date) : "TBD";
-    const countdownText = current && current.date ? formatCountdown(current.date.getTime() - now.getTime()) : "TBD";
+    const diffMs = current && current.date ? current.date.getTime() - now.getTime() : NaN;
+    const countdownText =
+      current && current.date
+        ? formatCountdown(diffMs, { pastLabel: current && current.id === "tradeDeadline" ? "Days Ago" : undefined })
+        : "TBD";
     const primary = state.mode === "date" ? dateText : countdownText;
     const secondary = state.mode === "date" ? countdownText : dateText;
 

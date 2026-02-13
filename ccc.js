@@ -2586,18 +2586,24 @@
     const teams = buildTeamList(seasonRows, mergedSubmissionRows, state.detectedFranchiseId || "");
     const positions = buildPositionList(seasonRows, mergedSubmissionRows);
     const defaults = normalizeDefaultFilters(state.defaultFilters || {});
+    const detectedTeamId = safeStr(state.detectedFranchiseId || "");
+    const defaultTeamPref = defaults.teamId
+      ? defaults.teamId
+      : state.canCommishMode
+      ? "__ALL__"
+      : detectedTeamId;
     const themeVal = safeStr(state.theme || "auto").toLowerCase();
 
     const teamOptions = teams
       .map((t, idx) => {
         if (!t || !t.id) return "";
-        const isSelected = defaults.teamId ? defaults.teamId === t.id : idx === 0;
+        const isSelected = defaultTeamPref ? defaultTeamPref === t.id : idx === 0;
         return `<option value="${htmlEsc(t.id)}"${isSelected ? " selected" : ""}>${htmlEsc(
           t.name || t.id
         )}</option>`;
       })
       .join("");
-    const allSelected = defaults.teamId === "__ALL__";
+    const allSelected = defaultTeamPref === "__ALL__";
     const teamSelect = `
       <option value="__ALL__"${allSelected ? " selected" : ""}>All Teams</option>
       ${teamOptions}

@@ -4313,6 +4313,7 @@
   function openDevNotice() {
     const modal = $("#devNoticeModal");
     if (!modal) return;
+    modal.dataset.opened = "1";
     modal.classList.add("is-open");
     document.body.classList.add("ccc-modalOpen");
     modal.setAttribute("aria-hidden", "false");
@@ -4321,6 +4322,7 @@
   function closeDevNotice() {
     const modal = $("#devNoticeModal");
     if (!modal) return;
+    modal.dataset.opened = "0";
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
     const mym = $("#mymModal");
@@ -6039,7 +6041,11 @@
     if (devNoticeModal) {
       devNoticeModal.addEventListener("click", (e) => {
         const close = e.target && e.target.closest ? e.target.closest("[data-close]") : null;
-        if (close) closeDevNotice();
+        if (close) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeDevNotice();
+        }
       });
     }
 

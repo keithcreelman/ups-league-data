@@ -1297,6 +1297,10 @@ body.ccc-modalOpen #tagModal,
 body.ccc-modalOpen #tagModal *{
   pointer-events: auto;
 }
+body.ccc-modalOpen #devNoticeModal,
+body.ccc-modalOpen #devNoticeModal *{
+  pointer-events: auto;
+}
 
 .ccc-modal-card{
   position: relative;

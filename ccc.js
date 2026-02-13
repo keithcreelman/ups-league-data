@@ -4076,7 +4076,11 @@
         ? positionFilteredRestructureSubmissions
         : positionFilteredMymSubmissions;
     const moduleSubmittedForTab =
-      state.activeModule === "mym" ? positionFilteredMymSubmissionsForTab : moduleSubmittedBase;
+      state.activeModule === "mym" && state.activeTab === "submitted"
+        ? teamFilteredMymSubmissionsForTab
+        : state.activeModule === "mym"
+        ? positionFilteredMymSubmissionsForTab
+        : moduleSubmittedBase;
     const scopedTagTracking = searchLower
       ? positionFilteredTagTracking.filter((r) =>
           safeStr(r.player_name).toLowerCase().includes(searchLower)
@@ -4237,7 +4241,10 @@
       sortState.tab === "eligible" ? sortState.dir : "desc"
     );
 
-    const submittedRowsRaw = searchLower
+    const bypassMymSubmittedFilters = state.activeModule === "mym" && state.activeTab === "submitted";
+    const submittedRowsRaw = bypassMymSubmittedFilters
+      ? moduleSubmittedForTab.slice()
+      : searchLower
       ? moduleSubmittedForTab.filter((r) => safeStr(r.player_name).toLowerCase().includes(searchLower))
       : moduleSubmittedForTab.slice();
 

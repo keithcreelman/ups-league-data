@@ -2492,9 +2492,17 @@
       state.tagSubmissionSeason = seasonList[0] || fallbackSeason || "";
     }
     const selectedSeason = state.tagSubmissionSeason;
-    const rows = Object.values(state.tagSubmissions || {}).filter(
+    let rows = Object.values(state.tagSubmissions || {}).filter(
       (s) => normalizeSeasonValue(s && s.season) === selectedSeason
     );
+    const selectedTeamId = state && state.showAllTeams ? "__ALL__" : pad4(state.selectedTeam);
+    if (selectedTeamId && selectedTeamId !== "__ALL__") {
+      rows = rows.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    }
+    const posFilter = safeStr(state && state.selectedPosition);
+    if (posFilter && posFilter !== "__ALL_POS__") {
+      rows = rows.filter((r) => posKeyFromRow(r) === posFilter);
+    }
 
     const seasonOptions = seasonList
       .map(

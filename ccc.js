@@ -2941,7 +2941,59 @@
     commishViewMode: "A",
     lastOwnerTeam: "",
     mymSubmissionSeason: "",
+    filtersByModule: {},
   };
+
+  function currentFilterSnapshot() {
+    return {
+      selectedTeam: safeStr(state.selectedTeam || ""),
+      showAllTeams: !!state.showAllTeams,
+      selectedPosition: safeStr(state.selectedPosition || "__ALL_POS__"),
+      search: safeStr(state.search || ""),
+      pageSize: clampInt(state.pageSize || 25, 10, 500),
+    };
+  }
+
+  function saveFiltersForModule(moduleKey) {
+    const key = safeStr(moduleKey || "").toLowerCase();
+    if (!key) return;
+    if (!state.filtersByModule || typeof state.filtersByModule !== "object") {
+      state.filtersByModule = {};
+    }
+    state.filtersByModule[key] = currentFilterSnapshot();
+  }
+
+  function applyFiltersForModule(moduleKey) {
+    const key = safeStr(moduleKey || "").toLowerCase();
+    const defaults = normalizeDefaultFilters(state.defaultFilters || {});
+    const saved =
+      key && state.filtersByModule && state.filtersByModule[key]
+        ? state.filtersByModule[key]
+        : null;
+
+    const defaultTeam = state.commishMode
+      ? "__ALL__"
+      : safeStr(defaults.teamId || state.detectedFranchiseId || "");
+    const selectedTeam = safeStr(saved && saved.selectedTeam ? saved.selectedTeam : defaultTeam);
+    state.selectedTeam = selectedTeam || "__ALL__";
+    state.showAllTeams = state.selectedTeam === "__ALL__";
+    state.selectedPosition = safeStr(
+      saved && saved.selectedPosition ? saved.selectedPosition : defaults.position || "__ALL_POS__"
+    );
+    state.search = safeStr(saved && saved.search ? saved.search : "");
+    const rawSize =
+      saved && saved.pageSize !== undefined ? safeInt(saved.pageSize) : safeInt(defaults.pageSize);
+    state.pageSize = [25, 100].includes(rawSize) ? rawSize : 25;
+  }
+
+  function switchModule(nextModule) {
+    const prevModule = safeStr(state.activeModule || "").toLowerCase();
+    if (prevModule) saveFiltersForModule(prevModule);
+    rememberHighlightForModule(state.activeModule || "default");
+    state.activeModule = state.activeModule === nextModule ? "" : nextModule;
+    setHighlightForModule(state.activeModule || "default");
+    applyFiltersForModule(state.activeModule || "default");
+  }
 
   function normalizeSeasonValue(v) {
     const s = safeStr(v);
@@ -3893,6 +3945,23 @@
     const showAllTeams = !!state.showAllTeams;
     const selectedPosition = safeStr(state.selectedPosition || "__ALL_POS__");
     const selectedTeamId = pad4(state.selectedTeam);
+    const teamSelectEl = $("#teamSelect");
+    if (teamSelectEl) {
+      const teamValue = showAllTeams ? "__ALL__" : safeStr(state.selectedTeam || "");
+      if (teamValue && teamSelectEl.value !== teamValue) teamSelectEl.value = teamValue;
+    }
+    const positionSelectEl = $("#positionSelect");
+    if (positionSelectEl && positionSelectEl.value !== selectedPosition) {
+      positionSelectEl.value = selectedPosition;
+    }
+    const searchBoxEl = $("#searchBox");
+    if (searchBoxEl && searchBoxEl.value !== safeStr(state.search || "")) {
+      searchBoxEl.value = safeStr(state.search || "");
+    }
+    const pageSizeSelectEl = $("#pageSizeSelect");
+    if (pageSizeSelectEl && pageSizeSelectEl.value !== String(state.pageSize || 25)) {
+      pageSizeSelectEl.value = String(state.pageSize || 25);
+    }
 
     const seasonEligibility = eligibility.filter(
       (r) => !season || normalizeSeasonValue(r.season) === season
@@ -5445,9 +5514,7 @@
     const moduleTagsChip = $("#moduleTagsChip");
     if (moduleTagsChip)
       moduleTagsChip.addEventListener("click", () => {
-        rememberHighlightForModule(state.activeModule || "default");
-        state.activeModule = state.activeModule === "tag" ? "" : "tag";
-        setHighlightForModule(state.activeModule || "default");
+        switchModule("tag");
         sortState.tab = "eligible";
         sortState.key = "player";
         sortState.dir = "asc";
@@ -5459,9 +5526,7 @@
     const moduleMymChip = $("#moduleMymChip");
     if (moduleMymChip)
       moduleMymChip.addEventListener("click", () => {
-        rememberHighlightForModule(state.activeModule || "default");
-        state.activeModule = state.activeModule === "mym" ? "" : "mym";
-        setHighlightForModule(state.activeModule || "default");
+        switchModule("mym");
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5473,9 +5538,7 @@
     const moduleRestructuresChip = $("#moduleRestructuresChip");
     if (moduleRestructuresChip)
       moduleRestructuresChip.addEventListener("click", () => {
-        rememberHighlightForModule(state.activeModule || "default");
-        state.activeModule = state.activeModule === "restructure" ? "" : "restructure";
-        setHighlightForModule(state.activeModule || "default");
+        switchModule("restructure");
         sortState.tab = "eligible";
         sortState.key = "salary";
         sortState.dir = "desc";
@@ -5487,9 +5550,7 @@
     const moduleExtensionsChip = $("#moduleExtensionsChip");
     if (moduleExtensionsChip)
       moduleExtensionsChip.addEventListener("click", () => {
-        rememberHighlightForModule(state.activeModule || "default");
-        state.activeModule = state.activeModule === "extensions" ? "" : "extensions";
-        setHighlightForModule(state.activeModule || "default");
+        switchModule("extensions");
         sortState.tab = "eligible";
         sortState.key = "acquired";
         sortState.dir = "desc";
@@ -5501,9 +5562,7 @@
     const moduleCommishChip = $("#moduleCommishChip");
     if (moduleCommishChip)
       moduleCommishChip.addEventListener("click", () => {
-        rememberHighlightForModule(state.activeModule || "default");
-        state.activeModule = state.activeModule === "commish" ? "" : "commish";
-        setHighlightForModule(state.activeModule || "default");
+        switchModule("commish");
         resetAllTablePages();
         setTab("summary");
         render();
@@ -5608,6 +5667,7 @@
         const v = safeStr(e.target.value);
         state.selectedTeam = v;
         state.showAllTeams = v === "__ALL__";
+        saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();
       });
@@ -5616,6 +5676,7 @@
     if (positionSelect)
       positionSelect.addEventListener("change", (e) => {
         state.selectedPosition = safeStr(e.target.value || "__ALL_POS__");
+        saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();
       });
@@ -5689,6 +5750,7 @@
     if (searchBox)
       searchBox.addEventListener("input", (e) => {
         state.search = e.target.value;
+        saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();
       });
@@ -5698,6 +5760,7 @@
       clearBtn.addEventListener("click", () => {
         $("#searchBox").value = "";
         state.search = "";
+        saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();
       });
@@ -5707,6 +5770,7 @@
       pageSizeSelect.addEventListener("change", (e) => {
         state.pageSize = clampInt(e.target.value || state.pageSize, 10, 500);
         e.target.value = String(state.pageSize);
+        saveFiltersForModule(state.activeModule || "default");
         resetAllTablePages();
         render();
       });

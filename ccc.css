@@ -26,95 +26,95 @@
 
 /* OPTION B: Modern Sports (Bold, Energetic) - Active */
 :root{
-  --bg:#F8FAFC;
-  --panel:#FFFFFF;
-  --card:#F8FAFC;
-  --surface-1:#FFFFFF;
-  --surface-2:#F1F5F9;
-  --surface-3:#E2E8F0;
-  --surface-4:#F8FAFC;
-  --surface-5:#FAFBFD;
-  --muted:#64748B;
-  --text:#0F172A;
-  --text-strong:#020617;
-  --line:rgba(15,23,42,.10);
-  --accent:#0EA5E9;
-  --accent2:#06B6D4;
-  --accent3:#F97316;
-  --accent-soft:rgba(14,165,233,.12);
-  --accent-soft-2:rgba(6,182,212,.12);
-  --accent-soft-3:rgba(249,115,22,.10);
-  --accent-border:rgba(14,165,233,.50);
-  --accent-border-2:rgba(6,182,212,.50);
-  --accent-underline:rgba(14,165,233,.90);
-  --accent-ring:rgba(14,165,233,.20);
-  --good:#10B981;
-  --warn:#F59E0B;
-  --warn-soft:rgba(245,158,11,.10);
-  --warn-border:rgba(245,158,11,.40);
-  --bad:#EF4444;
-  --bad-soft:rgba(239,68,68,.10);
-  --bad-border:rgba(239,68,68,.40);
-  --chip:#E0F2FE;
-  --shadow: 0 8px 24px rgba(6,182,212,.12);
-  --shadow-soft: 0 6px 18px rgba(6,182,212,.08);
+  --bg:#eef3fb;
+  --panel:#ffffff;
+  --card:#f7faff;
+  --surface-1:#ffffff;
+  --surface-2:#eef4ff;
+  --surface-3:#dfe9fb;
+  --surface-4:#f5f8ff;
+  --surface-5:#fbfdff;
+  --muted:#55637a;
+  --text:#0f1d35;
+  --text-strong:#071226;
+  --line:rgba(15,29,53,.14);
+  --accent:#2563eb;
+  --accent2:#0ea5e9;
+  --accent3:#f59e0b;
+  --accent-soft:rgba(37,99,235,.16);
+  --accent-soft-2:rgba(14,165,233,.14);
+  --accent-soft-3:rgba(245,158,11,.14);
+  --accent-border:rgba(37,99,235,.56);
+  --accent-border-2:rgba(14,165,233,.56);
+  --accent-underline:rgba(37,99,235,.95);
+  --accent-ring:rgba(37,99,235,.22);
+  --good:#059669;
+  --warn:#d97706;
+  --warn-soft:rgba(217,119,6,.12);
+  --warn-border:rgba(217,119,6,.42);
+  --bad:#dc2626;
+  --bad-soft:rgba(220,38,38,.12);
+  --bad-border:rgba(220,38,38,.42);
+  --chip:#dbeafe;
+  --shadow: 0 14px 36px rgba(15,29,53,.12);
+  --shadow-soft: 0 8px 22px rgba(15,29,53,.10);
   --radius: 16px;
-  --control-bg: #FFFFFF;
-  --table-head-bg: #F0F9FF;
-  --table-head-text: #0C4A6E;
-  --table-row: #FFFFFF;
-  --table-row-alt: #F8FAFC;
-  --table-sticky: #E0F2FE;
-  --table-text: #0F172A;
-  --modal-backdrop: rgba(6,182,212,.25);
-  --placeholder: rgba(100,116,139,.50);
-  --select-arrow: #64748B;
+  --control-bg: #ffffff;
+  --table-head-bg: #dbeafe;
+  --table-head-text: #102a52;
+  --table-row: #ffffff;
+  --table-row-alt: #f5f9ff;
+  --table-sticky: #cfe0ff;
+  --table-text: #0f1d35;
+  --modal-backdrop: rgba(15,29,53,.28);
+  --placeholder: rgba(85,99,122,.62);
+  --select-arrow: #475569;
 }
 
 /* OPTION B: Modern Sports (Bold, Energetic) - Dark Mode */
 #cccApp[data-theme="dark"]{
-  --bg:#0A0E1A;
-  --panel:#111827;
-  --card:#111827;
-  --surface-1:#111827;
-  --surface-2:#1F2937;
-  --surface-3:#374151;
-  --surface-4:#111827;
-  --surface-5:#0C111D;
-  --muted:#9CA3AF;
-  --text:#F3F4F6;
-  --text-strong:#FFFFFF;
-  --line:rgba(255,255,255,.10);
-  --accent:#38BDF8;
-  --accent2:#22D3EE;
-  --accent3:#FB923C;
-  --accent-soft:rgba(56,189,248,.20);
-  --accent-soft-2:rgba(34,211,238,.18);
-  --accent-soft-3:rgba(251,146,60,.16);
-  --accent-border:rgba(56,189,248,.60);
-  --accent-border-2:rgba(34,211,238,.60);
-  --accent-underline:rgba(56,189,248,.95);
-  --accent-ring:rgba(56,189,248,.25);
-  --good:#34D399;
-  --warn:#FBBF24;
-  --warn-soft:rgba(251,191,36,.16);
-  --warn-border:rgba(251,191,36,.50);
-  --bad:#F87171;
-  --bad-soft:rgba(248,113,113,.16);
-  --bad-border:rgba(248,113,113,.50);
-  --chip:#0C4A6E;
-  --shadow: 0 12px 40px rgba(0,0,0,.50);
-  --shadow-soft: 0 10px 28px rgba(0,0,0,.40);
-  --control-bg: #111827;
-  --table-head-bg: #0C111D;
-  --table-head-text: #22D3EE;
-  --table-row: #111827;
-  --table-row-alt: #1A202E;
-  --table-sticky: #0A0E1A;
-  --table-text: #F3F4F6;
-  --modal-backdrop: rgba(6,182,212,.35);
-  --placeholder: rgba(156,163,175,.55);
-  --select-arrow: #9CA3AF;
+  --bg:#080d16;
+  --panel:#101827;
+  --card:#101827;
+  --surface-1:#141e30;
+  --surface-2:#1b273c;
+  --surface-3:#24334a;
+  --surface-4:#101827;
+  --surface-5:#0c1322;
+  --muted:#a8b4cc;
+  --text:#ecf3ff;
+  --text-strong:#ffffff;
+  --line:rgba(148,163,184,.30);
+  --accent:#60a5fa;
+  --accent2:#22d3ee;
+  --accent3:#fbbf24;
+  --accent-soft:rgba(96,165,250,.30);
+  --accent-soft-2:rgba(34,211,238,.26);
+  --accent-soft-3:rgba(251,191,36,.24);
+  --accent-border:rgba(96,165,250,.72);
+  --accent-border-2:rgba(34,211,238,.72);
+  --accent-underline:rgba(147,197,253,.98);
+  --accent-ring:rgba(96,165,250,.34);
+  --good:#34d399;
+  --warn:#fbbf24;
+  --warn-soft:rgba(251,191,36,.20);
+  --warn-border:rgba(251,191,36,.56);
+  --bad:#f87171;
+  --bad-soft:rgba(248,113,113,.20);
+  --bad-border:rgba(248,113,113,.56);
+  --chip:#1e3a8a;
+  --shadow: 0 16px 46px rgba(2,8,23,.62);
+  --shadow-soft: 0 10px 30px rgba(2,8,23,.48);
+  --control-bg: #141e30;
+  --table-head-bg: #21344f;
+  --table-head-text: #f5f9ff;
+  --table-row: #141e30;
+  --table-row-alt: #18253a;
+  --table-sticky: #1b2a41;
+  --table-text: #eef4ff;
+  --modal-backdrop: rgba(7,12,22,.72);
+  --placeholder: rgba(168,180,204,.65);
+  --select-arrow: #b6c4dd;
 }
 
 #cccApp[data-theme="dark"] .ccc-nav{
@@ -161,48 +161,48 @@
 @media (prefers-color-scheme: dark) {
   /* OPTION B: Modern Sports (Bold, Energetic) - Auto Dark Mode */
   #cccApp[data-theme="auto"]{
-    --bg:#0A0E1A;
-    --panel:#111827;
-    --card:#111827;
-    --surface-1:#111827;
-    --surface-2:#1F2937;
-    --surface-3:#374151;
-    --surface-4:#111827;
-    --surface-5:#0C111D;
-    --muted:#9CA3AF;
-    --text:#F3F4F6;
-    --text-strong:#FFFFFF;
-    --line:rgba(255,255,255,.10);
-    --accent:#38BDF8;
-    --accent2:#22D3EE;
-    --accent3:#FB923C;
-    --accent-soft:rgba(56,189,248,.20);
-    --accent-soft-2:rgba(34,211,238,.18);
-    --accent-soft-3:rgba(251,146,60,.16);
-    --accent-border:rgba(56,189,248,.60);
-    --accent-border-2:rgba(34,211,238,.60);
-    --accent-underline:rgba(56,189,248,.95);
-    --accent-ring:rgba(56,189,248,.25);
-    --good:#34D399;
-    --warn:#FBBF24;
-    --warn-soft:rgba(251,191,36,.16);
-    --warn-border:rgba(251,191,36,.50);
-    --bad:#F87171;
-    --bad-soft:rgba(248,113,113,.16);
-    --bad-border:rgba(248,113,113,.50);
-    --chip:#0C4A6E;
-    --shadow: 0 12px 40px rgba(0,0,0,.50);
-    --shadow-soft: 0 10px 28px rgba(0,0,0,.40);
-    --control-bg: #111827;
-    --table-head-bg: #0C111D;
-    --table-head-text: #22D3EE;
-    --table-row: #111827;
-    --table-row-alt: #1A202E;
-    --table-sticky: #0A0E1A;
-    --table-text: #F3F4F6;
-    --modal-backdrop: rgba(6,182,212,.35);
-    --placeholder: rgba(156,163,175,.55);
-    --select-arrow: #9CA3AF;
+    --bg:#080d16;
+    --panel:#101827;
+    --card:#101827;
+    --surface-1:#141e30;
+    --surface-2:#1b273c;
+    --surface-3:#24334a;
+    --surface-4:#101827;
+    --surface-5:#0c1322;
+    --muted:#a8b4cc;
+    --text:#ecf3ff;
+    --text-strong:#ffffff;
+    --line:rgba(148,163,184,.30);
+    --accent:#60a5fa;
+    --accent2:#22d3ee;
+    --accent3:#fbbf24;
+    --accent-soft:rgba(96,165,250,.30);
+    --accent-soft-2:rgba(34,211,238,.26);
+    --accent-soft-3:rgba(251,191,36,.24);
+    --accent-border:rgba(96,165,250,.72);
+    --accent-border-2:rgba(34,211,238,.72);
+    --accent-underline:rgba(147,197,253,.98);
+    --accent-ring:rgba(96,165,250,.34);
+    --good:#34d399;
+    --warn:#fbbf24;
+    --warn-soft:rgba(251,191,36,.20);
+    --warn-border:rgba(251,191,36,.56);
+    --bad:#f87171;
+    --bad-soft:rgba(248,113,113,.20);
+    --bad-border:rgba(248,113,113,.56);
+    --chip:#1e3a8a;
+    --shadow: 0 16px 46px rgba(2,8,23,.62);
+    --shadow-soft: 0 10px 30px rgba(2,8,23,.48);
+    --control-bg: #141e30;
+    --table-head-bg: #21344f;
+    --table-head-text: #f5f9ff;
+    --table-row: #141e30;
+    --table-row-alt: #18253a;
+    --table-sticky: #1b2a41;
+    --table-text: #eef4ff;
+    --modal-backdrop: rgba(7,12,22,.72);
+    --placeholder: rgba(168,180,204,.65);
+    --select-arrow: #b6c4dd;
   }
 }
 
@@ -215,7 +215,7 @@
 #cccApp * { box-sizing:border-box; }
 
 #cccApp{
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: "Sora", "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color:var(--text);
   max-width: 1180px;
   margin: 0 auto;
@@ -1063,16 +1063,15 @@ table.ccc-table thead th{
   z-index: 5;
   background: var(--table-head-bg);
   background-image:
-    linear-gradient(120deg, rgba(255,255,255,.18), transparent 60%),
-    repeating-linear-gradient(45deg, rgba(255,255,255,.12) 0 8px, transparent 8px 16px);
-  background-blend-mode: soft-light;
-  backdrop-filter: blur(8px);
+    linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.02) 68%);
+  background-blend-mode: normal;
+  backdrop-filter: blur(6px);
   color: var(--table-head-text);
   font-size: var(--head-font-size);
   font-weight: 1000;
   text-align:left;
   padding: var(--header-pad-y) var(--header-pad-x);
-  border-bottom: 2px solid var(--line);
+  border-bottom: 2px solid var(--accent-border);
   border-right: 1px solid var(--line);
   letter-spacing: .2px;
   white-space: nowrap;
@@ -1080,7 +1079,7 @@ table.ccc-table thead th{
 }
 
 #cccApp[data-theme="dark"] table.ccc-table thead th{
-  background-image: linear-gradient(120deg, rgba(255,255,255,.06), transparent 65%);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.02) 70%);
 }
 
 table.ccc-table thead th:last-child{
@@ -1193,23 +1192,23 @@ table.ccc-table tbody tr:hover td{
 }
 
 /* Dark Mode Position Highlights */
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.16), rgba(96,165,250,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(52,211,153,.14), rgba(52,211,153,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.16), rgba(168,85,247,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.16), rgba(245,158,11,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.16), rgba(236,72,153,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.16), rgba(239,68,68,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.16), rgba(6,182,212,.05)); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.16), rgba(249,115,22,.05)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB{ background: linear-gradient(90deg, rgba(96,165,250,.28), rgba(96,165,250,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB{ background: linear-gradient(90deg, rgba(52,211,153,.25), rgba(52,211,153,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR{ background: linear-gradient(90deg, rgba(168,85,247,.28), rgba(168,85,247,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE{ background: linear-gradient(90deg, rgba(245,158,11,.27), rgba(245,158,11,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K { background: linear-gradient(90deg, rgba(236,72,153,.26), rgba(236,72,153,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL{ background: linear-gradient(90deg, rgba(239,68,68,.28), rgba(239,68,68,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB{ background: linear-gradient(90deg, rgba(6,182,212,.28), rgba(6,182,212,.10)); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB{ background: linear-gradient(90deg, rgba(249,115,22,.28), rgba(249,115,22,.10)); }
 
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(96,165,250,.7); background: rgba(96,165,250,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(52,211,153,.7); background: rgba(52,211,153,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.7); background: rgba(168,85,247,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.7); background: rgba(245,158,11,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.7); background: rgba(236,72,153,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.7); background: rgba(239,68,68,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.7); background: rgba(6,182,212,.12); }
-#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(249,115,22,.7); background: rgba(249,115,22,.12); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-QB td:first-child{ box-shadow: inset 4px 0 0 rgba(96,165,250,.95); background: rgba(96,165,250,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-RB td:first-child{ box-shadow: inset 4px 0 0 rgba(52,211,153,.95); background: rgba(52,211,153,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-WR td:first-child{ box-shadow: inset 4px 0 0 rgba(168,85,247,.95); background: rgba(168,85,247,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-TE td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.95); background: rgba(245,158,11,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-K td:first-child{ box-shadow: inset 4px 0 0 rgba(236,72,153,.95); background: rgba(236,72,153,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DL td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.95); background: rgba(239,68,68,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-LB td:first-child{ box-shadow: inset 4px 0 0 rgba(6,182,212,.95); background: rgba(6,182,212,.24); }
+#cccApp[data-theme="dark"][data-highlight="position"] table.ccc-table tbody tr.pos-DB td:first-child{ box-shadow: inset 4px 0 0 rgba(249,115,22,.95); background: rgba(249,115,22,.24); }
 
 #cccApp[data-theme="dark"][data-highlight="team"] table.ccc-table tbody tr{
   background: linear-gradient(90deg, rgba(var(--team-rgb, 0, 0, 0), .38), rgba(var(--team-rgb, 0, 0, 0), .14));

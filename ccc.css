@@ -908,6 +908,7 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(249,115,22,.20)
   border: 1px solid var(--line);
   background: var(--surface-2);
   box-shadow: var(--shadow-soft);
+  position: relative;
 }
 
 .ccc-tab{
@@ -925,6 +926,36 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(249,115,22,.20)
   border-color: var(--accent-border);
   color: #fff;
   box-shadow: 0 6px 14px rgba(15,23,42,.18);
+}
+
+.ccc-displayInline{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 6px 8px;
+  margin-left:auto;
+  border-left: 1px solid var(--line);
+}
+.ccc-displayInline .ccc-check{ margin:0; }
+.ccc-displayInline .ccc-check input{ margin-right:6px; }
+.ccc-displayInline .ccc-seg{
+  display:flex;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow:hidden;
+}
+.ccc-displayInline .ccc-seg .seg{
+  border:none;
+  background: transparent;
+  color: var(--text);
+  font-weight:800;
+  padding: 6px 10px;
+  cursor:pointer;
+}
+.ccc-displayInline .ccc-seg .seg.is-active{
+  background: var(--accent-soft);
+  color: var(--text-strong);
 }
 
 /* Table */

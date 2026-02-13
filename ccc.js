@@ -420,8 +420,14 @@
     if (chk) chk.checked = enabled;
     const sel = $("#rowHighlightModeSelect");
     if (sel) sel.value = mode;
-    const wrap = $("#rowHighlightModeWrap");
-    if (wrap) wrap.style.display = enabled ? "flex" : "none";
+    const seg = $("#rowHighlightSeg");
+    if (seg) {
+      seg.querySelectorAll(".seg").forEach((btn) => {
+        const isActive = btn.getAttribute("data-highlight") === mode;
+        btn.classList.toggle("is-active", isActive);
+        btn.disabled = !enabled;
+      });
+    }
   }
 
   function loadAsOfSeasonOverride() {
@@ -5501,6 +5507,17 @@
     if (rowHighlightModeSelect)
       rowHighlightModeSelect.addEventListener("change", (e) => {
         const v = safeStr(e.target.value || "position").toLowerCase();
+        state.rowHighlightMode = v === "team" ? "team" : "position";
+        rememberHighlightForModule(state.activeModule || "default");
+        applyHighlightSetting();
+      });
+
+    const rowHighlightSeg = $("#rowHighlightSeg");
+    if (rowHighlightSeg)
+      rowHighlightSeg.addEventListener("click", (e) => {
+        const btn = e.target && e.target.closest ? e.target.closest(".seg") : null;
+        if (!btn || btn.disabled) return;
+        const v = safeStr(btn.getAttribute("data-highlight") || "").toLowerCase();
         state.rowHighlightMode = v === "team" ? "team" : "position";
         rememberHighlightForModule(state.activeModule || "default");
         applyHighlightSetting();

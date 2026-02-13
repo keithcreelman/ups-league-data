@@ -113,21 +113,6 @@
         </div>
       </div>
 
-      <div class="ccc-filterSection" data-section="display">
-        <div class="ccc-filterTitle">Display</div>
-        <label class="ccc-check">
-          <input id="rowHighlightChk" type="checkbox" />
-          Highlight rows
-        </label>
-        <div id="rowHighlightModeWrap" class="ccc-field">
-          Highlight by
-          <select id="rowHighlightModeSelect" class="ccc-select">
-            <option value="position">Position</option>
-            <option value="team">Team</option>
-          </select>
-        </div>
-      </div>
-
       <div class="ccc-filterSection" data-section="actions">
         <div class="ccc-filterTitle">Actions</div>
         <button id="clearBtn" class="ccc-btn" type="button">Clear</button>
@@ -142,6 +127,21 @@
       <button class="ccc-tab" type="button" data-tab="costcalc">Cost Calc</button>
       <button class="ccc-tab" type="button" data-tab="eligible">Player Tracking</button>
       <button class="ccc-tab" type="button" data-tab="submitted">Finalized Submissions</button>
+
+      <div id="displayInline" class="ccc-displayInline">
+        <label class="ccc-check">
+          <input id="rowHighlightChk" type="checkbox" />
+          Highlight rows
+        </label>
+        <div class="ccc-seg" id="rowHighlightSeg">
+          <button class="seg" type="button" data-highlight="position">Position</button>
+          <button class="seg" type="button" data-highlight="team">Team</button>
+        </div>
+        <select id="rowHighlightModeSelect" class="ccc-select" style="display:none;">
+          <option value="position">Position</option>
+          <option value="team">Team</option>
+        </select>
+      </div>
     </div>
 
     <div id="tabSummary"></div>

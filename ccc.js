@@ -526,6 +526,22 @@
   }
 
   function detectFranchiseId() {
+    const readCookies = () => {
+      const out = {};
+      const raw = safeStr(document.cookie || "");
+      if (!raw) return out;
+      raw.split(";").forEach((part) => {
+        const p = safeStr(part).trim();
+        if (!p) return;
+        const idx = p.indexOf("=");
+        const key = idx >= 0 ? p.slice(0, idx).trim() : p;
+        const val = idx >= 0 ? p.slice(idx + 1).trim() : "";
+        if (!key) return;
+        out[key] = val;
+      });
+      return out;
+    };
+
     const readFromUrl = (urlText) => {
       if (!urlText) return "";
       const u = new URL(urlText, window.location.origin);
@@ -547,11 +563,30 @@
     };
 
     try {
-      // Use only URL/referrer-derived ids to avoid false positives from generic page links.
       const fromSelf = readFromUrl(window.location.href);
       if (fromSelf) return fromSelf;
       const fromReferrer = readFromUrl(document.referrer || "");
       if (fromReferrer) return fromReferrer;
+
+      const cookies = readCookies();
+      const leagueHint = safeStr(getLeagueId() || cookies.MFL_LAST_LEAGUE_ID || DEFAULT_LEAGUE_ID);
+      const popups = Object.keys(cookies).map((k) => {
+        const m = k.match(/^MFLPlayerPopup_(\d{4})_(\d+)_([0-9]{4})$/i);
+        if (!m) return null;
+        return {
+          key: k,
+          season: safeInt(m[1]),
+          leagueId: safeStr(m[2]),
+          franchiseId: pad4(m[3]),
+        };
+      }).filter(Boolean);
+      const filtered = popups
+        .filter((x) => x.franchiseId && x.franchiseId !== "0000")
+        .filter((x) => !leagueHint || x.leagueId === leagueHint);
+      if (filtered.length) {
+        filtered.sort((a, b) => b.season - a.season || b.key.localeCompare(a.key));
+        return filtered[0].franchiseId;
+      }
 
       return "";
     } catch (e) {
@@ -2830,6 +2865,7 @@
         return `
           <tr class="${rowClass}"${rowStyle ? ` style="${rowStyle}"` : ""}>
             <td>${tagBtn}${submittedTag}</td>
+            <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="cell-num">${safeInt(r.tag_bid || r.tag_salary).toLocaleString()}</td>
             <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
             <td>${htmlEsc(posKeyFromRow(r))}</td>
@@ -2837,7 +2873,6 @@
             <td class="cell-num">${safeInt(r.aav).toLocaleString()}</td>
             <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
             <td class="cell-num">${safeInt(r.pos_rank) || "—"}</td>
-            <td class="cell-num">${safeInt(r.tag_tier) || "—"}</td>
             <td class="cell-num">${ppgDisplay}</td>
             <td class="cell-num">${ppgRankCell}</td>
             <td class="muted">${htmlEsc(r.tag_formula || "")}</td>
@@ -2854,6 +2889,7 @@
           <thead>
             <tr>
               <th style="min-width:120px;">Tag</th>
+              ${sortTh("tagTier", "Tier (Based on Total Points)", "", "is-num")}
               ${sortTh("tagBid", "Cost to Tag (Projected Bid)", "min-width:190px;", "is-num")}
               ${sortTh("team", "Team")}
               ${sortTh("pos", "Position")}
@@ -2861,7 +2897,6 @@
               ${sortTh("aav", "AAV", "", "is-num")}
               ${sortTh("points", "Points", "", "is-num")}
               ${sortTh("tagRank", "Positional Rank", "", "is-num")}
-              ${sortTh("tagTier", "Tier (Based on Total Points)", "", "is-num")}
               ${sortTh("ppg", "PPG", "", "is-num")}
               ${sortTh("ppgRank", "PPG Rank", "", "is-num")}
               ${sortTh("tagFormula", "Formula", "min-width:240px;")}

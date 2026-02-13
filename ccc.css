@@ -1014,10 +1014,12 @@ table.ccc-table tbody tr.pos-DB .ccc-btn-offer{ background: rgba(249,115,22,.20)
   border-top: 4px solid var(--accent-border);
   background: var(--surface-1);
   border-radius: 16px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 68vh;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
+  scrollbar-gutter: stable;
   touch-action: pan-x pan-y;
   box-shadow: var(--shadow-soft);
   --row-pad-y: 12px;

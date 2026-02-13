@@ -4662,6 +4662,11 @@
         err.classList.remove("ok");
       }
     }
+    const confirm = $("#tagModalConfirm");
+    if (confirm) {
+      confirm.style.display = "none";
+      confirm.textContent = "";
+    }
 
     const removeBtn = $("#tagRemoveBtn");
     if (removeBtn) {
@@ -4719,7 +4724,17 @@
       payload,
     };
     saveTagSubmissions(state.tagSubmissions);
-    closeTagModal();
+    const confirm = $("#tagModalConfirm");
+    if (confirm) {
+      confirm.style.display = "";
+      confirm.innerHTML =
+        `<strong>Successful Tag</strong><br>` +
+        `Name: ${htmlEsc(sel.player_name || "")}<br>` +
+        `Salary: ${safeInt(payload.salary).toLocaleString()}<br><br>` +
+        `Tagged players may be cut before the FA Auction with no cap penalty and no bidding restrictions.<br>` +
+        `Submitted tags can be rescinded any time before the tag deadline.`;
+    }
+    render();
   }
 
   function removeTagSelection() {

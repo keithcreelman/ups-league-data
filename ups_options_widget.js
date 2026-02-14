@@ -17,7 +17,7 @@
   };
 
   const DEFAULT_PLAYOFF_END_WEEK = 17;
-  const DEFAULT_REGULAR_END_WEEK = 16;
+  const DEFAULT_REGULAR_END_WEEK = 14;
 
   const INLINE_SCHEDULES = {
     "2026": [

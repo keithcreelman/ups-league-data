@@ -4604,10 +4604,12 @@
     const mym = $("#mymModal");
     const rs = $("#restructureModal");
     const tag = $("#tagModal");
+    const tagAck = $("#tagAckModal");
     const anyOpen =
       (mym && mym.classList.contains("is-open")) ||
       (rs && rs.classList.contains("is-open")) ||
-      (tag && tag.classList.contains("is-open"));
+      (tag && tag.classList.contains("is-open")) ||
+      (tagAck && tagAck.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
   }
 
@@ -4716,11 +4718,44 @@
     tagModalState.key = "";
     const mym = $("#mymModal");
     const rs = $("#restructureModal");
+    const tagAck = $("#tagAckModal");
     const anyOpen =
       (mym && mym.classList.contains("is-open")) ||
-      (rs && rs.classList.contains("is-open"));
+      (rs && rs.classList.contains("is-open")) ||
+      (tagAck && tagAck.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
     render();
+  }
+
+  function openTagAckModal(sel, salary) {
+    const modal = $("#tagAckModal");
+    if (!modal) return;
+    const body = $("#tagAckBody");
+    if (body) {
+      body.innerHTML =
+        `Name: ${htmlEsc(sel && sel.player_name ? sel.player_name : "")}<br>` +
+        `Salary: ${safeInt(salary).toLocaleString()}`;
+    }
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ccc-modalOpen");
+  }
+
+  function closeTagAckModal() {
+    const modal = $("#tagAckModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    const mym = $("#mymModal");
+    const rs = $("#restructureModal");
+    const tag = $("#tagModal");
+    const dev = $("#devNoticeModal");
+    const anyOpen =
+      (mym && mym.classList.contains("is-open")) ||
+      (rs && rs.classList.contains("is-open")) ||
+      (tag && tag.classList.contains("is-open")) ||
+      (dev && dev.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
   }
 
   function submitTagSelection() {
@@ -4736,16 +4771,8 @@
       payload,
     };
     saveTagSubmissions(state.tagSubmissions);
-    const confirm = $("#tagModalConfirm");
-    if (confirm) {
-      confirm.style.display = "";
-      confirm.innerHTML =
-        `<strong>Successful Tag</strong><br>` +
-        `Name: ${htmlEsc(sel.player_name || "")}<br>` +
-        `Salary: ${safeInt(payload.salary).toLocaleString()}<br><br>` +
-        `Tagged players may be cut before the FA Auction with no cap penalty and no bidding restrictions.<br>` +
-        `Submitted tags can be rescinded any time before the tag deadline.`;
-    }
+    closeTagModal();
+    openTagAckModal(sel, payload.salary);
     render();
   }
 
@@ -6322,6 +6349,14 @@
       });
     }
 
+    const tagAckModal = $("#tagAckModal");
+    if (tagAckModal) {
+      tagAckModal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeTagAckModal();
+      });
+    }
+
     const devNoticeModal = $("#devNoticeModal");
     if (devNoticeModal) {
       devNoticeModal.addEventListener("click", (e) => {
@@ -6340,10 +6375,12 @@
         const modalElMym = $("#mymModal");
         const modalElRes = $("#restructureModal");
         const modalElTag = $("#tagModal");
+        const modalElTagAck = $("#tagAckModal");
         const modalElDev = $("#devNoticeModal");
         if (modalElMym && modalElMym.classList.contains("is-open")) closeMYMModal();
         if (modalElRes && modalElRes.classList.contains("is-open")) closeRestructureModal();
         if (modalElTag && modalElTag.classList.contains("is-open")) closeTagModal();
+        if (modalElTagAck && modalElTagAck.classList.contains("is-open")) closeTagAckModal();
         if (modalElDev && modalElDev.classList.contains("is-open")) closeDevNotice();
       }
     });
@@ -6363,6 +6400,9 @@
 
     const tagRemoveBtn = $("#tagRemoveBtn");
     if (tagRemoveBtn) tagRemoveBtn.addEventListener("click", () => removeTagSelection());
+
+    const tagAckOkBtn = $("#tagAckOkBtn");
+    if (tagAckOkBtn) tagAckOkBtn.addEventListener("click", () => closeTagAckModal());
 
     ["#rsTcvInput", "#rsYear1Input", "#rsYear2Input"].forEach((sel) => {
       const el = $(sel);

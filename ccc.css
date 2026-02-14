@@ -1373,7 +1373,9 @@ body.ccc-modalOpen #mymModal *,
 body.ccc-modalOpen #restructureModal,
 body.ccc-modalOpen #restructureModal *,
 body.ccc-modalOpen #tagModal,
-body.ccc-modalOpen #tagModal *{
+body.ccc-modalOpen #tagModal *,
+body.ccc-modalOpen #tagAckModal,
+body.ccc-modalOpen #tagAckModal *{
   pointer-events: auto;
 }
 body.ccc-modalOpen #devNoticeModal,
@@ -1453,6 +1455,31 @@ body.ccc-modalOpen #devNoticeModal *{
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.ccc-tagAckNotes{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(250, 204, 21, .45);
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, .12);
+  color: #78350f;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+#cccApp[data-theme="dark"] .ccc-tagAckNotes{
+  border-color: rgba(250, 204, 21, .5);
+  background: rgba(245, 158, 11, .2);
+  color: #fef3c7;
+}
+@media (prefers-color-scheme: dark){
+  #cccApp[data-theme="auto"] .ccc-tagAckNotes{
+    border-color: rgba(250, 204, 21, .5);
+    background: rgba(245, 158, 11, .2);
+    color: #fef3c7;
+  }
 }
 
 

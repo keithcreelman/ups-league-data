@@ -320,6 +320,33 @@
       </div>
     </div>
   </div>
+
+  <!-- TAG ACK MODAL -->
+  <div id="tagAckModal" class="ccc-modal" aria-hidden="true">
+    <div class="ccc-modal-backdrop" data-close="1"></div>
+
+    <div class="ccc-modal-card" role="dialog" aria-modal="true" aria-labelledby="tagAckTitle">
+      <div class="ccc-modal-head">
+        <div>
+          <div id="tagAckTitle" class="ccc-modal-title">Successful Tag</div>
+          <div class="ccc-modal-sub muted">Submission acknowledged.</div>
+        </div>
+        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+      </div>
+
+      <div class="ccc-modal-body">
+        <div class="ccc-code" id="tagAckBody">—</div>
+        <div class="ccc-tagAckNotes" id="tagAckNotes">
+          Tagged players may be cut before the FA Auction with no cap penalty and no bidding restrictions.<br>
+          Submitted tags can be rescinded any time before the tag deadline.
+        </div>
+      </div>
+
+      <div class="ccc-modal-foot">
+        <button class="ccc-btn" type="button" id="tagAckOkBtn" data-close="1" style="font-weight:1000;">OK</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>

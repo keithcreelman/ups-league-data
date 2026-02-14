@@ -29,6 +29,11 @@
     return String(v || "").toLowerCase() === "light" ? "light" : "dark";
   }
 
+  function normalizeExplicitMode(v) {
+    const mode = String(v || "").toLowerCase();
+    return mode === "light" || mode === "dark" ? mode : "";
+  }
+
   const u = getUrl();
   const L = getLeagueId(u);
   const YEAR = getYear(u);
@@ -55,7 +60,8 @@
   }
 
   function setHostMode(mode, persist) {
-    const next = normalizeMode(mode);
+    const next = normalizeExplicitMode(mode);
+    if (!next) return;
     if (typeof window.setUPSMode === "function") {
       window.setUPSMode(next);
       return;
@@ -237,7 +243,7 @@
     }
 
     if (data.type === "uow-theme") {
-      setHostMode(data.theme || "", true);
+      setHostMode(data.theme || data.mode || "", true);
       updateToggleUi();
       return;
     }

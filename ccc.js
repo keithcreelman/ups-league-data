@@ -1071,8 +1071,9 @@
 
   function posKeyFromRow(r) {
     const p = safeStr(r.positional_grouping || r.position).toUpperCase().trim();
-    if (p === "PK") return "K";
-    if (["QB", "RB", "WR", "TE", "K", "DL", "LB", "DB"].includes(p)) return p;
+    if (p === "K" || p === "PK") return "PK";
+    if (p === "PN" || p === "P") return "P";
+    if (["QB", "RB", "WR", "TE", "PK", "P", "DL", "LB", "DB"].includes(p)) return p;
     return p || "NA";
   }
 

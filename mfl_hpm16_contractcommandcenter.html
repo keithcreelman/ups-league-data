@@ -25,7 +25,7 @@
     <div class="ccc-nav">
       <span class="ccc-navTitle">Modules</span>
       <button id="moduleTagsChip" class="ccc-chipBtn primary" type="button" data-module="tag" data-tool="tags">Tags</button>
-      <button id="moduleExtensionsChip" class="ccc-chipBtn disabled" type="button" data-module="extensions" title="Placeholder for future module">Extensions</button>
+      <button id="moduleExtensionsChip" class="ccc-chipBtn primary" type="button" data-module="extensions">Extensions</button>
       <button id="moduleRestructuresChip" class="ccc-chipBtn disabled" type="button" data-module="restructure" title="Placeholder for future module">Restructures</button>
       <button id="moduleAuctionChip" class="ccc-chipBtn disabled" type="button" data-module="auction" title="Placeholder for future module">Auction Contracts</button>
       <button id="moduleMymChip" class="ccc-chipBtn primary" type="button" data-module="mym" data-tool="mym">MYM</button>
@@ -346,6 +346,51 @@
 
       <div class="ccc-modal-foot">
         <button class="ccc-btn" type="button" id="tagAckOkBtn" data-close="1" style="font-weight:1000;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTENSION MODAL -->
+  <div id="extensionModal" class="ccc-modal" aria-hidden="true">
+    <div class="ccc-modal-backdrop" data-close="1"></div>
+
+    <div class="ccc-modal-card" role="dialog" aria-modal="true" aria-labelledby="extModalTitle">
+      <div class="ccc-modal-head">
+        <div>
+          <div id="extModalTitle" class="ccc-modal-title">Offer Extension</div>
+          <div id="extModalSub" class="ccc-modal-sub muted"></div>
+        </div>
+        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+      </div>
+
+      <div class="ccc-modal-body">
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Add Extension Years</div>
+          <div class="ccc-modal-actions">
+            <button type="button" class="ccc-chipBtn primary" id="extOption1Btn">+1 Year</button>
+            <button type="button" class="ccc-chipBtn" id="extOption2Btn">+2 Years</button>
+          </div>
+        </div>
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Projected Breakdown</div>
+          <pre class="ccc-code" id="extModalBreakdown">—</pre>
+        </div>
+        <div class="ccc-modal-row" id="extModalDisclaimer">
+          <div class="ccc-tagAckNotes">
+            Extensions impact future seasons only.<br>
+            Current year salary stays unchanged; use restructure to change the current year.
+          </div>
+        </div>
+        <div class="ccc-modal-row">
+          <div class="ccc-modal-label">Submission Preview</div>
+          <pre class="ccc-code" id="extModalPreview">—</pre>
+        </div>
+        <div class="ccc-error" id="extModalErr" style="display:none;"></div>
+      </div>
+
+      <div class="ccc-modal-foot">
+        <button class="ccc-btn" type="button" data-close="1">Cancel</button>
+        <button class="ccc-btn" type="button" id="extSubmitBtn" style="font-weight:1000;">Submit Extension</button>
       </div>
     </div>
   </div>

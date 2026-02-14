@@ -1375,7 +1375,9 @@ body.ccc-modalOpen #restructureModal *,
 body.ccc-modalOpen #tagModal,
 body.ccc-modalOpen #tagModal *,
 body.ccc-modalOpen #tagAckModal,
-body.ccc-modalOpen #tagAckModal *{
+body.ccc-modalOpen #tagAckModal *,
+body.ccc-modalOpen #extensionModal,
+body.ccc-modalOpen #extensionModal *{
   pointer-events: auto;
 }
 body.ccc-modalOpen #devNoticeModal,

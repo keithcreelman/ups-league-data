@@ -207,6 +207,8 @@
   const LOCAL_ASOF_OVERRIDE_KEY = "ccc_asof_override_v1";
   const LOCAL_TAG_SELECTIONS_KEY = "ccc_tag_selections_v1";
   const LOCAL_TAG_SUBMISSIONS_KEY = "ccc_tag_submissions_v1";
+  const LOCAL_EXTENSION_SELECTIONS_KEY = "ccc_extension_selections_v1";
+  const LOCAL_EXTENSION_SUBMISSIONS_KEY = "ccc_extension_submissions_v1";
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
   const LOCAL_THEME_KEY = "ccc_theme_v1";
   const LOCAL_HIGHLIGHT_KEY = "ccc_row_highlight_v1";
@@ -262,6 +264,40 @@
   function saveTagSubmissions(submissions) {
     try {
       localStorage.setItem(LOCAL_TAG_SUBMISSIONS_KEY, JSON.stringify(submissions || {}));
+    } catch (e) {}
+  }
+
+  function loadExtensionSelections() {
+    try {
+      const raw = localStorage.getItem(LOCAL_EXTENSION_SELECTIONS_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveExtensionSelections(selections) {
+    try {
+      localStorage.setItem(LOCAL_EXTENSION_SELECTIONS_KEY, JSON.stringify(selections || {}));
+    } catch (e) {}
+  }
+
+  function loadExtensionSubmissions() {
+    try {
+      const raw = localStorage.getItem(LOCAL_EXTENSION_SUBMISSIONS_KEY);
+      if (!raw) return {};
+      const obj = JSON.parse(raw);
+      return obj && typeof obj === "object" ? obj : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveExtensionSubmissions(submissions) {
+    try {
+      localStorage.setItem(LOCAL_EXTENSION_SUBMISSIONS_KEY, JSON.stringify(submissions || {}));
     } catch (e) {}
   }
 
@@ -1386,6 +1422,10 @@
     if (state.activeModule === "tag") {
       return renderTagTable(rows, tabMode);
     }
+    if (state.activeModule === "extensions") {
+      if (tabMode === "submitted") return renderExtensionsSubmittedPage(state.selectedSeason);
+      return renderExtensionsTable(rows, tabMode);
+    }
 
     if (!rows.length) {
       return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
@@ -1970,7 +2010,55 @@
     `;
   }
 
-  function renderTagSummary(teamName, rows, season, selectedTeamId, showAllTeams) {
+  function buildTagIneligibleOneYearRows(rows) {
+    const list = (rows || []).filter((r) => {
+      if (safeInt(r.contract_year) !== 1) return false;
+      if (safeInt(r.is_tag_eligible) === 1) return false;
+      const text = `${safeStr(r.eligibility_reason)} ${safeStr(r.contract_status)} ${safeStr(
+        r.contract_info
+      )}`.toLowerCase();
+      return /(tag|superflex|keeper|auction)/.test(text);
+    });
+    list.sort((a, b) => {
+      const fa = safeStr(a.franchise_name || a.franchise_id);
+      const fb = safeStr(b.franchise_name || b.franchise_id);
+      if (fa !== fb) return fa.localeCompare(fb);
+      return safeStr(a.player_name).localeCompare(safeStr(b.player_name));
+    });
+    return list;
+  }
+
+  function renderTagIneligibleList(rows) {
+    if (!rows.length) return "";
+    const body = rows
+      .map(
+        (r) => `
+      <tr class="${buildRowClass(r, posKeyFromRow(r))}"${buildTeamStyle(r) ? ` style="${buildTeamStyle(r)}"` : ""}>
+        <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
+        <td class="playerCell">${htmlEsc(r.player_name)}</td>
+        <td>${htmlEsc(posKeyFromRow(r))}</td>
+        <td class="explain">${htmlEsc(r.eligibility_reason || r.contract_status || "Ineligible")}</td>
+      </tr>
+    `
+      )
+      .join("");
+    return `
+      <div class="ccc-summary" style="margin-top:10px;">
+        <div class="ccc-summaryTop">
+          <div class="ccc-summaryTitle">Tag Ineligible (1-Year Cohort)</div>
+        </div>
+        <div class="muted" style="margin:4px 0 10px 0;">Previously tagged players and superflex keeper exceptions.</div>
+        <div class="ccc-tableWrap">
+          <table class="ccc-table">
+            <thead><tr><th>Team</th><th>Player</th><th>Pos</th><th>Reason</th></tr></thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTagSummary(teamName, rows, season, selectedTeamId, showAllTeams, allRows) {
     const count = rows.length;
     const tier1 = rows.filter((r) => safeInt(r.tag_tier) === 1).length;
     const tier2 = rows.filter((r) => safeInt(r.tag_tier) === 2).length;
@@ -2004,6 +2092,8 @@
     const clearLocalHtml = state.commishMode
       ? `<div style="margin-top:10px;"><button type="button" class="ccc-pageBtn" data-tag-clear-all="1">Clear Local Tag Selections</button></div>`
       : "";
+    const ineligibleRows = buildTagIneligibleOneYearRows(allRows || rows);
+    const ineligibleHtml = renderTagIneligibleList(ineligibleRows);
 
     return `
       <div class="ccc-summaryTop">
@@ -2038,6 +2128,7 @@
       </div>
       ${selectionsHtml}
       ${clearLocalHtml}
+      ${ineligibleHtml}
     `;
   }
 
@@ -2754,6 +2845,144 @@
     `;
   }
 
+  function buildExtensionPreview(row, yearsToAdd) {
+    const salaryNow = safeInt(row && row.salary);
+    const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
+    const season = normalizeSeasonValue(state.selectedSeason || row.season || DEFAULT_YEAR);
+    const nextSeason = String(safeInt(season) + 1 || safeInt(DEFAULT_YEAR) + 1);
+    const secondSeason = String(safeInt(season) + 2 || safeInt(DEFAULT_YEAR) + 2);
+    const lines = [
+      `Current Season (${season}): ${salaryNow.toLocaleString()} (unchanged)`,
+      `${nextSeason}: TBD by extension rule`,
+    ];
+    if (years >= 2) lines.push(`${secondSeason}: TBD by extension rule`);
+    return {
+      yearsToAdd: years,
+      lines,
+      payload: {
+        type: "EXTENSION",
+        league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
+        season,
+        franchise_id: pad4(row.franchise_id),
+        franchise_name: safeStr(row.franchise_name || row.franchise_id),
+        player_id: safeStr(row.player_id),
+        player_name: safeStr(row.player_name),
+        pos: posKeyFromRow(row),
+        current_salary: salaryNow,
+        years_to_add: years,
+        contract_status: "Extension - Pending Rules",
+        contract_info: `Extension +${years}Y | Current salary locked | Future years TBD by rule`,
+      },
+    };
+  }
+
+  function renderExtensionsSummary(teamName, rows) {
+    const eligible = rows.filter((r) => canExtendRow(r)).length;
+    return `
+      <div class="ccc-summaryTop">
+        <div class="ccc-summaryTitle">${htmlEsc(teamName)} Extension Snapshot</div>
+      </div>
+      <div class="ccc-kpis">
+        <div class="kpi"><div class="label">Total Players</div><div class="value">${rows.length}</div></div>
+        <div class="kpi"><div class="label">Extension Eligible</div><div class="value">${eligible}</div><div class="hint">1+ years remaining, non-tag contracts</div></div>
+      </div>
+    `;
+  }
+
+  function renderExtensionsSubmittedPage(defaultSeason) {
+    const season = normalizeSeasonValue(defaultSeason || state.selectedSeason);
+    let rows = Object.values(state.extensionSubmissions || {}).filter(
+      (s) => normalizeSeasonValue(s && s.season) === season
+    );
+    const selectedTeamId = state && state.showAllTeams ? "__ALL__" : pad4(state.selectedTeam);
+    if (selectedTeamId && selectedTeamId !== "__ALL__") {
+      rows = rows.filter((r) => pad4(r.franchise_id) === selectedTeamId);
+    }
+    if (!rows.length) {
+      return `<div class="ccc-tableWrap" style="padding:12px;">No extension submissions for ${htmlEsc(
+        season
+      )}.</div>`;
+    }
+    const body = rows
+      .sort(
+        (a, b) => (parseDate(b.submitted_at_utc) || new Date(0)) - (parseDate(a.submitted_at_utc) || new Date(0))
+      )
+      .map((r) => {
+        const submittedFmt = formatSubmittedValue(r.submitted_at_utc);
+        const submitted = `${htmlEsc(submittedFmt.date)}${
+          submittedFmt.time ? `<div class="cell-sub">${htmlEsc(submittedFmt.time)}</div>` : ""
+        }`;
+        const style = buildTeamStyle(r);
+        return `
+          <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
+            <td>${submitted}</td>
+            <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
+            <td class="playerCell">${htmlEsc(r.player_name)}</td>
+            <td>${htmlEsc(posKeyFromRow(r))}</td>
+            <td class="cell-num">${safeInt(r.current_salary || r.salary).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.years_to_add)}</td>
+            <td class="explain">${htmlEsc(r.contract_info || "")}</td>
+          </tr>
+        `;
+      })
+      .join("");
+    return `<div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Submitted</th><th>Team</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Add Years</th><th>Preview</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+
+  function renderExtensionsTable(rows, tabMode) {
+    if (!rows.length) return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
+    const pageSize = clampInt(state.pageSize || 50, 10, 500);
+    const totalRows = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+    const pageRaw = state.pageByTab[tabMode] || 1;
+    const pageNow = clampInt(pageRaw, 1, totalPages);
+    if (pageNow !== pageRaw) updateTabPage(tabMode, pageNow);
+    const start = (pageNow - 1) * pageSize;
+    const pageRows = rows.slice(start, start + pageSize);
+    const body = pageRows
+      .map((r) => {
+        const canExtend = canManageTagForFranchise(r.franchise_id) && canExtendRow(r);
+        const btn = canExtend
+          ? `<button type="button" class="ccc-btn ccc-btn-offer" data-extension-action="1" data-season="${htmlEsc(
+              normalizeSeasonValue(r.season || state.selectedSeason)
+            )}" data-franchise-id="${htmlEsc(pad4(r.franchise_id))}" data-player-id="${htmlEsc(
+              r.player_id
+            )}">Extend</button>`
+          : `<span class="muted">—</span>`;
+        const style = buildTeamStyle(r);
+        return `
+          <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
+            <td>${btn}</td>
+            <td class="playerCell">${htmlEsc(r.player_name)}</td>
+            <td>${htmlEsc(posKeyFromRow(r))}</td>
+            <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
+            <td class="cell-num">${safeInt(r.contract_year)}</td>
+            <td>${htmlEsc(r.contract_status || "")}</td>
+            <td class="explain">${htmlEsc(r.contract_info || "")}</td>
+          </tr>
+        `;
+      })
+      .join("");
+    return `
+      <div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Action</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Years Remaining</th><th>Status</th><th>Contract Info</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="ccc-tableMeta">
+        <div class="ccc-tableMetaInfo">Showing ${totalRows ? start + 1 : 0}-${Math.min(
+      start + pageSize,
+      totalRows
+    )} of ${totalRows}</div>
+        <div class="ccc-tableMetaActions">
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="prev" ${
+      pageNow <= 1 ? "disabled" : ""
+    }>Prev</button>
+          <span class="ccc-pageLabel">Page ${pageNow} / ${totalPages}</span>
+          <button type="button" class="ccc-pageBtn" data-page-tab="${tabMode}" data-page-action="next" ${
+      pageNow >= totalPages ? "disabled" : ""
+    }>Next</button>
+        </div>
+      </div>
+    `;
+  }
+
   function renderCommishModulePage() {
     const canCommish = !!state.canCommishMode;
     const season = normalizeSeasonValue(state.selectedSeason);
@@ -3103,6 +3332,8 @@
     localOverrides: loadLocalOverrides(),
     tagSelections: loadTagSelections(),
     tagSubmissions: loadTagSubmissions(),
+    extensionSelections: loadExtensionSelections(),
+    extensionSubmissions: loadExtensionSubmissions(),
     tagSummaryView: "pos",
     tagSummarySide: "ALL",
     tagCalcOpen: false,
@@ -3204,6 +3435,29 @@
       out.push({ key, ...sel });
     });
     return out;
+  }
+
+  function buildExtensionSelectionKey(season, franchiseId, playerId) {
+    const league = safeStr(getLeagueId() || DEFAULT_LEAGUE_ID);
+    const s = normalizeSeasonValue(season) || DEFAULT_YEAR;
+    const fid = pad4(franchiseId);
+    const pid = safeStr(playerId);
+    return `${league}|${s}|${fid}|${pid}`;
+  }
+
+  function isExpiredRookieRow(row) {
+    const text = `${safeStr(row.contract_status)} ${safeStr(row.contract_info)} ${safeStr(
+      row.mym_acq_type
+    )}`.toLowerCase();
+    return text.includes("expired rookie");
+  }
+
+  function canExtendRow(row) {
+    if (!row) return false;
+    if (safeInt(row.contract_year) < 1) return false;
+    const status = safeStr(row.contract_status).toLowerCase();
+    if (status.includes("tag")) return false;
+    return true;
   }
 
   function buildSeasonList(eligibilityRows, submissionRows, restructureRows, tagRows) {
@@ -4304,7 +4558,14 @@
       syncCommishConsole(scopedEligibility);
 
       if (summary)
-        summary.innerHTML = renderTagSummary(teamName, tagRows, season, selectedTeamId, showAllTeams);
+        summary.innerHTML = renderTagSummary(
+          teamName,
+          tagRows,
+          season,
+          selectedTeamId,
+          showAllTeams,
+          positionFilteredTagTracking
+        );
       if (tabSummary)
         tabSummary.innerHTML = renderTagSummaryPage(
           tagEligibleRows,
@@ -4344,20 +4605,27 @@
     }
 
     if (state.activeModule === "extensions") {
-      const landing = `
-        <div class="ccc-landing">
-          <div class="ccc-landingTitle">Not yet functional</div>
-        </div>
-      `;
+      const extensionRows = sortRows(
+        scopedEligibility.filter((r) => canExtendRow(r)),
+        sortState.tab === "eligible" ? sortState.key : "player",
+        sortState.tab === "eligible" ? sortState.dir : "asc"
+      );
+      const teamNameSource =
+        (extensionRows[0] && extensionRows[0].franchise_name) ||
+        (scopedEligibility[0] && scopedEligibility[0].franchise_name) ||
+        "";
+      const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
       syncTabLabels();
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
-      if (summary) summary.innerHTML = landing;
-      if (tabSummary) tabSummary.innerHTML = landing;
-      if (tabCostCalc) tabCostCalc.innerHTML = "";
-      if (tabEligible) tabEligible.innerHTML = landing;
+      if (summary) summary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
+      if (tabSummary) tabSummary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
+      if (tabCostCalc)
+        tabCostCalc.innerHTML =
+          '<div class="ccc-tableWrap" style="padding:12px;">Cost breakdown is shown per player in the extension popup.</div>';
+      if (tabEligible) tabEligible.innerHTML = renderExtensionsTable(extensionRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
-      if (tabSubmitted) tabSubmitted.innerHTML = "";
+      if (tabSubmitted) tabSubmitted.innerHTML = renderExtensionsSubmittedPage(season);
       updateModuleStatusChips();
       return;
     }
@@ -4465,6 +4733,7 @@
   // ======================================================
   const mymModalState = { open: false, row: null, years: 2 };
   const tagModalState = { open: false, key: "" };
+  const extensionModalState = { open: false, key: "", yearsToAdd: 1 };
 
   function formatK(n) {
     const v = safeInt(n);
@@ -4584,6 +4853,120 @@
     return 0;
   }
 
+  function findExtensionRow(selection) {
+    if (!selection) return null;
+    const pid = safeStr(selection.player_id);
+    const season = normalizeSeasonValue(selection.season || state.selectedSeason);
+    return (
+      (state.payload.eligibility || []).find(
+        (r) => safeStr(r.player_id) === pid && normalizeSeasonValue(r.season) === season
+      ) || null
+    );
+  }
+
+  function openExtensionModal(selectionKey) {
+    const modal = $("#extensionModal");
+    if (!modal) return;
+    const sel = state.extensionSelections[selectionKey];
+    if (!sel) return;
+    const row = findExtensionRow(sel);
+    if (!row) return;
+
+    extensionModalState.open = true;
+    extensionModalState.key = selectionKey;
+    extensionModalState.yearsToAdd = Math.max(1, Math.min(2, safeInt(sel.years_to_add) || 1));
+
+    const title = $("#extModalTitle");
+    if (title) title.textContent = `Offer Extension - ${safeStr(row.player_name)}`;
+    const sub = $("#extModalSub");
+    if (sub) sub.textContent = `Current Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${safeStr(row.franchise_name || row.franchise_id)}`;
+
+    const preview = buildExtensionPreview(row, extensionModalState.yearsToAdd);
+    const breakdown = $("#extModalBreakdown");
+    if (breakdown) breakdown.textContent = preview.lines.join("\n");
+    const payloadEl = $("#extModalPreview");
+    if (payloadEl) payloadEl.textContent = JSON.stringify(preview.payload, null, 2);
+
+    const b1 = $("#extOption1Btn");
+    const b2 = $("#extOption2Btn");
+    if (b1 && b2) {
+      b1.classList.toggle("primary", extensionModalState.yearsToAdd === 1);
+      b2.classList.toggle("primary", extensionModalState.yearsToAdd === 2);
+    }
+
+    const disclaimer = $("#extModalDisclaimer");
+    if (disclaimer) {
+      if (isExpiredRookieRow(row)) {
+        disclaimer.style.display = "none";
+      } else {
+        disclaimer.style.display = "";
+      }
+    }
+
+    const err = $("#extModalErr");
+    if (err) {
+      err.style.display = "none";
+      err.textContent = "";
+      err.classList.remove("ok");
+    }
+
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ccc-modalOpen");
+  }
+
+  function closeExtensionModal() {
+    const modal = $("#extensionModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    extensionModalState.open = false;
+    extensionModalState.key = "";
+    const mym = $("#mymModal");
+    const rs = $("#restructureModal");
+    const tag = $("#tagModal");
+    const tagAck = $("#tagAckModal");
+    const dev = $("#devNoticeModal");
+    const anyOpen =
+      (mym && mym.classList.contains("is-open")) ||
+      (rs && rs.classList.contains("is-open")) ||
+      (tag && tag.classList.contains("is-open")) ||
+      (tagAck && tagAck.classList.contains("is-open")) ||
+      (dev && dev.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
+  }
+
+  function setExtensionYears(years) {
+    extensionModalState.yearsToAdd = Math.max(1, Math.min(2, safeInt(years) || 1));
+    const key = safeStr(extensionModalState.key);
+    const sel = state.extensionSelections[key];
+    if (sel) sel.years_to_add = extensionModalState.yearsToAdd;
+    saveExtensionSelections(state.extensionSelections);
+    openExtensionModal(key);
+  }
+
+  function submitExtensionSelection() {
+    const key = safeStr(extensionModalState.key);
+    if (!key) return;
+    const sel = state.extensionSelections[key];
+    if (!sel) return;
+    const row = findExtensionRow(sel);
+    if (!row) return;
+    const preview = buildExtensionPreview(row, extensionModalState.yearsToAdd);
+    state.extensionSubmissions[key] = {
+      ...preview.payload,
+      submitted_at_utc: new Date().toISOString(),
+    };
+    saveExtensionSubmissions(state.extensionSubmissions);
+    const err = $("#extModalErr");
+    if (err) {
+      err.style.display = "";
+      err.textContent = "Extension selection submitted locally.";
+      err.classList.add("ok");
+    }
+    render();
+  }
+
   function openDevNotice() {
     const modal = $("#devNoticeModal");
     if (!modal) return;
@@ -4603,11 +4986,13 @@
     const rs = $("#restructureModal");
     const tag = $("#tagModal");
     const tagAck = $("#tagAckModal");
+    const ext = $("#extensionModal");
     const anyOpen =
       (mym && mym.classList.contains("is-open")) ||
       (rs && rs.classList.contains("is-open")) ||
       (tag && tag.classList.contains("is-open")) ||
-      (tagAck && tagAck.classList.contains("is-open"));
+      (tagAck && tagAck.classList.contains("is-open")) ||
+      (ext && ext.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
   }
 
@@ -4717,10 +5102,12 @@
     const mym = $("#mymModal");
     const rs = $("#restructureModal");
     const tagAck = $("#tagAckModal");
+    const ext = $("#extensionModal");
     const anyOpen =
       (mym && mym.classList.contains("is-open")) ||
       (rs && rs.classList.contains("is-open")) ||
-      (tagAck && tagAck.classList.contains("is-open"));
+      (tagAck && tagAck.classList.contains("is-open")) ||
+      (ext && ext.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
     render();
   }
@@ -4747,11 +5134,13 @@
     const mym = $("#mymModal");
     const rs = $("#restructureModal");
     const tag = $("#tagModal");
+    const ext = $("#extensionModal");
     const dev = $("#devNoticeModal");
     const anyOpen =
       (mym && mym.classList.contains("is-open")) ||
       (rs && rs.classList.contains("is-open")) ||
       (tag && tag.classList.contains("is-open")) ||
+      (ext && ext.classList.contains("is-open")) ||
       (dev && dev.classList.contains("is-open"));
     if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
   }
@@ -4831,8 +5220,19 @@
     if (!modal) return;
 
     modal.classList.remove("is-open");
-    document.body.classList.remove("ccc-modalOpen");
     modal.setAttribute("aria-hidden", "true");
+    const rs = $("#restructureModal");
+    const tag = $("#tagModal");
+    const tagAck = $("#tagAckModal");
+    const ext = $("#extensionModal");
+    const dev = $("#devNoticeModal");
+    const anyOpen =
+      (rs && rs.classList.contains("is-open")) ||
+      (tag && tag.classList.contains("is-open")) ||
+      (tagAck && tagAck.classList.contains("is-open")) ||
+      (ext && ext.classList.contains("is-open")) ||
+      (dev && dev.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
 
     mymModalState.open = false;
     mymModalState.row = null;
@@ -5160,8 +5560,19 @@
     const modal = $("#restructureModal");
     if (!modal) return;
     modal.classList.remove("is-open");
-    document.body.classList.remove("ccc-modalOpen");
     modal.setAttribute("aria-hidden", "true");
+    const mym = $("#mymModal");
+    const tag = $("#tagModal");
+    const tagAck = $("#tagAckModal");
+    const ext = $("#extensionModal");
+    const dev = $("#devNoticeModal");
+    const anyOpen =
+      (mym && mym.classList.contains("is-open")) ||
+      (tag && tag.classList.contains("is-open")) ||
+      (tagAck && tagAck.classList.contains("is-open")) ||
+      (ext && ext.classList.contains("is-open")) ||
+      (dev && dev.classList.contains("is-open"));
+    if (!anyOpen) document.body.classList.remove("ccc-modalOpen");
     restructureModalState.open = false;
     restructureModalState.row = null;
     restructureModalState.calc = null;
@@ -5353,6 +5764,10 @@
       must("#tagModal");
       must("#tagSubmitBtn");
       must("#tagRemoveBtn");
+      must("#extensionModal");
+      must("#extOption1Btn");
+      must("#extOption2Btn");
+      must("#extSubmitBtn");
 
       $("#cccMeta").textContent = "Loading MYM data…";
 
@@ -5778,8 +6193,8 @@
       moduleExtensionsChip.addEventListener("click", () => {
         switchModule("extensions");
         sortState.tab = "eligible";
-        sortState.key = "acquired";
-        sortState.dir = "desc";
+        sortState.key = "player";
+        sortState.dir = "asc";
         resetAllTablePages();
         setTab("eligible");
         render();
@@ -6045,6 +6460,46 @@
 
         const tableMode = wrap.getAttribute("data-table") || "eligible";
         handleHeaderSortClick(th, tableMode);
+      },
+      true
+    );
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn =
+          e.target && e.target.closest ? e.target.closest("[data-extension-action='1']") : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const fid = pad4(btn.getAttribute("data-franchise-id"));
+        if (!canManageTagForFranchise(fid)) return;
+        const pid = safeStr(btn.getAttribute("data-player-id"));
+        const season = normalizeSeasonValue(btn.getAttribute("data-season") || state.selectedSeason);
+        const key = buildExtensionSelectionKey(season, fid, pid);
+        const row =
+          (state.payload.eligibility || []).find(
+            (r) =>
+              pad4(r.franchise_id) === fid &&
+              safeStr(r.player_id) === pid &&
+              normalizeSeasonValue(r.season) === season
+          ) || null;
+        if (!row) return;
+        state.extensionSelections[key] = {
+          league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
+          season,
+          franchise_id: fid,
+          franchise_name: safeStr(row.franchise_name || row.franchise_id),
+          player_id: pid,
+          player_name: safeStr(row.player_name),
+          pos: posKeyFromRow(row),
+          years_to_add: safeInt(
+            (state.extensionSelections[key] && state.extensionSelections[key].years_to_add) || 1
+          ),
+          at: Date.now(),
+        };
+        saveExtensionSelections(state.extensionSelections);
+        openExtensionModal(key);
       },
       true
     );
@@ -6347,6 +6802,14 @@
       });
     }
 
+    const extensionModal = $("#extensionModal");
+    if (extensionModal) {
+      extensionModal.addEventListener("click", (e) => {
+        const close = e.target && e.target.getAttribute && e.target.getAttribute("data-close");
+        if (close === "1") closeExtensionModal();
+      });
+    }
+
     const tagAckModal = $("#tagAckModal");
     if (tagAckModal) {
       tagAckModal.addEventListener("click", (e) => {
@@ -6374,11 +6837,13 @@
         const modalElRes = $("#restructureModal");
         const modalElTag = $("#tagModal");
         const modalElTagAck = $("#tagAckModal");
+        const modalElExt = $("#extensionModal");
         const modalElDev = $("#devNoticeModal");
         if (modalElMym && modalElMym.classList.contains("is-open")) closeMYMModal();
         if (modalElRes && modalElRes.classList.contains("is-open")) closeRestructureModal();
         if (modalElTag && modalElTag.classList.contains("is-open")) closeTagModal();
         if (modalElTagAck && modalElTagAck.classList.contains("is-open")) closeTagAckModal();
+        if (modalElExt && modalElExt.classList.contains("is-open")) closeExtensionModal();
         if (modalElDev && modalElDev.classList.contains("is-open")) closeDevNotice();
       }
     });
@@ -6401,6 +6866,13 @@
 
     const tagAckOkBtn = $("#tagAckOkBtn");
     if (tagAckOkBtn) tagAckOkBtn.addEventListener("click", () => closeTagAckModal());
+
+    const extOption1Btn = $("#extOption1Btn");
+    if (extOption1Btn) extOption1Btn.addEventListener("click", () => setExtensionYears(1));
+    const extOption2Btn = $("#extOption2Btn");
+    if (extOption2Btn) extOption2Btn.addEventListener("click", () => setExtensionYears(2));
+    const extSubmitBtn = $("#extSubmitBtn");
+    if (extSubmitBtn) extSubmitBtn.addEventListener("click", () => submitExtensionSelection());
 
     ["#rsTcvInput", "#rsYear1Input", "#rsYear2Input"].forEach((sel) => {
       const el = $(sel);

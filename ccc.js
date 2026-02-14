@@ -2905,7 +2905,7 @@
     const salaryNow = safeInt(row && row.salary);
     const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
     const season = normalizeSeasonValue(state.selectedSeason || row.season || DEFAULT_YEAR);
-    const expiredRookie = isExpiredRookieRow(row);
+    const expiredRookie = isExpiredRookieLike(row);
     const pos = posKeyFromRow(row);
     const raise = getExtensionRate(pos, season, years);
     const nextSeason = String(safeInt(season) + 1 || safeInt(DEFAULT_YEAR) + 1);
@@ -2988,7 +2988,7 @@
   function projectExtensionRowForward(row) {
     if (!row) return null;
     const years = safeInt(row.contract_year);
-    const expired = isExpiredRookieRow(row);
+    const expired = isExpiredRookieLike(row);
     const rookie = rookieLike(row.contract_status);
     if (years <= 0) return expired ? { ...row, contract_year: 0 } : null;
     if (years === 1) {
@@ -3084,7 +3084,7 @@
       return { ok: false, reason: `Deadline passed (${fmtYMDDate(deadline)}).`, deadline };
     }
     const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
-    const projectedYears = isExpiredRookieRow(row) ? years : safeInt(row.contract_year) + years;
+    const projectedYears = isExpiredRookieLike(row) ? years : safeInt(row.contract_year) + years;
     if (projectedYears >= 3 && isNonRookieContract(row)) {
       const current = countTeamThreeYearNonRookieContracts(row.franchise_id, season);
       const projected = current + (safeInt(row.contract_year) >= 3 ? 0 : 1);
@@ -3641,10 +3641,16 @@
     return text.includes("expired rookie");
   }
 
+  function isExpiredRookieLike(row) {
+    if (!row) return false;
+    if (isExpiredRookieRow(row)) return true;
+    return rookieLike(row.contract_status) && safeInt(row.contract_year) <= 0;
+  }
+
   function canExtendRow(row) {
     if (!row) return false;
     const years = safeInt(row.contract_year);
-    if (!(years === 1 || isExpiredRookieRow(row))) return false;
+    if (!(years === 1 || isExpiredRookieLike(row))) return false;
     const status = safeStr(row.contract_status).toLowerCase();
     if (status.includes("tag")) return false;
     return true;
@@ -4041,7 +4047,7 @@
     const acqDate = parseDate(row && row.acquired_date);
     const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
     const rookieStatus = rookieLike(row && row.contract_status);
-    const expiredRookie = isExpiredRookieRow(row) || (rookieStatus && safeInt(row && row.contract_year) <= 0);
+    const expiredRookie = isExpiredRookieLike(row);
     const rookieContract = rookieLike(row && row.contract_status);
     const rookieInfoCurrent = getTagDeadlineInfo(s);
     const rookieEventDeadlineCurrent =
@@ -5270,7 +5276,7 @@
 
     const disclaimer = $("#extModalDisclaimer");
     if (disclaimer) {
-      if (isExpiredRookieRow(row)) {
+      if (isExpiredRookieLike(row)) {
         disclaimer.style.display = "none";
       } else {
         disclaimer.style.display = "";
@@ -5280,7 +5286,7 @@
     const splitRow = $("#extRookieSplitRow");
     const y1Input = $("#extYear1Input");
     const y2Input = $("#extYear2Input");
-    if (splitRow) splitRow.style.display = isExpiredRookieRow(row) ? "" : "none";
+    if (splitRow) splitRow.style.display = isExpiredRookieLike(row) ? "" : "none";
     if (y1Input) y1Input.value = "";
     if (y2Input) {
       y2Input.value = "";

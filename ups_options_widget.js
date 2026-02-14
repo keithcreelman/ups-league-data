@@ -74,6 +74,21 @@
 
   const $ = (sel) => document.querySelector(sel);
 
+  function normalizeThemeValue(value, allowAuto) {
+    const v = String(value || "").toLowerCase();
+    if (v === "light" || v === "dark") return v;
+    return allowAuto ? "auto" : "";
+  }
+
+  function getThemeFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search || "");
+      return normalizeThemeValue(params.get("THEME") || params.get("theme"), false);
+    } catch (e) {
+      return "";
+    }
+  }
+
   function parseLeagueId() {
     const params = new URLSearchParams(window.location.search || "");
     const raw = params.get("L") || "";
@@ -81,11 +96,12 @@
   }
 
   function loadThemeSetting() {
+    const forcedByQuery = getThemeFromQuery();
+    if (forcedByQuery) return forcedByQuery;
     try {
       const raw = localStorage.getItem(THEME_KEY);
       if (!raw) return "auto";
-      const v = String(raw).toLowerCase();
-      return v === "light" || v === "dark" ? v : "auto";
+      return normalizeThemeValue(raw, true);
     } catch (e) {
       return "auto";
     }
@@ -99,8 +115,20 @@
 
   function applyThemeSetting(theme) {
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const next = theme === "auto" ? (prefersDark ? "dark" : "light") : theme;
+    const sanitized = normalizeThemeValue(theme, true);
+    const next = sanitized === "auto" ? (prefersDark ? "dark" : "light") : sanitized;
     document.body.setAttribute("data-theme", next);
+    const themeSelect = $("#themeSelect");
+    if (themeSelect && themeSelect.value !== sanitized) themeSelect.value = sanitized;
+  }
+
+  function applyHostTheme(theme) {
+    const forced = normalizeThemeValue(theme, false);
+    if (!forced) return;
+    state.theme = forced;
+    saveThemeSetting(state.theme);
+    applyThemeSetting(state.theme);
+    notifyParentTheme(state.theme);
   }
 
   function wireThemeListener() {
@@ -114,6 +142,22 @@
     } else if (media.addListener) {
       media.addListener(handler);
     }
+  }
+
+  function notifyParentTheme(theme) {
+    if (!window.parent || window.parent === window) return;
+    const t = normalizeThemeValue(theme, true);
+    try {
+      window.parent.postMessage({ type: "uow-theme", theme: t }, "*");
+    } catch (e) {}
+  }
+
+  function wireHostThemeMessages() {
+    window.addEventListener("message", (e) => {
+      const data = e && e.data ? e.data : {};
+      if (!data || data.type !== "ups-theme") return;
+      applyHostTheme(data.mode || data.theme || "");
+    });
   }
 
   function safeInt(x) {
@@ -696,10 +740,10 @@
     if (themeSelect) {
       themeSelect.value = state.theme;
       themeSelect.addEventListener("change", (e) => {
-        const v = String(e.target.value || "auto");
-        state.theme = v === "light" || v === "dark" ? v : "auto";
+        state.theme = normalizeThemeValue(e.target.value || "auto", true);
         saveThemeSetting(state.theme);
         applyThemeSetting(state.theme);
+        notifyParentTheme(state.theme);
       });
     }
 
@@ -783,6 +827,8 @@
     const leagueId = parseLeagueId();
     applyThemeSetting(state.theme);
     wireThemeListener();
+    wireHostThemeMessages();
+    notifyParentTheme(state.theme);
     applyScheduleFallback(year);
     applyScheduleFallback(year + 1);
     fetchSchedule(year);

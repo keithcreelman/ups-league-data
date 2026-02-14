@@ -1415,7 +1415,10 @@
       case "acquired":
         return (parseDate(r.acquired_date) || new Date("1900-01-01")).getTime();
       case "deadline":
-        return (parseDate(r.mym_deadline) || new Date("2999-01-01")).getTime();
+        return (
+          safeInt(r._extension_deadline_ts) ||
+          (parseDate(r.extension_deadline || r.mym_deadline) || new Date("2999-01-01")).getTime()
+        );
       default:
         return safeStr(r.player_name).toLowerCase();
     }
@@ -2148,9 +2151,6 @@
     const clearLocalHtml = state.commishMode
       ? `<div style="margin-top:10px;"><button type="button" class="ccc-pageBtn" data-tag-clear-all="1">Clear Local Tag Selections</button></div>`
       : "";
-    const ineligibleRows = buildTagIneligibleOneYearRows(allRows || rows);
-    const ineligibleHtml = renderTagIneligibleList(ineligibleRows);
-
     return `
       <div class="ccc-summaryTop">
         <div class="ccc-summaryTitle">${htmlEsc(teamName)} Tag Tracking Snapshot</div>
@@ -2184,7 +2184,6 @@
       </div>
       ${selectionsHtml}
       ${clearLocalHtml}
-      ${ineligibleHtml}
     `;
   }
 
@@ -3020,14 +3019,110 @@
   }
 
   function renderExtensionsSummary(teamName, rows) {
+    const total = rows.length;
     const eligible = rows.filter((r) => getExtensionEligibility(r, 1).ok).length;
+    const byTeam = new Map();
+    rows.forEach((r) => {
+      const key = pad4(r.franchise_id) || "----";
+      let rec = byTeam.get(key);
+      if (!rec) {
+        rec = {
+          team: safeStr(r.franchise_name || r.franchise_id || key),
+          total: 0,
+          eligible: 0,
+          byPos: new Map(),
+        };
+        byTeam.set(key, rec);
+      }
+      rec.total += 1;
+      if (getExtensionEligibility(r, 1).ok) rec.eligible += 1;
+      const pos = posKeyFromRow(r) || "NA";
+      rec.byPos.set(pos, (rec.byPos.get(pos) || 0) + 1);
+    });
+
+    const teamRows = Array.from(byTeam.values())
+      .sort((a, b) => a.team.localeCompare(b.team))
+      .map((rec) => {
+        const posRows = Array.from(rec.byPos.entries())
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(
+            ([pos, cnt]) => `
+              <tr><td>${htmlEsc(pos)}</td><td class="cell-num">${cnt}</td></tr>
+            `
+          )
+          .join("");
+        return `
+          <details class="ccc-summaryGroup">
+            <summary>
+              <div class="ccc-summaryRow">
+                <div class="ccc-summaryTeam">${htmlEsc(rec.team)}</div>
+                <div class="ccc-summaryStat"><span class="label">Total</span><span class="value">${rec.total}</span></div>
+                <div class="ccc-summaryStat"><span class="label">Eligible</span><span class="value">${rec.eligible}</span></div>
+                <div class="ccc-summaryStat"><span class="label">Ineligible</span><span class="value">${Math.max(0, rec.total - rec.eligible)}</span></div>
+                <div class="ccc-summaryStat"><span class="label">Open</span><span class="value">View Pos</span></div>
+              </div>
+            </summary>
+            <div class="ccc-tableWrap" style="margin-top:8px;">
+              <table class="ccc-table">
+                <thead><tr><th>Pos</th><th>Players</th></tr></thead>
+                <tbody>${posRows}</tbody>
+              </table>
+            </div>
+          </details>
+        `;
+      })
+      .join("");
+
     return `
       <div class="ccc-summaryTop">
         <div class="ccc-summaryTitle">${htmlEsc(teamName)} Extension Snapshot</div>
       </div>
       <div class="ccc-kpis">
-        <div class="kpi"><div class="label">Total Players</div><div class="value">${rows.length}</div></div>
-        <div class="kpi"><div class="label">Extension Eligible</div><div class="value">${eligible}</div><div class="hint">1-year deals or expired rookies, not already extended by current owner</div></div>
+        <div class="kpi"><div class="label">Total Players</div><div class="value">${total}</div></div>
+        <div class="kpi"><div class="label">Eligible</div><div class="value">${eligible}</div><div class="hint">1-year deals or expired rookies, not already extended by current owner</div></div>
+      </div>
+      <div class="ccc-summaryPage" style="margin-top:10px;">
+        ${teamRows || `<div class="muted">No teams.</div>`}
+      </div>
+    `;
+  }
+
+  function renderExtensionsExpiredRookieDraftPage(rows) {
+    const expired = (rows || [])
+      .filter((r) => isExpiredRookieLike(r))
+      .sort(
+        (a, b) =>
+          safeStr(a.franchise_name || a.franchise_id).localeCompare(
+            safeStr(b.franchise_name || b.franchise_id)
+          ) || safeStr(a.player_name).localeCompare(safeStr(b.player_name))
+      );
+    if (!expired.length) {
+      return `<div class="ccc-tableWrap" style="padding:12px;">No expired rookie draft candidates in this view.</div>`;
+    }
+    const body = expired
+      .map((r) => {
+        const style = buildTeamStyle(r);
+        return `
+          <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
+            <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
+            <td class="playerCell">${htmlEsc(r.player_name)}</td>
+            <td>${htmlEsc(posKeyFromRow(r))}</td>
+            <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
+            <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
+            <td class="muted">${htmlEsc(safeStr(r.extension_deadline || "TBD"))}</td>
+          </tr>
+        `;
+      })
+      .join("");
+    return `
+      <div class="ccc-summaryControls">
+        <span class="ccc-navTitle">Leaguewide Expired Rookie Draft</span>
+      </div>
+      <div class="ccc-tableWrap" data-table="costcalc">
+        <table class="ccc-table">
+          <thead><tr><th>Team</th><th>Player</th><th>Pos</th><th>Prior Pts</th><th>Sal</th><th>Deadline</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
       </div>
     `;
   }
@@ -3109,6 +3204,19 @@
     if (pageNow !== pageRaw) updateTabPage(tabMode, pageNow);
     const start = (pageNow - 1) * pageSize;
     const pageRows = rows.slice(start, start + pageSize);
+    const sortTh = (key, label, minWidthStyle, extraClass) => {
+      const isSorted = sortState.tab === tabMode && sortState.key === key;
+      const widthAttr = minWidthStyle ? ` style="${minWidthStyle}"` : "";
+      const className = ["is-sortable", isSorted ? "is-sorted" : "", extraClass || ""]
+        .join(" ")
+        .trim();
+      const ariaSort = isSorted ? (sortState.dir === "asc" ? "ascending" : "descending") : "none";
+      return `<th data-sort="${key}" aria-sort="${ariaSort}" class="${className}"${widthAttr}>${label} <span class="sort">${sortIcon(
+        tabMode,
+        key
+      )}</span></th>`;
+    };
+
     const body = pageRows
       .map((r) => {
         const own = canManageTagForFranchise(r.franchise_id);
@@ -3141,6 +3249,7 @@
         return `
           <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
             <td>${btn}</td>
+            <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
             <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td>${htmlEsc(posKeyFromRow(r))}</td>
             <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
@@ -3153,7 +3262,18 @@
       })
       .join("");
     return `
-      <div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Action</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Years Remaining</th><th>Deadline</th><th>Status</th><th>Contract Info</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="ccc-tableWrap" data-table="${tabMode}"><table class="ccc-table"><thead><tr><th>Action</th>${sortTh(
+        "team",
+        "Team"
+      )}${sortTh("player", "Player")}${sortTh("pos", "Pos")}${sortTh(
+        "salary",
+        "Sal",
+        "",
+        "is-num"
+      )}${sortTh("contractYear", "Yrs", "", "is-num")}${sortTh(
+        "deadline",
+        "Deadline"
+      )}${sortTh("status", "Status")}<th>Info</th></tr></thead><tbody>${body}</tbody></table></div>
       <div class="ccc-tableMeta">
         <div class="ccc-tableMetaInfo">Showing ${totalRows ? start + 1 : 0}-${Math.min(
       start + pageSize,
@@ -3665,7 +3785,10 @@
   }
 
   function parseExtensionOwnerFromContractInfo(contractInfo) {
-    const normalized = normalizeNickToken(contractInfo);
+    const src = safeStr(contractInfo);
+    const extMatch = src.match(/(?:^|\|)\s*Ext:\s*([^|]+)/i);
+    if (!extMatch) return "";
+    const normalized = normalizeNickToken(extMatch[1]);
     if (!normalized) return "";
     const entries = Object.entries(EXT_OWNER_BY_NICKNAME);
     for (let i = 0; i < entries.length; i++) {
@@ -4394,6 +4517,7 @@
     const summaryTab = $(`.ccc-tab[data-tab="summary"]`);
     const costTab = $(`.ccc-tab[data-tab="costcalc"]`);
     const eligibleTab = $(`.ccc-tab[data-tab="eligible"]`);
+    const ineligibleTab = $(`.ccc-tab[data-tab="ineligible"]`);
     const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
     if (summaryTab) summaryTab.textContent = "Summary";
     if (state.activeModule === "tag") {
@@ -4401,10 +4525,22 @@
         costTab.style.display = "";
         costTab.textContent = "Cost Calc";
       }
+      if (ineligibleTab) {
+        ineligibleTab.style.display = "";
+        ineligibleTab.textContent = "Ineligible";
+      }
       if (eligibleTab) eligibleTab.textContent = "Player Tagging";
       if (submittedTab) submittedTab.textContent = "Finalized Submissions";
     } else {
-      if (costTab) costTab.style.display = "none";
+      if (ineligibleTab) ineligibleTab.style.display = "none";
+      if (costTab) {
+        if (state.activeModule === "extensions") {
+          costTab.style.display = "";
+          costTab.textContent = "Expired Rookie Draft";
+        } else {
+          costTab.style.display = "none";
+        }
+      }
       if (eligibleTab)
         eligibleTab.textContent =
           state.activeModule === "extensions" ? "Extensions" : "Eligible";
@@ -4413,7 +4549,7 @@
           state.activeModule === "restructure"
             ? "Restructure - Submitted"
             : state.activeModule === "extensions"
-            ? "Extensions"
+            ? "Finalized Submissions"
             : "MYM - Submitted";
     }
   }
@@ -4861,6 +4997,7 @@
       const tagEligibleAll = (seasonTagTracking || []).filter(
         (r) => safeInt(r.is_tag_eligible) === 1
       );
+      const tagIneligibleRows = buildTagIneligibleOneYearRows(seasonTagTracking || []);
       const ppgMin = clampInt(state.ppgMinGames || 8, 1, 18);
       const ppgPool =
         state.tagTrackingMeta && Array.isArray(state.tagTrackingMeta.ppg_pool)
@@ -4908,7 +5045,7 @@
           seasonTagTracking || []
         );
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
-      if (tabIneligible) tabIneligible.innerHTML = "";
+      if (tabIneligible) tabIneligible.innerHTML = renderTagIneligibleList(tagIneligibleRows);
       if (tabSubmitted) tabSubmitted.innerHTML = renderTagFinalizedSubmissionsPage(season);
       updateModuleStatusChips();
       return;
@@ -4935,9 +5072,17 @@
         baseSeason,
         contractSeason
       );
+      extensionProjectedRows.forEach((r) => {
+        const d = getExtensionDeadlineDateForRow(
+          r,
+          normalizeSeasonValue(r.season || state.selectedSeason)
+        );
+        r.extension_deadline = d ? fmtYMDDate(d) : "";
+        r._extension_deadline_ts = d ? d.getTime() : 0;
+      });
       const extensionRows = sortRows(
         extensionProjectedRows.filter((r) => canExtendRow(r)),
-        sortState.tab === "eligible" ? sortState.key : "player",
+        sortState.tab === "eligible" ? sortState.key : "deadline",
         sortState.tab === "eligible" ? sortState.dir : "asc"
       );
       const teamNameSource =
@@ -4951,8 +5096,7 @@
       if (summary) summary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
       if (tabSummary) tabSummary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
       if (tabCostCalc)
-        tabCostCalc.innerHTML =
-          '<div class="ccc-tableWrap" style="padding:12px;">Cost breakdown is shown per player in the extension popup.</div>';
+        tabCostCalc.innerHTML = renderExtensionsExpiredRookieDraftPage(extensionProjectedRows);
       if (tabEligible) tabEligible.innerHTML = renderExtensionsTable(extensionRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
       if (tabSubmitted) tabSubmitted.innerHTML = renderExtensionsSubmittedPage(season);
@@ -6606,7 +6750,7 @@
       moduleExtensionsChip.addEventListener("click", () => {
         switchModule("extensions");
         sortState.tab = "eligible";
-        sortState.key = "player";
+        sortState.key = "deadline";
         sortState.dir = "asc";
         resetAllTablePages();
         setTab("eligible");

@@ -1,5 +1,5 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link id="cccCss" rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260209b">
+<link id="cccCss" rel="stylesheet" href="https://keithcreelman.github.io/ups-league-data/ccc.css?v=20260214q">
 
 <div id="cccApp">
   <div class="ccc-hero">
@@ -10,9 +10,9 @@
             Contract Command Center
             <span id="adminBadge" class="badge" style="display:none;">ADMIN</span>
           </div>
-          <img
-            class="ccc-titleArtImg"
-            src="https://keithcreelman.github.io/ups-league-data/ccc_contracts.svg?v=20260213a"
+            <img
+              class="ccc-titleArtImg"
+            src="https://keithcreelman.github.io/ups-league-data/ccc_contracts.svg?v=20260214q"
             alt="Contracts illustration"
           />
         </div>
@@ -112,6 +112,7 @@
     <div id="cccTabs" class="ccc-tabs">
       <span class="ccc-navTitle">Options</span>
       <button class="ccc-tab active" type="button" data-tab="eligible">Player Tagging</button>
+      <button class="ccc-tab" type="button" data-tab="ineligible" style="display:none;">Ineligible</button>
       <button class="ccc-tab" type="button" data-tab="costcalc">Cost Calc</button>
       <button class="ccc-tab" type="button" data-tab="summary">Summary</button>
       <button class="ccc-tab" type="button" data-tab="submitted">Finalized Submissions</button>
@@ -137,6 +138,7 @@
     <div id="tabSummary" style="display:none;"></div>
     <div id="tabCostCalc" style="display:none;"></div>
     <div id="tabEligible"></div>
+    <div id="tabIneligible" style="display:none;"></div>
     <div id="tabSubmitted" style="display:none;"></div>
 
     <div id="cccError" class="ccc-error"></div>
@@ -152,7 +154,7 @@
           <div id="mymModalTitle" class="ccc-modal-title">Offer MYM Contract</div>
           <div id="mymModalSub" class="ccc-modal-sub muted"></div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
 
       <div class="ccc-modal-body">
@@ -206,7 +208,7 @@
           <div id="rsModalTitle" class="ccc-modal-title">Restructure Contract</div>
           <div id="rsModalSub" class="ccc-modal-sub muted"></div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
 
       <div class="ccc-modal-body">
@@ -271,7 +273,7 @@
           <div id="devNoticeTitle" class="ccc-modal-title">Development Notice</div>
           <div class="ccc-modal-sub muted">This app is in active development. Submissions will not finalize until the app is complete.</div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
       <div class="ccc-modal-body">
         <div class="ccc-code">Feel free to explore and submit selections. We are not finalizing submissions yet.</div>
@@ -292,7 +294,7 @@
           <div id="tagModalTitle" class="ccc-modal-title">Submit Tag Selection</div>
           <div id="tagModalSub" class="ccc-modal-sub muted"></div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
 
       <div class="ccc-modal-body">
@@ -331,7 +333,7 @@
           <div id="tagAckTitle" class="ccc-modal-title">Successful Tag</div>
           <div class="ccc-modal-sub muted">Submission acknowledged.</div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
 
       <div class="ccc-modal-body">
@@ -360,7 +362,7 @@
           <div id="extModalTitle" class="ccc-modal-title">Offer Extension</div>
           <div id="extModalSub" class="ccc-modal-sub muted"></div>
         </div>
-        <button class="ccc-modal-x" type="button" data-close="1">&times;</button>
+        <button class="ccc-modal-x" type="button" data-close="1">X</button>
       </div>
 
       <div class="ccc-modal-body">

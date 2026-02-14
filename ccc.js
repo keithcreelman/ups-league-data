@@ -1097,6 +1097,13 @@
     return classes.join(" ");
   }
 
+  function canManageTagForFranchise(franchiseId) {
+    if (state.commishMode) return true;
+    const currentFid = pad4(state.detectedFranchiseId || state.selectedTeam || "");
+    if (!currentFid) return false;
+    return pad4(franchiseId) === currentFid;
+  }
+
   function hashToHue(str) {
     let h = 0;
     for (let i = 0; i < str.length; i++) {
@@ -2349,6 +2356,7 @@
     }
 
     const canTagFromSummary = (r) => {
+      if (!canManageTagForFranchise(r.franchise_id)) return false;
       if (state.commishMode) return true;
       if (state.showAllTeams) return false;
       return pad4(r.franchise_id) === pad4(state.selectedTeam);
@@ -2696,13 +2704,6 @@
           </select>
         </label>
       </div>
-      <div class="ccc-summary" style="margin-bottom:10px;">
-        <div class="muted" style="font-weight:900;">Tagged Player Notes</div>
-        <ul style="margin:8px 0 0 18px; padding:0;">
-          <li>Tagged players may be cut before the FA Auction with no cap penalty and no bidding restrictions.</li>
-          <li>Submitted tags can be rescinded any time before the tag deadline.</li>
-        </ul>
-      </div>
     `;
 
     if (!rows.length) {
@@ -2943,6 +2944,7 @@
         const side = safeStr(r.tag_side || "OFFENSE");
         const limit = Math.max(1, safeInt(r.tag_limit_per_side || 1));
         const key = buildTagSelectionKey(season, r.franchise_id, side);
+        const canTag = canManageTagForFranchise(r.franchise_id);
         const selected = state.tagSelections[key];
         const isSelected = !!selected && safeStr(selected.player_id) === safeStr(r.player_id);
         const lockEnforced = !state.commishMode;
@@ -2971,7 +2973,8 @@
           ? `Tag already used for ${side}`
           : "";
         const tagTitleEsc = tagTitle ? htmlEsc(tagTitle) : "";
-        const tagBtn = `
+        const tagBtn = canTag
+          ? `
           <button
             type="button"
             class="${tagBtnClass}"
@@ -2987,7 +2990,8 @@
             ${tagDisabled ? `disabled` : ``}
             ${tagTitleEsc ? `title="${tagTitleEsc}"` : ``}
           >${tagLabel}</button>
-        `;
+        `
+          : `<span class="muted">—</span>`;
         const posKeyRaw = posKeyFromRow(r);
         const posKey = htmlEsc(posKeyRaw);
         const gamesPlayed = safeInt(r.games_played);
@@ -6054,6 +6058,7 @@
         const side = safeStr(btn.getAttribute("data-tag-side") || "OFFENSE");
         const limit = Math.max(1, safeInt(btn.getAttribute("data-tag-limit") || 1));
         const fid = pad4(btn.getAttribute("data-franchise-id"));
+        if (!canManageTagForFranchise(fid)) return;
         const franchiseName = safeStr(btn.getAttribute("data-franchise-name"));
         const pid = safeStr(btn.getAttribute("data-player-id"));
         const playerName = safeStr(btn.getAttribute("data-player-name"));

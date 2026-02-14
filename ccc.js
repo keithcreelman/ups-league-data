@@ -1070,9 +1070,16 @@
   }
 
   function posKeyFromRow(r) {
-    const p = safeStr(r.positional_grouping || r.position).toUpperCase().trim();
+    const raw = safeStr(
+      r.positional_grouping || r.position || r.pos || r.position_abbr || r.position_code
+    )
+      .toUpperCase()
+      .trim();
+    const p = raw.replace(/[^A-Z]/g, "");
     if (p === "K" || p === "PK") return "PK";
-    if (p === "PN" || p === "P") return "P";
+    if (p === "P" || p === "PN" || p === "PNTR") return "P";
+    if (p === "DE" || p === "DT" || p === "DL") return "DL";
+    if (p === "CB" || p === "S" || p === "DB" || p === "SAF") return "DB";
     if (["QB", "RB", "WR", "TE", "PK", "P", "DL", "LB", "DB"].includes(p)) return p;
     return p || "NA";
   }

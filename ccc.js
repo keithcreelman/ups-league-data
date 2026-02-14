@@ -1105,6 +1105,19 @@
     return m[2] ? Math.round(num * 1000) : Math.round(num);
   }
 
+  function parseContractMoneyToken(raw) {
+    const s = safeStr(raw).replace(/,/g, "").trim();
+    if (!s) return 0;
+    const m = s.match(/^([0-9]+(?:\.[0-9]+)?)(K)?$/i);
+    if (!m) return safeInt(s);
+    const num = parseFloat(m[1]);
+    if (isNaN(num)) return 0;
+    if (m[2]) return Math.round(num * 1000);
+    // Contract line items are often stored as bare "12" meaning 12K.
+    if (num > 0 && num < 1000) return Math.round(num * 1000);
+    return Math.round(num);
+  }
+
   function roundToK(value) {
     const n = safeInt(value);
     if (n <= 0) return 0;
@@ -1119,10 +1132,10 @@
     const y3Match = base.match(/Y3-([0-9]+(?:\.[0-9]+)?K?)/i);
 
     const fallback = Math.max(1000, roundToK(fallbackSalary));
-    const y1Parsed = roundToK(parseMoneyToken(y1Match ? y1Match[1] : ""));
-    const y2Parsed = roundToK(parseMoneyToken(y2Match ? y2Match[1] : ""));
-    const y3Parsed = roundToK(parseMoneyToken(y3Match ? y3Match[1] : ""));
-    const tcvParsed = roundToK(parseMoneyToken(tcvMatch ? tcvMatch[1] : ""));
+    const y1Parsed = roundToK(parseContractMoneyToken(y1Match ? y1Match[1] : ""));
+    const y2Parsed = roundToK(parseContractMoneyToken(y2Match ? y2Match[1] : ""));
+    const y3Parsed = roundToK(parseContractMoneyToken(y3Match ? y3Match[1] : ""));
+    const tcvParsed = roundToK(parseContractMoneyToken(tcvMatch ? tcvMatch[1] : ""));
 
     const y1 = y1Parsed || fallback;
     const y2 = years === 3 ? y2Parsed || fallback : y2Parsed;
@@ -2978,8 +2991,9 @@
     const expired = isExpiredRookieRow(row);
     if (years <= 0) return expired ? { ...row, contract_year: 0 } : null;
     if (years === 1) {
-      // 1-year non-expired contracts roll off; expired rookies remain as extension-eligible cohort.
-      return expired ? { ...row, contract_year: 0 } : null;
+      // 1-year veterans roll off. Rookie/expired-rookie contracts remain extension-eligible.
+      if (expired || rookieLike(row.contract_status)) return { ...row, contract_year: 1 };
+      return null;
     }
 
     const parsed = parseContractAmounts(row.contract_info, years, safeInt(row.salary) || 1000);
@@ -3100,6 +3114,11 @@
         const baseCheck = getExtensionEligibility(r, 1);
         const canExtend = own && baseCheck.ok;
         const lockReason = baseCheck.reason || "";
+        const deadlineDate = getExtensionDeadlineDateForRow(
+          r,
+          normalizeSeasonValue(r.season || state.selectedSeason)
+        );
+        const deadlineTxt = deadlineDate ? fmtYMDDate(deadlineDate) : "TBD";
         const btn = canExtend
           ? `<button type="button" class="ccc-btn ccc-btn-offer" data-extension-action="1" data-season="${htmlEsc(
               normalizeSeasonValue(r.season || state.selectedSeason)
@@ -3125,6 +3144,7 @@
             <td>${htmlEsc(posKeyFromRow(r))}</td>
             <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
             <td class="cell-num">${safeInt(r.contract_year)}</td>
+            <td class="muted">${htmlEsc(deadlineTxt)}</td>
             <td>${htmlEsc(r.contract_status || "")}</td>
             <td class="explain">${htmlEsc(r.contract_info || "")}</td>
           </tr>
@@ -3132,7 +3152,7 @@
       })
       .join("");
     return `
-      <div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Action</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Years Remaining</th><th>Status</th><th>Contract Info</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Action</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Years Remaining</th><th>Deadline</th><th>Status</th><th>Contract Info</th></tr></thead><tbody>${body}</tbody></table></div>
       <div class="ccc-tableMeta">
         <div class="ccc-tableMetaInfo">Showing ${totalRows ? start + 1 : 0}-${Math.min(
       start + pageSize,

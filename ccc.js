@@ -2989,10 +2989,11 @@
     if (!row) return null;
     const years = safeInt(row.contract_year);
     const expired = isExpiredRookieRow(row);
+    const rookie = rookieLike(row.contract_status);
     if (years <= 0) return expired ? { ...row, contract_year: 0 } : null;
     if (years === 1) {
-      // 1-year veterans roll off. Rookie/expired-rookie contracts remain extension-eligible.
-      if (expired || rookieLike(row.contract_status)) return { ...row, contract_year: 1 };
+      // 1-year veterans roll off. 1-year rookies become expired rookies (0) next season.
+      if (expired || rookie) return { ...row, contract_year: 0 };
       return null;
     }
 
@@ -4039,16 +4040,23 @@
     const contractDeadline = getContractDeadlineDate(contractSeason);
     const acqDate = parseDate(row && row.acquired_date);
     const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
-    const expiredRookie = isExpiredRookieRow(row);
+    const rookieStatus = rookieLike(row && row.contract_status);
+    const expiredRookie = isExpiredRookieRow(row) || (rookieStatus && safeInt(row && row.contract_year) <= 0);
     const rookieContract = rookieLike(row && row.contract_status);
-    const rookieInfo = getTagDeadlineInfo(s);
-    const rookieEventDeadline = rookieInfo && rookieInfo.tagDeadline ? rookieInfo.tagDeadline : null;
+    const rookieInfoCurrent = getTagDeadlineInfo(s);
+    const rookieEventDeadlineCurrent =
+      rookieInfoCurrent && rookieInfoCurrent.tagDeadline ? rookieInfoCurrent.tagDeadline : null;
+    const rookieInfoNext = getTagDeadlineInfo(String(safeInt(s) + 1));
+    const rookieEventDeadlineNext =
+      rookieInfoNext && rookieInfoNext.tagDeadline ? rookieInfoNext.tagDeadline : null;
     if (expiredRookie) {
-      return rookieEventDeadline || contractDeadline;
+      return rookieEventDeadlineCurrent || contractDeadline;
     }
     if (rookieContract) {
-      return rookieEventDeadline || contractDeadline;
+      return rookieEventDeadlineNext || contractDeadline;
     }
+    if (safeInt(row && row.contract_year) === 1) return contractDeadline;
+
     const acquiredLater =
       !!acqDate &&
       ((contractDeadline && acqDate.getTime() > endOfDay(contractDeadline).getTime()) ||

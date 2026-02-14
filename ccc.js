@@ -4021,12 +4021,13 @@
     const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
     const expiredRookie = isExpiredRookieRow(row);
     const rookieContract = rookieLike(row && row.contract_status);
-    const rookieLock = parseDate(row && row.mym_deadline);
+    const rookieInfo = getTagDeadlineInfo(s);
+    const rookieEventDeadline = rookieInfo && rookieInfo.tagDeadline ? rookieInfo.tagDeadline : null;
     if (expiredRookie) {
-      return rookieLock || contractDeadline;
+      return rookieEventDeadline || contractDeadline;
     }
     if (rookieContract) {
-      return rookieLock || contractDeadline;
+      return rookieEventDeadline || contractDeadline;
     }
     const acquiredLater =
       !!acqDate &&

@@ -16,6 +16,10 @@
     "2025": { contract_deadline: "2025-08-31", season_complete: "2025-12-29" },
     "2026": { contract_deadline: "2026-09-06", season_complete: "2026-12-29" },
   };
+  const EXTENSION_RATES_BY_SEASON = {
+    "2024": { QB: { 1: 10000, 2: 20000 }, RB: { 1: 10000, 2: 20000 }, WR: { 1: 10000, 2: 20000 }, TE: { 1: 10000, 2: 20000 }, DL: { 1: 3000, 2: 5000 }, LB: { 1: 3000, 2: 5000 }, DB: { 1: 3000, 2: 5000 }, PK: { 1: 3000, 2: 5000 }, P: { 1: 3000, 2: 5000 } },
+    "2025": { QB: { 1: 10000, 2: 20000 }, RB: { 1: 10000, 2: 20000 }, WR: { 1: 10000, 2: 20000 }, TE: { 1: 10000, 2: 20000 }, DL: { 1: 3000, 2: 5000 }, LB: { 1: 3000, 2: 5000 }, DB: { 1: 3000, 2: 5000 }, PK: { 1: 3000, 2: 5000 }, P: { 1: 3000, 2: 5000 } },
+  };
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const TEAM_COLOR_OVERRIDES = {
     "0001": { h: 48, s: 88, l: 50 }, // L.A. Looks
@@ -2845,19 +2849,69 @@
     `;
   }
 
-  function buildExtensionPreview(row, yearsToAdd) {
+  function buildExtensionPreview(row, yearsToAdd, customYearSalaries) {
     const salaryNow = safeInt(row && row.salary);
     const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
     const season = normalizeSeasonValue(state.selectedSeason || row.season || DEFAULT_YEAR);
+    const expiredRookie = isExpiredRookieRow(row);
+    const pos = posKeyFromRow(row);
+    const raise = getExtensionRate(pos, season, years);
     const nextSeason = String(safeInt(season) + 1 || safeInt(DEFAULT_YEAR) + 1);
     const secondSeason = String(safeInt(season) + 2 || safeInt(DEFAULT_YEAR) + 2);
-    const lines = [
-      `Current Season (${season}): ${salaryNow.toLocaleString()} (unchanged)`,
-      `${nextSeason}: TBD by extension rule`,
-    ];
-    if (years >= 2) lines.push(`${secondSeason}: TBD by extension rule`);
+
+    let yearSalaries = [];
+    if (expiredRookie) {
+      const defaultAav = roundToK(salaryNow + raise);
+      const y1Raw = customYearSalaries && customYearSalaries[0] ? safeInt(customYearSalaries[0]) : defaultAav;
+      const y1 = Math.max(1000, roundToK(y1Raw));
+      if (years === 1) {
+        yearSalaries = [y1];
+      } else {
+        const y2Raw = customYearSalaries && customYearSalaries[1] ? safeInt(customYearSalaries[1]) : defaultAav;
+        const y2 = Math.max(1000, roundToK(y2Raw));
+        yearSalaries = [y1, y2];
+      }
+    } else {
+      const extAav = Math.max(1000, roundToK(salaryNow + raise));
+      yearSalaries = [salaryNow];
+      for (let i = 0; i < years; i++) yearSalaries.push(extAav);
+    }
+
+    const totalYears = yearSalaries.length;
+    const tcv = yearSalaries.reduce((a, b) => a + safeInt(b), 0);
+    const y1 = safeInt(yearSalaries[0] || 0);
+    const minY1 = Math.max(1000, roundToK(Math.ceil((tcv * 0.2) / 1000) * 1000));
+    const minY1Violation = expiredRookie && totalYears > 1 && y1 < minY1;
+    const gtd = tcv > 4000 ? Math.round(tcv * 0.75) : Math.max(0, tcv - y1);
+
+    const lines = [];
+    if (expiredRookie) {
+      lines.push(`Current Season (${season}): ${safeInt(yearSalaries[0]).toLocaleString()}`);
+      if (totalYears > 1) lines.push(`${nextSeason}: ${safeInt(yearSalaries[1]).toLocaleString()}`);
+    } else {
+      lines.push(`Current Season (${season}): ${safeInt(yearSalaries[0]).toLocaleString()} (unchanged)`);
+      lines.push(`${nextSeason}: ${safeInt(yearSalaries[1]).toLocaleString()}`);
+      if (totalYears > 2) lines.push(`${secondSeason}: ${safeInt(yearSalaries[2]).toLocaleString()}`);
+    }
+    lines.push(`TCV: ${tcv.toLocaleString()} | GTD: ${gtd.toLocaleString()}`);
+    lines.push(`Raise Applied (${years}Y): +${raise.toLocaleString()}`);
+    if (minY1Violation) lines.push(`ERROR: Year 1 must be at least ${minY1.toLocaleString()} (20% of TCV, rounded up).`);
+
+    const yearParts = yearSalaries.map((v, i) => `Y${i + 1}-${formatK(v)}`).join(", ");
+    const contractInfo = `CL ${totalYears}| TCV ${formatK(tcv)}| AAV ${formatK(
+      Math.round(tcv / Math.max(1, totalYears))
+    )}| ${yearParts}| GTD: ${formatK(gtd)}| Ext +${years}Y`;
+
     return {
       yearsToAdd: years,
+      expiredRookie,
+      totalYears,
+      yearSalaries,
+      tcv,
+      gtd,
+      raise,
+      minY1Violation,
+      minY1,
       lines,
       payload: {
         type: "EXTENSION",
@@ -2867,11 +2921,13 @@
         franchise_name: safeStr(row.franchise_name || row.franchise_id),
         player_id: safeStr(row.player_id),
         player_name: safeStr(row.player_name),
-        pos: posKeyFromRow(row),
+        pos,
         current_salary: salaryNow,
         years_to_add: years,
-        contract_status: "Extension - Pending Rules",
-        contract_info: `Extension +${years}Y | Current salary locked | Future years TBD by rule`,
+        contract_year: totalYears,
+        salary: safeInt(yearSalaries[0] || 0),
+        contract_status: "Extension",
+        contract_info: contractInfo,
       },
     };
   }
@@ -2929,6 +2985,29 @@
     return `<div class="ccc-tableWrap"><table class="ccc-table"><thead><tr><th>Submitted</th><th>Team</th><th>Player</th><th>Pos</th><th>Current Salary</th><th>Add Years</th><th>Preview</th></tr></thead><tbody>${body}</tbody></table></div>`;
   }
 
+  function getExtensionEligibility(row, yearsToAdd) {
+    const season = normalizeSeasonValue(row && row.season ? row.season : state.selectedSeason);
+    if (!canExtendRow(row)) return { ok: false, reason: "Not extension-eligible by contract status." };
+    const deadline = getExtensionDeadlineDateForRow(row, season);
+    const now = state.calendarNow || getEffectiveNow(season);
+    if (deadline && !state.commishMode && now.getTime() > endOfDay(deadline).getTime()) {
+      return { ok: false, reason: `Deadline passed (${fmtYMDDate(deadline)}).`, deadline };
+    }
+    const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
+    if (years === 2 && isNonRookieContract(row)) {
+      const current = countTeamThreeYearNonRookieContracts(row.franchise_id, season);
+      const projected = current + (safeInt(row.contract_year) === 3 ? 0 : 1);
+      if (projected > 6) {
+        return {
+          ok: false,
+          reason: `3-year non-rookie cap exceeded (${projected}/6).`,
+          deadline,
+        };
+      }
+    }
+    return { ok: true, reason: "", deadline };
+  }
+
   function renderExtensionsTable(rows, tabMode) {
     if (!rows.length) return `<div class="ccc-tableWrap" style="padding:12px;">No rows.</div>`;
     const pageSize = clampInt(state.pageSize || 50, 10, 500);
@@ -2941,14 +3020,17 @@
     const pageRows = rows.slice(start, start + pageSize);
     const body = pageRows
       .map((r) => {
-        const canExtend = canManageTagForFranchise(r.franchise_id) && canExtendRow(r);
+        const own = canManageTagForFranchise(r.franchise_id);
+        const baseCheck = getExtensionEligibility(r, 1);
+        const canExtend = own && baseCheck.ok;
+        const lockReason = baseCheck.reason || "";
         const btn = canExtend
           ? `<button type="button" class="ccc-btn ccc-btn-offer" data-extension-action="1" data-season="${htmlEsc(
               normalizeSeasonValue(r.season || state.selectedSeason)
             )}" data-franchise-id="${htmlEsc(pad4(r.franchise_id))}" data-player-id="${htmlEsc(
               r.player_id
             )}">Extend</button>`
-          : `<span class="muted">—</span>`;
+          : `<span class="muted">${htmlEsc(lockReason || "—")}</span>`;
         const style = buildTeamStyle(r);
         return `
           <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
@@ -3460,6 +3542,55 @@
     return true;
   }
 
+  function getExtensionRate(posKey, season, yearsToAdd) {
+    const s = normalizeSeasonValue(season || state.selectedSeason || DEFAULT_YEAR);
+    const y = safeInt(yearsToAdd) >= 2 ? 2 : 1;
+    const seasonMap =
+      EXTENSION_RATES_BY_SEASON[s] ||
+      EXTENSION_RATES_BY_SEASON[String(safeInt(s) - 1)] ||
+      EXTENSION_RATES_BY_SEASON["2025"];
+    const pos = posKey === "K" ? "PK" : posKey;
+    const rec = seasonMap && seasonMap[pos] ? seasonMap[pos] : seasonMap.DB;
+    return safeInt(rec && rec[y]);
+  }
+
+  function isNonRookieContract(row) {
+    if (!row) return false;
+    if (rookieLike(row.contract_status)) return false;
+    return !safeStr(row.contract_status).toLowerCase().includes("rookie");
+  }
+
+  function countTeamThreeYearNonRookieContracts(franchiseId, season) {
+    const fid = pad4(franchiseId);
+    const s = normalizeSeasonValue(season || state.selectedSeason);
+    return (state.payload.eligibility || []).filter(
+      (r) =>
+        pad4(r.franchise_id) === fid &&
+        normalizeSeasonValue(r.season) === s &&
+        isNonRookieContract(r) &&
+        safeInt(r.contract_year) === 3
+    ).length;
+  }
+
+  function isLoadedContractInfo(contractInfo, years, salary) {
+    const y = Math.max(1, safeInt(years));
+    if (y <= 1) return false;
+    const p = parseContractAmounts(contractInfo, y, salary);
+    if (y === 2) return p.y1 !== p.y2;
+    return p.y1 !== p.y2 || p.y2 !== p.y3;
+  }
+
+  function countTeamLoadedContracts(franchiseId, season) {
+    const fid = pad4(franchiseId);
+    const s = normalizeSeasonValue(season || state.selectedSeason);
+    return (state.payload.eligibility || []).filter(
+      (r) =>
+        pad4(r.franchise_id) === fid &&
+        normalizeSeasonValue(r.season) === s &&
+        isLoadedContractInfo(r.contract_info, safeInt(r.contract_year), safeInt(r.salary))
+    ).length;
+  }
+
   function buildSeasonList(eligibilityRows, submissionRows, restructureRows, tagRows) {
     const set = new Set();
     (eligibilityRows || []).forEach((r) => {
@@ -3746,6 +3877,49 @@
       }
     }
     return dynamicYmd || staticDeadline;
+  }
+
+  function resolveWeek1KickoffYmd(season) {
+    const s = normalizeSeasonValue(season);
+    if (!s) return "";
+    const dynamic = state && state.mymDeadlineBySeason ? state.mymDeadlineBySeason[s] : null;
+    const kickoffYmd = dynamic && dynamic.kickoffYmd ? dynamic.kickoffYmd : "";
+    if (!kickoffYmd && state && state.mymDeadlineFetch && !state.mymDeadlineFetch[s]) {
+      requestMymDeadlineFromSchedule(s);
+    }
+    return kickoffYmd;
+  }
+
+  function getWeek5KickoffDate(season) {
+    const kickoffYmd = resolveWeek1KickoffYmd(season);
+    const kickoff = parseYMDDate(kickoffYmd);
+    if (kickoff) return addDays(kickoff, 28);
+    const contractDeadline = getContractDeadlineDate(season);
+    if (!contractDeadline) return null;
+    return addDays(contractDeadline, 32);
+  }
+
+  function getExtensionDeadlineDateForRow(row, season) {
+    const s = normalizeSeasonValue(season || state.selectedSeason);
+    const contractDeadline = getContractDeadlineDate(s);
+    const acqDate = parseDate(row && row.acquired_date);
+    const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
+    const expiredRookie = isExpiredRookieRow(row);
+    if (expiredRookie) {
+      const lock = parseDate(row && row.mym_deadline);
+      return lock || contractDeadline;
+    }
+    const acquiredLater =
+      !!acqDate &&
+      ((contractDeadline && acqDate.getTime() > endOfDay(contractDeadline).getTime()) ||
+        /AUCTION|TRADE|WAIVER|FREE/.test(acqType));
+    if (acquiredLater) {
+      const acqPlus4 = addDays(acqDate, 28);
+      const week5 = getWeek5KickoffDate(s);
+      if (!week5) return acqPlus4;
+      return acqPlus4.getTime() >= week5.getTime() ? acqPlus4 : week5;
+    }
+    return contractDeadline;
   }
 
   async function requestMymDeadlineFromSchedule(season) {
@@ -4864,6 +5038,61 @@
     );
   }
 
+  function getExtensionCustomYearsFromInputs() {
+    const y1 = safeInt($("#extYear1Input") && $("#extYear1Input").value);
+    const y2 = safeInt($("#extYear2Input") && $("#extYear2Input").value);
+    return [y1, y2];
+  }
+
+  function renderExtensionModalPreview() {
+    const key = safeStr(extensionModalState.key);
+    if (!key) return null;
+    const sel = state.extensionSelections[key];
+    if (!sel) return null;
+    const row = findExtensionRow(sel);
+    if (!row) return null;
+
+    const preview = buildExtensionPreview(
+      row,
+      extensionModalState.yearsToAdd,
+      getExtensionCustomYearsFromInputs()
+    );
+    const eligibility = getExtensionEligibility(row, extensionModalState.yearsToAdd);
+    const breakdown = $("#extModalBreakdown");
+    if (breakdown) breakdown.textContent = preview.lines.join("\n");
+    const payloadEl = $("#extModalPreview");
+    if (payloadEl) payloadEl.textContent = JSON.stringify(preview.payload, null, 2);
+
+    const err = $("#extModalErr");
+    if (err) {
+      const loadedNow = countTeamLoadedContracts(row.franchise_id, row.season);
+      const isLoadedNew =
+        preview.expiredRookie &&
+        preview.yearSalaries.length > 1 &&
+        safeInt(preview.yearSalaries[0]) !== safeInt(preview.yearSalaries[1]);
+      const loadedProjected = loadedNow + (isLoadedNew ? 1 : 0);
+      const loadedCapFail = preview.expiredRookie && isLoadedNew && loadedProjected > 5;
+
+      const messages = [];
+      if (!eligibility.ok) messages.push(eligibility.reason);
+      if (preview.minY1Violation)
+        messages.push(`Year 1 must be at least ${preview.minY1.toLocaleString()} (20% of TCV).`);
+      if (loadedCapFail) messages.push(`Front/backloaded contract cap exceeded (${loadedProjected}/5).`);
+      if (eligibility.deadline)
+        messages.push(`Extension deadline: ${fmtYMDDate(eligibility.deadline)}`);
+      if (messages.length) {
+        err.style.display = "";
+        err.classList.remove("ok");
+        err.innerHTML = messages.map((m) => htmlEsc(m)).join("<br>");
+      } else {
+        err.style.display = "none";
+        err.classList.remove("ok");
+        err.textContent = "";
+      }
+    }
+    return { row, preview, eligibility };
+  }
+
   function openExtensionModal(selectionKey) {
     const modal = $("#extensionModal");
     if (!modal) return;
@@ -4881,12 +5110,6 @@
     const sub = $("#extModalSub");
     if (sub) sub.textContent = `Current Salary: ${safeInt(row.salary).toLocaleString()} | Team: ${safeStr(row.franchise_name || row.franchise_id)}`;
 
-    const preview = buildExtensionPreview(row, extensionModalState.yearsToAdd);
-    const breakdown = $("#extModalBreakdown");
-    if (breakdown) breakdown.textContent = preview.lines.join("\n");
-    const payloadEl = $("#extModalPreview");
-    if (payloadEl) payloadEl.textContent = JSON.stringify(preview.payload, null, 2);
-
     const b1 = $("#extOption1Btn");
     const b2 = $("#extOption2Btn");
     if (b1 && b2) {
@@ -4903,6 +5126,16 @@
       }
     }
 
+    const splitRow = $("#extRookieSplitRow");
+    const y1Input = $("#extYear1Input");
+    const y2Input = $("#extYear2Input");
+    if (splitRow) splitRow.style.display = isExpiredRookieRow(row) ? "" : "none";
+    if (y1Input) y1Input.value = "";
+    if (y2Input) {
+      y2Input.value = "";
+      y2Input.disabled = extensionModalState.yearsToAdd < 2;
+    }
+
     const err = $("#extModalErr");
     if (err) {
       err.style.display = "none";
@@ -4910,6 +5143,7 @@
       err.classList.remove("ok");
     }
 
+    renderExtensionModalPreview();
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("ccc-modalOpen");
@@ -4942,7 +5176,15 @@
     const sel = state.extensionSelections[key];
     if (sel) sel.years_to_add = extensionModalState.yearsToAdd;
     saveExtensionSelections(state.extensionSelections);
-    openExtensionModal(key);
+    const b1 = $("#extOption1Btn");
+    const b2 = $("#extOption2Btn");
+    if (b1 && b2) {
+      b1.classList.toggle("primary", extensionModalState.yearsToAdd === 1);
+      b2.classList.toggle("primary", extensionModalState.yearsToAdd === 2);
+    }
+    const y2Input = $("#extYear2Input");
+    if (y2Input) y2Input.disabled = extensionModalState.yearsToAdd < 2;
+    renderExtensionModalPreview();
   }
 
   function submitExtensionSelection() {
@@ -4952,7 +5194,19 @@
     if (!sel) return;
     const row = findExtensionRow(sel);
     if (!row) return;
-    const preview = buildExtensionPreview(row, extensionModalState.yearsToAdd);
+    const out = renderExtensionModalPreview();
+    if (!out) return;
+    const preview = out.preview;
+    const eligibility = out.eligibility;
+    const loadedNow = countTeamLoadedContracts(row.franchise_id, row.season);
+    const isLoadedNew =
+      preview.expiredRookie &&
+      preview.yearSalaries.length > 1 &&
+      safeInt(preview.yearSalaries[0]) !== safeInt(preview.yearSalaries[1]);
+    const loadedProjected = loadedNow + (isLoadedNew ? 1 : 0);
+    if (!eligibility.ok || preview.minY1Violation || (preview.expiredRookie && isLoadedNew && loadedProjected > 5)) {
+      return;
+    }
     state.extensionSubmissions[key] = {
       ...preview.payload,
       submitted_at_utc: new Date().toISOString(),
@@ -5768,6 +6022,8 @@
       must("#extOption1Btn");
       must("#extOption2Btn");
       must("#extSubmitBtn");
+      must("#extYear1Input");
+      must("#extYear2Input");
 
       $("#cccMeta").textContent = "Loading MYM data…";
 
@@ -6873,6 +7129,10 @@
     if (extOption2Btn) extOption2Btn.addEventListener("click", () => setExtensionYears(2));
     const extSubmitBtn = $("#extSubmitBtn");
     if (extSubmitBtn) extSubmitBtn.addEventListener("click", () => submitExtensionSelection());
+    const extYear1Input = $("#extYear1Input");
+    if (extYear1Input) extYear1Input.addEventListener("input", () => renderExtensionModalPreview());
+    const extYear2Input = $("#extYear2Input");
+    if (extYear2Input) extYear2Input.addEventListener("input", () => renderExtensionModalPreview());
 
     ["#rsTcvInput", "#rsYear1Input", "#rsYear2Input"].forEach((sel) => {
       const el = $(sel);

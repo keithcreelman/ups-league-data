@@ -3973,7 +3973,8 @@
 
   function getExtensionDeadlineDateForRow(row, season) {
     const s = normalizeSeasonValue(season || state.selectedSeason);
-    const contractDeadline = getContractDeadlineDate(s);
+    const contractSeason = getContractSeasonValue(s);
+    const contractDeadline = getContractDeadlineDate(contractSeason);
     const acqDate = parseDate(row && row.acquired_date);
     const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
     const expiredRookie = isExpiredRookieRow(row);
@@ -3991,7 +3992,7 @@
         /AUCTION|TRADE|WAIVER|FREE/.test(acqType));
     if (acquiredLater) {
       const acqPlus4 = addDays(acqDate, 28);
-      const week5 = getWeek5KickoffDate(s);
+      const week5 = getWeek5KickoffDate(contractSeason);
       if (!week5) return acqPlus4;
       return acqPlus4.getTime() >= week5.getTime() ? acqPlus4 : week5;
     }
@@ -4603,7 +4604,7 @@
     if (cccTabs) cccTabs.style.display = "";
     if (cccMain) cccMain.style.display = "";
     const teamFilterWrap = $("#teamFilterWrap");
-    if (teamFilterWrap) teamFilterWrap.style.display = state.commishMode ? "none" : "";
+    if (teamFilterWrap) teamFilterWrap.style.display = state.activeModule === "commish" ? "none" : "";
     const moduleFilters = $("#moduleFilters");
     if (moduleFilters) moduleFilters.style.display = state.activeModule === "commish" ? "none" : "";
 
@@ -4621,11 +4622,8 @@
     state.calendarBaseSeason = baseSeason;
     state.calendarContractSeason = contractSeason;
     state.calendarNow = nowRef;
-    if (state.commishMode) {
-      if (state.selectedTeam !== "__ALL__") {
-        state.lastOwnerTeam = state.lastOwnerTeam || state.selectedTeam;
-        state.selectedTeam = "__ALL__";
-      }
+    if (state.commishMode && !safeStr(state.selectedTeam)) {
+      state.selectedTeam = "__ALL__";
       state.showAllTeams = true;
     }
     const showAllTeams = !!state.showAllTeams;

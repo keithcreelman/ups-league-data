@@ -3970,9 +3970,13 @@
     const acqDate = parseDate(row && row.acquired_date);
     const acqType = safeStr(row && row.mym_acq_type).toUpperCase();
     const expiredRookie = isExpiredRookieRow(row);
+    const rookieContract = rookieLike(row && row.contract_status);
+    const rookieLock = parseDate(row && row.mym_deadline);
     if (expiredRookie) {
-      const lock = parseDate(row && row.mym_deadline);
-      return lock || contractDeadline;
+      return rookieLock || contractDeadline;
+    }
+    if (rookieContract) {
+      return rookieLock || contractDeadline;
     }
     const acquiredLater =
       !!acqDate &&

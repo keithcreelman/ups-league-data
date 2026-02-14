@@ -2357,9 +2357,7 @@
 
     const canTagFromSummary = (r) => {
       if (!canManageTagForFranchise(r.franchise_id)) return false;
-      if (state.commishMode) return true;
-      if (state.showAllTeams) return false;
-      return pad4(r.franchise_id) === pad4(state.selectedTeam);
+      return true;
     };
 
     const renderSummaryTagButton = (r) => {

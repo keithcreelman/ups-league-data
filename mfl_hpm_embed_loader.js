@@ -56,16 +56,55 @@
     return m ? pad4(m[1]) : "";
   }
 
+  function normalizeMode(v) {
+    return String(v || "").toLowerCase() === "light" ? "light" : "dark";
+  }
+
   const u = getUrl();
   const L = getLeagueId(u);
   const YEAR = getYear(u);
   const FRANCHISE_ID = getFranchiseId(u);
+  const MODE_KEY = "ups_mode_" + YEAR + "_" + L;
   const DEBUG_ADMIN =
     (u && (u.searchParams.get("DEBUG_ADMIN") || u.searchParams.get("DEBUG"))) || "";
 
   const LATEST_JSON_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.json";
   const LATEST_JS_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.js";
-  const DEFAULT_CACHE = "20260214n";
+  const DEFAULT_CACHE = "20260214o";
+
+  function inferModeFromSystem() {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+    return "light";
+  }
+
+  function getHostMode() {
+    if (typeof window.getUPSMode === "function") return normalizeMode(window.getUPSMode());
+    const attr = document.documentElement.getAttribute("data-ups-mode");
+    if (attr) return normalizeMode(attr);
+    try {
+      const stored = localStorage.getItem(MODE_KEY);
+      if (stored) return normalizeMode(stored);
+    } catch (e) {}
+    return inferModeFromSystem();
+  }
+
+  function setHostMode(mode, persist) {
+    const next = normalizeMode(mode);
+    if (typeof window.setUPSMode === "function") {
+      window.setUPSMode(next);
+      return;
+    }
+    document.documentElement.setAttribute("data-ups-mode", next);
+    document.documentElement.style.colorScheme = next;
+    if (persist) {
+      try {
+        localStorage.setItem(MODE_KEY, next);
+      } catch (e) {}
+    }
+    try {
+      document.dispatchEvent(new CustomEvent("ups-theme-change", { detail: { mode: next } }));
+    } catch (e) {}
+  }
 
   let mount = document.getElementById("cccMount");
   if (!mount) {
@@ -74,8 +113,9 @@
     document.body.appendChild(mount);
   }
 
-  function buildSrc(cacheKey) {
+  function buildSrc(cacheKey, mode) {
     const cache = cacheKey || DEFAULT_CACHE;
+    const theme = normalizeMode(mode || getHostMode());
     return (
       "https://keithcreelman.github.io/ups-league-data/mfl_hpm16_contractcommandcenter.html" +
       "?cache=" +
@@ -86,6 +126,8 @@
       encodeURIComponent(YEAR) +
       "&FRANCHISE_ID=" +
       encodeURIComponent(FRANCHISE_ID) +
+      "&THEME=" +
+      encodeURIComponent(theme) +
       (DEBUG_ADMIN ? "&DEBUG_ADMIN=" + encodeURIComponent(DEBUG_ADMIN) : "")
     );
   }
@@ -133,19 +175,54 @@
   mount.appendChild(iframe);
 
   resolveLatestCache((cacheKey) => {
-    iframe.src = buildSrc(cacheKey);
+    iframe.src = buildSrc(cacheKey, getHostMode());
+  });
+
+  function syncIframeTheme(mode) {
+    const nextMode = normalizeMode(mode || getHostMode());
+    const srcAttr = iframe.getAttribute("src");
+    if (srcAttr) {
+      try {
+        const src = new URL(srcAttr, window.location.href);
+        const before = src.toString();
+        src.searchParams.set("THEME", nextMode);
+        src.searchParams.set("theme", nextMode);
+        const after = src.toString();
+        if (after !== before) iframe.src = after;
+      } catch (e) {}
+    }
+    if (iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage({ type: "ups-theme", mode: nextMode }, "*");
+      } catch (e) {}
+    }
+  }
+
+  iframe.addEventListener("load", () => {
+    syncIframeTheme(getHostMode());
   });
 
   function onMessage(e) {
     if (!iframe.contentWindow || e.source !== iframe.contentWindow) return;
     if (e.origin !== "https://keithcreelman.github.io") return;
     const data = e.data || {};
-    if (!data || data.type !== "ccc-height") return;
-    const next = Number(data.height);
-    if (!Number.isFinite(next) || next <= 0) return;
-    const clamped = Math.max(600, Math.min(20000, Math.ceil(next)));
-    iframe.style.height = String(clamped) + "px";
+    if (!data) return;
+    if (data.type === "ccc-height") {
+      const next = Number(data.height);
+      if (!Number.isFinite(next) || next <= 0) return;
+      const clamped = Math.max(600, Math.min(20000, Math.ceil(next)));
+      iframe.style.height = String(clamped) + "px";
+      return;
+    }
+    if (data.type === "ccc-theme") {
+      setHostMode(data.theme || "", true);
+      return;
+    }
   }
 
   window.addEventListener("message", onMessage, false);
+  document.addEventListener("ups-theme-change", function (ev) {
+    const mode = normalizeMode(ev && ev.detail ? ev.detail.mode : getHostMode());
+    syncIframeTheme(mode);
+  });
 })();

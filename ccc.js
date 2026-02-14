@@ -254,6 +254,7 @@
   const LOCAL_EXTENSION_SUBMISSIONS_KEY = "ccc_extension_submissions_v1";
   const LOCAL_PPG_SETTINGS_KEY = "ccc_ppg_settings_v1";
   const LOCAL_THEME_KEY = "ccc_theme_v1";
+  const HOST_THEME_PREFIX = "ups_mode_";
   const LOCAL_HIGHLIGHT_KEY = "ccc_row_highlight_v1";
   const LOCAL_DEFAULT_FILTERS_KEY = "ccc_default_filters_v1";
   const SESSION_DEV_NOTICE_KEY = "ccc_dev_notice_seen_v1";
@@ -357,11 +358,47 @@
     }
   }
 
+  function normalizeThemeSetting(raw, allowAuto) {
+    const v = safeStr(raw).toLowerCase();
+    if (v === "light" || v === "dark") return v;
+    return allowAuto && v === "auto" ? "auto" : "";
+  }
+
+  function themeFromQuery() {
+    try {
+      const u = new URL(window.location.href);
+      return normalizeThemeSetting(u.searchParams.get("THEME") || u.searchParams.get("theme"), true);
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function hostThemeStorageKey() {
+    const y = safeStr(getYear() || DEFAULT_YEAR);
+    const l = safeStr(getLeagueId() || DEFAULT_LEAGUE_ID);
+    return HOST_THEME_PREFIX + y + "_" + l;
+  }
+
   function loadThemeSetting() {
+    const queryTheme = themeFromQuery();
+    if (queryTheme) return queryTheme;
+
+    const hostAttrTheme = normalizeThemeSetting(
+      document.documentElement ? document.documentElement.getAttribute("data-ups-mode") : "",
+      false
+    );
+    if (hostAttrTheme) return hostAttrTheme;
+
+    try {
+      const hostStored = localStorage.getItem(hostThemeStorageKey());
+      const hostTheme = normalizeThemeSetting(hostStored, false);
+      if (hostTheme) return hostTheme;
+    } catch (_) {}
+
     try {
       const raw = localStorage.getItem(LOCAL_THEME_KEY);
-      const v = safeStr(raw).toLowerCase();
-      if (v === "light" || v === "dark" || v === "auto") return v;
+      const v = normalizeThemeSetting(raw, true);
+      if (v) return v;
     } catch (_) {}
     return "auto";
   }
@@ -373,13 +410,36 @@
   }
 
   function applyThemeSetting(theme) {
-    const t = safeStr(theme).toLowerCase() || "auto";
+    const t = normalizeThemeSetting(theme, true) || "auto";
     const app = $("#cccApp");
     if (app) app.setAttribute("data-theme", t);
     const sel = $("#themeSelect");
     if (sel) sel.value = t;
     $$("[data-admin-theme]").forEach((el) => {
       if (el) el.value = t;
+    });
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: "ccc-theme", theme: t }, "*");
+      } catch (_) {}
+    }
+  }
+
+  function applyHostTheme(theme) {
+    const forced = normalizeThemeSetting(theme, false);
+    if (!forced) return;
+    state.theme = forced;
+    saveThemeSetting(forced);
+    applyThemeSetting(forced);
+  }
+
+  function wireHostThemeMessages() {
+    if (wireHostThemeMessages._wired) return;
+    wireHostThemeMessages._wired = true;
+    window.addEventListener("message", (e) => {
+      const data = e && e.data ? e.data : {};
+      if (!data || data.type !== "ups-theme") return;
+      applyHostTheme(data.mode || data.theme || "");
     });
   }
 
@@ -7587,12 +7647,14 @@
   // ======================================================
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
+      wireHostThemeMessages();
       wireEvents();
       load();
       startAutoHeightMessaging();
       maybeShowDevNotice();
     });
   } else {
+    wireHostThemeMessages();
     wireEvents();
     load();
     startAutoHeightMessaging();

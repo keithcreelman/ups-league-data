@@ -2972,6 +2972,38 @@
     };
   }
 
+  function projectExtensionRowForward(row) {
+    if (!row) return null;
+    const years = safeInt(row.contract_year);
+    const expired = isExpiredRookieRow(row);
+    if (years <= 0) return expired ? { ...row, contract_year: 0 } : null;
+    if (years === 1) {
+      // 1-year non-expired contracts roll off; expired rookies remain as extension-eligible cohort.
+      return expired ? { ...row, contract_year: 0 } : null;
+    }
+
+    const parsed = parseContractAmounts(row.contract_info, years, safeInt(row.salary) || 1000);
+    const nextSalary = safeInt(parsed.y2 || row.salary);
+    return {
+      ...row,
+      contract_year: Math.max(0, years - 1),
+      salary: nextSalary > 0 ? nextSalary : safeInt(row.salary),
+      _rolled_forward: 1,
+    };
+  }
+
+  function projectExtensionRowsForSeason(rows, baseSeason, contractSeason) {
+    const base = safeInt(normalizeSeasonValue(baseSeason));
+    const contract = safeInt(normalizeSeasonValue(contractSeason));
+    if (!base || !contract || contract <= base) return rows.slice();
+    const out = [];
+    (rows || []).forEach((r) => {
+      const p = projectExtensionRowForward(r);
+      if (p) out.push(p);
+    });
+    return out;
+  }
+
   function renderExtensionsSummary(teamName, rows) {
     const eligible = rows.filter((r) => getExtensionEligibility(r, 1).ok).length;
     return `
@@ -3071,9 +3103,19 @@
         const btn = canExtend
           ? `<button type="button" class="ccc-btn ccc-btn-offer" data-extension-action="1" data-season="${htmlEsc(
               normalizeSeasonValue(r.season || state.selectedSeason)
-            )}" data-franchise-id="${htmlEsc(pad4(r.franchise_id))}" data-player-id="${htmlEsc(
+            )}" data-franchise-id="${htmlEsc(pad4(r.franchise_id))}" data-franchise-name="${htmlEsc(
+              safeStr(r.franchise_name || r.franchise_id)
+            )}" data-player-id="${htmlEsc(
               r.player_id
-            )}">Extend</button>`
+            )}" data-player-name="${htmlEsc(r.player_name)}" data-pos="${htmlEsc(
+              posKeyFromRow(r)
+            )}" data-salary="${safeInt(r.salary)}" data-contract-year="${safeInt(
+              r.contract_year
+            )}" data-contract-status="${htmlEsc(safeStr(r.contract_status))}" data-contract-info="${htmlEsc(
+              safeStr(r.contract_info)
+            )}" data-acquired-date="${htmlEsc(safeStr(r.acquired_date))}" data-mym-deadline="${htmlEsc(
+              safeStr(r.mym_deadline)
+            )}" data-acq-type="${htmlEsc(safeStr(r.mym_acq_type))}">Extend</button>`
           : `<span class="muted">${htmlEsc(lockReason || "—")}</span>`;
         const style = buildTeamStyle(r);
         return `
@@ -4853,14 +4895,19 @@
     }
 
     if (state.activeModule === "extensions") {
+      const extensionProjectedRows = projectExtensionRowsForSeason(
+        scopedEligibility,
+        baseSeason,
+        contractSeason
+      );
       const extensionRows = sortRows(
-        scopedEligibility.filter((r) => canExtendRow(r)),
+        extensionProjectedRows.filter((r) => canExtendRow(r)),
         sortState.tab === "eligible" ? sortState.key : "player",
         sortState.tab === "eligible" ? sortState.dir : "asc"
       );
       const teamNameSource =
         (extensionRows[0] && extensionRows[0].franchise_name) ||
-        (scopedEligibility[0] && scopedEligibility[0].franchise_name) ||
+        (extensionProjectedRows[0] && extensionProjectedRows[0].franchise_name) ||
         "";
       const teamName = showAllTeams ? "All Teams" : safeStr(teamNameSource || "Team");
       syncTabLabels();
@@ -5103,6 +5150,7 @@
 
   function findExtensionRow(selection) {
     if (!selection) return null;
+    if (selection.row_snapshot) return { ...selection.row_snapshot };
     const pid = safeStr(selection.player_id);
     const season = normalizeSeasonValue(selection.season || state.selectedSeason);
     return (
@@ -6814,18 +6862,43 @@
               safeStr(r.player_id) === pid &&
               normalizeSeasonValue(r.season) === season
           ) || null;
-        if (!row) return;
+        const rowSnapshot = {
+          season,
+          franchise_id: fid,
+          franchise_name: safeStr(
+            (row && row.franchise_name) || btn.getAttribute("data-franchise-name") || ""
+          ),
+          player_id: pid,
+          player_name: safeStr((row && row.player_name) || btn.getAttribute("data-player-name") || ""),
+          positional_grouping: safeStr((row && row.positional_grouping) || btn.getAttribute("data-pos") || ""),
+          position: safeStr((row && row.position) || btn.getAttribute("data-pos") || ""),
+          salary: safeInt((row && row.salary) || btn.getAttribute("data-salary")),
+          contract_year: safeInt(
+            (row && row.contract_year) || btn.getAttribute("data-contract-year")
+          ),
+          contract_status: safeStr(
+            (row && row.contract_status) || btn.getAttribute("data-contract-status")
+          ),
+          contract_info: safeStr((row && row.contract_info) || btn.getAttribute("data-contract-info")),
+          acquired_date: safeStr((row && row.acquired_date) || btn.getAttribute("data-acquired-date")),
+          mym_deadline: safeStr((row && row.mym_deadline) || btn.getAttribute("data-mym-deadline")),
+          mym_acq_type: safeStr((row && row.mym_acq_type) || btn.getAttribute("data-acq-type")),
+        };
+        if (!rowSnapshot.player_id) return;
         state.extensionSelections[key] = {
           league_id: safeStr(getLeagueId() || DEFAULT_LEAGUE_ID),
           season,
           franchise_id: fid,
-          franchise_name: safeStr(row.franchise_name || row.franchise_id),
+          franchise_name: safeStr(
+            rowSnapshot.franchise_name || rowSnapshot.franchise_id || fid
+          ),
           player_id: pid,
-          player_name: safeStr(row.player_name),
-          pos: posKeyFromRow(row),
+          player_name: safeStr(rowSnapshot.player_name),
+          pos: posKeyFromRow(rowSnapshot),
           years_to_add: safeInt(
             (state.extensionSelections[key] && state.extensionSelections[key].years_to_add) || 1
           ),
+          row_snapshot: rowSnapshot,
           at: Date.now(),
         };
         saveExtensionSelections(state.extensionSelections);

@@ -65,7 +65,7 @@
 
   const LATEST_JSON_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.json";
   const LATEST_JS_URL = "https://keithcreelman.github.io/ups-league-data/ccc_latest.js";
-  const DEFAULT_CACHE = "20260214e";
+  const DEFAULT_CACHE = "20260214f";
 
   let mount = document.getElementById("cccMount");
   if (!mount) {

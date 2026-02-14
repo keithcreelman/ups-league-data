@@ -20,6 +20,38 @@
     "2024": { QB: { 1: 10000, 2: 20000 }, RB: { 1: 10000, 2: 20000 }, WR: { 1: 10000, 2: 20000 }, TE: { 1: 10000, 2: 20000 }, DL: { 1: 3000, 2: 5000 }, LB: { 1: 3000, 2: 5000 }, DB: { 1: 3000, 2: 5000 }, PK: { 1: 3000, 2: 5000 }, P: { 1: 3000, 2: 5000 } },
     "2025": { QB: { 1: 10000, 2: 20000 }, RB: { 1: 10000, 2: 20000 }, WR: { 1: 10000, 2: 20000 }, TE: { 1: 10000, 2: 20000 }, DL: { 1: 3000, 2: 5000 }, LB: { 1: 3000, 2: 5000 }, DB: { 1: 3000, 2: 5000 }, PK: { 1: 3000, 2: 5000 }, P: { 1: 3000, 2: 5000 } },
   };
+  const EXT_OWNER_BY_NICKNAME = {
+    uw: "0001",
+    lh: "0006",
+    cbp: "0002",
+    cleon: "0011",
+    sex: "0007",
+    gride: "0003",
+    hammer: "0005",
+    bb: "0010",
+    ctown: "0009",
+    chivalry: "0009",
+    pg: "0004",
+    creel: "0008",
+    hawks: "0012",
+    hood: "0099",
+    mafia: "0099",
+    blake: "0010",
+  };
+  const EXT_PRIMARY_NICK_BY_FRANCHISE = {
+    "0001": "UW",
+    "0006": "LH",
+    "0002": "CBP",
+    "0011": "Cleon",
+    "0007": "Sex",
+    "0003": "Gride",
+    "0005": "Hammer",
+    "0010": "BB",
+    "0009": "C-Town",
+    "0004": "PG",
+    "0008": "Creel",
+    "0012": "Hawks",
+  };
   const MFL_API_BASE = "https://api.myfantasyleague.com";
   const TEAM_COLOR_OVERRIDES = {
     "0001": { h: 48, s: 88, l: 50 }, // L.A. Looks
@@ -2898,9 +2930,10 @@
     if (minY1Violation) lines.push(`ERROR: Year 1 must be at least ${minY1.toLocaleString()} (20% of TCV, rounded up).`);
 
     const yearParts = yearSalaries.map((v, i) => `Y${i + 1}-${formatK(v)}`).join(", ");
+    const ownerNick = getOwnerExtensionNickname(row && row.franchise_id);
     const contractInfo = `CL ${totalYears}| TCV ${formatK(tcv)}| AAV ${formatK(
       Math.round(tcv / Math.max(1, totalYears))
-    )}| ${yearParts}| GTD: ${formatK(gtd)}| Ext +${years}Y`;
+    )}| ${yearParts}| GTD: ${formatK(gtd)}| Ext +${years}Y${ownerNick ? `| Ext: ${ownerNick}` : ""}`;
 
     return {
       yearsToAdd: years,
@@ -2933,14 +2966,14 @@
   }
 
   function renderExtensionsSummary(teamName, rows) {
-    const eligible = rows.filter((r) => canExtendRow(r)).length;
+    const eligible = rows.filter((r) => getExtensionEligibility(r, 1).ok).length;
     return `
       <div class="ccc-summaryTop">
         <div class="ccc-summaryTitle">${htmlEsc(teamName)} Extension Snapshot</div>
       </div>
       <div class="ccc-kpis">
         <div class="kpi"><div class="label">Total Players</div><div class="value">${rows.length}</div></div>
-        <div class="kpi"><div class="label">Extension Eligible</div><div class="value">${eligible}</div><div class="hint">1+ years remaining, non-tag contracts</div></div>
+        <div class="kpi"><div class="label">Extension Eligible</div><div class="value">${eligible}</div><div class="hint">1-year deals or expired rookies, not already extended by current owner</div></div>
       </div>
     `;
   }
@@ -2988,15 +3021,19 @@
   function getExtensionEligibility(row, yearsToAdd) {
     const season = normalizeSeasonValue(row && row.season ? row.season : state.selectedSeason);
     if (!canExtendRow(row)) return { ok: false, reason: "Not extension-eligible by contract status." };
+    if (isExtendedByCurrentOwner(row)) {
+      return { ok: false, reason: "Already extended by current owner." };
+    }
     const deadline = getExtensionDeadlineDateForRow(row, season);
     const now = state.calendarNow || getEffectiveNow(season);
     if (deadline && !state.commishMode && now.getTime() > endOfDay(deadline).getTime()) {
       return { ok: false, reason: `Deadline passed (${fmtYMDDate(deadline)}).`, deadline };
     }
     const years = Math.max(1, Math.min(2, safeInt(yearsToAdd) || 1));
-    if (years === 2 && isNonRookieContract(row)) {
+    const projectedYears = isExpiredRookieRow(row) ? years : safeInt(row.contract_year) + years;
+    if (projectedYears >= 3 && isNonRookieContract(row)) {
       const current = countTeamThreeYearNonRookieContracts(row.franchise_id, season);
-      const projected = current + (safeInt(row.contract_year) === 3 ? 0 : 1);
+      const projected = current + (safeInt(row.contract_year) >= 3 ? 0 : 1);
       if (projected > 6) {
         return {
           ok: false,
@@ -3536,10 +3573,38 @@
 
   function canExtendRow(row) {
     if (!row) return false;
-    if (safeInt(row.contract_year) < 1) return false;
+    const years = safeInt(row.contract_year);
+    if (!(years === 1 || isExpiredRookieRow(row))) return false;
     const status = safeStr(row.contract_status).toLowerCase();
     if (status.includes("tag")) return false;
     return true;
+  }
+
+  function normalizeNickToken(v) {
+    return safeStr(v).toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function getOwnerExtensionNickname(franchiseId) {
+    return safeStr(EXT_PRIMARY_NICK_BY_FRANCHISE[pad4(franchiseId)] || "");
+  }
+
+  function parseExtensionOwnerFromContractInfo(contractInfo) {
+    const normalized = normalizeNickToken(contractInfo);
+    if (!normalized) return "";
+    const entries = Object.entries(EXT_OWNER_BY_NICKNAME);
+    for (let i = 0; i < entries.length; i++) {
+      const [nick, fid] = entries[i];
+      if (!nick) continue;
+      if (normalized.includes(nick)) return pad4(fid);
+    }
+    return "";
+  }
+
+  function isExtendedByCurrentOwner(row) {
+    if (!row) return false;
+    const owner = parseExtensionOwnerFromContractInfo(row.contract_info);
+    if (!owner) return false;
+    return owner === pad4(row.franchise_id);
   }
 
   function getExtensionRate(posKey, season, yearsToAdd) {

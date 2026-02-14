@@ -1538,6 +1538,7 @@
         </div>
       </div>
     `;
+    const yearsSubmittedLabel = state.activeModule === "mym" ? "Years" : "Years Remaining";
 
     const head = `
       ${pager}
@@ -1553,7 +1554,7 @@
                 ${sortTh("player", "Player")}
                 ${sortTh("pos", "Pos")}
                 ${sortTh("salary", "Salary", "", "is-num")}
-                ${sortTh("contractYear", "Years Remaining", "min-width:145px;", "is-num")}
+                ${sortTh("contractYear", yearsSubmittedLabel, "min-width:145px;", "is-num")}
                 ${sortTh("status", "Status")}
                 ${showOverrideCols ? `<th>Admin Override</th><th>Override As-Of</th>` : ``}
                 <th style="min-width:260px;">Contract Info</th>
@@ -2949,10 +2950,28 @@
     if (minY1Violation) lines.push(`ERROR: Year 1 must be at least ${minY1.toLocaleString()} (20% of TCV, rounded up).`);
 
     const yearParts = yearSalaries.map((v, i) => `Y${i + 1}-${formatK(v)}`).join(", ");
-    const ownerNick = getOwnerExtensionNickname(row && row.franchise_id);
-    const contractInfo = `CL ${totalYears}| TCV ${formatK(tcv)}| AAV ${formatK(
-      Math.round(tcv / Math.max(1, totalYears))
-    )}| ${yearParts}| GTD: ${formatK(gtd)}| Ext +${years}Y${ownerNick ? `| Ext: ${ownerNick}` : ""}`;
+    const ownerNick = safeStr(getOwnerExtensionNickname(row && row.franchise_id));
+    const extMatch = safeStr(row && row.contract_info).match(/(?:^|\|)\s*Ext:\s*([^|]+)/i);
+    const extExisting = extMatch ? safeStr(extMatch[1]) : "";
+    const extOwners = extExisting
+      ? extExisting
+          .split(/[,/;&]|\band\b/gi)
+          .map((x) => safeStr(x).trim())
+          .filter(Boolean)
+      : [];
+    if (ownerNick) {
+      const ownerNorm = normalizeNickToken(ownerNick);
+      const hasOwner = extOwners.some((x) => normalizeNickToken(x) === ownerNorm);
+      if (!hasOwner) extOwners.push(ownerNick);
+    }
+    const extSuffix = extOwners.length ? `| Ext: ${extOwners.join(", ")}` : "";
+    const extAav = safeInt(yearSalaries[1] || salaryNow);
+    const aavDisplay = expiredRookie
+      ? formatK(Math.round(tcv / Math.max(1, totalYears)))
+      : `${formatK(salaryNow)},${formatK(extAav)}`;
+    const contractInfo = `CL ${totalYears}| TCV ${formatK(tcv)}| AAV ${aavDisplay}| ${yearParts}| GTD: ${formatK(
+      gtd
+    )}${extSuffix}`;
 
     return {
       yearsToAdd: years,
@@ -3087,7 +3106,7 @@
     `;
   }
 
-  function renderExtensionsExpiredRookieDraftPage(rows) {
+  function renderExtensionsExpiredRookieDraftPage(rows, priorPointsByPlayer) {
     const expired = (rows || [])
       .filter((r) => isExpiredRookieLike(r))
       .sort(
@@ -3102,12 +3121,18 @@
     const body = expired
       .map((r) => {
         const style = buildTeamStyle(r);
+        const pid = safeStr(r.player_id);
+        const priorPts = Number(
+          (priorPointsByPlayer && priorPointsByPlayer[pid] !== undefined
+            ? priorPointsByPlayer[pid]
+            : r.points_total) || 0
+        );
         return `
           <tr class="${buildRowClass(r, posKeyFromRow(r))}"${style ? ` style="${style}"` : ""}>
             <td>${htmlEsc(r.franchise_name || r.franchise_id)}</td>
             <td class="playerCell">${htmlEsc(r.player_name)}</td>
             <td>${htmlEsc(posKeyFromRow(r))}</td>
-            <td class="cell-num">${Number(r.points_total || 0).toFixed(1)}</td>
+            <td class="cell-num">${priorPts.toFixed(1)}</td>
             <td class="cell-num">${safeInt(r.salary).toLocaleString()}</td>
             <td class="muted">${htmlEsc(safeStr(r.extension_deadline || "TBD"))}</td>
           </tr>
@@ -3787,23 +3812,25 @@
   function parseExtensionOwnerFromContractInfo(contractInfo) {
     const src = safeStr(contractInfo);
     const extMatch = src.match(/(?:^|\|)\s*Ext:\s*([^|]+)/i);
-    if (!extMatch) return "";
-    const normalized = normalizeNickToken(extMatch[1]);
-    if (!normalized) return "";
-    const entries = Object.entries(EXT_OWNER_BY_NICKNAME);
-    for (let i = 0; i < entries.length; i++) {
-      const [nick, fid] = entries[i];
-      if (!nick) continue;
-      if (normalized.includes(nick)) return pad4(fid);
-    }
-    return "";
+    if (!extMatch) return [];
+    const tokens = safeStr(extMatch[1])
+      .split(/[,/;&]|\band\b/gi)
+      .map((x) => normalizeNickToken(x))
+      .filter(Boolean);
+    if (!tokens.length) return [];
+    const out = [];
+    tokens.forEach((token) => {
+      const fid = pad4(EXT_OWNER_BY_NICKNAME[token] || "");
+      if (fid && !out.includes(fid)) out.push(fid);
+    });
+    return out;
   }
 
   function isExtendedByCurrentOwner(row) {
     if (!row) return false;
-    const owner = parseExtensionOwnerFromContractInfo(row.contract_info);
-    if (!owner) return false;
-    return owner === pad4(row.franchise_id);
+    const owners = parseExtensionOwnerFromContractInfo(row.contract_info);
+    if (!owners || !owners.length) return false;
+    return owners.includes(pad4(row.franchise_id));
   }
 
   function getExtensionRate(posKey, season, yearsToAdd) {
@@ -4302,7 +4329,7 @@
     const nowRef = getEffectiveNow(baseSeason);
     const tagActive = state.commishMode || isTagActiveForSeason(baseSeason, nowRef);
     const mymActive = isMymActiveForSeason(baseSeason, nowRef);
-    const restructureActive = state.commishMode || isRestructureActiveForSeason(baseSeason, nowRef);
+    const restructureActive = true;
     const auctionActive = isAuctionActiveForSeason(baseSeason, nowRef);
     const tagChip = $("#moduleTagsChip");
     const mymChip = $("#moduleMymChip");
@@ -4339,7 +4366,7 @@
     };
 
     // Placeholder scheduling statuses for upcoming modules.
-    setModuleState("#moduleRestructuresChip", restructureActive, true);
+    setModuleState("#moduleRestructuresChip", restructureActive, false);
     setModuleState("#moduleAuctionChip", auctionActive, true);
   }
 
@@ -4519,6 +4546,11 @@
     const eligibleTab = $(`.ccc-tab[data-tab="eligible"]`);
     const ineligibleTab = $(`.ccc-tab[data-tab="ineligible"]`);
     const submittedTab = $(`.ccc-tab[data-tab="submitted"]`);
+    if (eligibleTab) eligibleTab.style.order = "1";
+    if (ineligibleTab) ineligibleTab.style.order = "2";
+    if (costTab) costTab.style.order = "3";
+    if (summaryTab) summaryTab.style.order = "4";
+    if (submittedTab) submittedTab.style.order = "5";
     if (summaryTab) summaryTab.textContent = "Summary";
     if (state.activeModule === "tag") {
       if (costTab) {
@@ -4537,6 +4569,8 @@
         if (state.activeModule === "extensions") {
           costTab.style.display = "";
           costTab.textContent = "Expired Rookie Draft";
+          costTab.style.order = "3";
+          if (summaryTab) summaryTab.style.order = "2";
         } else {
           costTab.style.display = "none";
         }
@@ -4816,6 +4850,7 @@
 
     if (cccTabs) cccTabs.style.display = "";
     if (cccMain) cccMain.style.display = "";
+    if (summary) summary.style.display = "";
     const teamFilterWrap = $("#teamFilterWrap");
     if (teamFilterWrap) teamFilterWrap.style.display = state.activeModule === "commish" ? "none" : "";
     const moduleFilters = $("#moduleFilters");
@@ -5072,6 +5107,11 @@
         baseSeason,
         contractSeason
       );
+      const extensionProjectedLeagueRows = projectExtensionRowsForSeason(
+        seasonEligibility,
+        baseSeason,
+        contractSeason
+      );
       extensionProjectedRows.forEach((r) => {
         const d = getExtensionDeadlineDateForRow(
           r,
@@ -5079,6 +5119,20 @@
         );
         r.extension_deadline = d ? fmtYMDDate(d) : "";
         r._extension_deadline_ts = d ? d.getTime() : 0;
+      });
+      extensionProjectedLeagueRows.forEach((r) => {
+        const d = getExtensionDeadlineDateForRow(
+          r,
+          normalizeSeasonValue(r.season || state.selectedSeason)
+        );
+        r.extension_deadline = d ? fmtYMDDate(d) : "";
+        r._extension_deadline_ts = d ? d.getTime() : 0;
+      });
+      const priorPointsByPlayer = {};
+      (seasonTagTracking || []).forEach((r) => {
+        const pid = safeStr(r.player_id);
+        if (!pid) return;
+        priorPointsByPlayer[pid] = Number(r.points_total || 0);
       });
       const extensionRows = sortRows(
         extensionProjectedRows.filter((r) => canExtendRow(r)),
@@ -5093,10 +5147,16 @@
       syncTabLabels();
       syncModuleChipSelection();
       syncCommishConsole(scopedEligibility);
-      if (summary) summary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
+      if (summary) {
+        summary.style.display = "none";
+        summary.innerHTML = "";
+      }
       if (tabSummary) tabSummary.innerHTML = renderExtensionsSummary(teamName, extensionRows);
       if (tabCostCalc)
-        tabCostCalc.innerHTML = renderExtensionsExpiredRookieDraftPage(extensionProjectedRows);
+        tabCostCalc.innerHTML = renderExtensionsExpiredRookieDraftPage(
+          extensionProjectedLeagueRows,
+          priorPointsByPlayer
+        );
       if (tabEligible) tabEligible.innerHTML = renderExtensionsTable(extensionRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = "";
       if (tabSubmitted) tabSubmitted.innerHTML = renderExtensionsSubmittedPage(season);

@@ -101,8 +101,15 @@
       return new Date(state.asOfDate.getTime());
     }
     if (!FORCE_SEASON_ROLLOVER) return new Date();
-    const s = safeInt(normalizeSeasonValue(season || getYear() || DEFAULT_YEAR));
-    const year = s ? s + 1 : new Date().getFullYear();
+    const seasonKey = normalizeSeasonValue(season || getYear() || DEFAULT_YEAR);
+    const evt = MYM_EVENTS_BY_SEASON[seasonKey] || null;
+    const seasonComplete = evt ? parseYMDDate(evt.season_complete) : null;
+    const nowActual = new Date();
+    if (!seasonComplete || nowActual.getTime() <= endOfDay(seasonComplete).getTime()) {
+      return nowActual;
+    }
+    const seasonNum = safeInt(seasonKey);
+    const year = seasonNum ? seasonNum + 1 : new Date().getFullYear();
     return new Date(year, 2, 1, 12, 0, 0);
   }
 

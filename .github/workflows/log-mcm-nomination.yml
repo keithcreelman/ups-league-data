@@ -1,0 +1,65 @@
+name: Log MCM Nomination
+
+on:
+  repository_dispatch:
+    types: [log-mcm-nomination]
+
+concurrency:
+  group: log-mcm-nomination
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Append nomination log
+        env:
+          DISPLAY_NAME: ${{ github.event.client_payload.display_name }}
+          GENRE_ID: ${{ github.event.client_payload.genre_id }}
+          PRIMARY_URL: ${{ github.event.client_payload.primary_url }}
+          IMAGE_URL: ${{ github.event.client_payload.image_url }}
+          NOTES: ${{ github.event.client_payload.notes }}
+          IP_HASH: ${{ github.event.client_payload.ip_hash }}
+          ATTESTATION_ADULT: ${{ github.event.client_payload.attestation_adult }}
+          ATTESTATION_RESPECTFUL: ${{ github.event.client_payload.attestation_respectful }}
+          CREATED_AT_UTC: ${{ github.event.client_payload.created_at_utc }}
+          STATUS: ${{ github.event.client_payload.status }}
+          SOURCE: ${{ github.event.client_payload.source }}
+        run: |
+          python etl/mfl_etl_full/log_mcm_nomination.py --json-path mcm_nominations.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- mcm_nominations.json; then
+            echo "No nomination log changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mcm_nominations.json
+          git commit -m "Log MCM nomination"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying..."
+            sleep 2
+          done
+          echo "Failed to push after 3 attempts."
+          exit 1
+

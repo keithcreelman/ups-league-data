@@ -1,0 +1,49 @@
+{
+  "schema_version": "v1",
+  "app": {
+    "name": "MCM",
+    "display_name": "Man Crush Monday",
+    "policy": {
+      "adults_only": true,
+      "respectful_only": true,
+      "no_scraping": true
+    }
+  },
+  "season": {
+    "year_mode": "current",
+    "season_start": "first_monday",
+    "regular_weeks": 48,
+    "playoff_weeks": 4,
+    "ballot_size": 8
+  },
+  "genres": [
+    { "id": "influencers_sfw", "name": "Influencers (SFW)", "description": "Public creators and influencers with SFW profiles." },
+    { "id": "fitness", "name": "Fitness", "description": "Fitness creators and athletes (SFW)." },
+    { "id": "athletes", "name": "Athletes", "description": "Pros, Olympians, and elite competitors." },
+    { "id": "models_editorial", "name": "Models (Editorial)", "description": "Fashion/editorial modeling and runway." },
+    { "id": "actors_tv_film", "name": "Actors (TV/Film)", "description": "On-screen talent across movies and television." },
+    { "id": "musicians", "name": "Musicians", "description": "Artists across pop, rock, hip-hop, country, and more." },
+    { "id": "streamers_esports", "name": "Streamers and Esports", "description": "Gaming streamers and esports talent (SFW)." },
+    { "id": "ninety_s_icons", "name": "90s Icons", "description": "Pop culture icons of the 1990s." },
+    { "id": "two_thousands_icons", "name": "2000s Icons", "description": "The early-2000s era of pop culture." },
+    { "id": "sports_media", "name": "Sports Media", "description": "Hosts, analysts, and sports journalists." },
+    { "id": "comedy", "name": "Comedy", "description": "Stand-up, sketch, and comedic actors." },
+    { "id": "wildcard", "name": "Wildcard", "description": "Anything that fits the rules." }
+  ],
+  "genres_cycle": [
+    "influencers_sfw",
+    "fitness",
+    "athletes",
+    "models_editorial",
+    "actors_tv_film",
+    "musicians",
+    "streamers_esports",
+    "ninety_s_icons",
+    "two_thousands_icons",
+    "sports_media",
+    "comedy",
+    "wildcard"
+  ],
+  "nominees": []
+}
+

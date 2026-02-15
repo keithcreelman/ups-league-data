@@ -1,0 +1,61 @@
+name: Log MCM Vote
+
+on:
+  repository_dispatch:
+    types: [log-mcm-vote]
+
+concurrency:
+  group: log-mcm-vote
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Append vote log
+        env:
+          SEASON_YEAR: ${{ github.event.client_payload.season_year }}
+          WEEK_NO: ${{ github.event.client_payload.week_no }}
+          MATCHUP_KEY: ${{ github.event.client_payload.matchup_key }}
+          NOMINEE_ID: ${{ github.event.client_payload.nominee_id }}
+          IP_HASH: ${{ github.event.client_payload.ip_hash }}
+          SUBMITTED_AT_UTC: ${{ github.event.client_payload.submitted_at_utc }}
+          SOURCE: ${{ github.event.client_payload.source }}
+        run: |
+          python etl/mfl_etl_full/log_mcm_vote.py --json-path mcm_votes.json
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- mcm_votes.json; then
+            echo "No vote log changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mcm_votes.json
+          git commit -m "Log MCM vote"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              echo "Push succeeded on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying..."
+            sleep 2
+          done
+          echo "Failed to push after 3 attempts."
+          exit 1
+

@@ -189,10 +189,7 @@
       return;
     }
 
-    if (data.type === "uow-theme") {
-      setHostMode(data.theme || data.mode || "", true);
-      return;
-    }
+    if (data.type === "uow-theme") return;
   }
 
   window.addEventListener("message", onMessage, false);

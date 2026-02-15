@@ -220,10 +220,7 @@
       iframe.style.height = String(clamped) + "px";
       return;
     }
-    if (data.type === "ccc-theme") {
-      setHostMode(data.theme || data.mode || "", true);
-      return;
-    }
+    if (data.type === "ccc-theme") return;
   }
 
   window.addEventListener("message", onMessage, false);

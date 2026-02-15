@@ -4961,8 +4961,22 @@
     const seasonRestructureSubmissions = (state.restructureSubmissions || [])
       .map((r) => normalizeSubmissionRow(r))
       .filter((r) => !season || normalizeSeasonValue(r.season) === season);
+
+    // Tag tracking can be generated from the prior season while "tracking_for_season" is the
+    // current MFL YEAR. Example: meta.season=2025, meta.tracking_for_season=2026.
+    const tagMetaSeason = normalizeSeasonValue(
+      state.tagTrackingMeta && state.tagTrackingMeta.season
+    );
+    const tagTrackingForSeason = normalizeSeasonValue(
+      state.tagTrackingMeta && state.tagTrackingMeta.tracking_for_season
+    );
+    const tagPoolSeason =
+      season && tagMetaSeason && tagTrackingForSeason && tagTrackingForSeason === season
+        ? tagMetaSeason
+        : season;
+
     const seasonTagTracking = (state.tagTrackingRows || []).filter(
-      (r) => !season || normalizeSeasonValue(r.season) === season
+      (r) => !tagPoolSeason || normalizeSeasonValue(r.season) === tagPoolSeason
     );
     const mymSubmissionSeasons = buildSubmissionSeasonList(allMymSubmissions);
     if (state.activeModule === "mym") {
@@ -5070,6 +5084,11 @@
         metaText += ` | as-of season: ${state.asOfSeasonOverride}`;
       }
       if (state.activeModule === "tag") {
+        const metaSeason = normalizeSeasonValue(state.tagTrackingMeta && state.tagTrackingMeta.season);
+        const trackingFor = normalizeSeasonValue(
+          state.tagTrackingMeta && state.tagTrackingMeta.tracking_for_season
+        );
+        if (metaSeason && trackingFor) metaText += ` | tag data: ${metaSeason} -> ${trackingFor}`;
         const scoringWeeks =
           (state.tagTrackingRows[0] && safeStr(state.tagTrackingRows[0].scoring_weeks_used)) || "";
         if (scoringWeeks) metaText += ` | scoring weeks: ${scoringWeeks}`;
@@ -5118,7 +5137,7 @@
         summary.innerHTML = renderTagSummary(
           teamName,
           tagRows,
-          season,
+          tagPoolSeason,
           selectedTeamId,
           showAllTeams,
           positionFilteredTagTracking
@@ -5141,7 +5160,7 @@
         );
       if (tabEligible) tabEligible.innerHTML = renderTable(tagRows, "eligible");
       if (tabIneligible) tabIneligible.innerHTML = renderTagIneligibleList(tagIneligibleRows);
-      if (tabSubmitted) tabSubmitted.innerHTML = renderTagFinalizedSubmissionsPage(season);
+      if (tabSubmitted) tabSubmitted.innerHTML = renderTagFinalizedSubmissionsPage(tagPoolSeason);
       updateModuleStatusChips();
       return;
     }

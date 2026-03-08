@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-01 03:24:15",
+    "generated_at": "2026-03-08 03:12:22",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4939,7 +4939,7 @@
       "player_name": "Jennings, Jauan",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 11000,
+      "salary": 21000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2025-11-27 10:47:47",
@@ -4947,7 +4947,7 @@
       "mym_deadline": "2025-12-11 10:47:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-27. Deadline to submit a MYM has passed. Deadline was 2025-12-11.",
-      "contract_info": "CL 2| TCV 12K| AAV 11K| Y1-1 Y2-11| Ext: Creel"
+      "contract_info": "CL 2| TCV 32K| AAV 21K| Y1-11K, Y2-21K| Ext: Creel, L.A.| GTD: 24K"
     },
     {
       "season": 2025,

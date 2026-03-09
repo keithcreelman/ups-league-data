@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-09 22:47:54",
+    "generated_at": "2026-03-09 23:44:16",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6619,15 +6619,15 @@
       "player_name": "Willis, Malik",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 37000,
+      "salary": 41000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "TAG",
       "acquired_date": "2025-12-27 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2026-01-10 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-27. Deadline to submit a MYM has passed. Deadline was 2026-01-10.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 41K| AAV 41K| GTD 41K| Tag| Tier 3| Formula: Avg Top 16-24 QB AAV | 10% salary floor (rounded up)"
     },
     {
       "season": 2025,

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-09 23:44:16",
+    "generated_at": "2026-03-10 03:07:08",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3499,7 +3499,7 @@
       "player_name": "Chase, Ja'Marr",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 64000,
+      "salary": 26000,
       "contract_year": 2,
       "contract_status": "BL",
       "acquired_date": "2024-10-31 00:36:32",
@@ -3507,7 +3507,7 @@
       "mym_deadline": "2024-11-14 00:36:32",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-31. Deadline to submit a MYM has passed. Deadline was 2024-11-14.",
-      "contract_info": "CL 3| TCV 162K| AAV 54K| Y1-33K, Y2-64K, Y3-65K| Ext: Creel, Hammer"
+      "contract_info": "CL 2| TCV 129K| AAV 64.5K| Y1-26K, Y2-103K| GTD: 96.8K| Ext: Creel, Hammer"
     },
     {
       "season": 2025,
@@ -7699,15 +7699,15 @@
       "player_name": "Lawrence, Trevor",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 11000,
+      "salary": 37000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "TAG",
       "acquired_date": "2024-11-27 14:23:19",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-11 14:23:19",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-27. Deadline to submit a MYM has passed. Deadline was 2024-12-11.",
-      "contract_info": "CL 2| TCV 58K| AAV 29K| Y1-47, Y2-11| No Further Extension Allowed"
+      "contract_info": "CL 1| TCV 37K| AAV 37K| GTD 37K| Tag| Tier 2| Formula: Avg Top 6-15 QB AAV"
     },
     {
       "season": 2025,

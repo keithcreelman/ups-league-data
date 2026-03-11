@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-10 16:15:30",
+    "generated_at": "2026-03-11 13:38:54",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3539,15 +3539,15 @@
       "player_name": "Doubs, Romeo",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 4000,
+      "salary": 15000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "TAG",
       "acquired_date": "2025-08-05 13:25:01",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-08-19 13:25:01",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-08-19.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 15K| AAV 15K| GTD 15K| Tag| Tier 3| Formula: Avg Top 15-40 WR AAV"
     },
     {
       "season": 2025,

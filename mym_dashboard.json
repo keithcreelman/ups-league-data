@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-03-16 20:58:30",
+    "generated_at": "2026-04-07 03:31:34",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -8039,15 +8039,15 @@
       "player_name": "White, Devin",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 5000,
+      "salary": 2000,
       "contract_year": 1,
-      "contract_status": "TAG",
+      "contract_status": "WW",
       "acquired_date": "2025-10-12 08:42:46",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-26 08:42:46",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-12. Deadline to submit a MYM has passed. Deadline was 2025-10-26.",
-      "contract_info": "CL 1| TCV 5K| AAV 5K| GTD 3.8K| Tag| Tier 1| Formula: Avg Top 1-6 LB AAV"
+      "contract_info": "CL 1|"
     },
     {
       "season": 2025,

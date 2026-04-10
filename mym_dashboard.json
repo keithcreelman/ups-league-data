@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-07 03:31:34",
+    "generated_at": "2026-04-10 03:42:14",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -99,15 +99,15 @@
       "player_name": "Brissett, Jacoby",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 5000,
+      "salary": 16000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "TAG",
       "acquired_date": "2025-10-10 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-24 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-10. Deadline to submit a MYM has passed. Deadline was 2025-10-24.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 16K| AAV 16K| GTD 12K| Tag| Tier 3| Formula: Avg Top 16-24 QB AAV"
     },
     {
       "season": 2025,

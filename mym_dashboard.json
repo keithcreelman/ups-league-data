@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-18 16:58:50",
+    "generated_at": "2026-04-18 19:10:16",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1219,15 +1219,15 @@
       "player_name": "Pollard, Tony",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 1,
+      "salary": 27000,
       "contract_year": 1,
-      "contract_status": "x",
+      "contract_status": "Veteran",
       "acquired_date": "2020-08-16 21:12:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2020-08-30 21:12:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2020-08-16. Deadline to submit a MYM has passed. Deadline was 2020-08-30.",
-      "contract_info": "probe"
+      "contract_info": "CL 2| TCV 54K| AAV 27K| Y1-27K, Y2-27K| Ext: C-Town"
     },
     {
       "season": 2025,
@@ -7479,15 +7479,15 @@
       "player_name": "Downs, Josh",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1,
+      "salary": 12000,
       "contract_year": 1,
-      "contract_status": "x",
+      "contract_status": "EXT1",
       "acquired_date": "2025-10-22 19:47:04",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-05 19:47:04",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-22. Deadline to submit a MYM has passed. Deadline was 2025-11-05.",
-      "contract_info": "probe"
+      "contract_info": "CL 2|TCV 14K|AAV 12K|Y1-2 Y2-12|Ext: GRide"
     },
     {
       "season": 2025,

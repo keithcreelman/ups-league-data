@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-18 15:54:55",
+    "generated_at": "2026-04-18 16:58:50",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3847,7 +3847,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-06. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 3| TCV 16K| AAV 6K"
+      "contract_info": "CL 3| TCV 18K| AAV 6K| Y1-6K, Y2-6K, Y3-6K"
     },
     {
       "season": 2025,
@@ -7041,13 +7041,13 @@
       "positional_grouping": "WR",
       "salary": 62000,
       "contract_year": 1,
-      "contract_status": "FL",
+      "contract_status": "Veteran",
       "acquired_date": "2017-11-23 10:38:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2017-12-07 10:38:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2017-11-23. Deadline to submit a MYM has passed. Deadline was 2017-12-07.",
-      "contract_info": "CL 2| TCV 142K| AAV 62K"
+      "contract_info": "CL 2| TCV 142K| AAV 62K| Y1-80K, Y2-62K"
     },
     {
       "season": 2025,

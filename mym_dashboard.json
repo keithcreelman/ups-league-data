@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-17 19:32:25",
+    "generated_at": "2026-04-18 11:50:47",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -5040,14 +5040,14 @@
       "position": "RB",
       "positional_grouping": "RB",
       "salary": 12000,
-      "contract_year": 1,
+      "contract_year": 2,
       "contract_status": "EXT1",
       "acquired_date": "2025-08-05 19:45:27",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 2|TCV 42K 20K, 30K|Y1-12K Y2-30K \ud83d\udd28 \u23f0|GTD: 31.5K"
+      "contract_info": "CL 2| TCV 42K| AAV 20K, 30K| Y1-12K, Y2-30K| Ext: Hammer| GTD: 31.5K"
     },
     {
       "season": 2025,

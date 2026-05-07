@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-04-23 16:09:57",
+    "generated_at": "2026-05-07 04:06:22",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -5679,15 +5679,15 @@
       "player_name": "Johnston, Quentin",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 8000,
+      "salary": 18000,
       "contract_year": 1,
-      "contract_status": "Rookie",
+      "contract_status": "EXT1",
       "acquired_date": "2024-10-19 17:23:57",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-02 17:23:57",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-19. Deadline to submit a MYM has passed. Deadline was 2024-11-02.",
-      "contract_info": "CL 3| TCV 24K| AAV 8K"
+      "contract_info": "CL 1| TCV 18K| AAV 18K| Y1-18K| Ext: PG| GTD: 13.5K"
     },
     {
       "season": 2025,

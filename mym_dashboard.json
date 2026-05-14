@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-07 04:06:22",
+    "generated_at": "2026-05-14 15:34:10",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6667,7 +6667,7 @@
       "mym_deadline": "2025-12-18 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-04. Deadline to submit a MYM has passed. Deadline was 2025-12-18.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K| GTD 2K| Tag| Tier 2| Formula: Avg Top 7-12 DB AAV"
+      "contract_info": "CL 1| TCV 2K| AAV 2K| GTD 1.5K| Tag| Tier 2| Formula: Avg Top 7-12 DB AAV"
     },
     {
       "season": 2025,

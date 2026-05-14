@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-14 15:34:10",
+    "generated_at": "2026-05-14 18:08:36",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6659,15 +6659,15 @@
       "player_name": "Winfield, Antoine",
       "position": "S",
       "positional_grouping": "DB",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "TAG",
+      "contract_status": "WW",
       "acquired_date": "2025-12-04 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-18 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-04. Deadline to submit a MYM has passed. Deadline was 2025-12-18.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K| GTD 1.5K| Tag| Tier 2| Formula: Avg Top 7-12 DB AAV"
+      "contract_info": "CL 1|"
     },
     {
       "season": 2025,

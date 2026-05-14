@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-14 18:08:36",
+    "generated_at": "2026-05-14 21:36:52",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -7681,7 +7681,7 @@
       "positional_grouping": "DL",
       "salary": 3000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Veteran",
       "acquired_date": "2023-08-03 20:56:14",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2023-08-17 20:56:14",
@@ -8079,15 +8079,15 @@
       "player_name": "Witherspoon, Devon",
       "position": "CB",
       "positional_grouping": "DB",
-      "salary": 2000,
+      "salary": 3000,
       "contract_year": 1,
-      "contract_status": "Rookie",
+      "contract_status": "TAG",
       "acquired_date": "2023-05-28 21:28:59",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 3| TCV 6K| AAV 2K"
+      "contract_info": "CL 1| TCV 3K| AAV 3K| GTD 2.3K| Tag| Tier 2| Formula: Avg Top 7-12 DB AAV | 10% salary floor (rounded up)"
     }
   ],
   "usage": [

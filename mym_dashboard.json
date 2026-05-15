@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-14 21:36:52",
+    "generated_at": "2026-05-15 15:30:36",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1039,15 +1039,15 @@
       "player_name": "LaPorta, Sam",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 5000,
+      "salary": 25000,
       "contract_year": 1,
-      "contract_status": "Rookie",
+      "contract_status": "EXT2",
       "acquired_date": "2023-05-28 20:16:43",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 3| TCV 15K| AAV 5K"
+      "contract_info": "CL 2|TCV 50K|AAV 25K|Y1-25K, Y2-25K|Ext: CTwn|GTD: 37.5K"
     },
     {
       "season": 2025,

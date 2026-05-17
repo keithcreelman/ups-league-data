@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-17 13:58:22",
+    "generated_at": "2026-05-17 17:15:47",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -2219,15 +2219,15 @@
       "player_name": "Kraft, Tucker",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 2000,
+      "salary": 12000,
       "contract_year": 1,
-      "contract_status": "Rookie",
+      "contract_status": "EXT1",
       "acquired_date": "2023-05-28 21:32:16",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 3| TCV 6K| AAV 2K"
+      "contract_info": "CL 1|TCV 12K|AAV 12K|Y1-12K|Ext: Cash|GTD: 9K"
     },
     {
       "season": 2025,

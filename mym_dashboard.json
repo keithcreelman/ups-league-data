@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-16 18:07:37",
+    "generated_at": "2026-05-17 04:32:55",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -5519,15 +5519,15 @@
       "player_name": "Garrett, Myles",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 4000,
+      "salary": 10000,
       "contract_year": 1,
-      "contract_status": "FL",
+      "contract_status": "TAG",
       "acquired_date": "2022-05-09 09:19:46",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2022-05-23 09:19:46",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2022-05-09. Deadline to submit a MYM has passed. Deadline was 2022-05-23.",
-      "contract_info": "CL 2| TCV 18K| AAV 9K| Y1-14, Y2-4,"
+      "contract_info": "CL 1| TCV 10K| AAV 10K| GTD 7.5K| Tag| Tier 1| Formula: Avg Top 1-6 DL AAV | 10% salary floor (rounded up)"
     },
     {
       "season": 2025,

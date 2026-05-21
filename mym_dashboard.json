@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-18 19:03:02",
+    "generated_at": "2026-05-21 12:26:26",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4719,15 +4719,15 @@
       "player_name": "Brown, Chase",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 2000,
-      "contract_year": 1,
-      "contract_status": "Rookie",
+      "salary": 22000,
+      "contract_year": 2,
+      "contract_status": "EXT2",
       "acquired_date": "2024-11-28 12:19:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-12 12:19:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-28. Deadline to submit a MYM has passed. Deadline was 2024-12-12.",
-      "contract_info": "CL 3| TCV 6K| AAV 2K"
+      "contract_info": "CL 2|TCV 44K|AAV 22K|Y1-22K, Y2-22K|Ext: L.A.|GTD: 33K"
     },
     {
       "season": 2025,
@@ -4819,15 +4819,15 @@
       "player_name": "Curl, Kamren",
       "position": "S",
       "positional_grouping": "DB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "TAG",
       "acquired_date": "2025-11-27 10:47:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-11 10:47:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-27. Deadline to submit a MYM has passed. Deadline was 2025-12-11.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 4K| AAV 4K| GTD 3K| Tag| Tier 1| Formula: Avg Top 1-6 DB AAV"
     },
     {
       "season": 2025,
@@ -5021,7 +5021,7 @@
       "positional_grouping": "DB",
       "salary": 3000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Veteran",
       "acquired_date": "2024-10-25 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-08 09:00:00",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-21 12:26:26",
+    "generated_at": "2026-05-21 16:23:23",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3299,15 +3299,15 @@
       "player_name": "Young, Bryce",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 13000,
-      "contract_year": 1,
-      "contract_status": "Rookie",
+      "salary": 33000,
+      "contract_year": 2,
+      "contract_status": "EXT2",
       "acquired_date": "2023-11-03 15:32:27",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-11-17 15:32:27",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-11-03. Deadline to submit a MYM has passed. Deadline was 2023-11-17.",
-      "contract_info": "CL 3| TCV 39K| AAV 13K"
+      "contract_info": "CL 2|TCV 66K|AAV 33K|Y1-33K, Y2-33K|Ext: GRID|GTD: 49.5K"
     },
     {
       "season": 2025,
@@ -3939,15 +3939,15 @@
       "player_name": "Williams, Javonte",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 27000,
+      "salary": 30000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "TAG",
       "acquired_date": "2023-10-06 07:29:33",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-10-20 07:29:33",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-10-06. Deadline to submit a MYM has passed. Deadline was 2023-10-20.",
-      "contract_info": "CL 2| TCV 54K| Ext: Hammer"
+      "contract_info": "CL 1| TCV 30K| AAV 30K| GTD 22.5K| Tag| Tier 3| Formula: Avg Top 9-31 RB AAV | 10% AAV floor (rounded up to $1K) | 10% AAV floor (rounded up to $1K)"
     },
     {
       "season": 2025,

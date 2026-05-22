@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-22 04:36:42",
+    "generated_at": "2026-05-22 12:00:54",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1799,7 +1799,7 @@
       "player_name": "Rodgers, Aaron",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 7000,
+      "salary": 15000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2025-10-07 17:45:18",

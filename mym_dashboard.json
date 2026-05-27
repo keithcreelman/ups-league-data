@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-22 12:00:54",
+    "generated_at": "2026-05-27 04:49:50",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3159,7 +3159,7 @@
       "player_name": "Rodriguez, Chris",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 2000,
+      "salary": 3000,
       "contract_year": 1,
       "contract_status": "Rookie",
       "acquired_date": "2024-03-20 19:36:05",
@@ -4799,7 +4799,7 @@
       "player_name": "Charbonnet, Zach",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 5000,
+      "salary": 7000,
       "contract_year": 1,
       "contract_status": "Rookie",
       "acquired_date": "2024-10-10 10:02:41",
@@ -6639,7 +6639,7 @@
       "player_name": "Wilson, Emanuel",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Rookie",
       "acquired_date": "2023-08-31 09:00:00",

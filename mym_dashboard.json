@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-27 12:31:52",
+    "generated_at": "2026-05-28 04:41:06",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3919,7 +3919,7 @@
       "player_name": "Tucker, Sean",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 2000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Rookie",
       "acquired_date": "2023-05-28 21:57:11",

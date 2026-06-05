@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-05 19:10:51",
+    "generated_at": "2026-06-05 22:35:39",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6701,7 +6701,7 @@
       "positional_grouping": "RB",
       "salary": 25000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2",
+      "contract_status": "Vet-Ext2-BL",
       "acquired_date": "2025-11-09 02:40:23",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-23 02:40:23",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-07 22:31:32",
+    "generated_at": "2026-07-15 17:39:38",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -999,7 +999,7 @@
       "player_name": "Jackson, Lamar",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 46000,
+      "salary": 17000,
       "contract_year": 1,
       "contract_status": "Tag",
       "acquired_date": "2025-11-12 22:53:34",

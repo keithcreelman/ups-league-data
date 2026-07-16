@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-16 22:16:40",
+    "generated_at": "2026-07-16 23:12:05",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -579,7 +579,7 @@
       "player_name": "Waddle, Jaylen",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 30000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2025-10-07 17:15:00",
@@ -1839,7 +1839,7 @@
       "player_name": "Smith, DeVonta",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 26000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2023-11-03 15:32:27",

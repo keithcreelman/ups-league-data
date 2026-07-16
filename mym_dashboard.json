@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-15 17:39:38",
+    "generated_at": "2026-07-16 11:54:04",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -39,7 +39,7 @@
       "player_name": "Barkley, Saquon",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 61000,
+      "salary": 3000,
       "contract_year": 1,
       "contract_status": "Tag",
       "acquired_date": "2024-11-13 06:18:24",
@@ -3959,7 +3959,7 @@
       "player_name": "Allen, Keenan",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 5000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2025-08-09 22:33:42",

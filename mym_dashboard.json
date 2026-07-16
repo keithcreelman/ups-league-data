@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-16 11:54:04",
+    "generated_at": "2026-07-16 14:24:10",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -679,7 +679,7 @@
       "player_name": "Allen, Josh",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 46000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2024-11-28 09:18:58",
@@ -1959,7 +1959,7 @@
       "player_name": "Allgeier, Tyler",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 15000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2025-06-09 05:58:50",
@@ -4759,7 +4759,7 @@
       "player_name": "Burrow, Joe",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 46000,
+      "salary": 16000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2020-06-01 20:14:25",

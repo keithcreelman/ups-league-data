@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-16 14:24:10",
+    "generated_at": "2026-07-16 22:16:40",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1559,7 +1559,7 @@
       "player_name": "Kamara, Alvin",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 27000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Veteran",
       "acquired_date": "2023-05-29 12:17:02",

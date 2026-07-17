@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-16 23:12:05",
+    "generated_at": "2026-07-17 17:31:19",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -99,7 +99,7 @@
       "player_name": "Brissett, Jacoby",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 16000,
+      "salary": 12000,
       "contract_year": 1,
       "contract_status": "Tag",
       "acquired_date": "2025-10-10 09:00:00",

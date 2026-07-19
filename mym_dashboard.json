@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-17 17:31:19",
+    "generated_at": "2026-07-19 15:15:57",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1281,7 +1281,7 @@
       "positional_grouping": "QB",
       "salary": 15000,
       "contract_year": 1,
-      "contract_status": "Vet-Ext2-FL",
+      "contract_status": "Vet-Ext2",
       "acquired_date": "2023-04-02 20:09:44",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-04-16 20:09:44",
@@ -1381,7 +1381,7 @@
       "positional_grouping": "WR",
       "salary": 47000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2-BL",
+      "contract_status": "Vet-Ext2",
       "acquired_date": "2024-05-26 20:30:15",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-06-09 20:30:15",
@@ -6701,7 +6701,7 @@
       "positional_grouping": "RB",
       "salary": 25000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2-BL",
+      "contract_status": "Vet-Ext2",
       "acquired_date": "2025-11-09 02:40:23",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-23 02:40:23",
@@ -7241,7 +7241,7 @@
       "positional_grouping": "WR",
       "salary": 25000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2-BL",
+      "contract_status": "Vet-Ext2",
       "acquired_date": "2025-10-14 05:06:44",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-28 05:06:44",

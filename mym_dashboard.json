@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-22 20:31:47",
+    "generated_at": "2026-07-22 22:16:27",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1079,7 +1079,7 @@
       "player_name": "London, Drake",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 52000,
+      "salary": 20000,
       "contract_year": 2,
       "contract_status": "Vet-Ext1",
       "acquired_date": "2024-09-12 06:51:20",
@@ -1087,7 +1087,7 @@
       "mym_deadline": "2024-09-26 06:51:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-12. Deadline to submit a MYM has passed. Deadline was 2024-09-26.",
-      "contract_info": "CL 2| TCV 95K| AAV 52K, 43K| Y1-52K, Y2-43K"
+      "contract_info": "CL 2| TCV 95K| AAV 47.5K| Y1-20K, Y2-75K| GTD: 71.3K"
     },
     {
       "season": 2025,

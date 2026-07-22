@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-22 22:16:27",
+    "generated_at": "2026-07-22 23:16:50",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6699,7 +6699,7 @@
       "player_name": "Achane, De'Von",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 25000,
+      "salary": 10000,
       "contract_year": 2,
       "contract_status": "Vet-Ext2",
       "acquired_date": "2025-11-09 02:40:23",
@@ -6707,7 +6707,7 @@
       "mym_deadline": "2025-11-23 02:40:23",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-09. Deadline to submit a MYM has passed. Deadline was 2025-11-23.",
-      "contract_info": "CL 3| TCV 55K| AAV 25K| Y1-5K, Y2-25K, Y3-25K| GTD: 41.3K| Ext: Gride"
+      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K| GTD: 37.5K"
     },
     {
       "season": 2025,
@@ -7239,7 +7239,7 @@
       "player_name": "Rice, Rashee",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 25000,
+      "salary": 10000,
       "contract_year": 2,
       "contract_status": "Vet-Ext2",
       "acquired_date": "2025-10-14 05:06:44",
@@ -7247,7 +7247,7 @@
       "mym_deadline": "2025-10-28 05:06:44",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-14. Deadline to submit a MYM has passed. Deadline was 2025-10-28.",
-      "contract_info": "CL 3|TCV 55K|AAV 25K|Y1-5K, Y2-25K, Y3-25K|GTD: 41.3K"
+      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K| GTD: 37.5K"
     },
     {
       "season": 2025,

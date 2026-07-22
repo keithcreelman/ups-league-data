@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-20 20:41:07",
+    "generated_at": "2026-07-22 18:34:36",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1081,13 +1081,13 @@
       "positional_grouping": "WR",
       "salary": 52000,
       "contract_year": 1,
-      "contract_status": "Vet-Ext2-BL",
+      "contract_status": "Vet-Ext1",
       "acquired_date": "2024-09-12 06:51:20",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-09-26 06:51:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-12. Deadline to submit a MYM has passed. Deadline was 2024-09-26.",
-      "contract_info": "CL 2| TCV 66K| AAV 52K| Y1-14, Y2-52| GTD: 49.5K| Ext: PG| restructure: 2025"
+      "contract_info": "CL 2| TCV 95K| AAV 52K, 43K| Y1-52K, Y2-43K"
     },
     {
       "season": 2025,

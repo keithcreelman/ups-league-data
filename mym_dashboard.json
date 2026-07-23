@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-23 14:33:11",
+    "generated_at": "2026-07-23 18:37:54",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -507,7 +507,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 3| TCV 84K| AAV 22K| Y1-40K, Y2-22K, Y3-22K| GTD: 63K"
+      "contract_info": "CL 3| TCV 84K| AAV 28K| Y1-40K, Y2-22K, Y3-22K| GTD: 63K"
     },
     {
       "season": 2025,
@@ -807,7 +807,7 @@
       "mym_deadline": "2024-06-09 20:30:15",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-26. Deadline to submit a MYM has passed. Deadline was 2024-06-09.",
-      "contract_info": "CL 2|TCV 64K|AAV 32K|Y1-14K, Y2-50K|GTD: 48K|Restructured 2026"
+      "contract_info": "CL 2|TCV 64K|AAV 27K, 37K|Y1-14K, Y2-50K|GTD: 48K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -1047,7 +1047,7 @@
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 2|TCV 50K|AAV 10K|Y1-10K, Y2-40K|Ext: CTwn|GTD: 37.5K"
+      "contract_info": "CL 2|TCV 50K|AAV 25K|Y1-10K, Y2-40K|Ext: CTwn|GTD: 37.5K"
     },
     {
       "season": 2025,
@@ -1259,15 +1259,15 @@
       "player_name": "Smith-Njigba, Jaxon",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
-      "contract_year": 2,
+      "salary": 14000,
+      "contract_year": 3,
       "contract_status": "Vet-Ext2-FL",
       "acquired_date": "2024-05-27 11:22:13",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-06-10 11:22:13",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-27. Deadline to submit a MYM has passed. Deadline was 2024-06-10.",
-      "contract_info": "CL 3| TCV 70K| AAV 1K| Y1-14K, Y2-1K, Y3-55K| GTD: 52.5K| Ext: C-Town| restructure: 2025"
+      "contract_info": "CL 3| TCV 70K| AAV 30K| Y1-14K, Y2-1K, Y3-55K| GTD: 52.5K| Ext: C-Town| restructure: 2025"
     },
     {
       "season": 2025,
@@ -1587,7 +1587,7 @@
       "mym_deadline": "2025-09-10 12:07:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-27. Deadline to submit a MYM has passed. Deadline was 2025-09-10.",
-      "contract_info": "CL 3| TCV 27K| AAV 6K| Y1-20, Y2-1, Y3-6| GTD: 20.3K"
+      "contract_info": "CL 3| TCV 27K| AAV 9K| Y1-20, Y2-1, Y3-6| GTD: 20.3K"
     },
     {
       "season": 2025,
@@ -2139,15 +2139,15 @@
       "player_name": "Jeudy, Jerry",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
-      "contract_year": 1,
+      "salary": 7000,
+      "contract_year": 3,
       "contract_status": "Vet-FAA-FL",
       "acquired_date": "2024-07-29 07:08:38",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2024-08-12 07:08:38",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-07-29. Deadline to submit a MYM has passed. Deadline was 2024-08-12.",
-      "contract_info": "CL 3| TCV 9K| AAV 1K| Y1-7, Y2-1, Y3-1| GTD: 6.8K"
+      "contract_info": "CL 3| TCV 9K| AAV 3K| Y1-7, Y2-1, Y3-1| GTD: 6.8K"
     },
     {
       "season": 2025,
@@ -2447,7 +2447,7 @@
       "mym_deadline": "2025-10-21 17:15:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-07. Deadline to submit a MYM has passed. Deadline was 2025-10-21.",
-      "contract_info": "CL 3| TCV 57K| AAV 25K| Y1-14K, Y2-25K, Y3-18K| GTD: 42.8K"
+      "contract_info": "CL 3| TCV 57K| AAV 19K| Y1-14K, Y2-25K, Y3-18K| GTD: 42.8K"
     },
     {
       "season": 2025,
@@ -2479,15 +2479,15 @@
       "player_name": "Smith, Roquan",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 1000,
-      "contract_year": 1,
+      "salary": 8000,
+      "contract_year": 3,
       "contract_status": "Vet-FAA-FL",
       "acquired_date": "2022-08-03 07:20:05",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2022-08-17 07:20:05",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2022-08-03. Deadline to submit a MYM has passed. Deadline was 2022-08-17.",
-      "contract_info": "CL 3| TCV 12K| AAV 1K| Y1-8, Y2-3, Y3-1| GTD: 9K"
+      "contract_info": "CL 3| TCV 12K| AAV 4K| Y1-8, Y2-3, Y3-1| GTD: 9K"
     },
     {
       "season": 2025,
@@ -3507,7 +3507,7 @@
       "mym_deadline": "2024-11-14 00:36:32",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-31. Deadline to submit a MYM has passed. Deadline was 2024-11-14.",
-      "contract_info": "CL 2| TCV 129K| AAV 26K| Y1-26K, Y2-103K| GTD: 96.8K| Ext: Creel, Hammer| restructure: 2026"
+      "contract_info": "CL 2| TCV 129K| AAV 54K| Y1-26K, Y2-103K| GTD: 96.8K| Ext: Creel, Hammer| restructure: 2026"
     },
     {
       "season": 2025,
@@ -3827,7 +3827,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 3| TCV 45K| AAV 1K| Y1-9K, Y2-1K, Y3-35K| GTD: 33.8K"
+      "contract_info": "CL 3| TCV 45K| AAV 15K| Y1-9K, Y2-1K, Y3-35K| GTD: 33.8K"
     },
     {
       "season": 2025,
@@ -5047,7 +5047,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 2| TCV 42K| AAV 12K| Y1-12K, Y2-30K| Ext: Hammer| GTD: 31.5K"
+      "contract_info": "CL 2| TCV 42K| AAV 20K, 30K| Y1-12K, Y2-30K| Ext: Hammer| GTD: 31.5K"
     },
     {
       "season": 2025,
@@ -5347,7 +5347,7 @@
       "mym_deadline": "2025-11-26 09:15:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-12. Deadline to submit a MYM has passed. Deadline was 2025-11-26.",
-      "contract_info": "CL 3| TCV 90K| AAV 20K| Y1-50, Y2-20, Y3-20| GTD: 67.5K"
+      "contract_info": "CL 3| TCV 90K| AAV 30K| Y1-50, Y2-20, Y3-20| GTD: 67.5K"
     },
     {
       "season": 2025,
@@ -5767,7 +5767,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 2| TCV 62K| AAV 26K| Y1-36, Y2-26| GTD: 46.5K| ,"
+      "contract_info": "CL 2| TCV 62K| AAV 31K| Y1-36, Y2-26| GTD: 46.5K"
     },
     {
       "season": 2025,
@@ -6547,7 +6547,7 @@
       "mym_deadline": "2025-11-26 22:53:34",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-12. Deadline to submit a MYM has passed. Deadline was 2025-11-26.",
-      "contract_info": "CL 2| TCV 74K| AAV 15K| Y1-15K, Y2-59K| GTD: 55.5K| Ext: PG, RealDeal| restructure: 2026"
+      "contract_info": "CL 2| TCV 74K| AAV 32K, 42K| Y1-15K, Y2-59K| GTD: 55.5K| Ext: PG, RealDeal| restructure: 2026"
     },
     {
       "season": 2025,
@@ -7407,7 +7407,7 @@
       "mym_deadline": "2025-08-30 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-16. Deadline to submit a MYM has passed. Deadline was 2025-08-30.",
-      "contract_info": "CL 3| TCV 24K| AAV 5K| Y1-5, Y2-5, Y3-14| GTD: 18K"
+      "contract_info": "CL 3| TCV 24K| AAV 8K| Y1-5, Y2-5, Y3-14| GTD: 18K"
     },
     {
       "season": 2025,

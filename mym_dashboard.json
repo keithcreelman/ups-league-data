@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-23 12:02:52",
+    "generated_at": "2026-07-23 14:33:11",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3980,14 +3980,14 @@
       "position": "S",
       "positional_grouping": "DB",
       "salary": 4000,
-      "contract_year": 1,
+      "contract_year": 2,
       "contract_status": "Vet-ERA",
       "acquired_date": "2023-05-28 22:16:31",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 1| TCV 4K| AAV 4K"
+      "contract_info": "CL 2|TCV 8K|AAV 4K|Y1-4K, Y2-4K|GTD: 6K"
     },
     {
       "season": 2025,

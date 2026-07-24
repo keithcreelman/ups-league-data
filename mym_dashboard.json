@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-23 18:37:54",
+    "generated_at": "2026-07-24 15:44:58",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -2399,15 +2399,15 @@
       "player_name": "Robinson, Bijan",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 35000,
+      "salary": 14000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2",
+      "contract_status": "Vet-Ext2-BL",
       "acquired_date": "2023-05-28 18:39:11",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 2|TCV 70K|AAV 35K|Y1-35K, Y2-35K|Ext: Cash|GTD: 52.5K"
+      "contract_info": "CL 2|TCV 70K|AAV 35K|Y1-14K, Y2-56K|GTD: 52.5K|Restructured 2026"
     },
     {
       "season": 2025,

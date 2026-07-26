@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-25 09:12:31",
+    "generated_at": "2026-07-26 17:16:46",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1839,15 +1839,15 @@
       "player_name": "Smith, DeVonta",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
+      "salary": 26000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2023-11-03 15:32:27",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-11-17 15:32:27",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-11-03. Deadline to submit a MYM has passed. Deadline was 2023-11-17.",
-      "contract_info": "CL 2| TCV 42K| AAV 26K|Y1-16 Y2-26|Ext: GRide, CBP"
+      "contract_info": "CL 1| TCV 26K| AAV 26K"
     },
     {
       "season": 2025,
@@ -3439,15 +3439,15 @@
       "player_name": "Burns, Brian",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 8000,
+      "salary": 7000,
       "contract_year": 1,
-      "contract_status": "TAG",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-26 10:00:18",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-10 10:00:18",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-26. Deadline to submit a MYM has passed. Deadline was 2024-12-10.",
-      "contract_info": "CL 1| TCV 8K| AAV 8K| GTD 8K| Tag| Tier 1| Formula: Avg Top 1-6 DL AAV"
+      "contract_info": "CL 1| TCV 7K| AAV 7K"
     },
     {
       "season": 2025,
@@ -5401,13 +5401,13 @@
       "positional_grouping": "LB",
       "salary": 4000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-09-30 12:31:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-14 12:31:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-30. Deadline to submit a MYM has passed. Deadline was 2025-10-14.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -6859,15 +6859,15 @@
       "player_name": "Crosby, Maxx",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 10000,
+      "salary": 8000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-27 10:18:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-11 10:18:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-27. Deadline to submit a MYM has passed. Deadline was 2025-12-11.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 8K| AAV 8K"
     },
     {
       "season": 2025,

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-26 17:16:46",
+    "generated_at": "2026-07-26 19:35:28",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4781,13 +4781,13 @@
       "positional_grouping": "LB",
       "salary": 2000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-07 15:09:19",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-07. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,

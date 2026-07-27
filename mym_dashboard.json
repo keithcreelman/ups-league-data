@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-27 20:43:28",
+    "generated_at": "2026-07-27 22:18:45",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -421,13 +421,13 @@
       "positional_grouping": "PN",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-28 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-12 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-28. Deadline to submit a MYM has passed. Deadline was 2025-12-12.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -1001,13 +1001,13 @@
       "positional_grouping": "QB",
       "salary": 62000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-12 22:53:34",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-26 22:53:34",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-12. Deadline to submit a MYM has passed. Deadline was 2025-11-26.",
-      "contract_info": "No Further Extension Allowed"
+      "contract_info": "CL 1| TCV 62K| AAV 62K"
     },
     {
       "season": 2025,

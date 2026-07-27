@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-27 18:48:29",
+    "generated_at": "2026-07-27 20:43:28",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -679,15 +679,15 @@
       "player_name": "Allen, Josh",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 4000,
+      "salary": 88000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-28 09:18:58",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-12 09:18:58",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-28. Deadline to submit a MYM has passed. Deadline was 2024-12-12.",
-      "contract_info": "No Further Extension Allowed"
+      "contract_info": "CL 1| TCV 88K| AAV 88K"
     },
     {
       "season": 2025,
@@ -3879,15 +3879,15 @@
       "player_name": "Swift, D'Andre",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 23000,
+      "salary": 26000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-03 13:10:49",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-17 13:10:49",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-03. Deadline to submit a MYM has passed. Deadline was 2025-10-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 26K| AAV 26K"
     },
     {
       "season": 2025,
@@ -4419,15 +4419,15 @@
       "player_name": "Prescott, Dak",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 45000,
+      "salary": 63000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-09-17 12:52:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-10-01 12:52:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-17. Deadline to submit a MYM has passed. Deadline was 2024-10-01.",
-      "contract_info": "CL 2| TCV 90K| AAV 45K| Y1-45, Y2-45,"
+      "contract_info": "CL 1| TCV 63K| AAV 63K"
     },
     {
       "season": 2025,
@@ -4759,15 +4759,15 @@
       "player_name": "Burrow, Joe",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 16000,
+      "salary": 58000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2020-06-01 20:14:25",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2020) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 1| TCV 46K| AAV 46K| No Further Extensions"
+      "contract_info": "CL 1| TCV 58K| AAV 58K"
     },
     {
       "season": 2025,
@@ -5579,15 +5579,15 @@
       "player_name": "Hutchinson, Aidan",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 5000,
+      "salary": 8000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-26 14:58:51",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-09 14:58:51",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-26. Deadline to submit a MYM has passed. Deadline was 2024-11-09.",
-      "contract_info": "CL 2| TCV 7K| AAV 5K| Y1-2K, Y2-5K| Ext: Cleon"
+      "contract_info": "CL 1| TCV 8K| AAV 8K"
     },
     {
       "season": 2025,
@@ -7319,15 +7319,15 @@
       "player_name": "Warren, Jaylen",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 14000,
+      "salary": 20000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-22 17:34:16",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-06 17:34:16",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-22. Deadline to submit a MYM has passed. Deadline was 2025-12-06.",
-      "contract_info": "CL 1| TCV 14K| AAV 14K| Y1-14K| Ext: CBP"
+      "contract_info": "CL 1| TCV 20K| AAV 20K"
     },
     {
       "season": 2025,

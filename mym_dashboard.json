@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-27 15:14:50",
+    "generated_at": "2026-07-27 17:11:08",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -999,7 +999,7 @@
       "player_name": "Jackson, Lamar",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 17000,
+      "salary": 62000,
       "contract_year": 1,
       "contract_status": "Tag",
       "acquired_date": "2025-11-12 22:53:34",
@@ -3599,15 +3599,15 @@
       "player_name": "Hamilton, Kyle",
       "position": "S",
       "positional_grouping": "DB",
-      "salary": 5000,
+      "salary": 3000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-26 10:00:18",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-10 10:00:18",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-26. Deadline to submit a MYM has passed. Deadline was 2024-12-10.",
-      "contract_info": "CL 1| TCV 5K| AAV 5K| Y1-5K| Ext: Hammer"
+      "contract_info": "CL 1| TCV 3K| AAV 3K"
     },
     {
       "season": 2025,

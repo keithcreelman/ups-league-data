@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-28 18:46:52",
+    "generated_at": "2026-07-28 20:34:48",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1659,15 +1659,15 @@
       "player_name": "Metcalf, DK",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 38000,
+      "salary": 11000,
       "contract_year": 1,
-      "contract_status": "BL",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-21 23:17:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-05 23:17:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-21. Deadline to submit a MYM has passed. Deadline was 2025-12-05.",
-      "contract_info": "CL 2| TCV 66K| AAV 33K| Y1-28K, Y2-38K| Not eligible for tag or extension"
+      "contract_info": "CL 1| TCV 11K| AAV 11K"
     },
     {
       "season": 2025,
@@ -7299,15 +7299,15 @@
       "player_name": "Van Ginkel, Andrew",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 7000,
+      "salary": 4000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-09 02:40:23",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-23 02:40:23",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-09. Deadline to submit a MYM has passed. Deadline was 2025-11-23.",
-      "contract_info": "CL 1| TCV 7K| AAV 7K| No Further Extensions"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,

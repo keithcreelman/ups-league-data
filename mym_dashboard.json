@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-28 12:14:46",
+    "generated_at": "2026-07-28 14:38:53",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -459,15 +459,15 @@
       "player_name": "Pitts, Kyle",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 27000,
+      "salary": 25000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-02 12:49:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-16 12:49:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-02. Deadline to submit a MYM has passed. Deadline was 2025-10-16.",
-      "contract_info": "CL 3| TCV 69K| AAV 27K| Y1-15 Y2- 27 Y3- 27| Ext: Gride"
+      "contract_info": "CL 1| TCV 25K| AAV 25K"
     },
     {
       "season": 2025,
@@ -3139,15 +3139,15 @@
       "player_name": "Pittman, Michael",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 45000,
+      "salary": 5000,
       "contract_year": 1,
-      "contract_status": "Vet-Ext2",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-23 21:00:30",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-06 21:00:30",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-23. Deadline to submit a MYM has passed. Deadline was 2024-11-06.",
-      "contract_info": "CL 3| TCV 115K| AAV 45K| Y1-25K Y2-45K Y3-45K| GTD: 86.3K| Ext: PG"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,
@@ -4979,15 +4979,15 @@
       "player_name": "Landman, Nate",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 2000,
+      "salary": 4000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-09-19 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-03 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-19. Deadline to submit a MYM has passed. Deadline was 2025-10-03.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -7019,15 +7019,15 @@
       "player_name": "Goff, Jared",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 30000,
+      "salary": 38000,
       "contract_year": 1,
-      "contract_status": "BL",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-14 20:41:54",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-28 20:41:54",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-14. Deadline to submit a MYM has passed. Deadline was 2025-11-28.",
-      "contract_info": "CL 2| TCV 56K| AAV 35K| Y1-26, Y2-30K| Ext: Sex"
+      "contract_info": "CL 1| TCV 38K| AAV 38K"
     },
     {
       "season": 2025,
@@ -7219,15 +7219,15 @@
       "player_name": "Pineiro, Eddy",
       "position": "PK",
       "positional_grouping": "PK",
-      "salary": 4000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-11 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-25 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-11. Deadline to submit a MYM has passed. Deadline was 2025-12-25.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

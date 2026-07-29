@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-29 12:21:15",
+    "generated_at": "2026-07-29 15:19:33",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -99,15 +99,15 @@
       "player_name": "Brissett, Jacoby",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 12000,
+      "salary": 13000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-10 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-24 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-10. Deadline to submit a MYM has passed. Deadline was 2025-10-24.",
-      "contract_info": "CL 1| TCV 16K| AAV 16K| GTD: 12K| Tag| Tier 3| Formula: Avg Top 16-24 QB AAV"
+      "contract_info": "CL 1| TCV 13K| AAV 13K"
     },
     {
       "season": 2025,
@@ -1379,7 +1379,7 @@
       "player_name": "Collins, Nico",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 30000,
+      "salary": 19000,
       "contract_year": 2,
       "contract_status": "Vet-Ext2-BL",
       "acquired_date": "2024-05-26 20:30:15",
@@ -1387,7 +1387,7 @@
       "mym_deadline": "2024-06-09 20:30:15",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-26. Deadline to submit a MYM has passed. Deadline was 2024-06-09.",
-      "contract_info": "CL 2| TCV 94K| AAV 47K| Y1-30K, Y2-64K| GTD: 70.5K"
+      "contract_info": "CL 2|TCV 94K|AAV 42K|Y1-19K, Y2-75K|GTD: 70.5K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -1781,13 +1781,13 @@
       "positional_grouping": "PK",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-19 10:28:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-02 10:28:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-19. Deadline to submit a MYM has passed. Deadline was 2025-11-02.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

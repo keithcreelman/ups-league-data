@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-29 21:12:44",
+    "generated_at": "2026-07-29 22:13:51",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4501,13 +4501,13 @@
       "positional_grouping": "LB",
       "salary": 2000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-12 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-26 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-12. Deadline to submit a MYM has passed. Deadline was 2025-12-26.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -6959,7 +6959,7 @@
       "player_name": "Gainwell, Kenneth",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 3000,
+      "salary": 23000,
       "contract_year": 1,
       "contract_status": "WW",
       "acquired_date": "2025-11-22 17:34:16",
@@ -7139,15 +7139,15 @@
       "player_name": "McCaffrey, Christian",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 62000,
+      "salary": 63000,
       "contract_year": 1,
-      "contract_status": "Tag",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-19 21:41:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-09-02 21:41:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-19. Deadline to submit a MYM has passed. Deadline was 2025-09-02.",
-      "contract_info": "CL 1| TCV 62K| AAV 62K| GTD: 46.5K| Tag| Tier 1| Formula: Avg Top 1-4 RB AAV | 10% salary floor (rounded up)"
+      "contract_info": "CL 1| TCV 63K| AAV 63K"
     },
     {
       "season": 2025,

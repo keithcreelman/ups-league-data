@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-29 03:42:14",
+    "generated_at": "2026-07-29 06:45:38",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1339,7 +1339,7 @@
       "player_name": "Turner, Kobie",
       "position": "DT",
       "positional_grouping": "DL",
-      "salary": 4000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "WW",
       "acquired_date": "2025-12-25 09:00:00",
@@ -2159,15 +2159,15 @@
       "player_name": "Jones, Ernest",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 4000,
+      "salary": 5000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-08 15:09:36",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-08. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,

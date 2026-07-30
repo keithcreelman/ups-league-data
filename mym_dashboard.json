@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-30 14:32:53",
+    "generated_at": "2026-07-30 16:50:27",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4959,15 +4959,15 @@
       "player_name": "Jones, Aaron",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 5000,
+      "salary": 12000,
       "contract_year": 1,
-      "contract_status": "FL",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2023-05-13 21:08:03",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2023-05-27 21:08:03",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-05-13. Deadline to submit a MYM has passed. Deadline was 2023-05-27.",
-      "contract_info": "CL 2| TCV 20K| AAV 10K| Y1-15, Y2-5,"
+      "contract_info": "CL 1| TCV 12K| AAV 12K"
     },
     {
       "season": 2025,

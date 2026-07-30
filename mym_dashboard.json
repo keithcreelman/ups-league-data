@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-30 12:04:13",
+    "generated_at": "2026-07-30 14:32:53",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1881,13 +1881,13 @@
       "positional_grouping": "PN",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-07 12:53:40",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-21 12:53:40",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-07. Deadline to submit a MYM has passed. Deadline was 2025-12-21.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -4639,15 +4639,15 @@
       "player_name": "Andrews, Mark",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 27000,
+      "salary": 7000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-21 23:17:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-05 23:17:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-21. Deadline to submit a MYM has passed. Deadline was 2025-12-05.",
-      "contract_info": "CL 3| TCV 63K| AAV 27K| Y1-9K, Y2-27K, Y3-27K| Ext: Blake, L.A. Looks"
+      "contract_info": "CL 1| TCV 7K| AAV 7K"
     },
     {
       "season": 2025,
@@ -6039,15 +6039,15 @@
       "player_name": "Cousins, Kirk",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 19000,
+      "salary": 5000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-20 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-04 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-20. Deadline to submit a MYM has passed. Deadline was 2025-12-04.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,
@@ -6341,13 +6341,13 @@
       "positional_grouping": "PK",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-29 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-13 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-29. Deadline to submit a MYM has passed. Deadline was 2025-12-13.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -7059,15 +7059,15 @@
       "player_name": "Hufanga, Talanoa",
       "position": "S",
       "positional_grouping": "DB",
-      "salary": 1000,
+      "salary": 3000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-04 15:18:50",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 3K| AAV 3K"
     },
     {
       "season": 2025,

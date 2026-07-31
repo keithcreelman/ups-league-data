@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-31 12:17:50",
+    "generated_at": "2026-07-31 14:39:30",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1219,15 +1219,15 @@
       "player_name": "Pollard, Tony",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 27000,
+      "salary": 28000,
       "contract_year": 1,
-      "contract_status": "Vet-Ext1",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2020-08-16 21:12:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2020-08-30 21:12:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2020-08-16. Deadline to submit a MYM has passed. Deadline was 2020-08-30.",
-      "contract_info": "CL 2| TCV 54K| AAV 27K| Y1-27K, Y2-27K| GTD: 40.5K| Ext: C-Town"
+      "contract_info": "CL 1| TCV 28K| AAV 28K"
     },
     {
       "season": 2025,
@@ -1561,13 +1561,13 @@
       "positional_grouping": "RB",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2023-05-29 12:17:02",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-06-12 12:17:02",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-05-29. Deadline to submit a MYM has passed. Deadline was 2023-06-12.",
-      "contract_info": "CL 2| TCV 54K| AAV 27K| Y1-27, Y2-27,"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -3539,15 +3539,15 @@
       "player_name": "Doubs, Romeo",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 4000,
+      "salary": 15000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-05 13:25:01",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-08-19 13:25:01",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-08-19.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 15K| AAV 15K"
     },
     {
       "season": 2025,
@@ -4459,15 +4459,15 @@
       "player_name": "Ridley, Calvin",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 28000,
+      "salary": 4000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-01 22:05:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-10-15 22:05:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-01. Deadline to submit a MYM has passed. Deadline was 2024-10-15.",
-      "contract_info": "CL 2| TCV 46K| AAV 28K| Y1-24 Y2-28| Ext: Sex"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -4841,13 +4841,13 @@
       "positional_grouping": "WR",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-06 17:44:42",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-06. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -5461,13 +5461,13 @@
       "positional_grouping": "DB",
       "salary": 2000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-02 17:02:33",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-16 17:02:33",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-02. Deadline to submit a MYM has passed. Deadline was 2025-10-16.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -6119,15 +6119,15 @@
       "player_name": "Flournoy, Ryan",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 6000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-11 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-25 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-11. Deadline to submit a MYM has passed. Deadline was 2025-12-25.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -6619,15 +6619,15 @@
       "player_name": "Willis, Malik",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 37000,
+      "salary": 39000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-27 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2026-01-10 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-27. Deadline to submit a MYM has passed. Deadline was 2026-01-10.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 39K| AAV 39K"
     },
     {
       "season": 2025,
@@ -6779,15 +6779,15 @@
       "player_name": "Bonitto, Nik",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 4000,
+      "salary": 5000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-07 19:04:00",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-07. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,

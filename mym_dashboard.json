@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-01 19:35:13",
+    "generated_at": "2026-08-01 23:12:28",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -999,15 +999,15 @@
       "player_name": "Jackson, Lamar",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 38000,
-      "contract_year": 3,
-      "contract_status": "Vet-FAA-BL",
+      "salary": 62000,
+      "contract_year": 1,
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-12 22:53:34",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-26 22:53:34",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-12. Deadline to submit a MYM has passed. Deadline was 2025-11-26.",
-      "contract_info": "CL 3|TCV 186K|AAV 62K|Y1-38K, Y2-62K, Y3-86K|GTD: 139.5K"
+      "contract_info": "CL 1| TCV 62K| AAV 62K"
     },
     {
       "season": 2025,
@@ -2160,14 +2160,14 @@
       "position": "LB",
       "positional_grouping": "LB",
       "salary": 5000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-08 15:09:36",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-08. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 3|TCV 15K|AAV 5K|Y1-5K, Y2-5K, Y3-5K|GTD: 11.3K"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,
@@ -2520,14 +2520,14 @@
       "position": "RB",
       "positional_grouping": "RB",
       "salary": 9000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-04 16:08:13",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-08-18 16:08:13",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-08-18.",
-      "contract_info": "CL 3|TCV 27K|AAV 9K|Y1-9K, Y2-9K, Y3-9K|GTD: 20.3K"
+      "contract_info": "CL 1| TCV 9K| AAV 9K"
     },
     {
       "season": 2025,
@@ -3440,14 +3440,14 @@
       "position": "DE",
       "positional_grouping": "DL",
       "salary": 7000,
-      "contract_year": 2,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-26 10:00:18",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-10 10:00:18",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-26. Deadline to submit a MYM has passed. Deadline was 2024-12-10.",
-      "contract_info": "CL 2|TCV 14K|AAV 7K|Y1-7K, Y2-7K|GTD: 10.5K"
+      "contract_info": "CL 1| TCV 7K| AAV 7K"
     },
     {
       "season": 2025,
@@ -3540,14 +3540,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 15000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-05 13:25:01",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-08-19 13:25:01",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-08-19.",
-      "contract_info": "CL 3|TCV 45K|AAV 15K|Y1-15K, Y2-15K, Y3-15K|GTD: 33.8K"
+      "contract_info": "CL 1| TCV 15K| AAV 15K"
     },
     {
       "season": 2025,
@@ -3600,14 +3600,14 @@
       "position": "S",
       "positional_grouping": "DB",
       "salary": 3000,
-      "contract_year": 2,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-26 10:00:18",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-12-10 10:00:18",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-26. Deadline to submit a MYM has passed. Deadline was 2024-12-10.",
-      "contract_info": "CL 2|TCV 6K|AAV 3K|Y1-3K, Y2-3K|GTD: 4.5K"
+      "contract_info": "CL 1| TCV 3K| AAV 3K"
     },
     {
       "season": 2025,
@@ -3679,15 +3679,15 @@
       "player_name": "Jacobs, Josh",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 18000,
-      "contract_year": 3,
-      "contract_status": "Vet-FAA-BL",
+      "salary": 30000,
+      "contract_year": 1,
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-10 11:47:20",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-10-24 11:47:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-10. Deadline to submit a MYM has passed. Deadline was 2024-10-24.",
-      "contract_info": "CL 3|TCV 90K|AAV 30K|Y1-18K, Y2-36K, Y3-36K|GTD: 67.5K"
+      "contract_info": "CL 1| TCV 30K| AAV 30K"
     },
     {
       "season": 2025,
@@ -4319,15 +4319,15 @@
       "player_name": "Mahomes, Patrick",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 28000,
-      "contract_year": 3,
-      "contract_status": "Vet-FAA-BL",
+      "salary": 48000,
+      "contract_year": 1,
+      "contract_status": "Vet-FAA",
       "acquired_date": "2024-11-09 21:56:06",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-23 21:56:06",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-09. Deadline to submit a MYM has passed. Deadline was 2024-11-23.",
-      "contract_info": "CL 3| TCV 144K| AAV 48K| Y1-28K, Y2-58K, Y3-58K| GTD: 108K| Restructured 2026"
+      "contract_info": "CL 1| TCV 48K| AAV 48K"
     },
     {
       "season": 2025,
@@ -4759,15 +4759,15 @@
       "player_name": "Burrow, Joe",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 28000,
-      "contract_year": 2,
-      "contract_status": "Vet-FAA-BL",
+      "salary": 58000,
+      "contract_year": 1,
+      "contract_status": "Vet-FAA",
       "acquired_date": "2020-06-01 20:14:25",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2020) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 2|TCV 116K|AAV 58K|Y1-28K, Y2-88K|GTD: 87K"
+      "contract_info": "CL 1| TCV 58K| AAV 58K"
     },
     {
       "season": 2025,
@@ -5200,14 +5200,14 @@
       "position": "QB",
       "positional_grouping": "QB",
       "salary": 33000,
-      "contract_year": 2,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-05 17:27:47",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 2|TCV 66K|AAV 33K|Y1-33K, Y2-33K|GTD: 49.5K"
+      "contract_info": "CL 1| TCV 33K| AAV 33K"
     },
     {
       "season": 2025,
@@ -5400,14 +5400,14 @@
       "position": "LB",
       "positional_grouping": "LB",
       "salary": 4000,
-      "contract_year": 2,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-09-30 12:31:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-14 12:31:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-30. Deadline to submit a MYM has passed. Deadline was 2025-10-14.",
-      "contract_info": "CL 2|TCV 8K|AAV 4K|Y1-4K, Y2-4K|GTD: 6K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -5460,14 +5460,14 @@
       "position": "CB",
       "positional_grouping": "DB",
       "salary": 2000,
-      "contract_year": 2,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-02 17:02:33",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-16 17:02:33",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-02. Deadline to submit a MYM has passed. Deadline was 2025-10-16.",
-      "contract_info": "CL 2|TCV 4K|AAV 2K|Y1-2K, Y2-2K|GTD: 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -5580,14 +5580,14 @@
       "position": "DE",
       "positional_grouping": "DL",
       "salary": 8000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-26 14:58:51",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-09 14:58:51",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-26. Deadline to submit a MYM has passed. Deadline was 2024-11-09.",
-      "contract_info": "CL 3|TCV 24K|AAV 8K|Y1-8K, Y2-8K, Y3-8K|GTD: 18K"
+      "contract_info": "CL 1| TCV 8K| AAV 8K"
     },
     {
       "season": 2025,
@@ -5720,14 +5720,14 @@
       "position": "PK",
       "positional_grouping": "PK",
       "salary": 1000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-14 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-28 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-14. Deadline to submit a MYM has passed. Deadline was 2025-11-28.",
-      "contract_info": "CL 3|TCV 3K|AAV 1K|Y1-1K, Y2-1K, Y3-1K|GTD: 1K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -6020,14 +6020,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 1000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-11 16:27:33",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-25 16:27:33",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-11. Deadline to submit a MYM has passed. Deadline was 2025-11-25.",
-      "contract_info": "CL 3|TCV 3K|AAV 1K|Y1-1K, Y2-1K, Y3-1K|GTD: 1K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -6860,14 +6860,14 @@
       "position": "DE",
       "positional_grouping": "DL",
       "salary": 8000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-27 10:18:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-11 10:18:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-27. Deadline to submit a MYM has passed. Deadline was 2025-12-11.",
-      "contract_info": "CL 3|TCV 24K|AAV 8K|Y1-8K, Y2-8K, Y3-8K|GTD: 18K"
+      "contract_info": "CL 1| TCV 8K| AAV 8K"
     },
     {
       "season": 2025,
@@ -7020,14 +7020,14 @@
       "position": "QB",
       "positional_grouping": "QB",
       "salary": 38000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-14 20:41:54",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-28 20:41:54",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-14. Deadline to submit a MYM has passed. Deadline was 2025-11-28.",
-      "contract_info": "CL 3|TCV 114K|AAV 38K|Y1-38K, Y2-38K, Y3-38K|GTD: 85.5K"
+      "contract_info": "CL 1| TCV 38K| AAV 38K"
     },
     {
       "season": 2025,
@@ -7360,14 +7360,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 16000,
-      "contract_year": 3,
+      "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2022-10-15 08:15:19",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2022-10-29 08:15:19",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2022-10-15. Deadline to submit a MYM has passed. Deadline was 2022-10-29.",
-      "contract_info": "CL 3|TCV 48K|AAV 16K|Y1-16K, Y2-16K, Y3-16K|GTD: 36K"
+      "contract_info": "CL 1| TCV 16K| AAV 16K"
     },
     {
       "season": 2025,

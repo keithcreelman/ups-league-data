@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-01 06:41:15",
+    "generated_at": "2026-08-01 09:21:38",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -7919,15 +7919,15 @@
       "player_name": "Robinson, Brian",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 15000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-06-08 09:18:09",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-06-22 09:18:09",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-06-08. Deadline to submit a MYM has passed. Deadline was 2025-06-22.",
-      "contract_info": "CL 1| TCV 15K| AAV 15K| Y1-15K| Ext: C-Town"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

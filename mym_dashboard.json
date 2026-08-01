@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-01 13:56:27",
+    "generated_at": "2026-08-01 15:27:35",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1921,13 +1921,13 @@
       "positional_grouping": "DL",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-06 12:09:21",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-06. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -2819,15 +2819,15 @@
       "player_name": "Elliss, Kaden",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 3000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-23 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-06 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-23. Deadline to submit a MYM has passed. Deadline was 2025-11-06.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

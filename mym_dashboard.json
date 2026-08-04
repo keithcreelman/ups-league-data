@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-04 14:43:43",
+    "generated_at": "2026-08-04 17:03:50",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -7039,7 +7039,7 @@
       "player_name": "Hill, Tyreek",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 62000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2017-11-23 10:38:47",
@@ -7047,7 +7047,7 @@
       "mym_deadline": "2017-12-07 10:38:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2017-11-23. Deadline to submit a MYM has passed. Deadline was 2017-12-07.",
-      "contract_info": "CL 2| TCV 142K| AAV 62K| Y1-80K, Y2-62K| GTD: 106.5K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,

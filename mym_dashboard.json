@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-04 17:03:50",
+    "generated_at": "2026-08-05 03:34:04",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -4640,14 +4640,14 @@
       "position": "TE",
       "positional_grouping": "TE",
       "salary": 7000,
-      "contract_year": 1,
+      "contract_year": 2,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-11-21 23:17:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-05 23:17:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-21. Deadline to submit a MYM has passed. Deadline was 2025-12-05.",
-      "contract_info": "CL 1| TCV 7K| AAV 7K"
+      "contract_info": "CL 2|TCV 14K|AAV 7K|Y1-7K, Y2-7K|GTD: 10.5K"
     },
     {
       "season": 2025,
@@ -5620,14 +5620,14 @@
       "position": "S",
       "positional_grouping": "DB",
       "salary": 2000,
-      "contract_year": 1,
+      "contract_year": 3,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-07 07:17:37",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-07. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 3|TCV 6K|AAV 2K|Y1-2K, Y2-2K, Y3-2K|GTD: 4.5K"
     },
     {
       "season": 2025,
@@ -7039,15 +7039,15 @@
       "player_name": "Hill, Tyreek",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 2000,
-      "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "salary": 4000,
+      "contract_year": 3,
+      "contract_status": "Vet-FAA-FL",
       "acquired_date": "2017-11-23 10:38:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2017-12-07 10:38:47",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2017-11-23. Deadline to submit a MYM has passed. Deadline was 2017-12-07.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 3|TCV 6K|AAV 2K|Y1-4K, Y2-1K, Y3-1K|GTD: 4.5K"
     },
     {
       "season": 2025,

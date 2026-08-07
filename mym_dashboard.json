@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-07 13:40:13",
+    "generated_at": "2026-08-07 15:09:32",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -5979,9 +5979,9 @@
       "player_name": "Benson, Trey",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 6000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Rookie-Draft",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-11-27 10:47:47",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-12-11 10:47:47",
@@ -7599,9 +7599,9 @@
       "player_name": "Johnson, Theo",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 5000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Rookie-Draft",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-10-14 05:06:44",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-28 05:06:44",

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-10 15:17:25",
+    "generated_at": "2026-08-13 13:49:24",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -339,15 +339,15 @@
       "player_name": "Jordan, Jawhar",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 4000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-12-18 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2026-01-01 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-18. Deadline to submit a MYM has passed. Deadline was 2026-01-01.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -3959,15 +3959,15 @@
       "player_name": "Allen, Keenan",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Veteran",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-08-09 22:33:42",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-09. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

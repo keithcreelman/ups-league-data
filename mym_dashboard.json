@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-22 16:41:59",
+    "generated_at": "2026-08-22 18:49:30",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -447,7 +447,7 @@
       "mym_deadline": "2023-08-17 21:47:50",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-08-03. Deadline to submit a MYM has passed. Deadline was 2023-08-17.",
-      "contract_info": "CL 2| TCV 44K| AAV 22K| Y1-9K, Y2-35K| GTD: 33K| Restructured 2026"
+      "contract_info": "CL 2| TCV 44K| AAV 22K| Y1-9K, Y2-35K|Ext: Bomb| GTD: 33K| Restructured 2026"
     },
     {
       "season": 2025,
@@ -807,7 +807,7 @@
       "mym_deadline": "2024-06-09 20:30:15",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-26. Deadline to submit a MYM has passed. Deadline was 2024-06-09.",
-      "contract_info": "CL 2|TCV 64K|AAV 27K, 37K|Y1-14K, Y2-50K|GTD: 48K|Restructured 2026"
+      "contract_info": "CL 2|TCV 64K|AAV 27K, 37K|Y1-14K, Y2-50K|Ext: CBP|GTD: 48K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -1087,7 +1087,7 @@
       "mym_deadline": "2024-09-26 06:51:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-12. Deadline to submit a MYM has passed. Deadline was 2024-09-26.",
-      "contract_info": "CL 2| TCV 95K| AAV 33K, 43K| Y1-20K, Y2-75K| GTD: 71.3K| Restructured 2026"
+      "contract_info": "CL 2| TCV 95K| AAV 33K, 43K| Y1-20K, Y2-75K|Ext: PG| GTD: 71.3K| Restructured 2026"
     },
     {
       "season": 2025,
@@ -1387,7 +1387,7 @@
       "mym_deadline": "2024-06-09 20:30:15",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-26. Deadline to submit a MYM has passed. Deadline was 2024-06-09.",
-      "contract_info": "CL 2|TCV 94K|AAV 42K|Y1-19K, Y2-75K|GTD: 70.5K|Restructured 2026"
+      "contract_info": "CL 2|TCV 94K|AAV 42K|Y1-19K, Y2-75K|Ext: C-Town, CBP|GTD: 70.5K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -1627,7 +1627,7 @@
       "mym_deadline": "2024-10-01 11:46:39",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-17. Deadline to submit a MYM has passed. Deadline was 2024-10-01.",
-      "contract_info": "CL 2|TCV 52K|AAV 21K, 31K|Y1-11K, Y2-41K|GTD: 39K|Restructured 2026"
+      "contract_info": "CL 2|TCV 52K|AAV 21K, 31K|Y1-11K, Y2-41K|Ext: PG|GTD: 39K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -2407,7 +2407,7 @@
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 2|TCV 70K|AAV 35K|Y1-14K, Y2-56K|GTD: 52.5K|Restructured 2026"
+      "contract_info": "CL 2|TCV 70K|AAV 35K|Y1-14K, Y2-56K|Ext: Cash|GTD: 52.5K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -3667,7 +3667,7 @@
       "mym_deadline": "2023-11-29 15:33:56",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-11-15. Deadline to submit a MYM has passed. Deadline was 2023-11-29.",
-      "contract_info": "CL 2|TCV 119K|AAV 42K, 52K|Y1-47K, Y2-72K|GTD: 89.3K|Restructured 2026"
+      "contract_info": "CL 2|TCV 119K|AAV 42K, 52K|Y1-47K, Y2-72K|Ext: Gride, Hammer|GTD: 89.3K|Restructured 2026"
     },
     {
       "season": 2025,
@@ -6707,7 +6707,7 @@
       "mym_deadline": "2025-11-23 02:40:23",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-09. Deadline to submit a MYM has passed. Deadline was 2025-11-23.",
-      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K| GTD: 37.5K| Restructured 2026"
+      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K|Ext: Gride| GTD: 37.5K| Restructured 2026"
     },
     {
       "season": 2025,
@@ -7247,7 +7247,7 @@
       "mym_deadline": "2025-10-28 05:06:44",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-14. Deadline to submit a MYM has passed. Deadline was 2025-10-28.",
-      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K| GTD: 37.5K| Restructured 2026"
+      "contract_info": "CL 2| TCV 50K| AAV 25K| Y1-10K, Y2-40K|Ext: LH| GTD: 37.5K| Restructured 2026"
     },
     {
       "season": 2025,

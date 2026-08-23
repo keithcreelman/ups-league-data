@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-22 22:39:54",
+    "generated_at": "2026-08-23 20:40:41",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1379,15 +1379,15 @@
       "player_name": "Collins, Nico",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 19000,
+      "salary": 30000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext2-BL",
+      "contract_status": "Vet-Ext2-FL",
       "acquired_date": "2024-05-26 20:30:15",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-06-09 20:30:15",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-05-26. Deadline to submit a MYM has passed. Deadline was 2024-06-09.",
-      "contract_info": "CL 2|TCV 94K|AAV 42K|Y1-19K, Y2-75K|Ext: C-Town, CBP|GTD: 70.5K|Restructured 2026"
+      "contract_info": "CL 2|TCV 94K|AAV 42K|Y1-30K, Y2-64K|GTD: 70.5K|Ext: C-Town, CBP|Restructured 2026"
     },
     {
       "season": 2025,

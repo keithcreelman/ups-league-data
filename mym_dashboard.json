@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-24 03:17:06",
+    "generated_at": "2026-08-24 13:14:13",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -20,14 +20,14 @@
       "position": "DE",
       "positional_grouping": "DL",
       "salary": 1000,
-      "contract_year": 1,
-      "contract_status": "Vet-MYM",
+      "contract_year": 2,
+      "contract_status": "VET-EXT1",
       "acquired_date": "2024-10-30 20:45:29",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-13 20:45:29",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-30. Deadline to submit a MYM has passed. Deadline was 2024-11-13.",
-      "contract_info": "CL 3| TCV 3K| AAV 1K| Y1-1K, Y2-1K, Y3-1K| GTD: 2K"
+      "contract_info": "CL 2|TCV 5K|AAV 1K, 4K|Y1-1K, Y2-4K|Ext: Bomb|GTD: 3.8K"
     },
     {
       "season": 2025,
@@ -1079,15 +1079,15 @@
       "player_name": "London, Drake",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 20000,
+      "salary": 33000,
       "contract_year": 2,
-      "contract_status": "Vet-Ext1-BL",
+      "contract_status": "Vet-Ext1-FL",
       "acquired_date": "2024-09-12 06:51:20",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-09-26 06:51:20",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-09-12. Deadline to submit a MYM has passed. Deadline was 2024-09-26.",
-      "contract_info": "CL 2| TCV 95K| AAV 33K, 43K| Y1-20K, Y2-75K|Ext: PG| GTD: 71.3K| Restructured 2026"
+      "contract_info": "CL 2| TCV 95K| AAV 33K, 43K| Y1-33K, Y2-62K| GTD: 71.3K| Restructured 2026"
     },
     {
       "season": 2025,
@@ -1840,14 +1840,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 26000,
-      "contract_year": 1,
+      "contract_year": 3,
       "contract_status": "Vet-FAA",
       "acquired_date": "2023-11-03 15:32:27",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-11-17 15:32:27",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-11-03. Deadline to submit a MYM has passed. Deadline was 2023-11-17.",
-      "contract_info": "CL 1| TCV 26K| AAV 26K"
+      "contract_info": "CL 3|TCV 78K|AAV 26K|Y1-26K, Y2-26K, Y3-26K|GTD: 58.5K"
     },
     {
       "season": 2025,
@@ -5320,14 +5320,14 @@
       "position": "DE",
       "positional_grouping": "DL",
       "salary": 2000,
-      "contract_year": 1,
+      "contract_year": 3,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-09-14 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-09-28 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-14. Deadline to submit a MYM has passed. Deadline was 2025-09-28.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 3|TCV 6K|AAV 2K|Y1-2K, Y2-2K, Y3-2K|GTD: 4.5K"
     },
     {
       "season": 2025,
@@ -5440,14 +5440,14 @@
       "position": "S",
       "positional_grouping": "DB",
       "salary": 1000,
-      "contract_year": 1,
+      "contract_year": 2,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-08-04 16:23:15",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 2|TCV 2K|AAV 1K|Y1-1K, Y2-1K|GTD: 1K"
     },
     {
       "season": 2025,

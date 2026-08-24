@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-23 21:36:43",
+    "generated_at": "2026-08-24 03:17:06",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -459,15 +459,15 @@
       "player_name": "Pitts, Kyle",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 25000,
-      "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "salary": 35000,
+      "contract_year": 2,
+      "contract_status": "Vet-FAA-FL",
       "acquired_date": "2025-10-02 12:49:10",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-16 12:49:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-02. Deadline to submit a MYM has passed. Deadline was 2025-10-16.",
-      "contract_info": "CL 1| TCV 25K| AAV 25K"
+      "contract_info": "CL 2|TCV 50K|AAV 25K|Y1-35K, Y2-15K|GTD: 37.5K"
     },
     {
       "season": 2025,
@@ -3140,14 +3140,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 5000,
-      "contract_year": 1,
+      "contract_year": 2,
       "contract_status": "Vet-FAA",
       "acquired_date": "2024-10-23 21:00:30",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-06 21:00:30",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-23. Deadline to submit a MYM has passed. Deadline was 2024-11-06.",
-      "contract_info": "CL 1| TCV 5K| AAV 5K"
+      "contract_info": "CL 2|TCV 10K|AAV 5K|Y1-5K, Y2-5K|GTD: 7.5K"
     },
     {
       "season": 2025,

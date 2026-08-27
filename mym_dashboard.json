@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-25 13:12:12",
+    "generated_at": "2026-08-27 15:16:29",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1061,13 +1061,13 @@
       "positional_grouping": "DB",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Vet-MYM",
+      "contract_status": "Vet-WW",
       "acquired_date": "2024-11-07 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-21 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-11-07. Deadline to submit a MYM has passed. Deadline was 2024-11-21.",
-      "contract_info": "CL 3| TCV 3K| AAV 1K| Y1-1, Y2-1, Y3-1| GTD: 2K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -1521,13 +1521,13 @@
       "positional_grouping": "WR",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-11-01 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-11-15 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-01. Deadline to submit a MYM has passed. Deadline was 2025-11-15.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -4459,15 +4459,15 @@
       "player_name": "Ridley, Calvin",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 4000,
+      "salary": 2000,
       "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "contract_status": "Vet-WW",
       "acquired_date": "2024-10-01 22:05:28",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-10-15 22:05:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-01. Deadline to submit a MYM has passed. Deadline was 2024-10-15.",
-      "contract_info": "CL 1| TCV 4K| AAV 4K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,

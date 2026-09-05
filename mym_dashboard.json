@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-05 16:05:48",
+    "generated_at": "2026-09-05 18:20:00",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -60,14 +60,14 @@
       "position": "TE",
       "positional_grouping": "TE",
       "salary": 1000,
-      "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "contract_year": 2,
+      "contract_status": "Vet-Ext1",
       "acquired_date": "2025-08-10 00:21:13",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-10. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 2| TCV 2K| AAV 1K| Y1-1K, Y2-1K| GTD: 1K"
+      "contract_info": "CL 2|TCV 12K|AAV 1K, 11K|Y1-1K, Y2-11K|Ext: Bomb|GTD: 9K"
     },
     {
       "season": 2025,
@@ -2260,14 +2260,14 @@
       "position": "LB",
       "positional_grouping": "LB",
       "salary": 1000,
-      "contract_year": 1,
+      "contract_year": 3,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-10-02 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-16 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-02. Deadline to submit a MYM has passed. Deadline was 2025-10-16.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 3|TCV 3K|AAV 1K|Y1-1K, Y2-1K, Y3-1K|GTD: 1K"
     },
     {
       "season": 2025,
@@ -4979,15 +4979,15 @@
       "player_name": "Landman, Nate",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 4000,
-      "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "salary": 2000,
+      "contract_year": 2,
+      "contract_status": "Vet-FAA-BL",
       "acquired_date": "2025-09-19 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-03 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-19. Deadline to submit a MYM has passed. Deadline was 2025-10-03.",
-      "contract_info": "CL 1| TCV 4K| AAV 4K"
+      "contract_info": "CL 2|TCV 8K|AAV 4K|Y1-2K, Y2-6K|GTD: 6K"
     },
     {
       "season": 2025,

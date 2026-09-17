@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-12 13:36:55",
+    "generated_at": "2026-09-17 13:30:43",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3959,7 +3959,7 @@
       "player_name": "Allen, Keenan",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
+      "salary": 3000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-08-09 22:33:42",
@@ -4519,7 +4519,7 @@
       "player_name": "Singletary, Devin",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 5000,
+      "salary": 3000,
       "contract_year": 1,
       "contract_status": "WW",
       "acquired_date": "2025-10-30 09:00:00",
@@ -5279,7 +5279,7 @@
       "player_name": "Wentz, Carson",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-MYM",
       "acquired_date": "2025-11-09 09:00:00",
@@ -6499,7 +6499,7 @@
       "player_name": "Vele, Devaughn",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-FAA",
       "acquired_date": "2025-12-04 09:00:00",

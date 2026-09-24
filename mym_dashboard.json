@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-23 23:43:31",
+    "generated_at": "2026-09-24 15:08:36",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -1559,15 +1559,15 @@
       "player_name": "Kamara, Alvin",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "contract_status": "Vet-WW",
       "acquired_date": "2023-05-29 12:17:02",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2023-06-12 12:17:02",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-05-29. Deadline to submit a MYM has passed. Deadline was 2023-06-12.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -1901,13 +1901,13 @@
       "positional_grouping": "LB",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-09-26 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2025-10-10 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-26. Deadline to submit a MYM has passed. Deadline was 2025-10-10.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -2720,14 +2720,14 @@
       "position": "WR",
       "positional_grouping": "WR",
       "salary": 1000,
-      "contract_year": 1,
-      "contract_status": "Rookie-MYM",
+      "contract_year": 2,
+      "contract_status": "Vet-Ext1",
       "acquired_date": "2024-10-26 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2024-11-09 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-26. Deadline to submit a MYM has passed. Deadline was 2024-11-09.",
-      "contract_info": "CL 3| TCV 3K| AAV 1K| Y1-1, Y2-1, Y3-1| GTD: 2K"
+      "contract_info": "CL 2|TCV 12K|AAV 1K, 11K|Y1-1K, Y2-11K|Ext: L.A.|GTD: 9K"
     },
     {
       "season": 2025,
@@ -6559,7 +6559,7 @@
       "player_name": "Waller, Darren",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 1000,
+      "salary": 5000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-09-28 09:00:00",
@@ -6567,7 +6567,7 @@
       "mym_deadline": "2025-10-12 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-09-28. Deadline to submit a MYM has passed. Deadline was 2025-10-12.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 5K| AAV 5K"
     },
     {
       "season": 2025,
@@ -6639,7 +6639,7 @@
       "player_name": "Wilson, Emanuel",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 2000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2023-08-31 09:00:00",
@@ -6647,7 +6647,7 @@
       "mym_deadline": "2023-09-14 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2023-08-31. Deadline to submit a MYM has passed. Deadline was 2023-09-14.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -6679,7 +6679,7 @@
       "player_name": "Winston, Jameis",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-28 13:04:42",
@@ -6687,7 +6687,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-28. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,

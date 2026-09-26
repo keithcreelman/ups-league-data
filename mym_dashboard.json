@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-26 13:07:33",
+    "generated_at": "2026-09-26 17:12:22",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -6600,14 +6600,14 @@
       "position": "QB",
       "positional_grouping": "QB",
       "salary": 1000,
-      "contract_year": 1,
-      "contract_status": "Vet-WW",
+      "contract_year": 3,
+      "contract_status": "Vet-MYM",
       "acquired_date": "2025-08-09 06:25:06",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-09. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 3| TCV 3K| AAV 1K| Y1-1K, Y2-1K, Y3-1K| GTD: 1K"
     },
     {
       "season": 2025,

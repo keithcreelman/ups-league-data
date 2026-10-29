@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-25 19:39:25",
+    "generated_at": "2026-10-29 14:22:45",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -79,7 +79,7 @@
       "player_name": "Bates, Jake",
       "position": "PK",
       "positional_grouping": "PK",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-11-13 09:00:00",
@@ -87,7 +87,7 @@
       "mym_deadline": "2025-11-27 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-13. Deadline to submit a MYM has passed. Deadline was 2025-11-27.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -2919,7 +2919,7 @@
       "player_name": "Hines-Allen, Josh",
       "position": "DE",
       "positional_grouping": "DL",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-07 09:00:00",
@@ -2927,7 +2927,7 @@
       "mym_deadline": "2025-12-21 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-07. Deadline to submit a MYM has passed. Deadline was 2025-12-21.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -3159,7 +3159,7 @@
       "player_name": "Rodriguez, Chris",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2024-03-20 19:36:05",
@@ -3167,7 +3167,7 @@
       "mym_deadline": "2024-04-03 19:36:05",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-03-20. Deadline to submit a MYM has passed. Deadline was 2024-04-03.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -3919,7 +3919,7 @@
       "player_name": "Tucker, Sean",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2023-05-28 21:57:11",
@@ -3927,7 +3927,7 @@
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2023) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -4519,7 +4519,7 @@
       "player_name": "Singletary, Devin",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 3000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-10-30 09:00:00",
@@ -4527,7 +4527,7 @@
       "mym_deadline": "2025-11-13 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-30. Deadline to submit a MYM has passed. Deadline was 2025-11-13.",
-      "contract_info": "CL 1| TCV 3K| AAV 3K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,

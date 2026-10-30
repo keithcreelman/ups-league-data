@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-29 14:22:45",
+    "generated_at": "2026-10-30 18:38:10",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -859,7 +859,7 @@
       "player_name": "Dulcich, Greg",
       "position": "TE",
       "positional_grouping": "TE",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-26 09:00:00",
@@ -867,7 +867,7 @@
       "mym_deadline": "2026-01-09 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-26. Deadline to submit a MYM has passed. Deadline was 2026-01-09.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,

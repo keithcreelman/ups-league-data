@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-01 18:57:22",
+    "generated_at": "2026-11-01 22:50:55",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -3259,7 +3259,7 @@
       "player_name": "Thomas, Drake",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-10-19 09:28:10",
@@ -3267,7 +3267,7 @@
       "mym_deadline": "2025-11-02 09:28:10",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-19. Deadline to submit a MYM has passed. Deadline was 2025-11-02.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,

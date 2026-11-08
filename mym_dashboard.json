@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-06 15:04:52",
+    "generated_at": "2026-11-08 21:11:26",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -7641,7 +7641,7 @@
       "positional_grouping": "WR",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Vet-FAA",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-08-04 12:06:57",
       "mym_acq_type": "AUCTION",
       "mym_deadline": "2025-09-17",

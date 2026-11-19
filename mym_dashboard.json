@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-15 17:13:05",
+    "generated_at": "2026-11-19 21:37:23",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -299,7 +299,7 @@
       "player_name": "Henley, Daiyan",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-08-05 00:03:01",
@@ -307,7 +307,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -1119,7 +1119,7 @@
       "player_name": "McLaughlin, Chase",
       "position": "PK",
       "positional_grouping": "PK",
-      "salary": 2000,
+      "salary": 3000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-08-05 05:51:17",
@@ -1127,7 +1127,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-05. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 3K| AAV 3K"
     },
     {
       "season": 2025,
@@ -2819,7 +2819,7 @@
       "player_name": "Elliss, Kaden",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 1000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-10-23 09:00:00",
@@ -2827,7 +2827,7 @@
       "mym_deadline": "2025-11-06 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-10-23. Deadline to submit a MYM has passed. Deadline was 2025-11-06.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -3519,7 +3519,7 @@
       "player_name": "Crawshaw, Jeremy",
       "position": "PN",
       "positional_grouping": "PN",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-11-27 09:00:00",
@@ -3527,7 +3527,7 @@
       "mym_deadline": "2025-12-11 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-11-27. Deadline to submit a MYM has passed. Deadline was 2025-12-11.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -6239,7 +6239,7 @@
       "player_name": "Hollins, Mack",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-28 09:00:00",
@@ -6247,7 +6247,7 @@
       "mym_deadline": "2026-01-11 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-28. Deadline to submit a MYM has passed. Deadline was 2026-01-11.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
@@ -7059,7 +7059,7 @@
       "player_name": "Hufanga, Talanoa",
       "position": "S",
       "positional_grouping": "DB",
-      "salary": 1000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-08-04 15:18:50",
@@ -7067,7 +7067,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-04. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 1K| AAV 1K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,

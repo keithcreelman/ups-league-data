@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-22 21:48:11",
+    "generated_at": "2026-11-26 19:02:48",
     "min_season": 2019,
     "views": [
       "View_MYM_Eligibility",
@@ -2619,7 +2619,7 @@
       "player_name": "Williams, Quincy",
       "position": "LB",
       "positional_grouping": "LB",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-08-08 22:11:49",
@@ -2627,7 +2627,7 @@
       "mym_deadline": "2025-09-17",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-08-08. Deadline to submit a MYM has passed. Deadline was 2025-09-17.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -3159,7 +3159,7 @@
       "player_name": "Rodriguez, Chris",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 4000,
+      "salary": 7000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2024-03-20 19:36:05",
@@ -3167,7 +3167,7 @@
       "mym_deadline": "2024-04-03 19:36:05",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-03-20. Deadline to submit a MYM has passed. Deadline was 2024-04-03.",
-      "contract_info": "CL 1| TCV 4K| AAV 4K"
+      "contract_info": "CL 1| TCV 7K| AAV 7K"
     },
     {
       "season": 2025,
@@ -3279,15 +3279,15 @@
       "player_name": "Vidal, Kimani",
       "position": "RB",
       "positional_grouping": "RB",
-      "salary": 2000,
+      "salary": 1000,
       "contract_year": 1,
-      "contract_status": "Rookie-Draft",
+      "contract_status": "Vet-WW",
       "acquired_date": "2024-05-26 19:34:48",
       "mym_acq_type": "ROOKIE_DRAFT",
       "mym_deadline": null,
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Rookie Draft Pick (2024) is not eligible for MYM. Eligible only if later dropped and re-added as a Free Agent.",
-      "contract_info": "CL 3| TCV 6K| AAV 2K| Y1-2K, Y2-2K, Y3-2K| GTD: 4.5K"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -4459,7 +4459,7 @@
       "player_name": "Ridley, Calvin",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 2000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2024-10-01 22:05:28",
@@ -4467,7 +4467,7 @@
       "mym_deadline": "2024-10-15 22:05:28",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2024-10-01. Deadline to submit a MYM has passed. Deadline was 2024-10-15.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -5921,13 +5921,13 @@
       "positional_grouping": "DL",
       "salary": 1000,
       "contract_year": 1,
-      "contract_status": "WW",
+      "contract_status": "Vet-WW",
       "acquired_date": "2025-12-27 09:00:00",
       "mym_acq_type": "WAIVER",
       "mym_deadline": "2026-01-10 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-27. Deadline to submit a MYM has passed. Deadline was 2026-01-10.",
-      "contract_info": "CL 1|"
+      "contract_info": "CL 1| TCV 1K| AAV 1K"
     },
     {
       "season": 2025,
@@ -6239,7 +6239,7 @@
       "player_name": "Hollins, Mack",
       "position": "WR",
       "positional_grouping": "WR",
-      "salary": 2000,
+      "salary": 4000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-28 09:00:00",
@@ -6247,7 +6247,7 @@
       "mym_deadline": "2026-01-11 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-28. Deadline to submit a MYM has passed. Deadline was 2026-01-11.",
-      "contract_info": "CL 1| TCV 2K| AAV 2K"
+      "contract_info": "CL 1| TCV 4K| AAV 4K"
     },
     {
       "season": 2025,
@@ -7559,7 +7559,7 @@
       "player_name": "Johnson, Josh",
       "position": "QB",
       "positional_grouping": "QB",
-      "salary": 4000,
+      "salary": 2000,
       "contract_year": 1,
       "contract_status": "Vet-WW",
       "acquired_date": "2025-12-25 09:00:00",
@@ -7567,7 +7567,7 @@
       "mym_deadline": "2026-01-08 09:00:00",
       "eligible_flag": 0,
       "rule_explanation": "Not eligible. Roster tenure started on 2025-12-25. Deadline to submit a MYM has passed. Deadline was 2026-01-08.",
-      "contract_info": "CL 1| TCV 4K| AAV 4K"
+      "contract_info": "CL 1| TCV 2K| AAV 2K"
     },
     {
       "season": 2025,
